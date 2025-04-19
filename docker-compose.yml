@@ -23,3 +23,11 @@ services:
       # If you're using certbot or any Let's Encrypt management inside/outside the container
       # - /etc/letsencrypt:/etc/letsencrypt
     restart: unless-stopped
+
+  pandoc:
+    build:
+      context: .
+      dockerfile: Dockerfile.pandoc
+    entrypoint: ["pandoc"]
+    volumes:
+      - .:/data

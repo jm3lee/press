@@ -1,7 +1,7 @@
-PANDOC_CMD := docker run --rm \
-		  --volume "$(PWD):/data" \
-		  --user $(shell id -u):$(shell id -g) \
-		  pandoc/extra
+PANDOC_CMD := docker compose run \
+			  --rm \
+			  -u $(shell id -u) \
+			  pandoc
 
 PANDOC_OPTS := \
 		--css '/press/style.css' \

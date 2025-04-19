@@ -1,0 +1,3 @@
+FROM pandoc/extra
+RUN apk add py3-pandocfilters
+COPY bin/ /press/bin/
