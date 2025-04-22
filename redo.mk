@@ -23,16 +23,26 @@ PANDOC_OPTS_PDF := \
 		--resource-path=build \
 		--filter pandoc-crossref \
 
+MINIFY_CMD := minify
+
 MARKDOWNS := $(shell find . \
 	\( -path ./build -o -path ./includes -o -path ./templates \) \
 	-prune -o -name '*.md' -print)
 HTMLS := $(MARKDOWNS:.md=.html)
 HTMLS := $(addprefix build/,$(HTMLS))
 
+BUILD_ROOT := build
+BUILD_SUBDIRS := $(shell dirname $(HTMLS) | sort | uniq)
+
 .PHONY: all
-all: | build
+all: | $(BUILD_ROOT) $(BUILD_SUBDIRS)
 all: $(HTMLS)
 all: build/style.css
+all: .minify
+
+.minify: build
+	cd build; minify -a -v -r -o . .
+	touch .minify
 
 # doctl auth init; remove extraneous context as necessary
 # doctl registry login
@@ -50,8 +60,10 @@ up:
 down:
 	docker compose down
 
+$(BUILD_SUBDIRS):
+	echo $(BUILD_SUBDIRS) | xargs mkdir -p
+
 build:
-	echo $@ $(dir $(HTMLS)) | sort | uniq | xargs mkdir -p
 	docker compose restart nginx-dev
 
 build/style.css: style.css
