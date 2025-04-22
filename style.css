@@ -3,8 +3,8 @@ body {
     margin: 2% 10% 2% 10%;
     font-size: 1.5rem; /* Default size for desktops/tablets */
     counter-reset: h2;
-    font-family: "adobe-garamond-pro", serif;
-    font-weight: 600;
+    font-family: serif;
+    font-weight: 400;
     font-style: normal;
 }
 

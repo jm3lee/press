@@ -4,7 +4,7 @@ PANDOC_CMD := docker compose run \
 			  pandoc
 
 PANDOC_OPTS := \
-		--css '/press/style.css' \
+		--css '/style.css' \
 		--standalone \
 		-t html \
 		--toc \
@@ -13,7 +13,7 @@ PANDOC_OPTS := \
 		--template=pandoc-template.html \
 
 PANDOC_OPTS_PDF := \
-		--css "/press/style.css" \
+		--css "/style.css" \
 		--standalone \
 		-t pdf \
 		--toc \
