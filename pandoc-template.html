@@ -3,20 +3,9 @@
     <head>
         <meta charset="utf-8" />
         <title>$title$</title>
-
         <!-- Pandoc's metadata block: Allows you to insert any meta tags specified in the document's metadata. -->
         $for(meta)$
         <meta name="$meta.key$" content="$meta.value$" />
-        $endfor$
-
-        <!-- If you have a single CSS file provided via CLI argument or metadata -->
-        $if(css)$
-        <link rel="stylesheet" href="$css$" />
-        $endif$
-
-        <!-- If you supply multiple CSS files via metadata -->
-        $for(css)$
-        <link rel="stylesheet" href="$css$" />
         $endfor$
     </head>
 
@@ -59,5 +48,17 @@
             © 2025 by Brian Lee is licensed under CC BY-NC-ND 4.0.
             </p>
         </div>
+
+        <!-- If you supply multiple CSS files via metadata -->
+        $for(css)$
+        <link rel="stylesheet" href="$css$" />
+        $endfor$
+        <!-- MATHJAX SUPPORT -->
+        $if(mathjax)$
+        <script async
+                src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+        </script>
+        $endif$
+        <link rel="stylesheet" href="https://use.typekit.net/qvc8xlz.css">
     </body>
 </html>
