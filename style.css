@@ -2,7 +2,6 @@ body {
     width: 80%;
     margin: 2% 10% 2% 10%;
     font-size: 1.5rem; /* Default size for desktops/tablets */
-    counter-reset: h2;
     font-family: serif;
     font-weight: 400;
     font-style: normal;
@@ -12,38 +11,6 @@ body {
     body {
         font-size: 3rem; /* Larger font size for mobile */
     }
-}
-
-h2 {
-    counter-reset: h3; /* Reset h3 counter when a new h2 starts */
-}
-
-h2::before {
-    counter-increment: h2;
-    content: counter(h2) ". ";
-}
-
-h3 {
-    counter-reset: h4; /* Reset h4 counter when a new h3 starts */
-}
-
-h3::before {
-    counter-increment: h3;
-    content: counter(h2) "." counter(h3) " ";
-}
-
-h4 {
-    counter-reset: h5; /* Reset h5 counter when a new h4 starts */
-}
-
-h4::before {
-    counter-increment: h4;
-    content: counter(h2) "." counter(h3) "." counter(h4) " ";
-}
-
-h5::before {
-    counter-increment: h5;
-    content: counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) " ";
 }
 
 table {

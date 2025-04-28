@@ -5,6 +5,7 @@ PANDOC_CMD := docker compose run \
 
 PANDOC_OPTS := \
 		--css '/style.css' \
+		--css '/numbered-headings.css' \
 		--standalone \
 		-t html \
 		--toc \
@@ -14,6 +15,7 @@ PANDOC_OPTS := \
 
 PANDOC_OPTS_PDF := \
 		--css "/style.css" \
+		--css '/numbered-headings.css' \
 		--standalone \
 		-t pdf \
 		--toc \
@@ -31,23 +33,25 @@ MARKDOWNS := $(shell find . \
 HTMLS := $(MARKDOWNS:.md=.html)
 HTMLS := $(addprefix build/,$(HTMLS))
 
+CSS_FILES := $(shell find . \( -path ./build \) -prune -o -name '*.css' -print)
+CSS := $(addprefix build/,$(CSS_FILES))
+
 BUILD_ROOT := build
 BUILD_SUBDIRS := $(shell dirname $(HTMLS) | sort | uniq)
 
 .PHONY: all
 all: | $(BUILD_ROOT) $(BUILD_SUBDIRS)
 all: $(HTMLS)
-all: build/style.css
-all: .minify
+all: $(CSS)
 
-.minify: build
+.minify: $(HTMLS) $(CSS)
 	cd build; minify -a -v -r -o . .
 	touch .minify
 
 # doctl auth init; remove extraneous context as necessary
 # doctl registry login
 .PHONY: docker
-docker:
+docker: .minify
 	docker compose build nginx
 	#docker tag artistic-anatomy-nginx registry.digitalocean.com/artisticanatomy/book:latest
 	#docker push registry.digitalocean.com/artisticanatomy/book:latest
@@ -66,7 +70,7 @@ $(BUILD_SUBDIRS):
 build:
 	docker compose restart nginx-dev
 
-build/style.css: style.css
+build/%.css: %.css
 	cp $< $@
 
 build/%.1.md: %.md | build
