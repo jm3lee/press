@@ -72,6 +72,10 @@ docker: .minify
 up:
 	docker compose up nginx-dev -d
 
+.PHONY: down
+down:
+	docker compose down nginx-dev
+
 # Create necessary build directories
 build: $(BUILD_SUBDIRS)
 
