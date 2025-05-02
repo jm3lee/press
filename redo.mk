@@ -129,3 +129,11 @@ build/%.pdf: %.md | build
 .PHONY: clean
 clean:
 	-rm -rf build
+
+.PHONY: prune
+prune:
+	docker system prune
+
+.PHONY: setup
+setup:
+	docker compose build
