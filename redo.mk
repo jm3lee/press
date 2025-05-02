@@ -6,6 +6,8 @@ PANDOC_CMD := docker compose run \
 			  -u $(shell id -u) \
 			  pandoc
 
+PANDOC_TEMPLATE := src/pandoc-template.html
+
 # Options for generating HTML output with Pandoc
 PANDOC_OPTS := \
 		--css '/style.css' \
@@ -15,7 +17,7 @@ PANDOC_OPTS := \
 		--toc \
 		--toc-depth=2 \
 		--filter pandoc-crossref \
-		--template=pandoc-template.html \
+		--template=$(PANDOC_TEMPLATE) \
 
 # Options for generating PDF output with Pandoc
 PANDOC_OPTS_PDF := \
@@ -33,20 +35,20 @@ PANDOC_OPTS_PDF := \
 # Command for minifying HTML files
 MINIFY_CMD := minify
 
+VPATH := src
+
 # Find all Markdown files excluding specified directories
-MARKDOWNS := $(shell find . \
-	\( -path ./build -o -path ./includes -o -path ./templates \) \
-	-prune -o -name '*.md' -print)
+MARKDOWNS := $(shell find src/ -name '*.md')
 
 # Define the corresponding HTML and PDF output files
-HTMLS := $(patsubst %.md, build/%.html, $(MARKDOWNS))
-PDFS := $(patsubst %.md, build/%.pdf, $(MARKDOWNS))
+HTMLS := $(patsubst src/%.md, build/%.html, $(MARKDOWNS))
+PDFS := $(patsubst src/%.md, build/%.pdf, $(MARKDOWNS))
 
 # Sort and define build subdirectories based on HTML files
 BUILD_SUBDIRS := $(sort $(dir $(HTMLS)))
 
-CSS := $(wildcard *.css)
-CSS := $(addprefix build/,$(CSS))
+CSS := $(wildcard src/*.css)
+CSS := $(patsubst src/%.css,build/%.css, $(CSS))
 
 # Define the default target to build everything
 .PHONY: all
@@ -106,10 +108,10 @@ build/%.3.md: build/%.2.md
 	./bin/emojify < $@ > $$@.tmp && mv $$@.tmp $@
 
 # Generate HTML from processed Markdown using Pandoc
-build/%.html: build/%.3.md pandoc-template.html | build
+build/%.html: build/%.3.md $(PANDOC_TEMPLATE) | build
 	$(PANDOC_CMD) $(PANDOC_OPTS) -o $@ $<
 
-build/%.html: build/%.3.md pandoc-template.html
+build/%.html: build/%.3.md $(PANDOC_TEMPLATE)
 	$(PANDOC_CMD) \
 		$(PANDOC_OPTS) \
 		-o $@ \
