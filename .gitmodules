@@ -1,0 +1,6 @@
+[submodule "docker/press-bookcovers"]
+	path = docker/bookcovers
+	url = git@github.com:onlyartists/press-bookcovers.git
+[submodule "docker/bookcovers"]
+	path = docker/bookcovers
+	url = git@github.com:onlyartists/press-bookcovers.git
