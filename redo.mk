@@ -45,6 +45,9 @@ PDFS := $(patsubst %.md, build/%.pdf, $(MARKDOWNS))
 # Sort and define build subdirectories based on HTML files
 BUILD_SUBDIRS := $(sort $(dir $(HTMLS)))
 
+CSS := $(wildcard *.css)
+CSS := $(addprefix build/,$(CSS))
+
 # Define the default target to build everything
 .PHONY: all
 all: | build $(BUILD_SUBDIRS)
