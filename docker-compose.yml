@@ -1,14 +1,17 @@
 services:
   nginx:
-    build: .
-    container_name: nginx
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.nginx
     ports:
       - "80:80"
       - "443:443"
     restart: unless-stopped
 
   nginx-dev:
-    build: .
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.nginx
     container_name: nginx-dev
     ports:
       - "80:80"
@@ -27,7 +30,7 @@ services:
   pandoc:
     build:
       context: .
-      dockerfile: Dockerfile.pandoc
+      dockerfile: docker/Dockerfile.pandoc
     entrypoint: ["pandoc"]
     volumes:
       - .:/data
