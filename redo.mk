@@ -1,8 +1,10 @@
 # Makefile for building and managing Press
 
 # Define the Pandoc command using Docker Compose
+# 	-T: Don't allocate pseudo-tty. Makes parallel builds work.
 PANDOC_CMD := docker compose run \
 			  --rm \
+			  -T \
 			  -u $(shell id -u) \
 			  pandoc
 
@@ -97,25 +99,15 @@ build/%.css: %.css
 	cp $< $@
 
 # Include and process Markdown files up to three levels deep
-build/%.1.md: %.md | build
+build/%.md: %.md | build
 	includefilter build $< $@
-
-build/%.2.md: build/%.1.md
 	includefilter build $< $@
-
-build/%.3.md: build/%.2.md
 	includefilter build $< $@
-	./bin/emojify < $@ > $$@.tmp && mv $$@.tmp $@
+	./bin/emojify < $@ > $@.tmp && mv $@.tmp $@
 
 # Generate HTML from processed Markdown using Pandoc
-build/%.html: build/%.3.md $(PANDOC_TEMPLATE) | build
+build/%.html: build/%.md $(PANDOC_TEMPLATE) | build
 	$(PANDOC_CMD) $(PANDOC_OPTS) -o $@ $<
-
-build/%.html: build/%.3.md $(PANDOC_TEMPLATE)
-	$(PANDOC_CMD) \
-		$(PANDOC_OPTS) \
-		-o $@ \
-		$<
 
 # Generate PDF from processed Markdown using Pandoc
 build/%.pdf: %.md | build
