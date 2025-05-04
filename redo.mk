@@ -37,6 +37,8 @@ PANDOC_OPTS_PDF := \
 # Command for minifying HTML files
 MINIFY_CMD := minify
 
+LINKCHECKER_CMD := docker compose run --rm -T linkchecker
+
 VPATH := src
 
 # Find all Markdown files excluding specified directories
@@ -73,6 +75,10 @@ docker: .minify
 	docker compose build nginx
 	#docker tag artistic-anatomy-nginx registry.digitalocean.com/artisticanatomy/book:latest
 	#docker push registry.digitalocean.com/artisticanatomy/book:latest
+
+.PHONY: test
+test: $(HTMLS)
+	$(LINKCHECKER_CMD) build
 
 # Target to bring up the development Nginx container
 .PHONY: up

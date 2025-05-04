@@ -34,3 +34,11 @@ services:
     entrypoint: ["pandoc"]
     volumes:
       - .:/data
+
+  linkchecker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.linkchecker
+    entrypoint: ["linkchecker"]
+    volumes:
+      - .:/data
