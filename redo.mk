@@ -90,15 +90,14 @@ down:
 	docker compose down nginx-dev
 
 # Create necessary build directories
-build: $(BUILD_SUBDIRS)
+build: | $(BUILD_SUBDIRS)
+	# Restart the development Nginx container since it needs to remount the
+	# docker volume to see the newly created build dirs.
+	docker compose restart nginx-dev
 
 # Create each build subdirectory if it doesn't exist
 $(BUILD_SUBDIRS):
 	mkdir -p $@
-
-# Restart the development Nginx container
-build:
-	docker compose restart nginx-dev
 
 # Copy CSS files to the build directory
 build/%.css: %.css
