@@ -61,12 +61,12 @@ nav:not(#TOC) {
 }
 */
 
-nav:not(#TOC) > ol {
+nav:not(#TOC) ul {
     list-style-type: none;
     padding-left: 0;
 }
 
-nav:not(#TOC) > ol > li {
+nav:not(#TOC) ul li {
     display: inline-block;
     padding-right: 0.5rem;
     text-transform: uppercase;
