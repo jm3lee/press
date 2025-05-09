@@ -42,3 +42,15 @@ services:
     entrypoint: ["linkchecker"]
     volumes:
       - .:/data
+
+  sync:
+    build: app/s3
+    entrypoint: ["/app/bin/sync"]
+    volumes:
+      - ./s3:/s3
+
+  seed:
+    build: app/s3
+    entrypoint: ["/app/bin/seed"]
+    volumes:
+      - ./s3:/s3

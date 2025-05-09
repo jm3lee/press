@@ -136,3 +136,11 @@ prune:
 .PHONY: setup
 setup:
 	docker compose build
+
+.PHONY: seed
+seed:
+	docker compose run --build --rm seed
+
+.PHONY: sync
+sync:
+	docker compose run --build --rm sync
