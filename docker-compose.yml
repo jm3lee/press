@@ -2,7 +2,7 @@ services:
   nginx:
     build:
       context: .
-      dockerfile: docker/Dockerfile.nginx
+      dockerfile: app/Dockerfile.nginx
     ports:
       - "80:80"
       - "443:443"
@@ -11,7 +11,7 @@ services:
   nginx-dev:
     build:
       context: .
-      dockerfile: docker/Dockerfile.nginx
+      dockerfile: app/Dockerfile.nginx
     container_name: nginx-dev
     ports:
       - "80:80"
@@ -30,7 +30,7 @@ services:
   pandoc:
     build:
       context: .
-      dockerfile: docker/Dockerfile.pandoc
+      dockerfile: app/Dockerfile.pandoc
     entrypoint: ["pandoc"]
     volumes:
       - .:/data
@@ -38,7 +38,7 @@ services:
   linkchecker:
     build:
       context: .
-      dockerfile: docker/Dockerfile.linkchecker
+      dockerfile: app/Dockerfile.linkchecker
     entrypoint: ["linkchecker"]
     volumes:
       - .:/data
