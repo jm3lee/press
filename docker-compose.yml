@@ -43,6 +43,13 @@ services:
     volumes:
       - .:/data
 
+  bookcovers:
+    build: app/bookcovers
+    entrypoint: ["/app/bin/service"]
+    volumes:
+      - ./bookcovers/input:/app/input
+      - ./s3/bookcovers:/app/output
+
   sync:
     build: app/s3
     entrypoint: ["/app/bin/sync"]
