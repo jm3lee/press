@@ -4,3 +4,6 @@
 [submodule "docker/bookcovers"]
 	path = app/bookcovers
 	url = git@github.com:onlyartists/press-bookcovers.git
+[submodule "app/s3"]
+	path = app/s3
+	url = git@github.com:onlyartists/press-s3.git
