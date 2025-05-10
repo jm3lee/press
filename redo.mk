@@ -39,7 +39,7 @@ MINIFY_CMD := minify
 
 EMOJIFY_CMD := docker compose run --rm shell emojify
 
-LINKCHECKER_CMD := docker compose run --rm -T shell linkchecker
+LINKCHECKER_CMD := docker compose run --rm -T linkchecker
 
 VPATH := src
 

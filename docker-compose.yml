@@ -60,3 +60,9 @@ services:
     entrypoint: ["bash"]
     volumes:
       - ./build:/build
+
+  linkchecker:
+    build: app/shell
+    entrypoint: ["linkchecker"]
+    volumes:
+      - ./build:/data/build
