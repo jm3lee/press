@@ -87,6 +87,10 @@ test: $(HTMLS)
 up:
 	docker compose up nginx-dev to-webp
 
+.PHONY: upd
+upd:
+	docker compose up nginx-dev to-webp -d
+
 .PHONY: down
 down:
 	docker compose down
