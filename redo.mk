@@ -133,7 +133,7 @@ clean:
 
 .PHONY: prune
 prune:
-	docker system prune
+	docker system prune -f
 
 .PHONY: setup
 setup:
