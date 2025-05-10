@@ -85,7 +85,7 @@ test: $(HTMLS)
 # Target to bring up the development Nginx container
 .PHONY: up
 up:
-	docker compose up nginx-dev to-webp
+	docker compose up nginx-dev to-webp --build --remove-orphans
 
 .PHONY: upd
 upd:
