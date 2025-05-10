@@ -53,6 +53,9 @@ services:
   to-webp:
     build: app/to-webp
     entrypoint: ["/app/bin/service"]
+    volumes:
+      - ./app/to-webp/input:/app/input
+      - ./app/to-webp/output:/app/output
 
   shell:
     build: app/shell

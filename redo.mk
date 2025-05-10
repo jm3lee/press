@@ -138,6 +138,8 @@ prune:
 .PHONY: setup
 setup:
 	docker compose build
+	mkdir -p app/to-webp/input
+	mkdir -p app/to-webp/output
 
 .PHONY: seed
 seed:
@@ -146,3 +148,7 @@ seed:
 .PHONY: sync
 sync:
 	docker compose run --build --rm sync
+
+.PHONY: sync
+to-webp:
+	docker compose run --build --rm to-webp
