@@ -61,3 +61,10 @@ services:
     entrypoint: ["/app/bin/seed"]
     volumes:
       - ./s3:/s3
+
+  service-framework:
+    build: app/service-framework
+
+  to-webp:
+    build: app/to-webp
+    entrypoint: ["/app/bin/service"]

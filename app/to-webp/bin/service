@@ -1,0 +1,57 @@
+#!/bin/bash
+
+set -euo pipefail
+
+# Prepend /app/bin to PATH so that any custom commands (e.g., add) are found.
+export PATH=/app/bin:$PATH
+
+# Handler: kill the sleep (if running) and exit
+_on_signal() {
+    echo "Caught signal, exiting immediately."
+    [[ -n "${_SLEEP_PID-}" ]] && kill "$_SLEEP_PID" 2>/dev/null || true
+    exit 0
+}
+
+# Trap common termination signals
+trap _on_signal SIGINT SIGTERM SIGHUP
+
+echo "Starting work… (PID $$)"
+
+# Always work in /app/output
+cd /app/output || {
+    echo "Error: Could not change directory to /app/output" >&2
+    exit 1
+}
+
+# Main processing loop: runs indefinitely
+while true; do
+    # Remove any Zone.Identifier ADS leftovers in /app/input
+    rm -f /app/input/*:Zone.Identifier
+
+    # Iterate over all entries in /app/input
+    for input_file in `find /app/input/ -type f -name '*.jpg' -o -name '*.png'`; do
+        # If it's a regular file, process it
+        if [ -f "$input_file" ]; then
+            echo "service: Processing $input_file"
+            stem=$(basename "$input_file" .jpg)
+            stem=$(basename "$stem" .png)
+            chmod a-x "$input_file"
+            convert "$input_file" -resize '50%' "/app/output/${stem}.webp"
+            rm "$input_file"
+            # Separator for readability in logs or stdout
+            echo "---"
+        fi
+    done
+
+    # Brief pause to avoid consuming 100% CPU
+    # Start sleep in the background and record its PID
+    echo "Sleeping for 3 seconds..."
+    sleep 3 &
+    _SLEEP_PID=$!
+
+    # Wait for either sleep to finish, or a signal to arrive
+    wait "$_SLEEP_PID"
+
+    # Clear PID so handler won’t try to kill a non‑existent process
+    unset _SLEEP_PID
+done
