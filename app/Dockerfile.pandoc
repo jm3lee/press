@@ -1,3 +1,2 @@
 FROM pandoc/extra
 RUN apk add --no-cache py3-pandocfilters
-COPY bin/ /press/bin/

@@ -61,3 +61,6 @@ services:
   to-webp:
     build: app/to-webp
     entrypoint: ["/app/bin/service"]
+
+  shell:
+    build: app/shell

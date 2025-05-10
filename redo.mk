@@ -37,6 +37,8 @@ PANDOC_OPTS_PDF := \
 # Command for minifying HTML files
 MINIFY_CMD := minify
 
+EMOJIFY_CMD := docker compose run --rm shell emojify
+
 LINKCHECKER_CMD := docker compose run --rm -T linkchecker
 
 VPATH := src
@@ -108,7 +110,7 @@ build/%.md: %.md | build
 	includefilter build $< $@
 	includefilter build $< $@
 	includefilter build $< $@
-	./bin/emojify < $@ > $@.tmp && mv $@.tmp $@
+	$(EMOJIFY_CMD) < $@ > $@.tmp && mv $@.tmp $@
 
 # Generate HTML from processed Markdown using Pandoc
 build/%.html: build/%.md $(PANDOC_TEMPLATE) | build
