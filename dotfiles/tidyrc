@@ -1,0 +1,6 @@
+indent: yes
+indent-spaces: 2
+quiet: yes
+show-warnings: no
+show-errors: 0
+show-body-only: yes
