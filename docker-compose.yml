@@ -28,9 +28,7 @@ services:
     restart: unless-stopped
 
   pandoc:
-    build:
-      context: .
-      dockerfile: app/Dockerfile.pandoc
+    build: app/shell
     entrypoint: ["pandoc"]
     volumes:
       - .:/data
@@ -59,5 +57,6 @@ services:
 
   shell:
     build: app/shell
+    entrypoint: ["bash"]
     volumes:
       - ./build:/build

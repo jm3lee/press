@@ -1,18 +1,4 @@
-# Dockerfile for creating a Debian-based image with linkchecker installed
-#
-# This image installs locales and linkchecker on top of debian:testing-slim,
-# configures UTF-8 locale support, and copies custom scripts into /usr/local/bin.
-#
-# Usage:
-#   docker build -t my-linkchecker-image .
-#   docker run --rm my-linkchecker-image linkchecker https://example.com
-#
-# Environment Variables:
-#   LANG        Set to en_US.UTF-8 to ensure UTF-8 support.
-#   LANGUAGE    Set to en_US:en for fallback language resolution.
-#   LC_ALL      Set to en_US.UTF-8 to enforce the chosen locale.
-
-FROM debian:testing-slim
+FROM pandoc/extra:latest-ubuntu
 
 # Install locales, linkchecker, avoid extra packages.
 RUN apt update -qq
@@ -30,4 +16,6 @@ ENV LANG=en_US.UTF-8 \
     LC_ALL=en_US.UTF-8
 
 # Copy custom helper scripts into the image
-COPY ./bin/* /usr/local/bin/
+COPY ./bin/ /app/bin
+
+ENV PATH="/app/bin:${PATH}"
