@@ -83,11 +83,11 @@ test: $(HTMLS)
 # Target to bring up the development Nginx container
 .PHONY: up
 up:
-	docker compose up nginx-dev -d
+	docker compose up nginx-dev to-webp
 
 .PHONY: down
 down:
-	docker compose down nginx-dev
+	docker compose down
 
 # Create necessary build directories
 build: | $(BUILD_SUBDIRS)
