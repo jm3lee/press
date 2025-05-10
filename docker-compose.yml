@@ -35,14 +35,6 @@ services:
     volumes:
       - .:/data
 
-  linkchecker:
-    build:
-      context: .
-      dockerfile: app/Dockerfile.linkchecker
-    entrypoint: ["linkchecker"]
-    volumes:
-      - .:/data
-
   sync:
     build: app/s3
     entrypoint: ["/app/bin/sync"]
@@ -64,3 +56,5 @@ services:
 
   shell:
     build: app/shell
+    volumes:
+      - ./build:/build

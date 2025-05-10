@@ -1,8 +1,9 @@
 FROM debian:testing-slim
 
 # Install locales
-RUN apt-get update
-RUN apt-get install -y --no-install-recommends locales
+RUN apt update -qq
+RUN apt install -y --no-install-recommends locales
+RUN apt install -y --no-install-recommends linkchecker
 RUN rm -rf /var/lib/apt/lists/*
 
 # Enable the UTF-8 locale
