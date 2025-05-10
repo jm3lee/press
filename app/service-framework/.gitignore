@@ -173,10 +173,5 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-.minify
 *.swp
 *.swo
-
-app/to-webp/input
-app/to-webp/output
-logs

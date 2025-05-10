@@ -1,9 +1,3 @@
 [submodule "docker/press-bookcovers"]
 	path = docker/bookcovers
 	url = git@github.com:onlyartists/press-bookcovers.git
-[submodule "app/s3"]
-	path = app/s3
-	url = git@github.com:onlyartists/press-s3.git
-[submodule "app/service-framework"]
-	path = app/service-framework
-	url = git@github.com:onlyartists/press-service-framework.git

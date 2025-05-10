@@ -1,0 +1,36 @@
+#!/bin/bash
+set -euo pipefail
+
+# Handler: kill the sleep (if running) and exit
+_on_signal() {
+    echo "Caught signal, exiting immediately."
+    [[ -n "${_SLEEP_PID-}" ]] && kill "$_SLEEP_PID" 2>/dev/null || true
+    exit 0
+}
+
+# Trap common termination signals
+trap _on_signal SIGINT SIGTERM SIGHUP
+
+echo "Starting work… (PID $$)"
+
+# Example loop with interruptible sleep
+while true; do
+    echo "Starting sync $(date +'%T')"
+    s3cmd sync \
+        --delete-removed \
+        --delete-after \
+        --acl-public \
+        /s3/ \
+        s3://artisticanatomy/
+
+    # Start sleep in the background and record its PID
+    echo "Sleeping for 10 seconds..."
+    sleep 10 &
+    _SLEEP_PID=$!
+
+    # Wait for either sleep to finish, or a signal to arrive
+    wait "$_SLEEP_PID"
+
+    # Clear PID so handler won’t try to kill a non‑existent process
+    unset _SLEEP_PID
+done

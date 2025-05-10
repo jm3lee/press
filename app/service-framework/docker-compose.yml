@@ -1,0 +1,7 @@
+services:
+  bookcovers:
+    build: .
+    entrypoint: ["/app/bin/service"]
+    volumes:
+      - ./input:/app/input
+      - ./output:/app/output
