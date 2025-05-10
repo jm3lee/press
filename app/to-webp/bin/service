@@ -15,7 +15,7 @@ _on_signal() {
 # Trap common termination signals
 trap _on_signal SIGINT SIGTERM SIGHUP
 
-echo "Starting work… (PID $$)"
+echo "Starting work… (PID $$)" | tee /app/logs/webp.txt
 
 # Always work in /app/output
 cd /app/output || {
@@ -38,6 +38,7 @@ while true; do
             chmod a-x "$input_file"
             convert "$input_file" -resize '50%' "/app/output/${stem}.webp"
             rm "$input_file"
+            echo "$input_file -> /app/output/${stem}.webp" >> /app/logs/webp.txt
             # Separator for readability in logs or stdout
             echo "---"
         fi
