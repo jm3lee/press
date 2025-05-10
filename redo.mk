@@ -1,158 +1,167 @@
 # Makefile for building and managing Press
 
-# Define the Pandoc command using Docker Compose
-# 	-T: Don't allocate pseudo-tty. Makes parallel builds work.
-PANDOC_CMD := docker compose run \
-			  --rm \
-			  -T \
-			  -u $(shell id -u) \
-			  pandoc
+.PHONY: all build dirs docker test up upd down clean prune setup seed sync to-webp .minify
 
-PANDOC_TEMPLATE := src/pandoc-template.html
+# -------------------------------------------------------------------
+# Commands & flags
+# -------------------------------------------------------------------
 
-# Options for generating HTML output with Pandoc
-PANDOC_OPTS := \
-		--css '/style.css' \
-		--css '/numbered-headings.css' \
-		--standalone \
-		-t html \
-		--toc \
-		--toc-depth=2 \
-		--filter pandoc-crossref \
-		--template=$(PANDOC_TEMPLATE) \
+PANDOC_CMD       := docker compose run --rm -T -u $(shell id -u) pandoc
+PANDOC_TEMPLATE  := src/pandoc-template.html
 
-# Options for generating PDF output with Pandoc
-PANDOC_OPTS_PDF := \
-		--css "/style.css" \
-		--css '/numbered-headings.css' \
-		--standalone \
-		-t pdf \
-		--toc \
-		--toc-depth=2 \
-		--number-sections \
-		--pdf-engine=xelatex \
-		--resource-path=build \
-		--filter pandoc-crossref \
+PANDOC_OPTS_HTML := \
+  --css '/style.css' \
+  --standalone \
+  -t html \
+  --toc \
+  --toc-depth=2 \
+  --filter pandoc-crossref \
+  --template=$(PANDOC_TEMPLATE)
 
-# Command for minifying HTML files
-MINIFY_CMD := minify
+PANDOC_OPTS_PDF  := \
+  --css '/press/style.css' \
+  --standalone \
+  -t pdf \
+  --toc \
+  --toc-depth=2 \
+  --number-sections \
+  --pdf-engine=xelatex \
+  --resource-path=build \
+  --filter pandoc-crossref
 
-EMOJIFY_CMD := docker compose run --rm shell emojify
+MINIFY_CMD       := minify
+EMOJIFY_CMD      := docker compose run --rm shell emojify
+LINKCHECKER_CMD  := docker compose run --rm -T linkchecker
 
-LINKCHECKER_CMD := docker compose run --rm -T linkchecker
+SERVICES         := nginx-dev to-webp sync
+VPATH            := src
 
-VPATH := src
+# -------------------------------------------------------------------
+# Sources and generated files
+# -------------------------------------------------------------------
 
-# Find all Markdown files excluding specified directories
-MARKDOWNS := $(shell find src/ -name '*.md')
+MARKDOWNS    := $(shell find src/ -name '*.md')
+HTMLS        := $(patsubst src/%.md,build/%.html,$(MARKDOWNS))
+PDFS         := $(patsubst src/%.md,build/%.pdf,$(MARKDOWNS))
 
-# Define the corresponding HTML and PDF output files
-HTMLS := $(patsubst src/%.md, build/%.html, $(MARKDOWNS))
-PDFS := $(patsubst src/%.md, build/%.pdf, $(MARKDOWNS))
+CSS_SRC      := $(wildcard src/*.css)
+CSS          := $(patsubst src/%.css,build/%.css,$(CSS_SRC))
 
-# Sort and define build subdirectories based on HTML files
 BUILD_SUBDIRS := $(sort $(dir $(HTMLS)))
 
-CSS := $(wildcard src/*.css)
-CSS := $(patsubst src/%.css,build/%.css, $(CSS))
+# -------------------------------------------------------------------
+# Default: build HTML, CSS
+# -------------------------------------------------------------------
 
-# Define the default target to build everything
-.PHONY: all
-all: | build $(BUILD_SUBDIRS)
-all: $(HTMLS)
-all: $(CSS)
+all: build dirs $(HTMLS) $(CSS)
 
-# Target to minify HTML and CSS files
-.minify: $(HTMLS) $(CSS)
-	cd build; minify -a -v -r -o . .
-	touch .minify
-
-# Docker-related targets
-# Initialize Docker authentication and build the Nginx image
-# Uncomment the lines below to tag and push the Docker image
-# doctl auth init; remove extraneous context as necessary
-# doctl registry login
-.PHONY: docker
-docker: .minify
-	docker compose build nginx
-	#docker tag artistic-anatomy-nginx registry.digitalocean.com/artisticanatomy/book:latest
-	#docker push registry.digitalocean.com/artisticanatomy/book:latest
-
-.PHONY: test
-test: $(HTMLS)
-	$(LINKCHECKER_CMD) build
-
-# Target to bring up the development Nginx container
-.PHONY: up
-up:
-	docker compose up nginx-dev to-webp
-
-.PHONY: upd
-upd:
-	docker compose up nginx-dev to-webp -d
-
-.PHONY: down
-down:
-	docker compose down
-
-# Create necessary build directories
-build: | $(BUILD_SUBDIRS)
-	# Restart the development Nginx container since it needs to remount the
-	# docker volume to see the newly created build dirs.
+# Ensure build dirs exist, then restart nginx-dev so it sees them
+build:
 	docker compose restart nginx-dev
 
-# Create each build subdirectory if it doesn't exist
+dirs: $(BUILD_SUBDIRS)
+
 $(BUILD_SUBDIRS):
 	mkdir -p $@
 
-# Copy CSS files to the build directory
-build/%.css: %.css
+# -------------------------------------------------------------------
+# CSS
+# -------------------------------------------------------------------
+
+build/%.css: src/%.css | build
 	cp $< $@
 
-# Include and process Markdown files up to three levels deep
-build/%.md: %.md | build
-	includefilter build $< $@
-	includefilter build $< $@
-	includefilter build $< $@
-	$(EMOJIFY_CMD) < $@ > $@.tmp && mv $@.tmp $@
+# -------------------------------------------------------------------
+# Markdown → intermediate MD (with includes + emojis)
+# -------------------------------------------------------------------
 
-# Generate HTML from processed Markdown using Pandoc
+build/%.md: src/%.md | build
+	$(EMOJIFY_CMD) < $< > $@
+	@# Apply includefilter 3 levels deep
+	@infile=$@; \
+	for lvl in 1 2 3; do \
+	  outfile=build/$*.$$lvl.md; \
+	  includefilter build $$infile $$outfile; \
+	  infile=$$outfile; \
+	done
+
+# -------------------------------------------------------------------
+# Intermediate MD → HTML
+# -------------------------------------------------------------------
+
 build/%.html: build/%.md $(PANDOC_TEMPLATE) | build
-	$(PANDOC_CMD) $(PANDOC_OPTS) -o $@ $<
+	$(PANDOC_CMD) $(PANDOC_OPTS_HTML) -o $@ $<
 
-# Generate PDF from processed Markdown using Pandoc
-build/%.pdf: %.md | build
-	includefilter build $< build/$*.1.md
-	includefilter build build/$*.1.md build/$*.2.md
-	includefilter build build/$*.2.md build/$*.3.md
-	$(PANDOC_CMD) \
-		$(PANDOC_OPTS_PDF) \
-		-o $@ \
-		build/$*.3.md
+# -------------------------------------------------------------------
+# Source MD → PDF (3‐level include preprocessing)
+# -------------------------------------------------------------------
 
-# Clean the build directory by removing all build artifacts
-.PHONY: clean
+build/%.pdf: src/%.md | build
+	@infile=$<; \
+	for lvl in 1 2 3; do \
+	  outfile=build/$*.$$lvl.md; \
+	  includefilter build $$infile $$outfile; \
+	  infile=$$outfile; \
+	done; \
+	$(PANDOC_CMD) $(PANDOC_OPTS_PDF) -o $@ $$infile
+
+# -------------------------------------------------------------------
+# Minify HTML & CSS
+# -------------------------------------------------------------------
+
+.minify: $(HTMLS) $(CSS)
+	cd build && $(MINIFY_CMD) -a -v -r -o .
+	touch .minify
+
+# -------------------------------------------------------------------
+# Docker image build & push
+# -------------------------------------------------------------------
+
+docker: .minify
+	docker compose build nginx
+	#docker tag brianleeart-nginx registry.digitalocean.com/artisticanatomy/brianlee.art:latest
+	#docker push registry.digitalocean.com/artisticanatomy/brianlee.art:latest
+
+# -------------------------------------------------------------------
+# Linkchecker
+# -------------------------------------------------------------------
+
+test: $(HTMLS)
+	$(LINKCHECKER_CMD) build
+
+# -------------------------------------------------------------------
+# Dev server controls
+# -------------------------------------------------------------------
+
+up:
+	docker compose up $(SERVICES)
+
+upd:
+	docker compose up -d $(SERVICES)
+
+down:
+	docker compose down
+
+# -------------------------------------------------------------------
+# Cleanup & maintenance
+# -------------------------------------------------------------------
+
 clean:
-	-rm -rf build
+	rm -rf build
 
-.PHONY: prune
 prune:
 	docker system prune -f
 
-.PHONY: setup
 setup:
-	mkdir -p app/to-webp/input
-	mkdir -p app/to-webp/output
+	mkdir -p app/to-webp/input app/to-webp/output
 	docker compose build
+	make -f redo.mk seed
 
-.PHONY: seed
 seed:
 	docker compose run --build --rm -T seed
 
-.PHONY: sync
 sync:
 	docker compose run --build --rm -T sync
 
-.PHONY: to-webp
 to-webp:
 	docker compose run --build --rm -T to-webp
