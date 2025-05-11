@@ -17,7 +17,6 @@ PANDOC_TEMPLATE := src/pandoc-template.html
 # Options for generating HTML output with Pandoc
 PANDOC_OPTS := \
 		--css '/style.css' \
-		--css '/numbered-headings.css' \
 		--standalone \
 		-t html \
 		--toc \
@@ -28,7 +27,6 @@ PANDOC_OPTS := \
 # Options for generating PDF output with Pandoc
 PANDOC_OPTS_PDF := \
 		--css "/style.css" \
-		--css '/numbered-headings.css' \
 		--standalone \
 		-t pdf \
 		--toc \
