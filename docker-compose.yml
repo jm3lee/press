@@ -48,12 +48,12 @@ services:
   service-framework:
     build: app/service-framework
 
-  to-webp:
-    build: app/to-webp
+  webp:
+    build: app/webp
     entrypoint: ["/app/bin/service"]
     volumes:
-      - ./app/to-webp/input:/app/input
-      - ./app/to-webp/output:/app/output
+      - ./app/webp/input:/app/input
+      - ./app/webp/output:/app/output
 
   shell:
     build: app/shell

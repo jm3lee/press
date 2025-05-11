@@ -9,7 +9,7 @@ override MAKEFLAGS += --warn-undefined-variables  \
 export MAKEFLAGS
 
 # Default services to run
-SERVICES := nginx-dev sync to-webp
+SERVICES := nginx-dev sync webp
 
 # Command for minifying HTML files
 MINIFY_CMD := minify
@@ -81,8 +81,8 @@ prune:
 
 .PHONY: setup
 setup:
-	mkdir -p app/to-webp/input
-	mkdir -p app/to-webp/output
+	mkdir -p app/webp/input
+	mkdir -p app/webp/output
 	docker compose build
 
 .PHONY: seed
@@ -93,9 +93,9 @@ seed:
 sync:
 	docker compose run --build --rm -T sync
 
-.PHONY: to-webp
-to-webp:
-	docker compose run --build --rm -T to-webp
+.PHONY: webp
+webp:
+	docker compose run --build --rm -T webp
 
 .PHONY: shell
 shell:
