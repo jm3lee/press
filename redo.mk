@@ -49,8 +49,6 @@ EMOJIFY_CMD := docker compose run --rm shell emojify
 
 CHECKLINKS_CMD := docker compose run --rm -T checklinks
 
-LINK_CMD := docker compose run --rm -T link
-
 VPATH := src
 
 # Find all Markdown files excluding specified directories
@@ -121,7 +119,7 @@ build/%.css: %.css
 
 # Include and preprocess Markdown files up to three levels deep
 build/%.md: %.md | build
-	docker compose run --rm -T -u $(shell id -u) preprocess $<
+	docker compose run --rm -T -u $(shell id -u) shell preprocess $<
 
 # Generate HTML from processed Markdown using Pandoc
 build/%.html: build/%.md $(PANDOC_TEMPLATE) | build

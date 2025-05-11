@@ -57,10 +57,11 @@ services:
       - ./logs:/app/logs/
 
   shell:
-    build: app/shell
+    image: press-shell
     entrypoint: ["bash"]
     volumes:
       - ./:/data
+      - ./app/shell/bin:/app/bin
 
   checklinks:
     build: app/shell
@@ -69,17 +70,3 @@ services:
       - ./:/data
       - ./app/shell/bin:/app/bin
     network_mode: host
-
-  link:
-    build: app/shell
-    entrypoint: ["link"]
-    volumes:
-      - ./:/data
-      - ./app/shell/bin:/app/bin
-
-  preprocess:
-    build: app/shell
-    entrypoint: ["preprocess"]
-    volumes:
-      - ./:/data
-      - ./app/shell/bin:/app/bin
