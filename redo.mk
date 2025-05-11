@@ -1,5 +1,13 @@
 # Makefile for building and managing Press
 
+# Override MAKEFLAGS (so your settings can’t be clobbered by the environment)
+override MAKEFLAGS += --warn-undefined-variables  \
+                      --no-builtin-rules        \
+                      -j16                      \
+
+# Export it so sub-makes see the same flags
+export MAKEFLAGS
+
 # Define the Pandoc command using Docker Compose
 # 	-T: Don't allocate pseudo-tty. Makes parallel builds work.
 PANDOC_CMD := docker compose run \
@@ -39,7 +47,9 @@ MINIFY_CMD := minify
 
 EMOJIFY_CMD := docker compose run --rm shell emojify
 
-LINKCHECKER_CMD := docker compose run --rm -T linkchecker
+CHECKLINKS_CMD := docker compose run --rm -T checklinks
+
+LINK_CMD := docker compose run --rm -T link
 
 VPATH := src
 
@@ -73,14 +83,14 @@ all: $(CSS)
 # doctl auth init; remove extraneous context as necessary
 # doctl registry login
 .PHONY: docker
-docker: .minify
+docker: .minify test
 	docker compose build nginx
 	#docker tag artistic-anatomy-nginx registry.digitalocean.com/artisticanatomy/book:latest
 	#docker push registry.digitalocean.com/artisticanatomy/book:latest
 
 .PHONY: test
 test: $(HTMLS)
-	$(LINKCHECKER_CMD) build
+	$(CHECKLINKS_CMD) http://localhost | tee log.test
 
 # Target to bring up the development Nginx container
 .PHONY: up
@@ -109,12 +119,9 @@ $(BUILD_SUBDIRS):
 build/%.css: %.css
 	cp $< $@
 
-# Include and process Markdown files up to three levels deep
+# Include and preprocess Markdown files up to three levels deep
 build/%.md: %.md | build
-	includefilter build $< $@
-	includefilter build $< $@
-	includefilter build $< $@
-	$(EMOJIFY_CMD) < $@ > $@.tmp && mv $@.tmp $@
+	docker compose run --rm -T -u $(shell id -u) preprocess $<
 
 # Generate HTML from processed Markdown using Pandoc
 build/%.html: build/%.md $(PANDOC_TEMPLATE) | build
@@ -156,3 +163,7 @@ sync:
 .PHONY: to-webp
 to-webp:
 	docker compose run --build --rm -T to-webp
+
+.PHONY: shell
+shell:
+	docker compose run --build --rm shell

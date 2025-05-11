@@ -60,10 +60,26 @@ services:
     build: app/shell
     entrypoint: ["bash"]
     volumes:
-      - ./build:/build
+      - ./:/data
 
-  linkchecker:
+  checklinks:
     build: app/shell
-    entrypoint: ["linkchecker"]
+    entrypoint: ["checklinks"]
     volumes:
-      - ./build:/data/build
+      - ./:/data
+      - ./app/shell/bin:/app/bin
+    network_mode: host
+
+  link:
+    build: app/shell
+    entrypoint: ["link"]
+    volumes:
+      - ./:/data
+      - ./app/shell/bin:/app/bin
+
+  preprocess:
+    build: app/shell
+    entrypoint: ["preprocess"]
+    volumes:
+      - ./:/data
+      - ./app/shell/bin:/app/bin

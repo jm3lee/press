@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Commands (just like in your Makefile)
+EMOJIFY_CMD=emojify
+LINK_CMD=link
+
+# process_file <input_markdown>
+#   - mirrors: build/%.md: %.md
+#   - runs includefilter 3× (3 levels of include expansion)
+#   - then runs link, then emojify
+process_file() {
+    local input="$1"
+    # strip leading src/ if present, then prefix with build/
+    local relpath="${input#src/}"
+    local output="build/${relpath}"
+
+    # ensure build directory exists
+    mkdir -p "$(dirname "$output")"
+
+    # Include and process Markdown files up to three levels deep
+    for _ in 1 2 3; do
+        includefilter build "$input" "$output"
+    done
+
+    # run link step
+    "$LINK_CMD" "$output"
+
+    # run emojify, write to a temp file and atomically move
+    "$EMOJIFY_CMD" < "$output" > "$output.tmp"
+    mv "$output.tmp" "$output"
+}
+
+# main
+if [[ $# -lt 1 ]]; then
+    echo "Usage: $0 <markdown-file> [more-markdown-files...]"
+    exit 1
+fi
+
+for md in "$@"; do
+    process_file "$md"
+done
