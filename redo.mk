@@ -8,44 +8,8 @@ override MAKEFLAGS += --warn-undefined-variables  \
 # Export it so sub-makes see the same flags
 export MAKEFLAGS
 
-# Define the Pandoc command using Docker Compose
-# 	-T: Don't allocate pseudo-tty. Makes parallel builds work.
-PANDOC_CMD := docker compose run \
-			  --rm \
-			  -T \
-			  -u $(shell id -u) \
-			  pandoc
-
-PANDOC_TEMPLATE := src/pandoc-template.html
-
-# Options for generating HTML output with Pandoc
-PANDOC_OPTS := \
-		--css '/style.css' \
-		--css '/numbered-headings.css' \
-		--standalone \
-		-t html \
-		--toc \
-		--toc-depth=2 \
-		--filter pandoc-crossref \
-		--template=$(PANDOC_TEMPLATE) \
-
-# Options for generating PDF output with Pandoc
-PANDOC_OPTS_PDF := \
-		--css "/style.css" \
-		--css '/numbered-headings.css' \
-		--standalone \
-		-t pdf \
-		--toc \
-		--toc-depth=2 \
-		--number-sections \
-		--pdf-engine=xelatex \
-		--resource-path=build \
-		--filter pandoc-crossref \
-
 # Command for minifying HTML files
 MINIFY_CMD := minify
-
-EMOJIFY_CMD := docker compose run --rm shell emojify
 
 CHECKLINKS_CMD := docker compose run --rm -T checklinks
 
@@ -67,7 +31,7 @@ CSS := $(patsubst src/%.css,build/%.css, $(CSS))
 # Define the default target to build everything
 .PHONY: all
 all:
-	docker compose run --rm --entrypoint make -u $(shell id -u) shell -f /app/mk/build.mk
+	docker compose run --rm --entrypoint make -u $(shell id -u) -T shell -f /app/mk/build.mk
 
 # Target to minify HTML and CSS files
 .minify: $(HTMLS) $(CSS)
