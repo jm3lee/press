@@ -61,7 +61,7 @@ services:
     entrypoint: ["bash"]
     volumes:
       - ./:/data
-      - ./app/shell/bin:/app/bin
+      - ./app/shell:/app
 
   checklinks:
     build: app/shell
