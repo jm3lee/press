@@ -27,12 +27,6 @@ services:
       # - /etc/letsencrypt:/etc/letsencrypt
     restart: unless-stopped
 
-  pandoc:
-    build: app/shell
-    entrypoint: ["pandoc"]
-    volumes:
-      - .:/data
-
   sync:
     build: app/s3
     entrypoint: ["/app/bin/sync"]
