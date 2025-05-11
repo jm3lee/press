@@ -51,7 +51,7 @@ HTMLS := $(patsubst src/%.md, build/%.html, $(MARKDOWNS))
 PDFS := $(patsubst src/%.md, build/%.pdf, $(MARKDOWNS))
 
 # Sort and define build subdirectories based on HTML files
-BUILD_SUBDIRS := $(sort $(dir $(HTMLS))) /app/log
+BUILD_SUBDIRS := $(sort $(dir $(HTMLS))) log
 
 CSS := $(wildcard src/*.css)
 CSS := $(patsubst src/%.css,build/%.css, $(CSS))
@@ -69,8 +69,8 @@ all: test
 	touch .minify
 
 .PHONY: test
-test: $(HTMLS) | /app/log
-	$(CHECKLINKS_CMD) http://nginx-dev | tee /app/log/checklinks.txt
+test: $(HTMLS) $(CSS) | log
+	$(CHECKLINKS_CMD) http://nginx-dev | tee log/checklinks.txt
 
 # Create necessary build directories
 build: | $(BUILD_SUBDIRS)

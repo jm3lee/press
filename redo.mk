@@ -24,15 +24,17 @@ HTMLS := $(patsubst src/%.md, build/%.html, $(MARKDOWNS))
 PDFS := $(patsubst src/%.md, build/%.pdf, $(MARKDOWNS))
 
 # Sort and define build subdirectories based on HTML files
-BUILD_SUBDIRS := $(sort $(dir $(HTMLS)))
+BUILD_SUBDIRS :=
 
 CSS := $(wildcard src/*.css)
 CSS := $(patsubst src/%.css,build/%.css, $(CSS))
 
+MAKE_CMD := docker compose run --rm --entrypoint make -u $(shell id -u) -T --build shell
+
 # Define the default target to build everything
 .PHONY: all
-all:
-	docker compose run --rm --entrypoint make -u $(shell id -u) -T shell -f /app/mk/build.mk
+all: | build
+	$(MAKE_CMD) -f /app/mk/build.mk
 
 # Target to minify HTML and CSS files
 .minify: $(HTMLS) $(CSS)
@@ -52,7 +54,7 @@ docker: .minify test
 
 .PHONY: test
 test:
-	docker compose run --rm --entrypoint make -u $(shell id -u) -T shell -f /app/mk/build.mk test
+	$(MAKE_CMD) -f /app/mk/build.mk test
 
 # Target to bring up the development Nginx container
 .PHONY: up
@@ -68,14 +70,11 @@ down:
 	docker compose down
 
 # Create necessary build directories
-build: | $(BUILD_SUBDIRS)
+build:
+	mkdir -p $@
 	# Restart the development Nginx container since it needs to remount the
 	# docker volume to see the newly created build dirs.
 	docker compose restart nginx-dev
-
-# Create each build subdirectory if it doesn't exist
-$(BUILD_SUBDIRS):
-	mkdir -p $@
 
 # Clean the build directory by removing all build artifacts
 .PHONY: clean
