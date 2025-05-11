@@ -16,22 +16,15 @@ VPATH := src
 # Find all Markdown files excluding specified directories
 MARKDOWNS := $(shell find src/ -name '*.md')
 
-# Define the corresponding HTML and PDF output files
-HTMLS := $(patsubst src/%.md, build/%.html, $(MARKDOWNS))
-PDFS := $(patsubst src/%.md, build/%.pdf, $(MARKDOWNS))
-
-# Sort and define build subdirectories based on HTML files
-BUILD_SUBDIRS :=
-
-CSS := $(wildcard src/*.css)
-CSS := $(patsubst src/%.css,build/%.css, $(CSS))
-
 MAKE_CMD := docker compose run --rm --entrypoint make -u $(shell id -u) -T --build shell
 
 # Define the default target to build everything
-.PHONY: all
-all:
+build/.buildinfo: $(MARKDOWNS) | build
 	$(MAKE_CMD) -f /app/mk/build.mk
+	date > $@
+
+build:
+	mkdir -p $@
 
 # Docker-related targets
 # Initialize Docker authentication and build the Nginx image
