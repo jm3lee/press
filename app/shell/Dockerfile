@@ -4,6 +4,7 @@ FROM pandoc/extra:latest-ubuntu
 RUN apt update -qq
 RUN apt install -y --no-install-recommends locales
 RUN apt install -y --no-install-recommends make
+RUN apt install -y --no-install-recommends minify
 RUN rm -rf /var/lib/apt/lists/*
 
 # Add includefilter.

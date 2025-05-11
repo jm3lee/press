@@ -61,11 +61,12 @@ CSS := $(patsubst src/%.css,build/%.css, $(CSS))
 all: | build $(BUILD_SUBDIRS)
 all: $(HTMLS)
 all: $(CSS)
+all: build/.minify
 
 # Target to minify HTML and CSS files
-.minify: $(HTMLS) $(CSS)
+build/.minify: $(HTMLS) $(CSS)
 	cd build; minify -a -v -r -o . .
-	touch .minify
+	@touch $@
 
 .PHONY: test
 test: $(HTMLS) $(CSS) | log

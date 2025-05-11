@@ -11,9 +11,6 @@ export MAKEFLAGS
 # Default services to run
 SERVICES := nginx-dev sync webp
 
-# Command for minifying HTML files
-MINIFY_CMD := minify
-
 VPATH := src
 
 # Find all Markdown files excluding specified directories
@@ -36,18 +33,13 @@ MAKE_CMD := docker compose run --rm --entrypoint make -u $(shell id -u) -T --bui
 all:
 	$(MAKE_CMD) -f /app/mk/build.mk
 
-# Target to minify HTML and CSS files
-.minify: $(HTMLS) $(CSS)
-	cd build; minify -a -v -r -o . .
-	touch .minify
-
 # Docker-related targets
 # Initialize Docker authentication and build the Nginx image
 # Uncomment the lines below to tag and push the Docker image
 # doctl auth init; remove extraneous context as necessary
 # doctl registry login
 .PHONY: docker
-docker: .minify test
+docker: test
 	docker compose build nginx
 	#docker tag artistic-anatomy-nginx registry.digitalocean.com/artisticanatomy/book:latest
 	#docker push registry.digitalocean.com/artisticanatomy/book:latest
