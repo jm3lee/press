@@ -61,7 +61,6 @@ CSS := $(patsubst src/%.css,build/%.css, $(CSS))
 all: | build $(BUILD_SUBDIRS)
 all: $(HTMLS)
 all: $(CSS)
-all: test
 
 # Target to minify HTML and CSS files
 .minify: $(HTMLS) $(CSS)
