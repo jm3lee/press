@@ -57,7 +57,7 @@ services:
       - ./logs:/app/logs/
 
   shell:
-    image: press-shell
+    build: app/shell
     entrypoint: ["bash"]
     volumes:
       - ./:/data

@@ -1,8 +1,9 @@
 FROM pandoc/extra:latest-ubuntu
 
-# Install locales, linkchecker, avoid extra packages.
+# Install extra tools
 RUN apt update -qq
 RUN apt install -y --no-install-recommends locales
+RUN apt install -y --no-install-recommends make
 RUN rm -rf /var/lib/apt/lists/*
 
 # Enable the en_US.UTF-8 locale
