@@ -6,6 +6,10 @@ RUN apt install -y --no-install-recommends locales
 RUN apt install -y --no-install-recommends make
 RUN rm -rf /var/lib/apt/lists/*
 
+# Add includefilter.
+COPY ./includefilter /app/includefilter
+RUN pip install --break-system-packages -e /app/includefilter
+
 # Enable the en_US.UTF-8 locale
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen \
  && locale-gen
@@ -21,7 +25,3 @@ ENV PATH="/app/bin:${PATH}"
 
 # Copy makefiles
 COPY ./mk/ /app/mk
-
-# Add includefilter.
-COPY ./includefilter /app/includefilter
-RUN pip install --break-system-packages -e /app/includefilter

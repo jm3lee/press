@@ -33,7 +33,7 @@ MAKE_CMD := docker compose run --rm --entrypoint make -u $(shell id -u) -T --bui
 
 # Define the default target to build everything
 .PHONY: all
-all: | build
+all:
 	$(MAKE_CMD) -f /app/mk/build.mk
 
 # Target to minify HTML and CSS files
@@ -54,6 +54,7 @@ docker: .minify test
 
 .PHONY: test
 test:
+	docker compose restart nginx-dev
 	$(MAKE_CMD) -f /app/mk/build.mk test
 
 # Target to bring up the development Nginx container
@@ -68,13 +69,6 @@ upd:
 .PHONY: down
 down:
 	docker compose down
-
-# Create necessary build directories
-build:
-	mkdir -p $@
-	# Restart the development Nginx container since it needs to remount the
-	# docker volume to see the newly created build dirs.
-	docker compose restart nginx-dev
 
 # Clean the build directory by removing all build artifacts
 .PHONY: clean
