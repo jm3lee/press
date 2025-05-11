@@ -8,6 +8,9 @@ override MAKEFLAGS += --warn-undefined-variables  \
 # Export it so sub-makes see the same flags
 export MAKEFLAGS
 
+# Default services to run
+SERVICES := nginx-dev sync to-webp
+
 # Command for minifying HTML files
 MINIFY_CMD := minify
 
@@ -56,11 +59,11 @@ test: $(HTMLS)
 # Target to bring up the development Nginx container
 .PHONY: up
 up:
-	docker compose up nginx-dev to-webp --build --remove-orphans
+	docker compose up $(SERVICES) --build --remove-orphans
 
 .PHONY: upd
 upd:
-	docker compose up nginx-dev to-webp -d
+	docker compose up $(SERVICES) --build --remove-orphans -d
 
 .PHONY: down
 down:

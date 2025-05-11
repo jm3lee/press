@@ -73,7 +73,7 @@ $(BUILD_SUBDIRS):
 	mkdir -p $@
 
 # Copy CSS files to the build directory
-build/%.css: %.css
+build/%.css: %.css | build
 	cp $< $@
 
 # Include and preprocess Markdown files up to three levels deep
