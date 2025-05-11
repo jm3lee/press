@@ -54,6 +54,7 @@ services:
     volumes:
       - ./app/webp/input:/app/input
       - ./app/webp/output:/app/output
+      - ./log:/app/log
 
   shell:
     build: app/shell

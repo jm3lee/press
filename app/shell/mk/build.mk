@@ -69,7 +69,7 @@ all: $(CSS)
 
 .PHONY: test
 test: $(HTMLS) $(CSS) | log
-	$(CHECKLINKS_CMD) http://nginx-dev | tee log/checklinks.txt
+	$(CHECKLINKS_CMD) http://nginx-dev 2>&1 | tee log/checklinks.txt
 
 # Create necessary build directories
 build: | $(BUILD_SUBDIRS)
