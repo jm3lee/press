@@ -17,9 +17,11 @@ ENV LANG=en_US.UTF-8 \
 
 # Copy custom helper scripts into the image
 COPY ./bin/ /app/bin
-
 ENV PATH="/app/bin:${PATH}"
 
+# Copy makefiles
+COPY ./mk/ /app/mk
+
 # Add includefilter.
-COPY ./includefilter /app/shell/includefilter
-RUN pip install --break-system-packages -e /app/shell/includefilter
+COPY ./includefilter /app/includefilter
+RUN pip install --break-system-packages -e /app/includefilter
