@@ -39,6 +39,8 @@ PANDOC_OPTS_PDF := \
 # Command for minifying HTML files
 MINIFY_CMD := minify
 
+CHECKLINKS_CMD := checklinks
+
 VPATH := src
 
 # Find all Markdown files excluding specified directories
@@ -49,7 +51,7 @@ HTMLS := $(patsubst src/%.md, build/%.html, $(MARKDOWNS))
 PDFS := $(patsubst src/%.md, build/%.pdf, $(MARKDOWNS))
 
 # Sort and define build subdirectories based on HTML files
-BUILD_SUBDIRS := $(sort $(dir $(HTMLS)))
+BUILD_SUBDIRS := $(sort $(dir $(HTMLS))) /app/log
 
 CSS := $(wildcard src/*.css)
 CSS := $(patsubst src/%.css,build/%.css, $(CSS))
@@ -59,11 +61,16 @@ CSS := $(patsubst src/%.css,build/%.css, $(CSS))
 all: | build $(BUILD_SUBDIRS)
 all: $(HTMLS)
 all: $(CSS)
+all: test
 
 # Target to minify HTML and CSS files
 .minify: $(HTMLS) $(CSS)
 	cd build; minify -a -v -r -o . .
 	touch .minify
+
+.PHONY: test
+test: $(HTMLS) | /app/log
+	$(CHECKLINKS_CMD) http://nginx-dev | tee /app/log/checklinks.txt
 
 # Create necessary build directories
 build: | $(BUILD_SUBDIRS)

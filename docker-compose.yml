@@ -54,7 +54,6 @@ services:
     volumes:
       - ./app/to-webp/input:/app/input
       - ./app/to-webp/output:/app/output
-      - ./logs:/app/logs/
 
   shell:
     build: app/shell
@@ -62,11 +61,3 @@ services:
     volumes:
       - ./:/data
       - ./app/shell:/app
-
-  checklinks:
-    build: app/shell
-    entrypoint: ["checklinks"]
-    volumes:
-      - ./:/data
-      - ./app/shell/bin:/app/bin
-    network_mode: host

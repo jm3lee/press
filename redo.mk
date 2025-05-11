@@ -14,8 +14,6 @@ SERVICES := nginx-dev sync to-webp
 # Command for minifying HTML files
 MINIFY_CMD := minify
 
-CHECKLINKS_CMD := docker compose run --rm -T checklinks
-
 VPATH := src
 
 # Find all Markdown files excluding specified directories
@@ -53,8 +51,8 @@ docker: .minify test
 	#docker push registry.digitalocean.com/artisticanatomy/book:latest
 
 .PHONY: test
-test: $(HTMLS)
-	$(CHECKLINKS_CMD) http://localhost | tee log.test
+test:
+	docker compose run --rm --entrypoint make -u $(shell id -u) -T shell -f /app/mk/build.mk test
 
 # Target to bring up the development Nginx container
 .PHONY: up
