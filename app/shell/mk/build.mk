@@ -98,3 +98,6 @@ build/%.pdf: %.md | build
 .PHONY: clean
 clean:
 	-rm -rf build
+
+# Optinally include user dependencies.
+-include /app/mk/dep.mk
