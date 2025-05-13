@@ -38,7 +38,7 @@ while true; do
             stem=$(basename "$input_file" .jpg)
             stem=$(basename "$stem" .png)
             chmod a-x "$input_file"
-            convert "$input_file" -resize '50%' "/app/output/${stem}.webp"
+            convert "$input_file" "/app/output/${stem}.webp"
             rm "$input_file"
             echo "$input_file -> /app/output/${stem}.webp" >> /app/log/webp.txt
             # Separator for readability in logs or stdout
