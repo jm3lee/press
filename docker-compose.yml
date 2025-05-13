@@ -11,7 +11,7 @@ services:
   nginx-dev:
     build:
       context: .
-      dockerfile: app/Dockerfile.nginx
+      dockerfile: app/nginx/Dockerfile
     container_name: nginx-dev
     ports:
       - "80:80"
