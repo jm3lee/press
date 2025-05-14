@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+
+import sys
+import yaml
+import json
+import logging
+import glob
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("build-index")
+
+def get_url(filename):
+    if filename.startswith("src/"):
+        url = filename[4:]
+        url = "/" + url.replace(".md", ".html")
+        return url
+
+def get_frontmatter(filename):
+    with open(filename, "r", encoding="utf-8") as f:
+        lines = f.readlines()
+        if lines and lines[0].startswith("---"):
+            yaml_lines = []
+            for line in lines[1:]:
+                if line.startswith("---"):
+                    break
+                yaml_lines.append(line)
+            front_matter = yaml.safe_load("".join(yaml_lines))
+            return front_matter
+
+index = {}
+for filename in glob.glob(f"{sys.argv[1]}/**/*.md", recursive=True):
+    logger.info(f"Processing {filename}")
+    frontmatter = get_frontmatter(filename)
+    if frontmatter is None:
+        logger.warning(f"No frontmatter found in {filename}.")
+        continue
+    frontmatter['url'] = get_url(filename)
+    id_ = frontmatter.get("id")
+    if id_:
+        if id_ in index:
+            raise KeyError(f"Duplicate id found: '{id_}', {index[id_]} vs. {frontmatter}")
+        index[id_] = frontmatter
+    else:
+        logger.warning(f"Missing 'id' for {frontmatter['title']}")
+print(json.dumps(index))
