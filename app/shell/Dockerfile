@@ -9,8 +9,10 @@ RUN apt install -y --no-install-recommends python3-jinja2
 RUN rm -rf /var/lib/apt/lists/*
 
 # Add includefilter.
-COPY ./includefilter /app/includefilter
-RUN pip install --break-system-packages -e /app/includefilter
+# Don't install from /app since users can map this path to override the default
+# behavior.
+COPY ./includefilter /press/includefilter
+RUN pip install --break-system-packages -e /press/includefilter
 
 # Enable the en_US.UTF-8 locale
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen \
