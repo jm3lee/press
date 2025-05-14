@@ -51,7 +51,7 @@ HTMLS := $(patsubst src/%.md, build/%.html, $(MARKDOWNS))
 PDFS := $(patsubst src/%.md, build/%.pdf, $(MARKDOWNS))
 
 # Sort and define build subdirectories based on HTML files
-BUILD_SUBDIRS := $(sort $(dir $(HTMLS))) log
+BUILD_SUBDIRS := $(sort $(dir $(HTMLS))) log build/static
 
 CSS := $(wildcard src/*.css)
 CSS := $(patsubst src/%.css,build/%.css, $(CSS))
@@ -62,6 +62,10 @@ all: | build $(BUILD_SUBDIRS)
 all: $(HTMLS)
 all: $(CSS)
 all: build/.minify
+all: build/static/index.json
+
+build/static/index.json: $(MARKDOWNS)
+	build-index src > $@
 
 # Target to minify HTML and CSS files
 build/.minify: $(HTMLS) $(CSS)
@@ -84,7 +88,9 @@ build/%.css: %.css | build
 	cp $< $@
 
 # Include and preprocess Markdown files up to three levels deep
-build/%.md: %.md | build
+build/%.md: | build
+build/%.md: build/static/index.json
+build/%.md: %.md
 	preprocess $<
 
 # Generate HTML from processed Markdown using Pandoc

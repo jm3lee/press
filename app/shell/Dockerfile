@@ -5,6 +5,7 @@ RUN apt update -qq
 RUN apt install -y --no-install-recommends locales
 RUN apt install -y --no-install-recommends make
 RUN apt install -y --no-install-recommends minify
+RUN apt install -y --no-install-recommends python3-jinja2
 RUN rm -rf /var/lib/apt/lists/*
 
 # Add includefilter.

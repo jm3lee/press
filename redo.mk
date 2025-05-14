@@ -13,15 +13,12 @@ SERVICES := nginx-dev sync webp
 
 VPATH := src
 
-# Find all Markdown files excluding specified directories
-MARKDOWNS := $(shell find src/ -name '*.md')
-
 MAKE_CMD := docker compose run --rm --entrypoint make -u $(shell id -u) -T --build shell
 
 # Define the default target to build everything
-build/.buildinfo: $(MARKDOWNS) | build
+.PHONY: all
+all:
 	$(MAKE_CMD) -f /app/mk/build.mk
-	date > $@
 
 build:
 	mkdir -p $@

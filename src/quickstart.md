@@ -1,6 +1,8 @@
 ---
 title: Quickstart
 author: Brian Lee
+id: quickstart
+linktext: quickstart
 ---
 
 ## Start Server

@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-
-# Commands (just like in your Makefile)
-EMOJIFY_CMD=emojify
-LINK_CMD=link
+# set -x
 
 # process_file <input_markdown>
 #   - mirrors: build/%.md: %.md
@@ -24,10 +21,11 @@ process_file() {
     done
 
     # run link step
-    "$LINK_CMD" "$output"
+    render_template build/static/index.json "$output" > "$output.$$"
+    mv "$output.$$" "$output"
 
     # run emojify, write to a temp file and atomically move
-    "$EMOJIFY_CMD" < "$output" > "$output.tmp"
+    emojify < "$output" > "$output.tmp"
     mv "$output.tmp" "$output"
 }
 
