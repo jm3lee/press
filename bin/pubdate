@@ -1,0 +1,18 @@
+#!/bin/bash
+#
+# Script Name: pubdate.sh
+# Description:
+#   Prints the current publication date in a simple front-matter style:
+#   `pubdate: Mon DD YYYY`
+#
+# Usage:
+#   pubdate
+#
+# Output Example:
+#   pubdate: Apr 12 2024
+#
+
+# Print the literal "pubdate: " without a trailing newline,
+# then append the current date in the desired format.
+echo -n "pubdate: "
+date +"%b %d %Y"
