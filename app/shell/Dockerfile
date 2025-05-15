@@ -14,6 +14,8 @@ RUN rm -rf /var/lib/apt/lists/*
 COPY ./py /press/py
 RUN pip install --break-system-packages -e /press/py/includefilter
 RUN pip install --break-system-packages -e /press/py/pie
+RUN pip install --break-system-packages -r /press/py/xmera/backend/requirements.txt
+RUN pip install --break-system-packages -e /press/py/xmera/backend
 
 # Enable the en_US.UTF-8 locale
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen \

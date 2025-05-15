@@ -1,3 +1,6 @@
 [submodule "docker/press-bookcovers"]
 	path = docker/bookcovers
 	url = git@github.com:onlyartists/press-bookcovers.git
+[submodule "app/shell/py/xmera"]
+	path = app/shell/py/xmera
+	url = git@github.com:onlyartists/xmera.git
