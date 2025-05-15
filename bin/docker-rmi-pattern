@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<EOF
+Usage: $(basename "$0") PATTERN
+
+Remove all Docker images whose repository:tag matches the glob PATTERN.
+
+Example:
+  $(basename "$0") 'foo-*'
+EOF
+  exit 1
+}
+
+# Ensure a pattern was provided
+if [ $# -ne 1 ]; then
+  usage
+fi
+
+PATTERN=$1
+
+# List matching image IDs
+IMAGE_IDS=$(docker image ls --filter=reference="$PATTERN" -q)
+
+if [ -z "$IMAGE_IDS" ]; then
+  echo "No images found matching pattern '$PATTERN'."
+  exit 0
+fi
+
+echo "Removing images matching '$PATTERN':"
+docker image ls --filter=reference="$PATTERN"
+echo
+
+# Remove them
+docker image rm $IMAGE_IDS

@@ -82,3 +82,8 @@ webp:
 .PHONY: shell
 shell:
 	docker compose run --build --rm shell
+
+.PHONY: rmi
+
+rmi:
+	./bin/docker-rmi-pattern 'press-*'
