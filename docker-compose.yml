@@ -53,5 +53,7 @@ services:
   shell:
     build: app/shell
     entrypoint: ["bash"]
+    environment:
+      OPENAI_API_KEY: "${OPENAI_API_KEY}"
     volumes:
       - ./:/data
