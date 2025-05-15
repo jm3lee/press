@@ -11,8 +11,9 @@ RUN rm -rf /var/lib/apt/lists/*
 # Add includefilter.
 # Don't install from /app since users can map this path to override the default
 # behavior.
-COPY ./includefilter /press/includefilter
-RUN pip install --break-system-packages -e /press/includefilter
+COPY ./py /press/py
+RUN pip install --break-system-packages -e /press/py/includefilter
+RUN pip install --break-system-packages -e /press/py/pie
 
 # Enable the en_US.UTF-8 locale
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen \

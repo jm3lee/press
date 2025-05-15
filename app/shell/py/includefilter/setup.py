@@ -9,5 +9,5 @@ setup(
             "includefilter=includefilter:main",
         ],
     },
-    install_requires=[],
+    install_requires=["PyYAML>=6.0"],
 )

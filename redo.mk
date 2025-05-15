@@ -63,6 +63,7 @@ prune:
 
 .PHONY: setup
 setup:
+	docker compose build service-framework
 	mkdir -p app/webp/input
 	mkdir -p app/webp/output
 	docker compose build
