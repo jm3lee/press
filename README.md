@@ -24,5 +24,5 @@ The system collects it. Then it uses it to fill Jinja2 templates.
 
 Custom filters:
 
-- `linktitle`: formats link text as a title.
-- `linkcap`: capitalizes link text (for the start of a sentence).
+- `linktitle`: formats `linktext` as a title.
+- `linkcap`: capitalizes `linktext` (for the start of a sentence).
