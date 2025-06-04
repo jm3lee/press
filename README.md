@@ -26,3 +26,16 @@ Custom filters:
 
 - `linktitle`: formats `linktext` as a title.
 - `linkcap`: capitalizes `linktext` (for the start of a sentence).
+
+## Overriding Python Modules
+
+In `docker-compose.yml`, map `./app/shell/py` to `/press/py`. Python modules are
+installed using the `-e` flag so you can edit them in place without reinstalling
+Python modules.
+
+```
+shell:
+  image: press-shell
+  volumes:
+    - ./app/shell/py:/press/py
+```
