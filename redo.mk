@@ -28,11 +28,14 @@ build:
 # Uncomment the lines below to tag and push the Docker image
 # doctl auth init; remove extraneous context as necessary
 # doctl registry login
+
+ECR := registry.digitalocean.com/artisticanatomy
+
 .PHONY: docker
 docker: test
 	docker compose build nginx
-	#docker tag artistic-anatomy-nginx registry.digitalocean.com/artisticanatomy/book:latest
-	#docker push registry.digitalocean.com/artisticanatomy/book:latest
+	docker tag koreanbriancom-nginx $(ECR)/koreanbrian.com:latest
+	docker push registry.digitalocean.com/artisticanatomy/koreanbrian.com:latest
 
 .PHONY: test
 test:
