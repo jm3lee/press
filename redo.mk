@@ -29,12 +29,12 @@ build:
 # doctl auth init; remove extraneous context as necessary
 # doctl registry login
 
-ECR := registry.digitalocean.com/artisticanatomy
+CONTAINER_REGISTRY := registry.digitalocean.com/artisticanatomy
 
 .PHONY: docker
 docker: test
 	docker compose build nginx
-	docker tag koreanbriancom-nginx $(ECR)/koreanbrian.com:latest
+	docker tag koreanbriancom-nginx $(CONTAINER_REGISTRY)/koreanbrian.com:latest
 	docker push registry.digitalocean.com/artisticanatomy/koreanbrian.com:latest
 
 .PHONY: test

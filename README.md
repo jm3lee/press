@@ -1,5 +1,13 @@
 ## Quickstart
 
+1. Edit `docker-compose.yml`. Adjust `image` as necessary. *In the future,
+   provide users with templates or wizards. Need examples.*
+2. Edit `redo.mk`. Update the list of services.
+3. Edit documents under `src/`.
+4. Optionally customize `src/pandoc-template.html` for your project.
+5. Edit `docker` rule in `redo.mk` if you'd like to push docker images to a
+   container registry.
+
 ### General Setup
 
 ```
@@ -14,6 +22,10 @@ cp foo.png app/webp/input
 r webp
 ls app/webp/output
 ```
+
+## Wish List
+
+- May need a wizard
 
 ## Jinja2 Template Rendering
 
