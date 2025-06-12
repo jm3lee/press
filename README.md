@@ -51,3 +51,24 @@ shell:
   volumes:
     - ./app/shell/py:/press/py
 ```
+
+## Document Metadata
+
+Pandoc lets you define document metadata in two ways:
+
+1. **Inline**: Add a YAML block at the beginning of your Markdown file.  
+2. **Sidecar**: Place a separate `.yml` file alongside your Markdown.
+
+### Required Field
+- `name`: The display name of the document.
+
+### Auto-Generated Fields
+If you don’t provide these, Pandoc (or your build tooling) will generate them automatically:
+- `id`: A unique identifier for cross-document linking (e.g., when using Jinja templates).
+- `citation`: The default inline text used for hyperlinks to this document.
+
+### Examples
+- **Sidecar metadata**  
+  Store metadata in `index.yml` and content in `index.md`.  
+- **Inline metadata**  
+  Embed the YAML block directly at the top of `quickstart.md`.

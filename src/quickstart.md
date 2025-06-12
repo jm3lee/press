@@ -1,8 +1,8 @@
 ---
-title: Quickstart
+name: Quickstart
 author: Brian Lee
 id: quickstart
-linktext: quickstart
+citation: quickstart
 ---
 
 ## Start Server

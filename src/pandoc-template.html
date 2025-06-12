@@ -1,11 +1,20 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta charset="utf-8" />
         <title>$title$</title>
         <!-- Pandoc's metadata block: Allows you to insert any meta tags specified in the document's metadata. -->
         $for(meta)$
         <meta name="$meta.key$" content="$meta.value$" />
+        $endfor$
+
+        <!-- If you supply multiple CSS files via metadata -->
+        <!-- The main stylesheet has to be included here because mobile browsers
+            don't seem to apply the stylesheet otherwise, and fonts are too
+            small. -->
+        $for(css)$
+        <link rel="stylesheet" href="$css$" />
         $endfor$
     </head>
 
@@ -19,13 +28,17 @@
 
         <h1>$title$</h1>
 
+        <p class="pubdate">
         $if(author)$
-          $if(pubdate)$
-          <p class="pubdate">$author$, $pubdate$</p>
-          $else$
-          <p class="pubdate">$author$</p>
-          $endif$
+          $author$<br/>
         $endif$
+        $if(pubdate)$
+          $pubdate$<br/>
+        $endif$
+        $if(status)$
+          $status$
+        $endif$
+        </p>
 
         $if(preamble)$
         <p class="preamble">
@@ -49,17 +62,17 @@
         $header-includes$
         $endfor$
 
+
         <div class="footer">
             <hr/>
             <p>
             © 2025 by Brian Lee is licensed under CC BY-NC-ND 4.0.
             </p>
+            <p>
+            <small>Published using Press</small>
+            </p>
         </div>
 
-        <!-- If you supply multiple CSS files via metadata -->
-        $for(css)$
-        <link rel="stylesheet" href="$css$" />
-        $endfor$
         <!-- MATHJAX SUPPORT -->
         $if(mathjax)$
         <script async

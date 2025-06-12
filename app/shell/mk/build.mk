@@ -64,8 +64,9 @@ all: $(CSS)
 all: build/.minify
 all: build/static/index.json
 
-build/static/index.json: $(MARKDOWNS)
-	build-index src > $@
+.PRECIOUS: build/static/index.json
+build/static/index.json: $(MARKDOWNS) $(YAMLS) | build/static
+	build-index src -o $@ 2> log/build-index
 
 # Target to minify HTML and CSS files
 build/.minify: $(HTMLS) $(CSS)
@@ -114,3 +115,10 @@ clean:
 
 # Optinally include user dependencies.
 -include /app/mk/dep.mk
+
+YAMLS := $(shell find src -name "*.yml")
+
+build/picasso.mk: $(YAMLS) | build
+	picasso > $@
+
+include build/picasso.mk

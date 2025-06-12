@@ -58,7 +58,7 @@ down:
 # Clean the build directory by removing all build artifacts
 .PHONY: clean
 clean:
-	-rm -rf build
+	-rm -rf build/*
 
 .PHONY: prune
 prune:

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# set -x
+DEBUG=0
+if [ $DEBUG -eq 1 ]; then set -x; fi
 
 # process_file <input_markdown>
 #   - mirrors: build/%.md: %.md
@@ -20,9 +21,10 @@ process_file() {
         includefilter build "$input" "$output"
     done
 
-    # run link step
-    render_template build/static/index.json "$output" > "$output.$$"
+    # Render links
+    python3 -m pie.render_template build/static/index.json "$output" > "$output.$$"
     mv "$output.$$" "$output"
+    if [ $DEBUG -eq 1 ]; then cat "$output"; fi
 
     # run emojify, write to a temp file and atomically move
     emojify < "$output" > "$output.tmp"

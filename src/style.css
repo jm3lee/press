@@ -84,3 +84,9 @@ nav:not(#TOC) ul li {
     padding-bottom: 1.5rem;
     text-align: center;
 }
+
+.pubdate {
+  font-size: 0.8em;
+  color: darkgray;
+  margin-top: 0;
+}
