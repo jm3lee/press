@@ -14,6 +14,7 @@ SERVICES := nginx-dev sync webp
 VPATH := src
 
 MAKE_CMD := docker compose run --rm --entrypoint make -u $(shell id -u) -T --build shell
+DOCKER_RUN := docker compose run --build --rm -T
 
 # Define the default target to build everything
 .PHONY: all
@@ -73,19 +74,19 @@ setup:
 
 .PHONY: seed
 seed:
-	docker compose run --build --rm -T seed
+       $(DOCKER_RUN) seed
 
 .PHONY: sync
 sync:
-	docker compose run --build --rm -T sync
+       $(DOCKER_RUN) sync
 
 .PHONY: webp
 webp:
-	docker compose run --build --rm -T webp
+       $(DOCKER_RUN) webp
 
 .PHONY: shell
 shell:
-	docker compose run --build --rm shell
+       $(DOCKER_RUN) shell
 
 .PHONY: rmi
 

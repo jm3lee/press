@@ -6,6 +6,7 @@
 
 - **`SERVICES`** – Containers started by `up`/`upd` (default: `nginx-dev sync webp`).
 - **`MAKE_CMD`** – Helper command to run the lower-level makefile inside the `shell` service.
+- **`DOCKER_RUN`** – Shorthand for `docker compose run --build --rm -T` used by several targets.
 
 ## Common Targets
 
