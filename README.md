@@ -7,6 +7,7 @@
 4. Optionally customize `src/pandoc-template.html` for your project.
 5. Edit `docker` rule in `redo.mk` if you'd like to push docker images to a
    container registry.
+6. See `docs/redo-mk.md` for descriptions of the available `make` targets.
 
 ### General Setup
 
