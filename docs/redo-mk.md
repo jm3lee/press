@@ -6,7 +6,7 @@
 
 - **`SERVICES`** – Containers started by `up`/`upd` (default: `nginx-dev sync webp`).
 - **`MAKE_CMD`** – Helper command to run the lower-level makefile inside the `shell` service.
-- **`IMAGE_NAME`** – Name of the Nginx image to tag (default: `koreanbriancom-nginx`).
+- **`IMAGE_NAME`** – Name of the Nginx image to tag and push (default: `koreanbriancom-nginx`).
 - **`REGISTRY`** – Container registry used by the `docker` target (default: `registry.digitalocean.com/artisticanatomy`).
 
 ## Common Targets

@@ -38,8 +38,8 @@ REGISTRY ?= registry.digitalocean.com/artisticanatomy
 .PHONY: docker
 docker: test
        docker compose build nginx
-       docker tag $(IMAGE_NAME) $(REGISTRY)/koreanbrian.com:latest
-       docker push $(REGISTRY)/koreanbrian.com:latest
+       docker tag $(IMAGE_NAME) $(REGISTRY)/$(IMAGE_NAME):latest
+       docker push $(REGISTRY)/$(IMAGE_NAME):latest
 
 .PHONY: test
 test:
