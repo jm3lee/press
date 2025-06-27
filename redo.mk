@@ -8,7 +8,8 @@ override MAKEFLAGS += --warn-undefined-variables  \
 # Export it so sub-makes see the same flags
 export MAKEFLAGS
 
-# Default services to run
+# Containers started when running `up`/`upd`.
+# See docs/redo-mk.md for details on targets and variables.
 SERVICES := nginx-dev sync webp
 
 VPATH := src
