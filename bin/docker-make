@@ -1,5 +1,24 @@
 #!/bin/bash
-MAKE_CMD="docker compose run
---rm --entrypoint make -u $(id -u) -T --build
-shell"
-$MAKE_CMD -f /app/mk/build.mk $*
+#
+# Description:
+#   Invoke `make` inside the Docker Compose `shell` service.
+#   This mirrors running `make -f app/shell/mk/build.mk` but
+#   executes inside the container so the build environment is
+#   consistent across systems. All arguments are passed directly
+#   to the underlying `make` command.
+#
+# Usage:
+#   docker-make [MAKE_TARGETS]
+#
+# Example:
+#   docker-make all
+#
+# Run "make" in the container with the current user's UID so that
+# generated files are owned by the invoking user. The container is
+# removed after completion.
+
+MAKE_CMD="docker compose run \
+  --rm --entrypoint make -u $(id -u) -T --build \
+  shell"
+
+$MAKE_CMD -f /app/mk/build.mk "$@"
