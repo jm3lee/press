@@ -5,8 +5,9 @@
 2. Edit `redo.mk`. Update the list of services.
 3. Edit documents under `src/`.
 4. Optionally customize `src/pandoc-template.html` for your project.
-5. Edit `docker` rule in `redo.mk` if you'd like to push docker images to a
-   container registry.
+5. If you plan to push Docker images, set the `IMAGE_NAME` and `REGISTRY`
+   variables in `redo.mk` (or export them in your environment) before running
+   the `docker` target.
 6. See `docs/redo-mk.md` for descriptions of the available `make` targets.
 
 ### General Setup

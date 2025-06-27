@@ -29,13 +29,17 @@ build:
 # doctl auth init; remove extraneous context as necessary
 # doctl registry login
 
-CONTAINER_REGISTRY := registry.digitalocean.com/artisticanatomy
+# Name of the nginx image produced by docker-compose
+IMAGE_NAME ?= koreanbriancom-nginx
+
+# Container registry to push images to
+REGISTRY ?= registry.digitalocean.com/artisticanatomy
 
 .PHONY: docker
 docker: test
-	docker compose build nginx
-	docker tag koreanbriancom-nginx $(CONTAINER_REGISTRY)/koreanbrian.com:latest
-	docker push registry.digitalocean.com/artisticanatomy/koreanbrian.com:latest
+       docker compose build nginx
+       docker tag $(IMAGE_NAME) $(REGISTRY)/koreanbrian.com:latest
+       docker push $(REGISTRY)/koreanbrian.com:latest
 
 .PHONY: test
 test:
