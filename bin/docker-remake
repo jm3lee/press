@@ -1,3 +1,20 @@
 #!/bin/bash
+#
+# Description:
+#   Remove the specified build directories and then invoke
+#   `docker-make` with the same arguments. This is useful when
+#   you want to force a clean rebuild of one or more targets.
+#
+# Usage:
+#   docker-remake [TARGETS...]
+#
+# Example:
+#   docker-remake build webp
+#
+# Each argument is recursively deleted with `rm -rf` before
+# delegating to `docker-make` so the build artifacts are
+# regenerated from scratch.
+
 bin=$(dirname "$0")
-rm -rf $*; $bin/docker-make $*
+rm -rf "$@"
+$bin/docker-make "$@"
