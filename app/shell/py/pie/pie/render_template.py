@@ -74,7 +74,7 @@ def linkcap(desc):
     return f"""<a href="{url}" class="internal-link">{citation}</a>"""
 
 
-def linkinternal(desc):
+def linkicon(desc):
     """
     Capitalize the first character of each word in the string,
     preserving ALL whitespace (spaces, tabs, newlines).
@@ -187,7 +187,7 @@ def create_env():
     env.filters["linktitle"] = linktitle
     env.filters["linkcap"] = linkcap
     env.filters["link_icon_title"] = link_icon_title
-    env.filters["linkinternal"] = linkinternal
+    env.filters["linkicon"] = linkicon
     env.filters["get_desc"] = get_desc
     env.globals["get_origins"] = get_origins
     env.globals["get_insertions"] = get_insertions
