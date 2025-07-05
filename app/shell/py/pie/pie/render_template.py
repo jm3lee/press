@@ -7,7 +7,7 @@ import re
 import sys
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("render")
+logger = logging.getLogger("render_template")
 index_json = None  # See main().
 
 import yaml
