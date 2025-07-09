@@ -15,3 +15,5 @@
 ## Linking Using Jinja2
 
 {{quickstart|linktitle}}
+
+{{quickstart|link}}

@@ -6,13 +6,16 @@ import os
 import re
 import sys
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("render_template")
-index_json = None  # See main().
-
 import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
-from xmera.utils import read_json
+from xmera.utils import read_json, read_utf8
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(name)s - %(funcName)s - %(message)s",
+)
+logger = logging.getLogger("render")
+index_json = None  # See main().
 
 _whitespace_word_pattern = re.compile(r"(\S+)")
 
@@ -85,6 +88,16 @@ def linkicon(desc):
     if icon:
         return f"""<a href="{url}" class="internal-link">{icon} {citation}</a>"""
     return f"""<a href="{url}" class="internal-link">{citation}</a>"""
+
+
+def link(desc):
+    """
+    Capitalize the first character of each word in the string,
+    preserving ALL whitespace (spaces, tabs, newlines).
+    """
+    citation = desc["citation"]
+    url = desc["url"]
+    return f"""<a href="{url}">{citation}</a>"""
 
 
 def extract_front_matter(file_path: str) -> dict | None:
@@ -184,6 +197,7 @@ def to_alpha_index(i):
 
 def create_env():
     env = Environment(loader=FileSystemLoader("/data"), undefined=StrictUndefined)
+    env.filters["link"] = link
     env.filters["linktitle"] = linktitle
     env.filters["linkcap"] = linkcap
     env.filters["link_icon_title"] = link_icon_title
