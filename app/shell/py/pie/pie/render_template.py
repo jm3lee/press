@@ -150,49 +150,15 @@ def process_directory(root_dir: str) -> None:
                 )
 
 
-def get_origins(name):
-    env = create_env()
-    j = index_json[name]
-    for i in j["origins"]:
-        if i in index_json:
-            yield index_json[i]
-        else:
-            yield i
-
-
-def get_insertions(name):
-    j = index_json[name]
-    for i in j["insertions"]:
-        if i in index_json:
-            yield index_json[i]
-        else:
-            yield i
-
-
-def get_actions(name):
-    j = index_json[name]
-    yield from j["actions"]
-
-
-def get_desc(name):
-    d = index_json.get(name)
-    if d:
-        return d
-    return name
-
-
-def load_mc(filename):
-    j = read_json(filename)
-    return j
-
-
 def render_jinja(snippet):
     env = create_env()
     return env.from_string(snippet).render(**index_json)
 
 
-def to_alpha_index(i):
-    return ("a", "b", "c", "d")[i]
+def read_yaml(filename):
+    y = yaml.safe_load(read_utf8(filename))
+    logging.info(y["toc"])
+    yield from y["toc"]
 
 
 def create_env():
@@ -202,13 +168,9 @@ def create_env():
     env.filters["linkcap"] = linkcap
     env.filters["link_icon_title"] = link_icon_title
     env.filters["linkicon"] = linkicon
-    env.filters["get_desc"] = get_desc
-    env.globals["get_origins"] = get_origins
-    env.globals["get_insertions"] = get_insertions
-    env.globals["get_actions"] = get_actions
-    env.globals["load_mc"] = load_mc
     env.globals["render_jinja"] = render_jinja
-    env.globals["to_alpha_index"] = to_alpha_index
+    env.globals["read_json"] = read_json
+    env.globals["read_yaml"] = read_yaml
     return env
 
 
