@@ -12,19 +12,20 @@ FROM pandoc/extra:latest-ubuntu
 # -------------------------------------------------------------------
 # System preparation
 # -------------------------------------------------------------------
-
-# Update package index quietly to fetch latest package lists
-RUN apt update -qq
-
-# Install locales package first (changes less often than other tools,
-# so placing it early saves rebuild time when other layers change).
-RUN apt install -y --no-install-recommends locales
+# Update package index and install required packages
+RUN apt update -qq \
+ && apt install -y --no-install-recommends \
+        locales \
+        make \
+        minify \
+        python3-jinja2 \
+        linkchecker \
+ && rm -rf /var/lib/apt/lists/*
 
 # -------------------------------------------------------------------
 # Locale configuration
 # -------------------------------------------------------------------
-
-# Enable en_US.UTF-8 locale for consistent UTF-8 support
+# Generate en_US locale for consistent UTF-8 support
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen \
  && locale-gen
 
@@ -34,50 +35,23 @@ ENV LANG=en_US.UTF-8 \
     LC_ALL=en_US.UTF-8
 
 # -------------------------------------------------------------------
-# Install build and utility tools
-# -------------------------------------------------------------------
-
-# Install GNU Make for build automation
-RUN apt install -y --no-install-recommends make
-
-# Install HTML/CSS/JS minifier
-RUN apt install -y --no-install-recommends minify
-
-# Install Jinja2 for Python templating
-RUN apt install -y --no-install-recommends python3-jinja2
-
-# Install linkchecker to validate links in generated sites
-RUN apt install -y --no-install-recommends linkchecker
-
-# Clean up apt cache to reduce image size
-RUN rm -rf /var/lib/apt/lists/*
-
-# -------------------------------------------------------------------
 # Python filters and backends
 # -------------------------------------------------------------------
-
-# Copy Press Python libraries into the image. Users can override by mounting /press/py.
+# Copy Press Python libraries into the image. Users can override by mounting /press/py
 COPY ./py /press/py
-
-# Install includefilter plugin in editable mode
-RUN pip install --break-system-packages -e /press/py/includefilter
-
-# Install pie plugin in editable mode
-RUN pip install --break-system-packages -e /press/py/pie
-
-# Install Xmera backend dependencies
-RUN pip install --break-system-packages -r /press/py/xmera/backend/requirements.txt
-
-# Install Xmera backend plugin in editable mode
-RUN pip install --break-system-packages -e /press/py/xmera/backend
+# Install all Press plugins in one step
+RUN pip install --break-system-packages \
+        -e /press/py/includefilter \
+        -e /press/py/pie \
+        -r /press/py/xmera/backend/requirements.txt \
+        -e /press/py/xmera/backend
 
 # -------------------------------------------------------------------
 # Custom helper scripts and makefiles
 # -------------------------------------------------------------------
-
-# Copy custom shell scripts into /app/bin and ensure they're in PATH
+# Add helper scripts to PATH
 COPY ./bin/ /app/bin
 ENV PATH="/app/bin:${PATH}"
 
-# Copy custom Makefile fragments into /app/mk
+# Copy additional Makefile fragments
 COPY ./mk/ /app/mk
