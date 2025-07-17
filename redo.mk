@@ -99,3 +99,7 @@ rmi: ## Remove Docker images matching press-*
 help: ## List available tasks
 	@grep -E '^[a-zA-Z0-9_-]+:.*##' $(MAKEFILE_LIST) | \
 	awk -F ':.*##' '{printf "%-10s %s\n", $$1, $$2}'
+
+.PHONY: buildx
+buildx: ## Run Docker buildx
+	docker buildx build app/shell/
