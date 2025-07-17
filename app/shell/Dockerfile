@@ -55,4 +55,3 @@ ENV PATH="/app/bin:${PATH}"
 
 # Copy additional Makefile fragments
 COPY ./mk/ /app/mk
-
