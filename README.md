@@ -110,3 +110,4 @@ If you don’t provide these, Pandoc (or your build tooling) will generate them 
 - [Jinja Globals](docs/jinja-globals.md)
 - [Build Index](docs/build-index.md)
 - [Quiz Workflow](docs/quiz-workflow.md)
+- [include-filter](docs/include-filter.md)
