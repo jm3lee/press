@@ -15,4 +15,11 @@ setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
+    entry_points={
+        'console_scripts': [
+            'build-index=pie.build_index:main',
+            'link=pie.link:main',
+            'picasso=pie.picasso:main',
+        ],
+    },
 )
