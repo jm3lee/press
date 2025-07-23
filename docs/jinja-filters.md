@@ -25,7 +25,7 @@ toc:
   - "{{deltoid_tuberosity|linktitle}}"
 ```
 
-The filter implementation lives in `app/shell/bin/render_template` and uses a regular expression to extract the link text and URL:
+The filter implementation lives in `pie.render_template` and is available via the `render-template` command. It uses a regular expression to extract the link text and URL:
 
 ```python
 match = _LINK_PATTERN.match(value)

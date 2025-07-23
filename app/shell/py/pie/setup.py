@@ -20,6 +20,8 @@ setup(
             'build-index=pie.build_index:main',
             'link=pie.link:main',
             'picasso=pie.picasso:main',
+            'render-template=pie.render_template:main',
+            'render-study-json=pie.render_study_json:main',
         ],
     },
 )
