@@ -34,6 +34,8 @@ def linktitle(desc):
 
     def cap_match(m):
         word = m.group(1)
+        if word in ("of",):
+            return word
         return word[0].upper() + word[1:]
 
     citation = _whitespace_word_pattern.sub(cap_match, citation)
@@ -150,9 +152,53 @@ def process_directory(root_dir: str) -> None:
                 )
 
 
+def get_origins(name):
+    j = index_json[name]
+    for i in j["origins"]:
+        if i in index_json:
+            yield index_json[i]
+        else:
+            yield i
+
+
+def get_insertions(name):
+    j = index_json[name]
+    for i in j["insertions"]:
+        if i in index_json:
+            yield index_json[i]
+        else:
+            yield i
+
+
+def get_actions(name):
+    j = index_json[name]
+    yield from j["actions"]
+
+
+def get_translations(name):
+    j = index_json[name]
+    yield from j["translations"].items()
+
+
+def get_desc(name):
+    d = index_json.get(name)
+    if d:
+        return d
+    return name
+
+
+def load_mc(filename):
+    j = read_json(filename)
+    return j
+
+
 def render_jinja(snippet):
-    env = create_env()
+    logger.info(snippet)
     return env.from_string(snippet).render(**index_json)
+
+
+def to_alpha_index(i):
+    return ("a", "b", "c", "d")[i]
 
 
 def read_yaml(filename):
@@ -168,16 +214,25 @@ def create_env():
     env.filters["linkcap"] = linkcap
     env.filters["link_icon_title"] = link_icon_title
     env.filters["linkicon"] = linkicon
+    env.filters["get_desc"] = get_desc
+    env.globals["get_origins"] = get_origins
+    env.globals["get_insertions"] = get_insertions
+    env.globals["get_actions"] = get_actions
+    env.globals["get_translations"] = get_translations
+    env.globals["load_mc"] = load_mc
     env.globals["render_jinja"] = render_jinja
+    env.globals["to_alpha_index"] = to_alpha_index
     env.globals["read_json"] = read_json
     env.globals["read_yaml"] = read_yaml
     return env
 
 
+env = create_env()
+
+
 def main():
     global index_json
     index_json = read_json(sys.argv[1])
-    env = create_env()
     template = env.get_template(sys.argv[2])
     print(template.render(**index_json))
 
