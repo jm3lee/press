@@ -187,11 +187,6 @@ def get_desc(name):
     return name
 
 
-def load_mc(filename):
-    j = read_json(filename)
-    return j
-
-
 def render_jinja(snippet):
     logger.info(snippet)
     return env.from_string(snippet).render(**index_json)
@@ -219,7 +214,6 @@ def create_env():
     env.globals["get_insertions"] = get_insertions
     env.globals["get_actions"] = get_actions
     env.globals["get_translations"] = get_translations
-    env.globals["load_mc"] = load_mc
     env.globals["render_jinja"] = render_jinja
     env.globals["to_alpha_index"] = to_alpha_index
     env.globals["read_json"] = read_json
