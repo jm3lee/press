@@ -5,6 +5,17 @@ or PDF, converting images to WebP, and customizing Jinja templates. It's meant
 for building documentation or other small websites that can be served from a
 containerized Nginx instance.
 
+### Makefiles
+
+The build relies on three cooperating Makefiles:
+
+- **`redo.mk`** – run from the host to launch Docker containers and kick off
+  builds.
+- **`app/shell/mk/build.mk`** – executed by `make` inside the shell container to
+  generate the site.
+- **`app/shell/mk/dep.mk`** – optional, included by `build.mk` for project
+  specific dependencies.
+
 ## Quickstart
 
 1. Edit `docker-compose.yml`. Adjust `image` as necessary. **TODO: Examples**
