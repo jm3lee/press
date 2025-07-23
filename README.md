@@ -103,3 +103,10 @@ If you don’t provide these, Pandoc (or your build tooling) will generate them 
   Store metadata in `index.yml` and content in `index.md`.  
 - **Inline metadata**  
   Embed the YAML block directly at the top of `quickstart.md`.
+
+## Further Reading
+
+- [Jinja Filters](docs/jinja-filters.md)
+- [Jinja Globals](docs/jinja-globals.md)
+- [Build Index](docs/build-index.md)
+- [Quiz Workflow](docs/quiz-workflow.md)
