@@ -7,10 +7,10 @@
  * into it, passing along any `data-name` attribute as a prop.
  */
 
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import Quiz from './Quiz'
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import './index.css';
+import Quiz from './Quiz';
 
 /**
  * Bootstraps and renders the SearchIndex component into the DOM.
@@ -23,17 +23,17 @@ import Quiz from './Quiz'
  * @returns {void}
  */
 function initializeSearchIndex() {
-  const mount = document.getElementById('quiz-root')
+  const mount = document.getElementById('quiz-root');
   if (!mount) {
-    return
+    return;
   }
 
-  const root = createRoot(mount)
+  const root = createRoot(mount);
   root.render(
     <StrictMode>
       <Quiz src={mount.getAttribute('data-src')} />
     </StrictMode>
-  )
+  );
 }
 
-window.addEventListener('DOMContentLoaded', initializeSearchIndex)
+window.addEventListener('DOMContentLoaded', initializeSearchIndex);
