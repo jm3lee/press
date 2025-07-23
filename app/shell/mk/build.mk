@@ -98,12 +98,12 @@ build/%.html: build/%.md $(PANDOC_TEMPLATE) | build
 
 # Generate PDF from processed Markdown using Pandoc
 build/%.pdf: %.md | build
-        include-filter build $< build/$*.1.md
-        include-filter build build/$*.1.md build/$*.2.md
-        include-filter build build/$*.2.md build/$*.3.md
-        $(PANDOC_CMD) \
-                $(PANDOC_OPTS_PDF) \
-                -o $@ \
+	include-filter build $< build/$*.1.md
+	include-filter build build/$*.1.md build/$*.2.md
+	include-filter build build/$*.2.md build/$*.3.md
+	$(PANDOC_CMD) \
+		$(PANDOC_OPTS_PDF) \
+		-o $@ \
 		build/$*.3.md
 
 # Clean the build directory by removing all build artifacts

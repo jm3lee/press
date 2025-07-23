@@ -42,6 +42,7 @@ COPY ./py /press/py
 # Install all Press plugins in one step
 RUN pip install --break-system-packages \
         -e /press/py/pie \
+        -r /press/py/pie/requirements.txt \
         -r /press/py/xmera/backend/requirements.txt \
         -e /press/py/xmera/backend
 
