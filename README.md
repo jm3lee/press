@@ -123,5 +123,6 @@ If you don’t provide these, Pandoc (or your build tooling) will generate them 
 - [Quiz Workflow](docs/quiz-workflow.md)
 - [include-filter](docs/include-filter.md)
 - [preprocess](docs/preprocess.md)
+- [picasso](docs/picasso.md)
 - [Nginx Dockerfile](docs/nginx.md)
 - [docker-make](docs/docker-make.md)
