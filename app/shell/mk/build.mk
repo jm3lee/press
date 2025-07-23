@@ -89,9 +89,7 @@ build/%.css: %.css | build
 	cp $< $@
 
 # Include and preprocess Markdown files up to three levels deep
-build/%.md: | build
-build/%.md: build/static/index.json
-build/%.md: %.md
+build/%.md: %.md build/static/index.json | build
 	preprocess $<
 
 # Generate HTML from processed Markdown using Pandoc
