@@ -14,7 +14,7 @@ def test_get_url_from_src_md(tmp_path):
     try:
         assert build_index.get_url("src/foo.md") == "/foo.html"
     finally:
-        os.chdir("/workspace/press")
+        os.chdir("/tmp")
 
 
 def test_get_url_invalid_raises(tmp_path):
@@ -25,7 +25,7 @@ def test_get_url_invalid_raises(tmp_path):
         with pytest.raises(Exception):
             build_index.get_url("foo.md")
     finally:
-        os.chdir("/workspace/press")
+        os.chdir("/tmp")
 
 
 def test_process_markdown_parses_frontmatter(tmp_path):
@@ -36,7 +36,7 @@ def test_process_markdown_parses_frontmatter(tmp_path):
     try:
         data = build_index.process_markdown("src/doc.md")
     finally:
-        os.chdir("/workspace/press")
+        os.chdir("/tmp")
     assert data == {"title": "T", "url": "/doc.html"}
 
 
@@ -48,7 +48,7 @@ def test_process_yaml_generates_fields(tmp_path):
     try:
         data = build_index.process_yaml("src/item.yml")
     finally:
-        os.chdir("/workspace/press")
+        os.chdir("/tmp")
     assert data["name"] == "Foo"
     assert data["url"] == "/item.html"
     assert data["citation"] == "foo"
