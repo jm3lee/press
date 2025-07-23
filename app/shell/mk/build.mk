@@ -1,17 +1,21 @@
 # Makefile for building and managing Press
+# This file executes inside the shell container. See docs/redo-mk.md
+# for how to run these targets from the host.
 
 # Override MAKEFLAGS (so your settings can’t be clobbered by the environment)
+# docker-make passes these flags to the container; see docs/docker-make.md
 override MAKEFLAGS += --warn-undefined-variables  \
                       --no-builtin-rules        \
                       -j16                      \
 
 # Export it so sub-makes see the same flags
+# docker-make handles running this file inside Docker; see docs/docker-make.md
 export MAKEFLAGS
 
-# Define the Pandoc command using Docker Compose
-# 	-T: Don't allocate pseudo-tty. Makes parallel builds work.
+# Define the Pandoc command used inside the container
+#       -T: Don't allocate pseudo-tty. Makes parallel builds work.
+# For container setup details, see docs/docker-make.md.
 PANDOC_CMD := pandoc
-
 PANDOC_TEMPLATE := src/pandoc-template.html
 
 # Options for generating HTML output with Pandoc
@@ -65,6 +69,7 @@ all: build/.minify
 all: build/static/index.json
 
 .PRECIOUS: build/static/index.json
+# See docs/build-index.md for how the index is generated.
 build/static/index.json: $(MARKDOWNS) $(YAMLS) | build/static
 	build-index src -o $@ 2> log/build-index
 
@@ -74,6 +79,7 @@ build/.minify: $(HTMLS) $(CSS)
 	@touch $@
 
 .PHONY: test
+# Triggered by the test target in redo.mk; see docs/redo-mk.md.
 test: $(HTMLS) $(CSS) | log
 	$(CHECKLINKS_CMD) http://nginx-dev 2>&1 | tee log/checklinks.txt
 
@@ -89,6 +95,7 @@ build/%.css: %.css | build
 	cp $< $@
 
 # Include and preprocess Markdown files up to three levels deep
+# See docs/preprocess.md for preprocessing details
 build/%.md: %.md build/static/index.json | build
 	preprocess $<
 
@@ -97,6 +104,7 @@ build/%.html: build/%.md $(PANDOC_TEMPLATE) | build
 	$(PANDOC_CMD) $(PANDOC_OPTS) -o $@ $<
 
 # Generate PDF from processed Markdown using Pandoc
+# include-filter usage is documented in docs/include-filter.md
 build/%.pdf: %.md | build
 	include-filter build $< build/$*.1.md
 	include-filter build build/$*.1.md build/$*.2.md
@@ -111,7 +119,7 @@ build/%.pdf: %.md | build
 clean:
 	-rm -rf build
 
-# Optinally include user dependencies.
+# Optionally include user dependencies; see docs/redo-mk.md.
 -include /app/mk/dep.mk
 
 YAMLS := $(shell find src -name "*.yml")
