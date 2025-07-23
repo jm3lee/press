@@ -18,7 +18,7 @@
 # removed after completion.
 
 MAKE_CMD="docker compose run \
-  --rm --entrypoint make -u $(id -u) -T --build \
+  --rm --entrypoint make -u $(id -u) \
   shell"
 
 $MAKE_CMD -f /app/mk/build.mk "$@"
