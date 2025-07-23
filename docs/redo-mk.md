@@ -1,6 +1,16 @@
 # redo.mk Overview
 
-`redo.mk` defines high-level developer tasks for this project. Most targets wrap `docker compose` commands so that the build environment is consistent. The file is meant to be invoked with `make -f redo.mk` (often aliased to `r`).
+`redo.mk` defines high-level developer tasks for this project. Most targets wrap
+`docker compose` commands so that the build environment is consistent. The file
+is meant to be invoked with `make -f redo.mk` (often aliased to `r`).
+
+This repository actually uses three Makefiles that work together:
+
+- **`redo.mk`** – run from the host to start Docker containers and delegate
+  commands.
+- **`build.mk`** – copied into the shell container as `/app/mk/build.mk` and
+  executed by `make` inside that container to build the site.
+- **`dep.mk`** – optional file included by `build.mk` for custom dependencies.
 
 ## Variables
 
