@@ -1,0 +1,24 @@
+{% macro render_mc(filename) %}
+```{=html}
+<ol>
+    {% for mc in load_mc(filename) %}
+        <li>
+            <p class="question">{{render_jinja(mc["q"])}}</p>
+            <ol type="a">
+            {% for c in mc["c"] %}
+                <li>{{render_jinja(c)}}</li>
+            {% endfor %}
+            </ol>
+            <details class="answer">
+                <summary>Answer</summary>
+                <p>
+                {{to_alpha_index(mc["a"][0])}}. {{render_jinja(mc["c"][mc["a"][0]])}}
+                <hr/>
+                {{render_jinja(mc["a"][1])}}
+                </p>
+            </details>
+        </li>
+    {% endfor %}
+</ol>
+```
+{% endmacro %}
