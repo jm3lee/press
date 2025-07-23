@@ -10,7 +10,6 @@ small utilities used during rendering.
 - `get_insertions(name)` – yield insertion strings for the key.
 - `get_actions(name)` – yield action descriptions.
 - `get_translations(name)` – iterate over translation pairs.
-- `load_mc(path)` – load a multiple-choice JSON file and return the parsed object.
 - `render_jinja(snippet)` – render a snippet of text using the same environment.
 - `to_alpha_index(i)` – convert `0`–`3` to `a`–`d`.
 - `read_json(path)` – read and parse a JSON file.
