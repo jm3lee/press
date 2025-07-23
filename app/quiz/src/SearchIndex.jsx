@@ -9,17 +9,21 @@ import {
 } from '@mui/material';
 
 /**
- * SearchIndex component renders a search input and a list of entries
- * fetched from `/static/index.json`. Uses Material-UI components for styling.
+ * @fileoverview Search component for browsing static index data.
+ */
+
+/**
+ * Render a searchable list of content entries.
  *
- * @component
+ * @param {{name: string}} props
  * @returns {JSX.Element}
  */
-export default function SearchIndex({name}) {
+export default function SearchIndex({ name }) {
   const [entries, setEntries] = useState([]);
   const [query, setQuery] = useState('');
   const [filtered, setFiltered] = useState([]);
 
+  // Load the index file and transform it into a sorted array of entries.
   useEffect(() => {
     fetch(`/static/${name}`)
       .then((response) => response.json())
@@ -34,9 +38,10 @@ export default function SearchIndex({name}) {
         setEntries(list);
         setFiltered(list);
       })
-      .catch(console.error);
+      .catch(console.error)
   }, [name]);
 
+  // Update the displayed list based on the search query.
   useEffect(() => {
     const q = query.toLowerCase();
     setFiltered(
@@ -46,6 +51,11 @@ export default function SearchIndex({name}) {
     );
   }, [query, entries]);
 
+  /**
+   * Navigate to the given URL.
+   *
+   * @param {string} url - Destination location.
+   */
   const go = (url) => {
     window.location.href = url;
   };

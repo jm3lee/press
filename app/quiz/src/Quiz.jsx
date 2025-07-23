@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from 'react';
 
 /**
+ * @fileoverview Interactive multiple-choice quiz component.
+ *
+ * The quiz loads questions from a JSON file, tracks a user's selections,
+ * and displays a final score once submitted.  Styling is handled via the
+ * accompanying `index.css` file.
+ */
+
+/**
  * Quiz component that fetches questions from a JSON source, allows users to select answers,
  * submit them, and then displays the score along with each question's correct/incorrect styling
  * and explanations.
@@ -17,6 +25,7 @@ const Quiz = ({ src = "/study/key_terms.json" }) => {
   const [showAnswers, setShowAnswers] = useState(false);
   const [score, setScore] = useState(null);
 
+  // Fetch quiz questions whenever the `src` prop changes.
   useEffect(() => {
     fetch(src)
       .then((res) => res.json())
@@ -25,10 +34,12 @@ const Quiz = ({ src = "/study/key_terms.json" }) => {
   }, [src]);
 
   /**
-   * Handle a user selecting a choice.
+   * Record the choice a user selects for a given question.
    *
-   * @param {number} qIndex - Index of the question
-   * @param {number} cIndex - Index of the choice
+   * Selections are ignored after the quiz has been submitted.
+   *
+   * @param {number} qIndex - Index of the question.
+   * @param {number} cIndex - Index of the choice.
    */
   const handleSelect = (qIndex, cIndex) => {
     if (showAnswers) return;
@@ -36,7 +47,7 @@ const Quiz = ({ src = "/study/key_terms.json" }) => {
   };
 
   /**
-   * Calculate the user's score and reveal correct answers.
+   * Tally the user's answers and reveal the results.
    */
   const handleSubmit = () => {
     const newScore = questions.reduce((acc, q, qIndex) => {
