@@ -5,7 +5,7 @@ if [ $DEBUG -eq 1 ]; then set -x; fi
 
 # process_file <input_markdown>
 #   - mirrors: build/%.md: %.md
-#   - runs includefilter 3× (3 levels of include expansion)
+#   - runs include-filter 3× (3 levels of include expansion)
 #   - then runs link, then emojify
 process_file() {
     local input="$1"
@@ -18,7 +18,7 @@ process_file() {
 
     # Include and process Markdown files up to three levels deep
     for _ in 1 2 3; do
-        includefilter build "$input" "$output"
+        include-filter build "$input" "$output"
     done
 
     # Render links
