@@ -42,17 +42,24 @@ build/study/%.json: study/%.json | build/static/index.json
         python3 -m pie.render_study_json build/static/index.json $< > $@
 ```
 
-`render_study_json.py` loads the global index data and renders the Jinja expressions found in the quiz file:
+`render_study_json.py` now provides a small CLI. It expands the quiz file using
+variables from the index and optionally writes the output to a file:
 
 ```python
-index_json = read_json(sys.argv[1])
-study_json = read_json(sys.argv[2])
-for mc in study_json:
-    q = env.from_string(mc["q"]).render(**index_json)
-    c = [env.from_string(c).render(**index_json) for c in mc["c"]]
-    a = [mc["a"][0], env.from_string(mc["a"][1]).render(**index_json)]
-    result.append({"q": q, "c": c, "a": a})
-print(json.dumps(result))
+parser = argparse.ArgumentParser()
+parser.add_argument("index")
+parser.add_argument("study")
+parser.add_argument("-o", "--output")
+args = parser.parse_args()
+
+index_json = read_json(args.index)
+study_json = read_json(args.study)
+rendered = render_study(index_json, study_json)
+output = json.dumps(rendered)
+if args.output:
+    Path(args.output).write_text(output, encoding="utf-8")
+else:
+    print(output)
 ```
 
 The rendered JSON is written to `build/study/*.json` and served directly by the site.
