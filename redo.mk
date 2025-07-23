@@ -43,7 +43,6 @@ docker: test ## Build and push the Nginx image after running test
 
 .PHONY: test
 test: ## Restart nginx-dev and run tests
-	docker compose restart nginx-dev
 	$(MAKE_CMD) -f /app/mk/build.mk test
 
 # Target to bring up the development Nginx container
@@ -89,7 +88,7 @@ webp: ## Convert images to webp format
 
 .PHONY: shell
 shell: ## Open an interactive shell container
-	docker compose run --build --rm shell
+	docker compose run --rm shell
 
 .PHONY: rmi
 rmi: ## Remove Docker images matching press-*
@@ -103,3 +102,8 @@ help: ## List available tasks
 .PHONY: buildx
 buildx: ## Run Docker buildx
 	docker buildx build app/shell/
+
+
+.PHONY: pytest
+pytest:
+	docker compose run --entrypoint pytest --rm shell /press/py/pie/tests
