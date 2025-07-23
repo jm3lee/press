@@ -65,7 +65,6 @@ CSS := $(patsubst src/%.css,build/%.css, $(CSS))
 all: | build $(BUILD_SUBDIRS)
 all: $(HTMLS)
 all: $(CSS)
-all: build/.minify
 all: build/static/index.json
 
 .PRECIOUS: build/static/index.json
@@ -80,7 +79,7 @@ build/.minify: $(HTMLS) $(CSS)
 
 .PHONY: test
 # Triggered by the test target in redo.mk; see docs/redo-mk.md.
-test: $(HTMLS) $(CSS) | log
+test: $(HTMLS) $(CSS) build/.minify | log
 	$(CHECKLINKS_CMD) http://nginx-dev 2>&1 | tee log/checklinks.txt
 
 # Create necessary build directories
