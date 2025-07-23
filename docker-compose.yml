@@ -57,3 +57,4 @@ services:
       OPENAI_API_KEY: "${OPENAI_API_KEY}"
     volumes:
       - ./:/data
+      - ./dep.mk:/app/mk/dep.mk

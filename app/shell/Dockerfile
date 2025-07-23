@@ -19,8 +19,16 @@ RUN apt update -qq \
         make \
         minify \
         python3-jinja2 \
-        linkchecker \
- && rm -rf /var/lib/apt/lists/*
+        linkchecker
+
+# Install curl to install nodejs
+RUN apt install -y --no-install-recommends curl
+
+# Install Node.js and npm
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+ && apt install -y --no-install-recommends nodejs
+
+RUN rm -rf /var/lib/apt/lists/*
 
 # -------------------------------------------------------------------
 # Locale configuration

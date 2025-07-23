@@ -9,7 +9,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         // no hashes—always `bundle.js`
-        entryFileNames: 'bundle.js',
+        entryFileNames: 'quiz.js',
         chunkFileNames: 'chunk-[name].js',
         assetFileNames: '[name].[ext]'
       }
