@@ -32,17 +32,17 @@ Example from `src/study/key_terms.json`:
 
 ## 2. Rendering JSON
 
-During the build, these source files are processed with `pie.render_study_json`. The rule in `dep.mk` declares:
+During the build, these source files are processed with the `render-study-json` CLI. The rule in `dep.mk` declares:
 
 ```make
 BUILD_SUBDIRS += build/study
 STUDY_JSONS := $(patsubst src/%,build/%,$(wildcard src/study/*.json))
 prebuild: $(STUDY_JSONS)
 build/study/%.json: study/%.json | build/static/index.json
-        python3 -m pie.render_study_json build/static/index.json $< > $@
+        render-study-json build/static/index.json $< > $@
 ```
 
-`render_study_json.py` now provides a small CLI. It expands the quiz file using
+The `render-study-json` command expands the quiz file using
 variables from the index and optionally writes the output to a file:
 
 ```python
@@ -143,7 +143,7 @@ Both the site CSS (`src/style.css`) and the React bundle’s stylesheet (`search
 ## Summary
 
 1. Quizzes are defined as JSON under `src/study/`.
-2. `render_study_json` expands Jinja expressions and outputs `build/study/*.json`.
+2. `render-study-json` expands Jinja expressions and outputs `build/study/*.json`.
 3. Static pages use the `render_mc` Jinja macro to embed quizzes directly in Markdown.
 4. The React `Quiz` component fetches the built JSON for an interactive version and is included via `bundle.js`.
 
