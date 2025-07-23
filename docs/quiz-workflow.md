@@ -4,13 +4,13 @@ This document explains how multiple-choice quizzes are stored in the repository,
 
 ## 1. Source JSON
 
-Each quiz lives under `src/study/` as a JSON array. Every element has three fields:
+Each quiz lives under `src/quiz/` as a JSON array. Every element has three fields:
 
 - `q` – the question text (can contain Jinja templates for links or icons).
 - `c` – a list of answer choices, also Jinja-capable.
 - `a` – a two-element array `[correct_index, explanation]`.
 
-Example from `src/study/key_terms.json`:
+Example from `src/quiz/demo.json`:
 
 ```json
 [
@@ -32,41 +32,29 @@ Example from `src/study/key_terms.json`:
 
 ## 2. Rendering JSON
 
-During the build, these source files are processed with the `render-study-json` CLI. The rule in `dep.mk` declares:
+During the build the React quiz interface is compiled with Vite.  The
+`app/quiz/dep.mk` makefile also copies the JSON files so they are
+served from `/quiz/`:
 
 ```make
-BUILD_SUBDIRS += build/study
-STUDY_JSONS := $(patsubst src/%,build/%,$(wildcard src/study/*.json))
-prebuild: $(STUDY_JSONS)
-build/study/%.json: study/%.json | build/static/index.json
-        render-study-json build/static/index.json $< > $@
+all: build/quiz/quiz.js build/quiz/demo.json
+
+build/quiz/quiz.js: app/build/static/js/quiz.js | build/quiz
+cp $< $@
+
+app/build/static/js/quiz.js: $(wildcard app/quiz/src/*) app/quiz/.init
+cd app/quiz; npm run build
+
+build/quiz/demo.json: src/quiz/demo.json
+mkdir -p $(dir $@)
+cp $< $@
 ```
 
-The `render-study-json` command expands the quiz file using
-variables from the index and optionally writes the output to a file:
-
-```python
-parser = argparse.ArgumentParser()
-parser.add_argument("index")
-parser.add_argument("study")
-parser.add_argument("-o", "--output")
-args = parser.parse_args()
-
-index_json = read_json(args.index)
-study_json = read_json(args.study)
-rendered = render_study(index_json, study_json)
-output = json.dumps(rendered)
-if args.output:
-    Path(args.output).write_text(output, encoding="utf-8")
-else:
-    print(output)
-```
-
-The rendered JSON is written to `build/study/*.json` and served directly by the site.
+The resulting assets live under `build/quiz/` and are served directly by the site.
 
 ## 3. Interactive Quiz Component
 
-For dynamic quizzes, the React component `search-ui/src/Quiz.jsx` fetches a JSON file and handles user interaction:
+For dynamic quizzes, the React component `app/quiz/src/Quiz.jsx` fetches a JSON file and handles user interaction:
 
 ```jsx
 const Quiz = ({ src = "/study/key_terms.json" }) => {
@@ -85,24 +73,24 @@ const Quiz = ({ src = "/study/key_terms.json" }) => {
 }
 ```
 
-It renders each question, lets the user pick choices, and displays the score when submitted. The component is bundled by Vite into `build/static/js/bundle.js`.
+It renders each question, lets the user pick choices, and displays the score when submitted. The component is bundled by Vite into `build/quiz/quiz.js`.
 
 A page can embed the quiz with:
 
 ```html
-<div id="quiz-root" data-src="/study/deltoid.json"></div>
-<script type="module" src="/static/js/bundle.js" defer></script>
+<div id="quiz-root" data-src="/quiz/demo.json"></div>
+<script type="module" src="/quiz/quiz.js" defer></script>
 ```
 
 `main.jsx` mounts the `Quiz` component onto `#quiz-root` using the `data-src` attribute to locate the JSON file.
 
 ## 4. Styling
 
-Both the site CSS (`src/style.css`) and the React bundle’s stylesheet (`search-ui/src/index.css`) define classes like `.quiz-container`, `.question`, `.choice`, and `.answer` to style quizzes consistently.
+Both the site CSS (`src/style.css`) and the React bundle’s stylesheet (`app/quiz/src/index.css`) define classes like `.quiz-container`, `.question`, `.choice`, and `.answer` to style quizzes consistently.
 
 ## Summary
 
-1. Quizzes are defined as JSON under `src/study/`.
-2. `render-study-json` expands Jinja expressions and outputs `build/study/*.json`.
-3. The React `Quiz` component fetches the built JSON for an interactive version and is included via `bundle.js`.
+1. Quizzes are defined as JSON under `src/quiz/`.
+2. `app/quiz/dep.mk` compiles the React app and copies quizzes to `build/quiz/`.
+3. The React `Quiz` component fetches the built JSON for an interactive version and is included via `quiz.js`.
 
