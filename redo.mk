@@ -14,7 +14,7 @@ SERVICES := nginx-dev sync webp
 
 VPATH := src
 
-MAKE_CMD := docker compose run --rm --entrypoint make -u $(shell id -u) -T --build shell
+MAKE_CMD := docker compose run --rm --entrypoint make -u $(shell id -u) -T shell
 
 # Default make target
 .DEFAULT_GOAL := all
@@ -88,7 +88,7 @@ webp: ## Convert images to webp format
 
 .PHONY: shell
 shell: ## Open an interactive shell container
-	docker compose run --rm shell
+	docker compose run --rm --build shell
 
 .PHONY: rmi
 rmi: ## Remove Docker images matching press-*
