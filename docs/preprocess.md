@@ -1,0 +1,34 @@
+# preprocess Script
+
+`preprocess` prepares Markdown files for Pandoc. It expands includes, renders
+internal links, and emojifies the text. The output mirrors the directory
+structure under `build/` so that `src/foo/bar.md` becomes
+`build/foo/bar.md`.
+
+## Usage
+
+```bash
+preprocess <markdown-file> [more-files...]
+```
+
+Each input file is processed in place:
+
+1. **Expand includes** – `include-filter` runs three times to resolve nested
+   `include()` blocks and render Mermaid diagrams.
+2. **Render links** – `render-template build/static/index.json` converts
+   special link syntax using the build index.
+3. **Emoji conversion** – `emojify` replaces `:emoji:` codes with Unicode
+   characters.
+
+### Makefile Integration
+
+`app/shell/mk/build.mk` invokes `preprocess` when building `.md` targets:
+
+```make
+build/%.md: %.md build/static/index.json | build
+    preprocess $<
+```
+
+Running `preprocess src/guide/intro.md` will create
+`build/guide/intro.md` ready for Pandoc.
+
