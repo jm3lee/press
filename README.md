@@ -7,9 +7,7 @@ containerized Nginx instance.
 
 ## Quickstart
 
-1. Edit `docker-compose.yml`. Adjust `image` as necessary. For example, set
-   `nginx` to `myrepo/press-nginx:latest` and `shell` to
-   `myrepo/press-shell:latest`.
+1. Edit `docker-compose.yml`. Adjust `image` as necessary. **TODO: Examples**
 2. Edit `redo.mk`. Update the list of services.
 3. Edit documents under `src/`.
 4. Optionally customize `src/pandoc-template.html` for your project.
