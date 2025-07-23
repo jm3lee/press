@@ -22,6 +22,7 @@ setup(
             'picasso=pie.picasso:main',
             'render-template=pie.render_template:main',
             'render-study-json=pie.render_study_json:main',
+            'include-filter=pie.include_filter:main',
         ],
     },
 )
