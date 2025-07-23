@@ -35,3 +35,40 @@ return f"[{transformed}]({url})"
 ```
 
 This ensures that each word is capitalized without altering spacing or punctuation.
+
+## `linkcap`
+
+The `linkcap` filter capitalizes only the first character of the link text.
+It expects the same `[text](url)` syntax and leaves the rest of the string
+untouched.
+
+```jinja
+{{ "[deltoid tuberosity](/humerus.html#deltoid_tuberosity)" | linkcap }}
+```
+
+renders as:
+
+```html
+<a href="/humerus.html#deltoid_tuberosity" class="internal-link">Deltoid tuberosity</a>
+```
+
+## `linkicon`
+
+`linkicon` leaves the link text unchanged but allows emoji or other icons to be
+included. It is useful when the source metadata provides an `icon` field that
+should appear before the link text.
+
+## `link_icon_title`
+
+This filter combines the behavior of `linkicon` with word capitalization. It is
+primarily used when a metadata entry defines both an icon and link text.
+
+## `link`
+
+A simple filter that returns the raw HTML `<a>` tag without any additional
+transformation.
+
+## `get_desc`
+
+Looks up a description object from the build index. If the name is not present,
+`get_desc` returns the name unchanged.
