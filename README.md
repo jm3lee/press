@@ -7,8 +7,9 @@ containerized Nginx instance.
 
 ## Quickstart
 
-1. Edit `docker-compose.yml`. Adjust `image` as necessary. *In the future,
-   provide users with templates or wizards. Need examples.*
+1. Edit `docker-compose.yml`. Adjust `image` as necessary. For example, set
+   `nginx` to `myrepo/press-nginx:latest` and `shell` to
+   `myrepo/press-shell:latest`.
 2. Edit `redo.mk`. Update the list of services.
 3. Edit documents under `src/`.
 4. Optionally customize `src/pandoc-template.html` for your project.
@@ -17,11 +18,34 @@ containerized Nginx instance.
 6. Run `r help` (or `make -f redo.mk help`) to see available tasks. See
    `docs/redo-mk.md` for more details.
 
-### General Setup
+### Install prerequisites
 
+Install Docker and `make` using your package manager.
+For example on Debian/Ubuntu:
+
+```bash
+sudo apt-get install docker.io make
 ```
+
+On macOS with Homebrew:
+
+```bash
+brew install --cask docker
+brew install make
+```
+
+### Build and start the environment
+
+```bash
 alias r='make -f redo.mk'
-r setup
+r setup   # build images and prepare volumes
+r up      # start the development stack
+```
+
+### Shut down the stack
+
+```bash
+r down
 ```
 
 ### webp converter
