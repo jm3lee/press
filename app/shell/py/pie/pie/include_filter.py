@@ -1,4 +1,15 @@
 #!/usr/bin/env python3
+"""Expand Python directives inside Markdown files.
+
+The ``include-filter`` command reads a source Markdown document, executes any
+fenced ``python`` code blocks, and writes the transformed output to another
+file.  Available helper functions include ``include()`` for inserting other
+Markdown files and ``mermaid()`` for converting Mermaid diagrams to images.
+
+Links that end with ``.md`` are rewritten to ``.html`` so the output can be fed
+directly to Pandoc.  The command is primarily driven via ``preprocess`` and the
+``build.mk`` makefile.
+"""
 
 import os
 import re
