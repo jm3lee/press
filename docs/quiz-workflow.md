@@ -90,11 +90,11 @@ It renders each question, lets the user pick choices, and displays the score whe
 A page can embed the quiz with:
 
 ```html
-<div id="search-root" data-src="/study/deltoid.json"></div>
+<div id="quiz-root" data-src="/study/deltoid.json"></div>
 <script type="module" src="/static/js/bundle.js" defer></script>
 ```
 
-`main.jsx` mounts the `Quiz` component onto `#search-root` using the `data-src` attribute to locate the JSON file.
+`main.jsx` mounts the `Quiz` component onto `#quiz-root` using the `data-src` attribute to locate the JSON file.
 
 ## 4. Styling
 
