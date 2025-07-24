@@ -35,7 +35,7 @@ def get_url(filename: str) -> Optional[str]:
     if filename.startswith(prefix):
         relative_path = filename[len(prefix) :]
         base, ext = os.path.splitext(relative_path)
-        if ext.lower() in (".md", ".yml"):
+        if ext.lower() in (".md", ".yml", ".yaml"):
             html_path = base + ".html"
             return "/" + html_path
     logger.warning("Can't create a url.", filename=filename)

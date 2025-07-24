@@ -129,6 +129,7 @@ build. Use `--src DIR` to search a different directory for `.yml` files and
 - [Jinja Filters](docs/jinja-filters.md)
 - [Jinja Globals](docs/jinja-globals.md)
 - [Build Index](docs/build-index.md)
+- [gen-markdown-index](docs/gen-markdown-index.md)
 - [Quiz Workflow](docs/quiz-workflow.md)
 - [include-filter](docs/include-filter.md)
 - [preprocess](docs/preprocess.md)

@@ -18,6 +18,7 @@ setup(
     entry_points={
         'console_scripts': [
             'build-index=pie.build_index:main',
+            'gen-markdown-index=pie.gen_markdown_index:main',
             'picasso=pie.picasso:main',
             'render-template=pie.render_template:main',
             'render-study-json=pie.render_study_json:main',
