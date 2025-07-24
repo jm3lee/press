@@ -18,13 +18,15 @@ The build relies on three cooperating Makefiles:
 
 ## Quickstart
 
-1. Edit `docker-compose.yml`. Adjust `image` as necessary. **TODO: Examples**
-2. Edit `redo.mk`. Update the list of services.
-3. Edit documents under `src/`.
-4. Optionally customize `src/pandoc-template.html` for your project.
-5. Edit `docker` rule in `redo.mk` if you'd like to push docker images to a
+1. Run `git submodule update --init --recursive` after cloning to fetch
+   required submodules such as `xmera`.
+2. Edit `docker-compose.yml`. Adjust `image` as necessary. **TODO: Examples**
+3. Edit `redo.mk`. Update the list of services.
+4. Edit documents under `src/`.
+5. Optionally customize `src/pandoc-template.html` for your project.
+6. Edit `docker` rule in `redo.mk` if you'd like to push docker images to a
    container registry.
-6. Run `r help` (or `make -f redo.mk help`) to see available tasks. See
+7. Run `r help` (or `make -f redo.mk help`) to see available tasks. See
    `docs/redo-mk.md` for more details.
 
 ### Install prerequisites
