@@ -21,7 +21,7 @@ def test_main_prints_rules(tmp_path, capsys):
     src.mkdir()
     (src / "doc.yml").write_text("{}")
 
-    picasso.main(src_root=src, build_root=build)
+    picasso.main(["--src", str(src), "--build", str(build)])
     out = capsys.readouterr().out.strip()
     expected = picasso.generate_rule(src / "doc.yml", src_root=src, build_root=build).strip()
     assert out == expected

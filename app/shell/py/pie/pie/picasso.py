@@ -7,6 +7,7 @@ Both the source root and build root can be overridden via function
 parameters or command–line arguments.
 """
 
+import argparse
 import sys
 from pathlib import Path
 
@@ -49,8 +50,31 @@ def generate_rule(
 """
 
 
-def main(src_root: Path = Path("src"), build_root: Path = Path("build")) -> None:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """Parse command-line arguments."""
+
+    parser = argparse.ArgumentParser(
+        description="Generate Makefile rules for processing YAML files with pandoc",
+    )
+    parser.add_argument(
+        "--src",
+        default="src",
+        help="Directory containing source `.yml` files",
+    )
+    parser.add_argument(
+        "--build",
+        default="build",
+        help="Directory where build artifacts are written",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> None:
     """Entry point: print Makefile rules for ``.yml`` files under ``src_root``."""
+
+    args = parse_args(argv)
+    src_root = Path(args.src)
+    build_root = Path(args.build)
 
     if not src_root.is_dir():
         sys.stderr.write(f"Directory {src_root!s} does not exist\n")
@@ -61,7 +85,4 @@ def main(src_root: Path = Path("src"), build_root: Path = Path("build")) -> None
 
 
 if __name__ == "__main__":
-    argv = sys.argv[1:]
-    src = Path(argv[0]) if len(argv) >= 1 else Path("src")
-    build = Path(argv[1]) if len(argv) >= 2 else Path("build")
-    main(src_root=src, build_root=build)
+    main()
