@@ -1,5 +1,5 @@
 """
-Generate Makefile rules for processing ``.yml`` files with ``pandoc``.
+Generate Makefile rules for processing ``.yml`` and ``.yaml`` files with ``pandoc``.
 
 By default the script scans the ``src`` directory and writes rules that
 produce preprocessed ``.md`` and rendered ``.html`` files under ``build``.
@@ -19,7 +19,7 @@ def generate_rule(
     """Generate a Makefile rule for a given YAML metadata file.
 
     Args:
-        input_path (Path): Path to the source `.yml` file.
+        input_path (Path): Path to the source `.yml` or `.yaml` file.
         src_root (Path): Directory that contains the source files.
         build_root (Path): Directory where build artifacts are written.
 
@@ -50,14 +50,17 @@ def generate_rule(
 
 
 def main(src_root: Path = Path("src"), build_root: Path = Path("build")) -> None:
-    """Entry point: print Makefile rules for ``.yml`` files under ``src_root``."""
+    """Entry point: print Makefile rules for ``.yml`` and ``.yaml`` files under ``src_root``."""
 
     if not src_root.is_dir():
         sys.stderr.write(f"Directory {src_root!s} does not exist\n")
         sys.exit(1)
 
-    for yml_file in src_root.rglob("*.yml"):
-        print(generate_rule(yml_file, src_root=src_root, build_root=build_root))
+    for pattern in ("*.yml", "*.yaml"):
+        for yml_file in src_root.rglob(pattern):
+            print(
+                generate_rule(yml_file, src_root=src_root, build_root=build_root)
+            )
 
 
 if __name__ == "__main__":

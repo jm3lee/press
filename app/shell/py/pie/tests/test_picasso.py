@@ -25,3 +25,15 @@ def test_main_prints_rules(tmp_path, capsys):
     out = capsys.readouterr().out.strip()
     expected = picasso.generate_rule(src / "doc.yml", src_root=src, build_root=build).strip()
     assert out == expected
+
+
+def test_main_prints_rules_yaml(tmp_path, capsys):
+    src = tmp_path / "src"
+    build = tmp_path / "build"
+    src.mkdir()
+    (src / "doc.yaml").write_text("{}")
+
+    picasso.main(src_root=src, build_root=build)
+    out = capsys.readouterr().out.strip()
+    expected = picasso.generate_rule(src / "doc.yaml", src_root=src, build_root=build).strip()
+    assert out == expected
