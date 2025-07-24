@@ -112,8 +112,15 @@ If you don’t provide these, Pandoc (or your build tooling) will generate them 
 ### Examples
 - **Sidecar metadata**  
   Store metadata in `index.yml` and content in `index.md`.  
-- **Inline metadata**  
+- **Inline metadata**
   Embed the YAML block directly at the top of `quickstart.md`.
+
+## picasso
+
+`picasso` scans YAML metadata files and generates Makefile rules to render them
+with Pandoc. The output is written to `build/picasso.mk` and included during the
+build. Use `--src DIR` to search a different directory for `.yml` files and
+`--build DIR` to change where generated rules point.
 
 ## Further Reading
 
