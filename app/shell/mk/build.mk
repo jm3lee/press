@@ -124,6 +124,6 @@ clean:
 YAMLS := $(shell find src -name "*.yml")
 
 build/picasso.mk: $(YAMLS) | build
-	picasso > $@
+        picasso --src src --build build > $@
 
 include build/picasso.mk

@@ -15,6 +15,12 @@ picasso > build/picasso.mk
 This happens automatically in `build.mk` whenever any `.yml` file under `src/`
 changes.
 
+You can override the source or build directories using `--src` and `--build`:
+
+```bash
+picasso --src path/to/src --build path/to/build > build/picasso.mk
+```
+
 ## Example Output
 
 For a source file `src/index.yml` the output looks like:
