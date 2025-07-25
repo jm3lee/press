@@ -73,15 +73,16 @@ build/static/index.json: $(MARKDOWNS) $(YAMLS) | build/static
 	build-index src -o $@ --log log/build-index
 
 # Target to minify HTML and CSS files
-build/.minify: $(HTMLS) $(CSS)
+# Modifies file timestamps. The preserve option doesn't seem to work.
+build/.minify:
 	cd build; minify -a -v -r -o . .
 	@touch $@
 
 .PHONY: test
 # Triggered by the test target in redo.mk; see docs/redo-mk.md.
-test: $(HTMLS) $(CSS) build/.minify | log
+test: build/.minify | log
 	$(CHECKLINKS_CMD) http://nginx-dev 2>&1 | tee log/checklinks.txt
-	check-page-title build
+	check-page-title -x cfg/check-page-title-exclude.yml build
 
 # Create necessary build directories
 build: | $(BUILD_SUBDIRS)
