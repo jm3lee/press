@@ -70,7 +70,7 @@ all: build/static/index.json
 .PRECIOUS: build/static/index.json
 # See docs/build-index.md for how the index is generated.
 build/static/index.json: $(MARKDOWNS) $(YAMLS) | build/static
-	build-index src -o $@ 2> log/build-index
+	build-index src -o $@ --log log/build-index
 
 # Target to minify HTML and CSS files
 build/.minify: $(HTMLS) $(CSS)

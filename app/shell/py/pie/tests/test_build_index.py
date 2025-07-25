@@ -59,3 +59,21 @@ def test_validate_and_insert_duplicate(tmp_path):
     index = {"a": {"id": "a"}}
     with pytest.raises(KeyError):
         build_index.validate_and_insert_metadata({"id": "a"}, "file", index)
+
+
+def test_main_writes_log_file(tmp_path):
+    src = tmp_path / "src"
+    src.mkdir()
+    md = src / "doc.md"
+    md.write_text("---\n{\"title\": \"T\"}\n---\n")
+    out = tmp_path / "index.json"
+    log = tmp_path / "build.log"
+
+    os.chdir(tmp_path)
+    try:
+        build_index.main(["src", "-o", str(out), "--log", str(log)])
+    finally:
+        os.chdir("/tmp")
+
+    assert out.exists()
+    assert log.exists()
