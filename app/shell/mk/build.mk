@@ -81,7 +81,7 @@ build/.minify: $(HTMLS) $(CSS)
 # Triggered by the test target in redo.mk; see docs/redo-mk.md.
 test: $(HTMLS) $(CSS) build/.minify | log
 	$(CHECKLINKS_CMD) http://nginx-dev 2>&1 | tee log/checklinks.txt
-	check-page-title build 2>&1 | tee log/check-page-title.txt
+	check-page-title build
 
 # Create necessary build directories
 build: | $(BUILD_SUBDIRS)

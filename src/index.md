@@ -14,6 +14,11 @@
 
 ## Linking Using Jinja2
 
+### linktitle
 {{quickstart|linktitle}}
 
+### link
 {{quickstart|link}}
+
+## Quiz Example
+{{quiz|linktitle}}

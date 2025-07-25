@@ -107,3 +107,4 @@ buildx: ## Run Docker buildx
 .PHONY: pytest
 pytest:
 	docker compose run --entrypoint pytest --rm shell /press/py/pie/tests
+	docker compose run --entrypoint pytest --rm shell tests

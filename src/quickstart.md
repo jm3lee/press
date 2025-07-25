@@ -1,5 +1,5 @@
 ---
-name: Quickstart
+title: Quickstart
 author: Brian Lee
 id: quickstart
 citation: quickstart
