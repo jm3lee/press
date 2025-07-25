@@ -20,6 +20,14 @@ index_json = None  # See main().
 _whitespace_word_pattern = re.compile(r"(\S+)")
 
 
+def get_tracking_options(desc):
+    if "link" in desc:
+        if "tracking" in desc:
+            if desc["tracking"] == False:
+                return 'rel="noopener noreferrer" target="_blank"'
+    return ""
+
+
 def linktitle(desc):
     """
     Capitalize the first character of each word in the string,
@@ -31,6 +39,7 @@ def linktitle(desc):
     citation = desc["citation"]
     url = desc["url"]
     icon = desc.get("icon")
+    a_attribs = get_tracking_options(desc)
 
     def cap_match(m):
         word = m.group(1)
@@ -41,8 +50,8 @@ def linktitle(desc):
     citation = _whitespace_word_pattern.sub(cap_match, citation)
 
     if icon:
-        return f"""<a href="{url}" class="internal-link">{icon} {citation}</a>"""
-    return f"""<a href="{url}" class="internal-link">{citation}</a>"""
+        return f"""<a href="{url}" class="internal-link" {a_attribs}>{icon} {citation}</a>"""
+    return f"""<a href="{url}" class="internal-link" {a_attribs}>{citation}</a>"""
 
 
 def link_icon_title(desc):
@@ -53,13 +62,16 @@ def link_icon_title(desc):
     citation = desc["citation"]
     url = desc["url"]
     icon = desc["icon"]
+    a_attribs = get_tracking_options(desc)
 
     def cap_match(m):
         word = m.group(1)
         return word[0].upper() + word[1:]
 
     citation = _whitespace_word_pattern.sub(cap_match, citation)
-    return f"""<a href="{url}" class="internal-link">{icon} {citation}</a>"""
+    return (
+        f"""<a href="{url}" class="internal-link" {a_attribs}>{icon} {citation}</a>"""
+    )
 
 
 def linkcap(desc):
@@ -74,9 +86,10 @@ def linkcap(desc):
     citation = citation[0].upper() + citation[1:]
     url = desc["url"]
     icon = desc.get("icon")
+    a_attribs = get_tracking_options(desc)
     if icon:
-        return f"""<a href="{url}" class="internal-link">{icon} {citation}</a>"""
-    return f"""<a href="{url}" class="internal-link">{citation}</a>"""
+        return f"""<a href="{url}" class="internal-link" {a_attribs}>{icon} {citation}</a>"""
+    return f"""<a href="{url}" class="internal-link" {a_attribs}>{citation}</a>"""
 
 
 def linkicon(desc):
@@ -87,9 +100,10 @@ def linkicon(desc):
     citation = desc["citation"]
     url = desc["url"]
     icon = desc.get("icon")
+    a_attribs = get_tracking_options(desc)
     if icon:
-        return f"""<a href="{url}" class="internal-link">{icon} {citation}</a>"""
-    return f"""<a href="{url}" class="internal-link">{citation}</a>"""
+        return f"""<a href="{url}" class="internal-link" {a_attribs}>{icon} {citation}</a>"""
+    return f"""<a href="{url}" class="internal-link" {a_attribs}>{citation}</a>"""
 
 
 def link(desc):
@@ -99,7 +113,8 @@ def link(desc):
     """
     citation = desc["citation"]
     url = desc["url"]
-    return f"""<a href="{url}">{citation}</a>"""
+    a_attribs = get_tracking_options(desc)
+    return f"""<a href="{url}" {a_attribs}>{citation}</a>"""
 
 
 def extract_front_matter(file_path: str) -> dict | None:
