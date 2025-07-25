@@ -1,8 +1,17 @@
 #!/usr/bin/env python3
 """Check that HTML files contain non-empty <h1> tags."""
+import os
 import sys
 from pathlib import Path
 from bs4 import BeautifulSoup
+
+# Detect whether we should emit ANSI colour codes. We only use colours when
+# stdout is a TTY and the TERM environment variable is not set to "dumb".
+USE_COLOR = sys.stdout.isatty() and os.environ.get("TERM") != "dumb"
+
+GREEN = "\x1b[32m" if USE_COLOR else ""
+REVERSE = "\x1b[7m" if USE_COLOR else ""
+RESET = "\x1b[0m" if USE_COLOR else ""
 
 
 def check_file(path: Path) -> bool:
@@ -10,7 +19,11 @@ def check_file(path: Path) -> bool:
         soup = BeautifulSoup(f, "html.parser")
     h1 = soup.find("h1")
     if h1 is None or not h1.get_text(strip=True):
-        print(f"Missing or empty <h1> in {path}")
+        message = f"Missing or empty <h1> in {path}"
+        if USE_COLOR:
+            print(f"{REVERSE}{message}{RESET}")
+        else:
+            print(message)
         return False
     return True
 
@@ -23,7 +36,11 @@ def main(argv: list[str]) -> int:
         if not check_file(html_file):
             ok = False
     if ok:
-        print("All pages have <h1> titles.")
+        message = "All pages have <h1> titles."
+        if USE_COLOR:
+            print(f"{GREEN}{message}{RESET}")
+        else:
+            print(message)
         return 0
     return 1
 
