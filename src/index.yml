@@ -1,3 +1,23 @@
 title: Home
 name: Home
 author: Brian Lee
+description: Example home page
+og_image: /img/home.png
+url: https://example.com/
+meta:
+  - property: og:title
+    content: Example Home
+  - property: og:description
+    content: Example home page
+  - property: og:image
+    content: /img/home.png
+  - property: og:url
+    content: https://example.com/
+  - name: twitter:card
+    content: summary_large_image
+  - name: twitter:title
+    content: Example Home
+  - name: twitter:description
+    content: Example home page
+  - name: twitter:image
+    content: /img/home.png
