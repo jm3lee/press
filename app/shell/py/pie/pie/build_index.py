@@ -13,7 +13,7 @@ import sys
 from typing import Any, Dict, Optional
 
 import yaml
-from xmera import logger
+from pie.utils import add_file_logger, logger
 
 
 def get_url(filename: str) -> Optional[str]:
@@ -228,10 +228,8 @@ def main(argv: list[str] | None = None) -> None:
     """Build the index and write JSON output."""
     args = parse_args(argv)
 
-    log_fp = None
     if args.log:
-        log_fp = open(args.log, "w", encoding="utf-8")
-        sys.stderr = log_fp
+        add_file_logger(args.log, level="DEBUG")
 
     # Build index for Markdown and YAML separately
     md_index = build_index(args.source_dir, file_pattern="**/*.md")
@@ -246,9 +244,6 @@ def main(argv: list[str] | None = None) -> None:
         logger.info("Index written to file", path=args.output)
     else:
         print(output_json)
-
-    if log_fp is not None:
-        log_fp.close()
 
 
 if __name__ == "__main__":
