@@ -15,10 +15,7 @@ import json
 from typing import Any, Dict, Mapping
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
-import logging
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('render_template')
+from pie.utils import logger
 
 # Precompile regex patterns for performance
 _WHITESPACE_WORD_PATTERN = re.compile(r"(\S+)")
