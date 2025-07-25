@@ -11,6 +11,8 @@ import argparse
 import sys
 from pathlib import Path
 
+from pie.utils import logger
+
 
 def generate_rule(
     input_path: Path,
@@ -77,7 +79,7 @@ def main(argv: list[str] | None = None) -> None:
     build_root = Path(args.build)
 
     if not src_root.is_dir():
-        sys.stderr.write(f"Directory {src_root!s} does not exist\n")
+        logger.error("Directory does not exist", directory=str(src_root))
         sys.exit(1)
 
     for yml_file in src_root.rglob("*.yml"):

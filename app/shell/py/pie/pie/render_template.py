@@ -164,10 +164,14 @@ def process_directory(root_dir: str) -> None:
             fm = extract_front_matter(full_path)
 
             if fm and isinstance(fm, dict) and "title" in fm:
-                print(f'TITLE: {fm["title"]} | FILE: {full_path}')
+                logger.info(
+                    "TITLE: {title} | FILE: {file}",
+                    title=fm["title"],
+                    file=full_path,
+                )
             else:
-                print(
-                    f"WARNING: No front matter or title in {full_path}", file=sys.stderr
+                logger.warning(
+                    "No front matter or title", file=full_path
                 )
 
 
