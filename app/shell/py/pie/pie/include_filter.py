@@ -16,6 +16,7 @@ import re
 import sys
 
 import yaml
+from pie.utils import logger
 
 figcount = 0
 heading_level = 0
@@ -42,7 +43,7 @@ def parse_metadata_or_print_first_line(f):
 
 
 def include(filename):
-    print("include", filename)
+    logger.info("include", filename=filename)
     with open(filename, "r", encoding="utf-8") as f:
         metadata = parse_metadata_or_print_first_line(f)
         if metadata and metadata.get("title"):
@@ -78,7 +79,7 @@ def new_filestem(stem):
 
 
 def mermaid(mmd_filename, alt_text, ref_id):
-    print(mmd_filename)
+    logger.info("Processing mermaid file", filename=mmd_filename)
     global figcount
     stem = new_filestem(f"{outdir}/diagram")
     with open(mmd_filename, "r", encoding="utf-8") as inmmd, open(
