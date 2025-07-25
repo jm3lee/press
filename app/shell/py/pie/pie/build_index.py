@@ -9,6 +9,7 @@ import argparse
 import glob
 import json
 import os
+import sys
 from typing import Any, Dict, Optional
 
 import yaml
@@ -201,8 +202,8 @@ def build_index(source_dir: str, file_pattern: str = "**/*.md") -> Dict[str, Any
     return index
 
 
-def main() -> None:
-    """Parse command-line arguments, build the index, and write JSON output."""
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """Parse command line arguments."""
     parser = argparse.ArgumentParser(
         description="Build a JSON index from Markdown/YAML files' metadata."
     )
@@ -215,7 +216,22 @@ def main() -> None:
         "--output",
         help="Path to write the JSON index (defaults to stdout)",
     )
-    args = parser.parse_args()
+    parser.add_argument(
+        "-l",
+        "--log",
+        help="Write logs to the specified file",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> None:
+    """Build the index and write JSON output."""
+    args = parse_args(argv)
+
+    log_fp = None
+    if args.log:
+        log_fp = open(args.log, "w", encoding="utf-8")
+        sys.stderr = log_fp
 
     # Build index for Markdown and YAML separately
     md_index = build_index(args.source_dir, file_pattern="**/*.md")
@@ -230,6 +246,9 @@ def main() -> None:
         logger.info("Index written to file", path=args.output)
     else:
         print(output_json)
+
+    if log_fp is not None:
+        log_fp.close()
 
 
 if __name__ == "__main__":

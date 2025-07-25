@@ -13,6 +13,9 @@ metadata.
 
 # Scan 'docs/' and write the index to 'index.json'
 ./build_index.py docs/ --output index.json
+
+# Write logs to a file
+./build_index.py docs/ -o index.json --log build-index.log
 ```
 
 ### Arguments
@@ -20,8 +23,11 @@ metadata.
 - `<source_dir>`  
   Root directory to scan for Markdown and YAML files.
 
-- `-o, --output <path>`  
+- `-o, --output <path>`
   (Optional) Path to write the resulting JSON index. Defaults to stdout if omitted.
+
+- `-l, --log <path>`
+  (Optional) Write logs to the specified file.
 
 ## Example Output
 
