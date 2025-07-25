@@ -63,3 +63,23 @@ def test_mermaid_creates_files(tmp_path):
     assert (tmp_path / "diagram0.mmd").read_text() == "A-->B\n"
     assert include_filter.outfile.getvalue().strip() == f"![alt](./diagram0.png){{ #id }}"
     assert include_filter.figcount == 1
+
+
+def test_main_writes_log_file(tmp_path):
+    outdir = tmp_path / "out"
+    outdir.mkdir()
+    infile = tmp_path / "doc.md"
+    infile.write_text("Hello")
+    outfile = tmp_path / "out.md"
+    log = tmp_path / "inc.log"
+
+    include_filter.main([
+        str(outdir),
+        str(infile),
+        str(outfile),
+        "--log",
+        str(log),
+    ])
+
+    assert outfile.exists()
+    assert log.exists()

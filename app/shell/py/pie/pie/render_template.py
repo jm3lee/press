@@ -4,11 +4,12 @@ import json
 import os
 import re
 import sys
+import argparse
 
 import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from xmera.utils import read_json, read_utf8
-from pie.utils import logger
+from pie.utils import add_file_logger, logger
 
 index_json = None  # See main().
 
@@ -247,10 +248,33 @@ def create_env():
 env = create_env()
 
 
-def main():
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """Parse command line arguments."""
+
+    parser = argparse.ArgumentParser(
+        description="Render a template using variables from an index JSON file",
+    )
+    parser.add_argument("index", help="Path to index.json")
+    parser.add_argument("template", help="Template file to render")
+    parser.add_argument(
+        "-l",
+        "--log",
+        help="Write logs to the specified file",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> None:
+    """Render the specified template using variables from ``index.json``."""
+
     global index_json
-    index_json = read_json(sys.argv[1])
-    template = env.get_template(sys.argv[2])
+    args = parse_args(argv)
+
+    if args.log:
+        add_file_logger(args.log, level="DEBUG")
+
+    index_json = read_json(args.index)
+    template = env.get_template(args.template)
     print(template.render(**index_json))
 
 

@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any, Iterable, List
 
 from xmera.utils import read_json
+from pie.utils import add_file_logger, logger
 
 from .render_template import create_env
 
@@ -58,6 +59,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--output",
         help="Optional file to write the rendered JSON (defaults to stdout)",
     )
+    parser.add_argument(
+        "-l",
+        "--log",
+        help="Write logs to the specified file",
+    )
     return parser.parse_args(argv)
 
 
@@ -65,6 +71,8 @@ def main(argv: list[str] | None = None) -> None:
     """Entry point for the ``pie.render_study_json`` module."""
 
     args = parse_args(argv)
+    if args.log:
+        add_file_logger(args.log, level="DEBUG")
 
     index_json = read_json(args.index)
     study_json = read_json(args.study)

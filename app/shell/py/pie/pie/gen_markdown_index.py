@@ -6,6 +6,7 @@ import argparse
 from typing import Iterable, Mapping, List
 
 from xmera.utils import read_json
+from pie.utils import add_file_logger, logger
 
 
 def generate_lines(index: Mapping[str, Mapping[str, str]]) -> List[str]:
@@ -28,12 +29,19 @@ def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
         description="Generate a Markdown index from a JSON index file"
     )
     parser.add_argument("index", help="Path to index.json")
+    parser.add_argument(
+        "-l",
+        "--log",
+        help="Write logs to the specified file",
+    )
     return parser.parse_args(list(argv) if argv is not None else None)
 
 
 def main(argv: Iterable[str] | None = None) -> None:
     """Entry point used by the ``gen-markdown-index`` console script."""
     args = parse_args(argv)
+    if args.log:
+        add_file_logger(args.log, level="DEBUG")
     index = read_json(args.index)
     for line in generate_lines(index):
         print(line)

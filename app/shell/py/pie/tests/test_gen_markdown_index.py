@@ -21,3 +21,14 @@ def test_main_outputs_lines(tmp_path, capsys):
     gen_markdown_index.main([str(path)])
     out = capsys.readouterr().out.strip()
     assert out == "- [Foo](/foo)"
+
+
+def test_main_writes_log_file(tmp_path):
+    data = {"item": {"name": "Foo", "url": "/foo"}}
+    index_path = tmp_path / "index.json"
+    log_path = tmp_path / "index.log"
+    index_path.write_text(json.dumps(data))
+
+    gen_markdown_index.main([str(index_path), "--log", str(log_path)])
+
+    assert log_path.exists()
