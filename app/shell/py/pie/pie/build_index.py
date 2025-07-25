@@ -110,8 +110,8 @@ def process_yaml(filepath: str) -> Optional[Dict[str, Any]]:
                 metadata["url"] = get_url(filepath)
             if "citation" not in metadata:
                 # Intentionally use indexing so we get an exception here.
-                # The name field must exist.
-                metadata["citation"] = metadata["name"].lower()
+                # The title field must exist.
+                metadata["citation"] = metadata["title"].lower()
             if "id" not in metadata:
                 base, _ = os.path.splitext(filepath)
                 metadata["id"] = base.split(os.sep)[-1]

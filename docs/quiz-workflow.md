@@ -15,7 +15,7 @@ Example from `src/quiz/demo.json`:
 ```json
 [
   {
-    "q": "Which of the following best describes the {{sagittal['name']|lower}} plane?",
+    "q": "Which of the following best describes the {{sagittal['title']|lower}} plane?",
     "c": [
       "Divides the body into anterior and posterior portions",
       "Divides the body into superior and inferior portions",

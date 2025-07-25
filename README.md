@@ -104,7 +104,7 @@ Pandoc lets you define document metadata in two ways:
 2. **Sidecar**: Place a separate `.yml` file alongside your Markdown.
 
 ### Required Field
-- `name`: The display name of the document.
+- `title`: The display name of the document.
 
 ### Auto-Generated Fields
 If you don’t provide these, Pandoc (or your build tooling) will generate them automatically:

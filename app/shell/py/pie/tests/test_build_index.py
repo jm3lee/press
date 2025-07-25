@@ -43,13 +43,13 @@ def test_process_markdown_parses_frontmatter(tmp_path):
 def test_process_yaml_generates_fields(tmp_path):
     yml = tmp_path / "src" / "item.yml"
     yml.parent.mkdir(parents=True)
-    yml.write_text('{"name": "Foo"}')
+    yml.write_text('{"title": "Foo"}')
     os.chdir(tmp_path)
     try:
         data = build_index.process_yaml("src/item.yml")
     finally:
         os.chdir("/tmp")
-    assert data["name"] == "Foo"
+    assert data["title"] == "Foo"
     assert data["url"] == "/item.html"
     assert data["citation"] == "foo"
     assert data["id"] == "item"

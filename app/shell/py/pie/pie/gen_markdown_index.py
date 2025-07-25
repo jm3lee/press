@@ -9,16 +9,16 @@ from xmera.utils import read_json
 
 
 def generate_lines(index: Mapping[str, Mapping[str, str]]) -> List[str]:
-    """Return Markdown list items sorted by the ``name`` field."""
+    """Return Markdown list items sorted by the ``title`` field."""
     lines: List[str] = []
-    for _, item in sorted(index.items(), key=lambda p: p[1]["name"]):
-        name = item["name"]
+    for _, item in sorted(index.items(), key=lambda p: p[1]["title"]):
+        title = item["title"]
         url = item["url"]
         icon = item.get("icon")
         if icon:
-            lines.append(f"- [{icon} {name}]({url})")
+            lines.append(f"- [{icon} {title}]({url})")
         else:
-            lines.append(f"- [{name}]({url})")
+            lines.append(f"- [{title}]({url})")
     return lines
 
 
