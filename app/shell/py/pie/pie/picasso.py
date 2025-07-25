@@ -11,7 +11,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from pie.utils import logger
+from pie.utils import add_file_logger, logger
 
 
 def generate_rule(
@@ -68,6 +68,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default="build",
         help="Directory where build artifacts are written",
     )
+    parser.add_argument(
+        "-l",
+        "--log",
+        help="Write logs to the specified file",
+    )
     return parser.parse_args(argv)
 
 
@@ -75,6 +80,8 @@ def main(argv: list[str] | None = None) -> None:
     """Entry point: print Makefile rules for ``.yml`` files under ``src_root``."""
 
     args = parse_args(argv)
+    if args.log:
+        add_file_logger(args.log, level="DEBUG")
     src_root = Path(args.src)
     build_root = Path(args.build)
 

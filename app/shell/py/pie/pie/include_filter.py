@@ -14,9 +14,10 @@ directly to Pandoc.  The command is primarily driven via ``preprocess`` and the
 import os
 import re
 import sys
+import argparse
 
 import yaml
-from pie.utils import logger
+from pie.utils import add_file_logger, logger
 
 figcount = 0
 heading_level = 0
@@ -111,12 +112,36 @@ def md_to_html_links(line):
     return result
 
 
-def main():
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """Parse command line arguments."""
+
+    parser = argparse.ArgumentParser(
+        description="Expand Python directives inside a Markdown file",
+    )
+    parser.add_argument("outdir", help="Output directory for diagrams")
+    parser.add_argument("infile", help="Input Markdown file")
+    parser.add_argument("outfile", help="Output Markdown file")
+    parser.add_argument(
+        "-l",
+        "--log",
+        help="Write logs to the specified file",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> None:
+    """Process a Markdown file and expand custom directives."""
+
     global outdir, infilename, outfilename, infile, outfile
 
-    outdir = sys.argv[1]
-    infilename = sys.argv[2]
-    outfilename = sys.argv[3]
+    args = parse_args(argv)
+
+    if args.log:
+        add_file_logger(args.log, level="DEBUG")
+
+    outdir = args.outdir
+    infilename = args.infile
+    outfilename = args.outfile
 
     with open(infilename, "r", encoding="utf-8") as infile, open(
         outfilename, "w", encoding="utf-8"
