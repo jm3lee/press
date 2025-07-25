@@ -28,6 +28,14 @@ def get_tracking_options(desc):
     return ""
 
 
+def get_link_class(desc):
+    if "link" in desc:
+        link_options = desc["link"]
+        if isinstance(link_options, dict) and "class" in link_options:
+            return link_options["class"]
+    return "internal-link"
+
+
 def linktitle(desc):
     """
     Capitalize the first character of each word in the string,
@@ -50,8 +58,8 @@ def linktitle(desc):
     citation = _whitespace_word_pattern.sub(cap_match, citation)
 
     if icon:
-        return f"""<a href="{url}" class="internal-link" {a_attribs}>{icon} {citation}</a>"""
-    return f"""<a href="{url}" class="internal-link" {a_attribs}>{citation}</a>"""
+        return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{icon} {citation}</a>"""
+    return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{citation}</a>"""
 
 
 def link_icon_title(desc):
@@ -70,7 +78,7 @@ def link_icon_title(desc):
 
     citation = _whitespace_word_pattern.sub(cap_match, citation)
     return (
-        f"""<a href="{url}" class="internal-link" {a_attribs}>{icon} {citation}</a>"""
+        f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{icon} {citation}</a>"""
     )
 
 
@@ -88,8 +96,8 @@ def linkcap(desc):
     icon = desc.get("icon")
     a_attribs = get_tracking_options(desc)
     if icon:
-        return f"""<a href="{url}" class="internal-link" {a_attribs}>{icon} {citation}</a>"""
-    return f"""<a href="{url}" class="internal-link" {a_attribs}>{citation}</a>"""
+        return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{icon} {citation}</a>"""
+    return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{citation}</a>"""
 
 
 def linkicon(desc):
@@ -102,8 +110,8 @@ def linkicon(desc):
     icon = desc.get("icon")
     a_attribs = get_tracking_options(desc)
     if icon:
-        return f"""<a href="{url}" class="internal-link" {a_attribs}>{icon} {citation}</a>"""
-    return f"""<a href="{url}" class="internal-link" {a_attribs}>{citation}</a>"""
+        return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{icon} {citation}</a>"""
+    return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{citation}</a>"""
 
 
 def link(desc):

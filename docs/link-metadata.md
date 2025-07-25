@@ -13,6 +13,7 @@ name: press.io home
 url: https://press.io
 link:
   tracking: false
+  class: external-link
 ```
 
 This file generates an entry with the `id` `press_io_home` because the filename (without extension) is used when the `id` field is missing.
@@ -28,6 +29,15 @@ if "link" in desc:
     if "tracking" in desc:
         if desc["tracking"] == False:
             return 'rel="noopener noreferrer" target="_blank"'
+```
+
+## Link Class
+
+By default, rendered links use the CSS class `internal-link`. You can override this by specifying `link.class` in the metadata. For example:
+
+```yaml
+link:
+  class: external-link
 ```
 
 ## How IDs Are Generated
