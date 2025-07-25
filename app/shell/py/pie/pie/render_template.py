@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import json
-import logging
 import os
 import re
 import sys
@@ -9,12 +8,8 @@ import sys
 import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from xmera.utils import read_json, read_utf8
+from pie.utils import logger
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(name)s - %(funcName)s - %(message)s",
-)
-logger = logging.getLogger("render")
 index_json = None  # See main().
 
 _whitespace_word_pattern = re.compile(r"(\S+)")
@@ -222,7 +217,7 @@ def to_alpha_index(i):
 
 def read_yaml(filename):
     y = yaml.safe_load(read_utf8(filename))
-    logging.info(y["toc"])
+    logger.info(y["toc"])
     yield from y["toc"]
 
 
