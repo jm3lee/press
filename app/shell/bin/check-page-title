@@ -4,6 +4,8 @@ import os
 import sys
 from pathlib import Path
 from bs4 import BeautifulSoup
+import argparse
+import yaml
 
 # Detect whether we should emit ANSI colour codes. We only use colours when
 # stdout is a TTY and the TERM environment variable is not set to "dumb".
@@ -28,11 +30,42 @@ def check_file(path: Path) -> bool:
     return True
 
 
-def main(argv: list[str]) -> int:
-    directory = Path(argv[0]) if argv else Path("build")
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Verify that HTML files contain non-empty <h1> tags.",
+    )
+    parser.add_argument(
+        "directory",
+        nargs="?",
+        default="build",
+        help="Root directory to scan for HTML files",
+    )
+    parser.add_argument(
+        "-x",
+        "--exclude",
+        help="YAML file listing HTML files to skip",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
+    directory = Path(args.directory).resolve()
     html_files = list(directory.rglob("*.html"))
+    exclude: set[Path] = set()
+    if args.exclude:
+        with open(args.exclude, "r", encoding="utf-8") as exf:
+            data = yaml.safe_load(exf) or []
+        for item in data:
+            p = Path(item)
+            if not p.is_absolute():
+                p = directory / p
+            exclude.add(p.resolve())
     ok = True
     for html_file in html_files:
+        if html_file.resolve() in exclude:
+            continue
         if not check_file(html_file):
             ok = False
     if ok:
