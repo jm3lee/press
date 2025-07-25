@@ -21,10 +21,11 @@ _whitespace_word_pattern = re.compile(r"(\S+)")
 
 
 def get_tracking_options(desc):
-    if "link" in desc:
-        if "tracking" in desc:
-            if desc["tracking"] == False:
-                return 'rel="noopener noreferrer" target="_blank"'
+    link = desc.get("link")
+    if link is not None:
+        tracking = link.get("tracking")
+        if not tracking:
+            return 'rel="noopener noreferrer" target="_blank"'
     return ""
 
 
@@ -122,7 +123,7 @@ def link(desc):
     citation = desc["citation"]
     url = desc["url"]
     a_attribs = get_tracking_options(desc)
-    return f"""<a href="{url}" {a_attribs}>{citation}</a>"""
+    return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{citation}</a>"""
 
 
 def extract_front_matter(file_path: str) -> dict | None:

@@ -2,3 +2,4 @@ name: press.io home
 url: https://press.io
 link:
   tracking: false
+  class: external-link
