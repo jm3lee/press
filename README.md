@@ -133,5 +133,6 @@ build. Use `--src DIR` to search a different directory for `.yml` files and
 - [include-filter](docs/include-filter.md)
 - [preprocess](docs/preprocess.md)
 - [picasso](docs/picasso.md)
+- [gen-markdown-index](docs/gen-markdown-index.md)
 - [Nginx Dockerfile](docs/nginx.md)
 - [docker-make](docs/docker-make.md)

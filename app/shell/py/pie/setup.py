@@ -22,6 +22,7 @@ setup(
             'render-template=pie.render_template:main',
             'render-study-json=pie.render_study_json:main',
             'include-filter=pie.include_filter:main',
+            'gen-markdown-index=pie.gen_markdown_index:main',
         ],
     },
 )
