@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+"""Check that HTML files contain non-empty <h1> tags."""
+import sys
+from pathlib import Path
+from bs4 import BeautifulSoup
+
+
+def check_file(path: Path) -> bool:
+    with open(path, "r", encoding="utf-8") as f:
+        soup = BeautifulSoup(f, "html.parser")
+    h1 = soup.find("h1")
+    if h1 is None or not h1.get_text(strip=True):
+        print(f"Missing or empty <h1> in {path}")
+        return False
+    return True
+
+
+def main(argv: list[str]) -> int:
+    directory = Path(argv[0]) if argv else Path("build")
+    html_files = list(directory.rglob("*.html"))
+    ok = True
+    for html_file in html_files:
+        if not check_file(html_file):
+            ok = False
+    if ok:
+        print("All pages have <h1> titles.")
+        return 0
+    return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))

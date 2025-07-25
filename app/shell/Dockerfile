@@ -49,6 +49,7 @@ ENV LANG=en_US.UTF-8 \
 COPY ./py /press/py
 # Install all Press plugins in one step
 RUN pip install --break-system-packages \
+        beautifulsoup4 \
         -e /press/py/pie \
         -r /press/py/pie/requirements.txt \
         -r /press/py/xmera/backend/requirements.txt \
