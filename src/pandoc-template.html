@@ -4,9 +4,35 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta charset="utf-8" />
         <title>$title$</title>
-        <!-- Pandoc's metadata block: Allows you to insert any meta tags specified in the document's metadata. -->
+        <!--
+        Example metadata block for social tags used by Pandoc:
+        ---
+        title: "Example Page"
+        description: "Page description."
+        og_image: "/img/example.png"
+        url: "https://example.com/example"
+        meta:
+          - property: og:title
+            content: "Example Page"
+          - property: og:description
+            content: "Page description."
+          - property: og:image
+            content: "/img/example.png"
+          - property: og:url
+            content: "https://example.com/example"
+          - name: twitter:card
+            content: summary_large_image
+          - name: twitter:title
+            content: "Example Page"
+          - name: twitter:description
+            content: "Page description."
+          - name: twitter:image
+            content: "/img/example.png"
+        ---
+        -->
+        <!-- Pandoc's metadata block: values come from the document's YAML front matter -->
         $for(meta)$
-        <meta name="$meta.key$" content="$meta.value$" />
+        <meta$if(meta.name)$ name="$meta.name$"$endif$$if(meta.property)$ property="$meta.property$"$endif$ content="$meta.content$" />
         $endfor$
 
         <!-- If you supply multiple CSS files via metadata -->
