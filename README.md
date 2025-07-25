@@ -13,8 +13,8 @@ The build relies on three cooperating Makefiles:
   builds.
 - **`app/shell/mk/build.mk`** – executed by `make` inside the shell container to
   generate the site.
-- **`app/shell/mk/dep.mk`** – optional, included by `build.mk` for project
-  specific dependencies.
+- **`dep.mk`** – optional file included by `build.mk` for custom dependencies.
+  See [docs/dep-mk.md](docs/dep-mk.md).
 
 ## Quickstart
 
