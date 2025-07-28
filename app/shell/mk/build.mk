@@ -72,7 +72,7 @@ CSS := $(wildcard src/*.css)
 CSS := $(patsubst src/%.css,build/%.css, $(CSS))
 
 # Define the default target to build everything
-.PHONY: all build-message
+.PHONY: all
 all: | build $(BUILD_SUBDIRS)
 all: $(HTMLS)
 all: $(CSS)
