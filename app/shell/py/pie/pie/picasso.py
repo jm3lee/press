@@ -46,6 +46,7 @@ def generate_rule(
     return f"""
 {preprocessed_yml}: {input_path}
 	$(Q)emojify < $< > $@
+	$(Q)process-yaml $< $@
 {output_html}: {preprocessed_md} {preprocessed_yml}
 	$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) --metadata-file={preprocessed_yml} -o $@ $<
 	$(Q)python3 -m pie.error_on_python_dict $@
