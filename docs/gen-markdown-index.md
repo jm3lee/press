@@ -1,11 +1,19 @@
 # gen-markdown-index
 
-Generate a simple Markdown list from `index.json`.
+Generate a Jinja formatted list from `index.json`.
 
 ```
 usage: gen-markdown-index <index.json>
 ```
 
-The command reads the JSON index file produced by `build-index` and prints
-a bullet list of links sorted by the `name` field. If an entry contains
-an `icon` value it is prefixed to the link text.
+The command reads the JSON index file produced by `build-index` and prints a
+bullet list where each item is a Jinja expression. When a metadata entry
+provides a `link.tracking` value it is preserved so the rendered HTML uses
+`rel="noopener noreferrer"` and `target="_blank"` when set to `false`.
+Entries are sorted by the `name` field and icons are included when present.
+
+Example output:
+
+```jinja
+- {{ {"citation": "Example", "url": "/ex", "link": {"tracking": false}} | linktitle }}
+```
