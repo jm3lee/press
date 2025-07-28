@@ -19,7 +19,7 @@ setup(
         'console_scripts': [
             'build-index=pie.build_index:main',
             'picasso=pie.picasso:main',
-            'render-template=pie.render_template:main',
+            'render-jinja-template=pie.render_jinja_template:main',
             'render-study-json=pie.render_study_json:main',
             'include-filter=pie.include_filter:main',
             'gen-markdown-index=pie.gen_markdown_index:main',

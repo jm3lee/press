@@ -15,7 +15,7 @@ Each input file is processed in place:
 
 1. **Expand includes** – `include-filter` runs three times to resolve nested
    `include()` blocks and render Mermaid diagrams.
-2. **Render links** – `render-template build/static/index.json` converts
+2. **Render links** – `render-jinja-template build/static/index.json` converts
    special link syntax using the build index.
 3. **Emoji conversion** – `emojify` replaces `:emoji:` codes with Unicode
    characters.

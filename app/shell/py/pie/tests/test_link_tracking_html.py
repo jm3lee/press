@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 
 import pytest
 import yaml
-from pie import render_template
+from pie import render_jinja_template as render_template
 
 
 def _collect_tracking_disabled_urls(src_root: Path) -> list[str]:
