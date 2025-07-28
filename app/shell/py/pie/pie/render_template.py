@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+"""Helper filters and globals for rendering Jinja templates.
+
+This module exposes a set of Jinja2 filters and global functions used by the
+press build scripts.  It can also be executed as a small CLI to render a
+template using variables loaded from ``index.json``.
+"""
+
 import json
 import os
 import re
@@ -11,12 +18,20 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from xmera.utils import read_json, read_utf8
 from pie.utils import add_file_logger, logger
 
-index_json = None  # See main().
+index_json = None  # Loaded in :func:`main`.
 
 _whitespace_word_pattern = re.compile(r"(\S+)")
 
 
 def get_tracking_options(desc):
+    """Return HTML attributes for link tracking behaviour.
+
+    The metadata dictionary ``desc`` may contain ``link.tracking``. When this
+    value is ``False`` the returned string includes ``rel`` and ``target``
+    attributes so external links open in a new tab without leaking referrer
+    information.  Otherwise an empty string is returned.
+    """
+
     link = desc.get("link")
     if link is not None:
         tracking = link.get("tracking")
@@ -26,6 +41,8 @@ def get_tracking_options(desc):
 
 
 def get_link_class(desc):
+    """Return the CSS class to use for a link."""
+
     if "link" in desc:
         link_options = desc["link"]
         if isinstance(link_options, dict) and "class" in link_options:
@@ -177,6 +194,8 @@ def process_directory(root_dir: str) -> None:
 
 
 def get_origins(name):
+    """Yield origin references for the given entry ``name``."""
+
     j = index_json[name]
     for i in j["origins"]:
         if i in index_json:
@@ -186,6 +205,8 @@ def get_origins(name):
 
 
 def get_insertions(name):
+    """Yield insertion references for ``name``."""
+
     j = index_json[name]
     for i in j["insertions"]:
         if i in index_json:
@@ -195,16 +216,22 @@ def get_insertions(name):
 
 
 def get_actions(name):
+    """Yield actions associated with ``name`` from ``index_json``."""
+
     j = index_json[name]
     yield from j["actions"]
 
 
 def get_translations(name):
+    """Yield key/value translation pairs for ``name``."""
+
     j = index_json[name]
     yield from j["translations"].items()
 
 
 def get_desc(name):
+    """Return the metadata entry for ``name`` or ``name`` itself."""
+
     d = index_json.get(name)
     if d:
         return d
@@ -212,21 +239,29 @@ def get_desc(name):
 
 
 def render_jinja(snippet):
+    """Render a Jinja snippet using the current environment."""
+
     logger.info(snippet)
     return env.from_string(snippet).render(**index_json)
 
 
 def to_alpha_index(i):
+    """Convert ``0``–``3`` to ``a``–``d``."""
+
     return ("a", "b", "c", "d")[i]
 
 
 def read_yaml(filename):
+    """Read ``filename`` as YAML and yield the ``toc`` sequence."""
+
     y = yaml.safe_load(read_utf8(filename))
     logger.info(y["toc"])
     yield from y["toc"]
 
 
 def create_env():
+    """Create and configure the Jinja2 environment."""
+
     env = Environment(loader=FileSystemLoader("/data"), undefined=StrictUndefined)
     env.filters["link"] = link
     env.filters["linktitle"] = linktitle
