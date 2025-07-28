@@ -2,7 +2,8 @@
 
 The template environment provides several helper functions that can be invoked
 from any Jinja template. They expose metadata from the build index or offer
-small utilities used during rendering.
+small utilities used during rendering. See [Metadata Fields](metadata-fields.md)
+for details on the structure of this metadata.
 
 ## Available Globals
 

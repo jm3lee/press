@@ -1,6 +1,6 @@
 # Key Terms Data Flow
 
-This document explains how the `keyterms.json` file is transformed into the final `keyterms.html` page.
+This document explains how the `keyterms.json` file is transformed into the final `keyterms.html` page. See [Metadata Fields](metadata-fields.md) for a description of the metadata associated with each term.
 
 ## Source JSON
 

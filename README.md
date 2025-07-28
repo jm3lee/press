@@ -117,6 +117,8 @@ If you don’t provide these, Pandoc (or your build tooling) will generate them 
 - `id`: A unique identifier for cross-document linking (e.g., when using Jinja templates).
 - `citation`: The default inline text used for hyperlinks to this document.
 
+See [docs/metadata-fields.md](docs/metadata-fields.md) for a complete list of supported fields and defaults.
+
 ### Examples
 - **Sidecar metadata**  
   Store metadata in `index.yml` and content in `index.md`.  
