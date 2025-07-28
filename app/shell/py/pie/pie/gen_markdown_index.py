@@ -1,25 +1,31 @@
-"""Generate a Markdown list from an index JSON file."""
+"""Generate a Jinja list from an index JSON file."""
 
 from __future__ import annotations
 
 import argparse
 from typing import Iterable, Mapping, List
+import json
 
 from xmera.utils import read_json
 from pie.utils import add_file_logger, logger
 
 
 def generate_lines(index: Mapping[str, Mapping[str, str]]) -> List[str]:
-    """Return Markdown list items sorted by the ``name`` field."""
+    """Return Jinja list items sorted by the ``name`` field."""
     lines: List[str] = []
     for _, item in sorted(index.items(), key=lambda p: p[1]["name"]):
-        name = item["name"]
-        url = item["url"]
+        desc = {
+            "citation": item["name"],
+            "url": item["url"],
+        }
         icon = item.get("icon")
-        if icon:
-            lines.append(f"- [{icon} {name}]({url})")
-        else:
-            lines.append(f"- [{name}]({url})")
+        if icon is not None:
+            desc["icon"] = icon
+        link = item.get("link")
+        if isinstance(link, dict) and "tracking" in link:
+            desc["link"] = {"tracking": link["tracking"]}
+        snippet = "{{ " + json.dumps(desc, ensure_ascii=False) + " | linktitle }}"
+        lines.append(f"- {snippet}")
     return lines
 
 
