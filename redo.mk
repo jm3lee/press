@@ -33,8 +33,8 @@ status = @echo "==> $(1)"
 # Define the default target to build everything
 .PHONY: all
 all: ## Build the site by invoking /app/mk/build.mk inside the shell container
-	$(call status,Build site)
-	$(Q)$(MAKE_CMD) -f /app/mk/build.mk
+        $(call status,Build site)
+        $(Q)$(MAKE_CMD) -f /app/mk/build.mk VERBOSE=$(VERBOSE)
 
 build: ## Helper target used by other rules
 	$(call status,Prepare build directory $@)
@@ -59,8 +59,8 @@ docker: test ## Build and push the Nginx image after running test
 
 .PHONY: test
 test: ## Restart nginx-dev and run tests
-	$(call status,Run tests)
-	$(Q)$(MAKE_CMD) -f /app/mk/build.mk test
+        $(call status,Run tests)
+        $(Q)$(MAKE_CMD) -f /app/mk/build.mk VERBOSE=$(VERBOSE) test
 
 # Target to bring up the development Nginx container
 .PHONY: up
@@ -143,6 +143,6 @@ pytest:
 
 .PHONY: t
 t: ## Restart nginx-dev and run tests, ansi colors
-	$(call status,Run tests with colors)
-	$(Q)docker compose run --entrypoint make --rm shell -f /app/mk/build.mk test
+        $(call status,Run tests with colors)
+        $(Q)docker compose run --entrypoint make --rm shell -f /app/mk/build.mk VERBOSE=$(VERBOSE) test
 	$(Q)docker compose run --entrypoint pytest --rm shell /press/py/pie/tests
