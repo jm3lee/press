@@ -53,6 +53,12 @@ r setup   # build images and prepare volumes
 r up      # start the development stack
 ```
 
+Set `VERBOSE=1` to see the actual commands executed by `make`:
+
+```bash
+r up VERBOSE=1
+```
+
 ### Shut down the stack
 
 ```bash
