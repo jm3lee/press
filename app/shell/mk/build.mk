@@ -73,13 +73,10 @@ CSS := $(patsubst src/%.css,build/%.css, $(CSS))
 
 # Define the default target to build everything
 .PHONY: all build-message
-all: build-message | build $(BUILD_SUBDIRS)
+all: | build $(BUILD_SUBDIRS)
 all: $(HTMLS)
 all: $(CSS)
 all: build/static/index.json
-
-build-message:
-	$(call status,Build site)
 
 .PRECIOUS: build/static/index.json
 # See docs/build-index.md for how the index is generated.
