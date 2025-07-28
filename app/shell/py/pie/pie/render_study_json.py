@@ -16,7 +16,7 @@ from typing import Any, Iterable, List
 from xmera.utils import read_json
 from pie.utils import add_file_logger, logger
 
-from .render_template import create_env
+from .render_jinja_template import create_env
 
 
 def render_study(index: dict[str, Any], questions: Iterable[dict[str, Any]]) -> List[dict[str, Any]]:

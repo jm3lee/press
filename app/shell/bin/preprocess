@@ -22,7 +22,7 @@ process_file() {
     done
 
     # Render links
-    render-template build/static/index.json "$output" > "$output.$$"
+    render-jinja-template build/static/index.json "$output" > "$output.$$"
     mv "$output.$$" "$output"
     if [ $DEBUG -eq 1 ]; then cat "$output"; fi
 

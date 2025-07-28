@@ -1,5 +1,5 @@
 import pytest
-from pie import render_template
+from pie import render_jinja_template as render_template
 
 
 def test_default_class():

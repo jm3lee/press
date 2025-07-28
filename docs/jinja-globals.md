@@ -15,6 +15,6 @@ small utilities used during rendering.
 - `read_json(path)` – read and parse a JSON file.
 - `read_yaml(path)` – read YAML and yield the sequence stored under `toc`.
 
-These helpers live in `app/shell/py/pie/pie/render_template.py` and are
+These helpers live in `app/shell/py/pie/pie/render_jinja_template.py` and are
 registered with the Jinja environment by `create_env()`.
 
