@@ -17,12 +17,6 @@ if 'xmera' not in sys.modules:
     sys.modules['xmera.utils'] = utils
     sys.modules['xmera.logger'] = xmera.logger
 
-if 'yaml' not in sys.modules:
-    yaml = types.ModuleType('yaml')
-    yaml.safe_load = lambda c: json.loads(c if isinstance(c, str) else c.read())
-    yaml.YAMLError = Exception
-    sys.modules['yaml'] = yaml
-
 # Simple templating fallback used when jinja2 is unavailable
 class _Template:
     _pattern = re.compile(r"{{([^{}]+)}}")

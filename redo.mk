@@ -106,7 +106,8 @@ buildx: ## Run Docker buildx
 
 .PHONY: pytest
 pytest:
-	docker compose run --entrypoint pytest --rm shell /press/py/pie/tests
+	# Add option -s to see stdout.
+	docker compose run --entrypoint pytest --rm shell -vvv /press/py/pie/tests
 
 .PHONY: t
 t: ## Restart nginx-dev and run tests, ansi colors

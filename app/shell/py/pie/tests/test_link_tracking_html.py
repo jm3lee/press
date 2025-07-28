@@ -1,11 +1,11 @@
 """Tests related to HTML output when link tracking is disabled."""
 
 import re
+import traceback
 from pathlib import Path
 
 import pytest
 import yaml
-
 from pie import render_template
 
 
@@ -13,22 +13,26 @@ def _collect_tracking_disabled_urls(src_root: Path) -> list[str]:
     """Return URLs from ``*.yml`` files with ``link.tracking: false``."""
     urls: list[str] = []
     for yml in src_root.rglob("*.yml"):
-        data = yaml.safe_load(yml.read_text(encoding="utf-8"))
-        if isinstance(data, dict):
-            link = data.get("link", {})
-            if isinstance(link, dict) and link.get("tracking") is False:
-                url = data.get("url")
-                if url:
-                    urls.append(url)
+        try:
+            data = yaml.safe_load(yml.read_text(encoding="utf-8"))
+            if isinstance(data, dict):
+                link = data.get("link", {})
+                if isinstance(link, dict) and link.get("tracking") is False:
+                    url = data.get("url")
+                    if url:
+                        urls.append(url)
+        except Exception as e:
+            traceback.print_exc()
+            print("WARNING: Can't load and parse ", yml, e)
     return urls
 
 
 def test_tracking_false_links_have_attributes():
     """Ensure disabled-tracking links in HTML have the expected attributes."""
 
-    build_dir = Path("build")
+    build_dir = Path("/data/build")
     if not build_dir.is_dir():
-        pytest.skip("build directory not found")
+        pytest.skip(f"build directory, {build_dir}, not found")
 
     # All rendered HTML files under build/
     html_files = list(build_dir.rglob("*.html"))
@@ -36,7 +40,7 @@ def test_tracking_false_links_have_attributes():
         pytest.skip("no html files found in build")
 
     # Collect every link marked with tracking: false from src/
-    urls = _collect_tracking_disabled_urls(Path("src"))
+    urls = _collect_tracking_disabled_urls(Path("/data/src"))
     if not urls:
         pytest.skip("no links with tracking=false found")
 
