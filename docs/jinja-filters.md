@@ -1,6 +1,6 @@
 # Jinja Filters for Link Formatting
 
-Several build scripts provide custom Jinja filters that transform Markdown links. They operate on strings of the form `[text](url)` and return HTML anchors. This document describes the `linktitle` filter which capitalizes every word in the link text.
+Several build scripts provide custom Jinja filters that transform Markdown links. They operate on strings of the form `[text](url)` and return HTML anchors. This document describes the `linktitle` filter which capitalizes every word in the link text. For an overview of the metadata fields used by these filters, see [Metadata Fields](metadata-fields.md).
 
 ## `linktitle`
 

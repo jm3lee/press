@@ -1,6 +1,6 @@
 # Link Metadata Files
 
-This document explains how to describe external links using YAML files and how the build scripts interpret them.
+This document explains how to describe external links using YAML files and how the build scripts interpret them. A list of all metadata keys can be found in [Metadata Fields](metadata-fields.md).
 
 ## Creating a Metadata File
 
