@@ -4,6 +4,8 @@ import re
 import traceback
 from pathlib import Path
 
+from bs4 import BeautifulSoup
+
 import pytest
 import yaml
 from pie import render_template
@@ -45,17 +47,25 @@ def test_tracking_false_links_have_attributes():
         pytest.skip("no links with tracking=false found")
 
     expected_attrs = render_template.get_tracking_options({"link": {"tracking": False}})
+    attrs = dict(re.findall(r'(\w+)="([^"]+)"', expected_attrs))
+    expected_rel = attrs.get("rel")
+    expected_target = attrs.get("target")
 
     for url in urls:
-        # Look for anchor tags with this href across all HTML files
-        pattern = rf'<a[^>]*href="{re.escape(url)}"[^>]*>'
         found = False
         for html_path in html_files:
-            html = html_path.read_text(encoding="utf-8")
-            anchors = re.findall(pattern, html)
+            with open(html_path, "r", encoding="utf-8") as f:
+                soup = BeautifulSoup(f, "html.parser")
+            anchors = soup.find_all("a", href=url)
             if anchors:
                 found = True
-                # Every occurrence should contain the expected attributes
                 for tag in anchors:
-                    assert expected_attrs in tag
+                    if expected_rel:
+                        rel_values = tag.get("rel", [])
+                        if isinstance(rel_values, str):
+                            rel_values = rel_values.split()
+                        for value in expected_rel.split():
+                            assert value in rel_values
+                    if expected_target:
+                        assert tag.get("target") == expected_target
         assert found, f"Link to {url} not found"
