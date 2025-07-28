@@ -60,3 +60,22 @@ def test_main_writes_log_file(tmp_path):
     gen_markdown_index.main([str(index_path), "--log", str(log_path)])
 
     assert log_path.exists()
+
+
+def test_generate_lines_nested_dirs():
+    index = {
+        "foo": {"name": "Foo", "url": "/jp/foo.html"},
+        "a": {"name": "A", "url": "/jp/a/index.html"},
+        "bar": {"name": "Bar", "url": "/jp/a/bar.html"},
+    }
+    lines = gen_markdown_index.generate_lines(index)
+    foo = {"citation": "Foo", "url": "/jp/foo.html"}
+    a = {"citation": "A", "url": "/jp/a/index.html"}
+    bar = {"citation": "Bar", "url": "/jp/a/bar.html"}
+    expected = [
+        "- {{ " + json.dumps(a, ensure_ascii=False) + " | linktitle }}",
+        "  - {{ " + json.dumps(bar, ensure_ascii=False) + " | linktitle }}",
+        "- {{ " + json.dumps(foo, ensure_ascii=False) + " | linktitle }}",
+    ]
+    assert lines == expected
+
