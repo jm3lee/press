@@ -45,6 +45,7 @@ def generate_rule(
 
     return f"""
 {preprocessed_yml}: {input_path}
+	$(Q)mkdir -p $(dir {preprocessed_yml})
 	$(Q)emojify < $< > $@
 	$(Q)process-yaml $< $@
 {output_html}: {preprocessed_md} {preprocessed_yml}
