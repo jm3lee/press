@@ -83,3 +83,20 @@ def test_main_writes_log_file(tmp_path):
 
     assert outfile.exists()
     assert log.exists()
+
+
+def test_yield_lines_reads_until_fence():
+    f = io.StringIO("one\ntwo\n```\nthree\n")
+    lines = list(include_filter.yield_lines(f))
+    assert lines == ["one\n", "two\n"]
+    assert f.readline() == "three\n"
+
+
+def test_parse_args_parses_all_options():
+    args = include_filter.parse_args([
+        "out", "in.md", "out.md", "--log", "log.txt"
+    ])
+    assert args.outdir == "out"
+    assert args.infile == "in.md"
+    assert args.outfile == "out.md"
+    assert args.log == "log.txt"
