@@ -7,7 +7,9 @@ def test_generate_rule_basic():
     rule = picasso.generate_rule(Path("src/foo/bar.yml")).strip()
     expected = (
         "build/foo/bar.yml: src/foo/bar.yml\n"
+        "\t$(Q)mkdir -p $(dir build/foo/bar.yml)\n"
         "\t$(Q)emojify < $< > $@\n"
+        "\t$(Q)process-yaml $< $@\n"
         "build/foo/bar.html: build/foo/bar.md build/foo/bar.yml\n"
         "\t$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) --metadata-file=build/foo/bar.yml -o $@ $<\n"
         "\t$(Q)python3 -m pie.error_on_python_dict $@"

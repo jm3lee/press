@@ -1,62 +1,30 @@
-import json
-from pie import gen_markdown_index
+import subprocess
+from pathlib import Path
+
+# Path to the CLI script relative to this file
+SCRIPT = Path(__file__).resolve().parents[5] / "app" / "shell" / "bin" / "gen-markdown-index"
 
 
-def test_generate_lines_sorted_and_icon():
-    index = {
-        "b": {"name": "Beta", "url": "/b"},
-        "a": {
-            "name": "Alpha",
-            "url": "/a",
-            "icon": "*",
-            "link": {"tracking": False},
-        },
-    }
-    lines = gen_markdown_index.generate_lines(index)
-    expected_a = {
-        "citation": "Alpha",
-        "url": "/a",
-        "icon": "*",
-        "link": {"tracking": False},
-    }
-    expected_b = {
-        "citation": "Beta",
-        "url": "/b",
-    }
-    expected_lines = [
-        "- {{ " + json.dumps(expected_a, ensure_ascii=False) + " | linktitle }}",
-        "- {{ " + json.dumps(expected_b, ensure_ascii=False) + " | linktitle }}",
+def run_script(path: Path) -> str:
+    result = subprocess.run(
+        [str(SCRIPT), str(path)],
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    return result.stdout.strip()
+
+
+def test_nested_directory_listing(tmp_path):
+    (tmp_path / "a.yml").write_text("id: a\ntitle: Alpha\n")
+    sub = tmp_path / "sub"
+    sub.mkdir()
+    (sub / "index.yml").write_text("id: sub\ntitle: Sub\n")
+    (sub / "b.yml").write_text("id: b\ntitle: Beta\n")
+
+    output = run_script(tmp_path)
+    assert output.splitlines() == [
+        "- {{a|linktitle}}",
+        "- {{sub|linktitle}}",
+        "  - {{b|linktitle}}",
     ]
-    # - {{ {"citation": "Alpha", "url": "/a", "icon": "*", "link": {"tracking": false}} | linktitle }}
-    # - {{ {"citation": "Beta", "url": "/b"} | linktitle }}
-    assert lines == expected_lines
-
-
-def test_main_outputs_lines(tmp_path, capsys):
-    data = {
-        "item": {
-            "name": "Foo",
-            "url": "/foo",
-            "link": {"tracking": False},
-        }
-    }
-    path = tmp_path / "index.json"
-    path.write_text(json.dumps(data))
-
-    gen_markdown_index.main([str(path)])
-    out = capsys.readouterr().out.strip()
-    desc = {"citation": "Foo", "url": "/foo", "link": {"tracking": False}}
-    expected = "- {{ " + json.dumps(desc, ensure_ascii=False) + " | linktitle }}"
-    # - {{ {"citation": "Foo", "url": "/foo", "link": {"tracking": false}} | linktitle }}
-    assert out == expected
-
-
-def test_main_writes_log_file(tmp_path):
-    data = {"item": {"name": "Foo", "url": "/foo"}}
-    index_path = tmp_path / "index.json"
-    log_path = tmp_path / "index.log"
-    index_path.write_text(json.dumps(data))
-
-    gen_markdown_index.main([str(index_path), "--log", str(log_path)])
-
-    assert log_path.exists()
