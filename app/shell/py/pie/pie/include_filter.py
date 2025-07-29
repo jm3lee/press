@@ -69,6 +69,20 @@ def include(filename: str) -> None:
             print(line, end="", file=outfile)
 
 
+def include_deflist_entry(filename: str) -> None:
+    """Insert the contents of another Markdown file."""
+
+    logger.info("include_deflist_entry", filename=filename)
+    with open(filename, "r", encoding="utf-8") as f:
+        metadata = parse_metadata_or_print_first_line(f)
+        if metadata and metadata.get("title"):
+            print("<dt>" + metadata["title"] + "</dt>", file=outfile)
+        print("<dd>", file=outfile)
+        for line in f:
+            print(line, end="", file=outfile)
+        print("</dd>", file=outfile)
+
+
 def yield_lines(infile: IO[str]) -> Iterable[str]:
     """Yield lines from *infile* until the next closing code fence."""
 
