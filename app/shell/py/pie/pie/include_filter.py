@@ -11,13 +11,18 @@ directly to Pandoc.  The command is primarily driven via ``preprocess`` and the
 ``build.mk`` makefile.
 """
 
+from __future__ import annotations
+
+import argparse
 import os
 import re
 import sys
-import argparse
+from typing import IO, Iterable
 
 import yaml
 from pie.utils import add_file_logger, logger
+
+MD_LINK_PATTERN = re.compile(r"\[([^\]]+)\]\(([^)]+)\.md\)")
 
 figcount = 0
 heading_level = 0
@@ -29,7 +34,15 @@ outfile = None
 infile = None
 
 
-def parse_metadata_or_print_first_line(f):
+def parse_metadata_or_print_first_line(f: IO[str]) -> dict | None:
+    """Return YAML front matter from *f* or echo the first line.
+
+    If the provided file object begins with a YAML front matter block delimited
+    by ``---`` lines, the parsed dictionary is returned.  Otherwise the first
+    line of the file is written unchanged to :data:`outfile` and ``None`` is
+    returned.
+    """
+
     for line in f:
         if line.strip() == "---":
             y = ""
@@ -38,12 +51,13 @@ def parse_metadata_or_print_first_line(f):
                     break
                 y += line
             return yaml.safe_load(y)
-        else:
-            print(line, end="", file=outfile)
-            break
+        print(line, end="", file=outfile)
+        break
 
 
-def include(filename):
+def include(filename: str) -> None:
+    """Insert the contents of another Markdown file."""
+
     logger.info("include", filename=filename)
     with open(filename, "r", encoding="utf-8") as f:
         metadata = parse_metadata_or_print_first_line(f)
@@ -55,22 +69,18 @@ def include(filename):
             print(line, end="", file=outfile)
 
 
-def yield_lines(infile):
+def yield_lines(infile: IO[str]) -> Iterable[str]:
+    """Yield lines from *infile* until the next closing code fence."""
+
     for line in infile:
         if line.strip() == "```":
             break
         yield line
 
 
-def eval_code():
-    for line in infile:
-        if line.strip() == "```":
-            break
-        else:
-            eval(line)
+def new_filestem(stem: str) -> str:
+    """Return *stem* with a numeric suffix that doesn't clash with existing files."""
 
-
-def new_filestem(stem):
     counter = 0
     while os.path.exists(f"{stem}{counter}.svg") or os.path.exists(
         f"{stem}{counter}.mmd"
@@ -79,7 +89,9 @@ def new_filestem(stem):
     return f"{stem}{counter}"
 
 
-def mermaid(mmd_filename, alt_text, ref_id):
+def mermaid(mmd_filename: str, alt_text: str, ref_id: str) -> None:
+    """Convert a Mermaid diagram to an image and write a Markdown reference."""
+
     logger.info("Processing mermaid file", filename=mmd_filename)
     global figcount
     stem = new_filestem(f"{outdir}/diagram")
@@ -101,15 +113,10 @@ def mermaid(mmd_filename, alt_text, ref_id):
     figcount += 1
 
 
-def md_to_html_links(line):
-    # Compile a pattern that captures:
-    # 1) The link text inside [   ]
-    # 2) The link URL (without .md) inside (   )
-    pattern = re.compile(r"\[([^\]]+)\]\(([^)]+)\.md\)")
+def md_to_html_links(line: str) -> str:
+    """Replace ``.md`` links in *line* with ``.html`` versions."""
 
-    # Use a replacement with the captured groups, changing `.md` to `.html`
-    result = pattern.sub(r"[\1](\2.html)", line)
-    return result
+    return MD_LINK_PATTERN.sub(r"[\1](\2.html)", line)
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -130,9 +137,15 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def main(argv: list[str] | None = None) -> None:
-    """Process a Markdown file and expand custom directives."""
+    """Process a Markdown file and expand custom directives.
 
-    global outdir, infilename, outfilename, infile, outfile
+    ``include-filter`` is primarily used by the build scripts.  It executes any
+    ``python`` fenced blocks in the input and writes the resulting Markdown to
+    ``outfile``.  Links ending in ``.md`` are rewritten so that Pandoc can
+    convert the file directly to HTML.
+    """
+
+    global outdir, infilename, outfilename, infile, outfile, heading_level
 
     args = parse_args(argv)
 
@@ -163,3 +176,7 @@ def main(argv: list[str] | None = None) -> None:
                     heading_level = len(parts[0])
                 line = md_to_html_links(line)
                 print(line, end="", file=outfile)
+
+
+if __name__ == "__main__":
+    main()
