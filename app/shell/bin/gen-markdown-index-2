@@ -32,31 +32,12 @@ def visit(directory):
                 if os.path.isfile(os.path.join(p, 'index.yml')):
                     meta = extract_metadata(os.path.join(p, 'index.yml'))
                     yield (meta['id'], meta['title'], p)
-            elif os.path.isfile(p) and p.endswith('.yml') and not p.endswith("/index.yml"):
+            elif os.path.isfile(p) and p.endswith('.yml') and filename != 'index.yml':
                 meta = extract_metadata(p)
                 yield (meta['id'], meta['title'], p)
         except Exception as e:
             warnings.warn(f"Failed to process {p}")
             raise
-
-def print_index_entry(directory):
-    """
-    Print the index entry for a directory, if index.md and index.yml exist.
-
-    Args:
-        directory (str): Path to the directory.
-    """
-    index_md = os.path.join(directory, 'index.md')
-    index_yml = os.path.join(directory, 'index.yml')
-    if os.path.isfile(index_md) and os.path.isfile(index_yml):
-        meta = extract_metadata(index_yml)
-        if meta:
-            entry_id = meta.get('id')
-            entry_title = meta.get('title')
-            if entry_id and entry_title:
-                print('  ' * level + f'- {{{{{entry_id}|linktitle}}}}')
-            else:
-                warnings.warn(f"Missing 'id' in: {index_yml}")
 
 def process_dir(directory):
     """
