@@ -26,3 +26,11 @@
 
 ## Quiz Example
 {{quiz|linktitle}}
+
+## include-filter example
+
+`dist/` content:
+
+```python
+include("build/static/index/dist.md")
+```

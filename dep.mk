@@ -11,3 +11,5 @@ build/static/index/dist.md: $(patsubst src/%,build/%,$(DIST_YAMLS)) | build/stat
 	gen-markdown-index-2 build/dist > $@
 	emojify < $@ > $@.tmp
 	mv $@.tmp $@
+
+build/index.html: build/static/index/dist.md

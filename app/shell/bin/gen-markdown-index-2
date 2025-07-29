@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
 import os
-import yaml
 import warnings
+
+import yaml
 
 # Tracks the depth of directory traversal for indentation
 level = 0
+
 
 def extract_metadata(filepath):
     """
@@ -18,26 +20,34 @@ def extract_metadata(filepath):
         dict or None: Parsed metadata dictionary, or None if invalid.
     """
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, "r", encoding="utf-8") as f:
             return yaml.safe_load(f) or {}
     except Exception as e:
         warnings.warn(f"Invalid YAML: {filepath} ({e})")
         return None
+
+
+def getopt_link(meta):
+    if meta.get("gen-markdown-index-2"):
+        return meta.get("gen-markdown-index-2").get("link", True)
+    return True
+
 
 def visit(directory):
     for filename in os.listdir(directory):
         try:
             p = os.path.join(directory, filename)
             if os.path.isdir(p):
-                if os.path.isfile(os.path.join(p, 'index.yml')):
-                    meta = extract_metadata(os.path.join(p, 'index.yml'))
-                    yield (meta['id'], meta['title'], p)
-            elif os.path.isfile(p) and p.endswith('.yml') and filename != 'index.yml':
+                if os.path.isfile(os.path.join(p, "index.yml")):
+                    meta = extract_metadata(os.path.join(p, "index.yml"))
+                    yield (meta["id"], meta["title"], p, getopt_link(meta))
+            elif os.path.isfile(p) and p.endswith(".yml") and filename != "index.yml":
                 meta = extract_metadata(p)
-                yield (meta['id'], meta['title'], p)
+                yield (meta["id"], meta["title"], p, getopt_link(meta))
         except Exception as e:
             warnings.warn(f"Failed to process {p}")
             raise
+
 
 def process_dir(directory):
     """
@@ -49,14 +59,21 @@ def process_dir(directory):
     global level
     for entry in sorted(list(visit(directory)), key=lambda x: x[1].lower()):
         entry_id = entry[0]
-        print('  ' * level + f'- {{{{{entry_id}|linktitle}}}}')
+        entry_title = entry[1]
+        entry_link = entry[3]
+        if entry_link:
+            print("  " * level + f"- {{{{{entry_id}|linktitle}}}}")
+        else:
+            print("  " * level + f"- {{{{'{entry_title}'|title}}}}")
         entry_path = entry[2]
         if os.path.isdir(entry_path):
             level += 1
             process_dir(entry_path)
             level -= 1
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     import sys
-    root_dir = sys.argv[1] if len(sys.argv) > 1 else '.'
+
+    root_dir = sys.argv[1] if len(sys.argv) > 1 else "."
     process_dir(root_dir)
