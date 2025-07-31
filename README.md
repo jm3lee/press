@@ -72,6 +72,8 @@ cp foo.png app/webp/input
 r webp
 ls app/webp/output
 ```
+See [docs/webp-service.md](docs/webp-service.md) for more about how the
+converter works.
 
 ## Wish List
 
@@ -145,4 +147,5 @@ build. Use `--src DIR` to search a different directory for `.yml` files and
 - [process-yaml](docs/process-yaml.md)
 - [Nginx Dockerfile](docs/nginx.md)
 - [docker-make](docs/docker-make.md)
+- [WebP Service](docs/webp-service.md)
 - [check-page-title](docs/check-page-title.md)
