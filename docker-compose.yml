@@ -51,14 +51,14 @@ services:
       - ./log:/app/log
 
   shell:
-    build: app/shell
+    build: dist/app/shell
     entrypoint: ["bash"]
     environment:
       OPENAI_API_KEY: "${OPENAI_API_KEY}"
     volumes:
       - ./:/data
-      - ./app/shell/mk:/app/mk
-      - ./app/shell/bin:/app/bin
-      - ./app/shell/py/pie/pie:/press/py/pie/pie
-      - ./app/shell/py/pie/tests:/press/py/pie/tests
-      - ./dep.mk:/app/mk/dep.mk
+      - ./dist/app/shell/mk:/app/mk
+      - ./dist/app/shell/bin:/app/bin
+      - ./dist/app/shell/py/pie/pie:/press/py/pie/pie
+      - ./dist/app/shell/py/pie/tests:/press/py/pie/tests
+      - ./dist/dep.mk:/app/mk/dep.mk
