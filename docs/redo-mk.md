@@ -31,7 +31,7 @@ This repository actually uses three Makefiles that work together:
 | `down` | Stops and removes the compose stack. |
 | `clean` | Removes everything under `build/`. |
 | `prune` | Runs `docker system prune -f` to clean unused Docker resources. |
-| `setup` | Builds the service framework image, prepares `app/webp` directories and builds all services. |
+| `setup` | Prepares `app/webp` directories and builds all services. |
 | `seed` | Runs the `seed` container to populate initial data. |
 | `sync` | Runs the `sync` container to upload site files to S3. |
 | `webp` | Runs the image conversion service. |

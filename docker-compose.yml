@@ -39,9 +39,6 @@ services:
     volumes:
       - ./s3:/s3
 
-  service-framework:
-    build: app/service-framework
-
   webp:
     build: app/webp
     entrypoint: ["/app/bin/service"]

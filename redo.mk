@@ -90,9 +90,7 @@ prune: ## Run docker system prune -f to clean unused resources
 	$(Q)docker system prune -f
 
 .PHONY: setup
-setup: ## Build the service framework image and prepare app/webp directories
-	$(call status,Build service-framework)
-	$(Q)docker compose build service-framework
+setup: ## Prepare app/webp directories and build all services
 	$(call status,Prepare webp directories)
 	$(Q)mkdir -p app/webp/input
 	$(Q)mkdir -p app/webp/output
