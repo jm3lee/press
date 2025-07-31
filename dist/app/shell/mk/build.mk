@@ -37,6 +37,7 @@ PANDOC_OPTS := \
 		--toc \
 		--toc-depth=2 \
 		--filter pandoc-crossref \
+		--mathjax \
 		--template=$(PANDOC_TEMPLATE) \
 
 # Options for generating PDF output with Pandoc
