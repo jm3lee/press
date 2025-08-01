@@ -147,3 +147,7 @@ t: ## Restart nginx-dev and run tests, ansi colors
 	$(call status,Run tests with colors)
 	$(Q)$(DOCKER_COMPOSE) run --entrypoint make --rm shell -f /app/mk/build.mk VERBOSE=$(VERBOSE) test
 	$(Q)$(DOCKER_COMPOSE) run --entrypoint pytest --rm shell /press/py/pie/tests
+
+.PHONY: t
+redis:
+	$(Q)$(DOCKER_COMPOSE) exec dragonfly redis-cli
