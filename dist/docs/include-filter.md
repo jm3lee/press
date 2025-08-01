@@ -18,8 +18,20 @@ include-filter <output-dir> <input> <output>
 Within fenced `python` blocks the following functions are available:
 
 - `include(path)` – insert another Markdown file and adjust heading levels
+- `include_deflist_entry(path)` – insert a Markdown file as a definition list
+  entry using its `title` metadata for the term
 - `mermaid(file, alt, id)` – convert a Mermaid code block into an image using
   `mmdc` and emit a Markdown image link
+
+Example:
+
+```markdown
+<dl>
+```python
+include_deflist_entry("src/dist/include-filter/a.md")
+```
+</dl>
+```
 
 Any links ending with `.md` are automatically rewritten to point at the
 corresponding `.html` file.
