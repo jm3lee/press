@@ -35,6 +35,10 @@ toc:
 This filter lives in `pie.render_jinja_template` and is also exposed by the
 `render-jinja-template` command.
 
+When you pass a string instead of a dictionary, the filters fetch the
+corresponding metadata from Redis. The lookup now retries a few times before
+aborting so templates are more resilient when entries are added concurrently.
+
 ## `linkcap`
 
 `linkcap` capitalizes only the first character of the `citation` text. It uses
