@@ -12,6 +12,7 @@ import os
 import re
 import sys
 import argparse
+import time
 
 import redis
 from flatten_dict import unflatten
@@ -104,7 +105,12 @@ def _load_desc(desc):
     """Return a metadata dict for ``desc`` using Redis lookups when needed."""
 
     if isinstance(desc, str):
-        data = _get_metadata(desc)
+        data = None
+        for _ in range(3):
+            data = _get_metadata(desc)
+            if data is not None:
+                break
+            time.sleep(0.5)
         if data is None:
             logger.error("Missing metadata", id=desc)
             raise SystemExit(1)
