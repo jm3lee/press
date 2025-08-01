@@ -13,6 +13,7 @@ import re
 import sys
 import argparse
 import time
+from pathlib import Path
 
 import redis
 from flatten_dict import unflatten
@@ -22,7 +23,10 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from xmera.utils import read_json, read_utf8
 from pie.utils import add_file_logger, logger
 
+DEFAULT_CONFIG = Path("cfg/render-jinja-template.yml")
+
 index_json = None  # Loaded in :func:`main`.
+config = {}
 redis_conn = None  # lazily initialised connection used by ``linktitle``.
 
 _whitespace_word_pattern = re.compile(r"(\S+)")
@@ -377,6 +381,23 @@ def read_yaml(filename):
     yield from y["toc"]
 
 
+def load_config(path: str | Path = DEFAULT_CONFIG) -> dict:
+    """Load configuration from *path* and return a dict."""
+
+    cfg_path = Path(path)
+    if not cfg_path.exists():
+        if cfg_path == DEFAULT_CONFIG:
+            return {}
+        logger.error("Configuration file not found", path=str(cfg_path))
+        raise SystemExit(1)
+    try:
+        with cfg_path.open("r", encoding="utf-8") as cf:
+            return yaml.safe_load(cf) or {}
+    except Exception as exc:
+        logger.error("Failed to load configuration", path=str(cfg_path), exception=str(exc))
+        raise SystemExit(1)
+
+
 def create_env():
     """Create and configure the Jinja2 environment."""
 
@@ -418,6 +439,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--log",
         help="Write logs to the specified file",
     )
+    parser.add_argument(
+        "-c",
+        "--config",
+        default=str(DEFAULT_CONFIG),
+        help="Path to YAML configuration file",
+    )
     return parser.parse_args(argv)
 
 
@@ -430,6 +457,8 @@ def main(argv: list[str] | None = None) -> None:
     if args.log:
         add_file_logger(args.log, level="DEBUG")
 
+    global config
+    config = load_config(args.config)
     index_json = read_json(args.index) if args.index else {}
     template = env.get_template(args.template)
     print(template.render(**index_json))
