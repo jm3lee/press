@@ -344,6 +344,9 @@ dd + dt {
 dd + dd {
   margin-top: 0.5em;
 }
+dd > p {
+  margin-top: 0;
+}
 ul.examples {
   list-style: none;
 }
