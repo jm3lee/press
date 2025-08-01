@@ -15,7 +15,7 @@
 ## Linking Using Jinja2
 
 ### linktitle
-{{quickstart|linktitle}}
+{{"quickstart"|linktitle}}
 
 ### link
 {{quickstart|link}}

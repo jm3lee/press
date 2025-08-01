@@ -84,7 +84,7 @@ def process_markdown(filepath: str) -> Optional[Dict[str, Any]]:
     """
     metadata = get_frontmatter(filepath)
     if metadata is None:
-        logger.warning("No frontmatter found in Markdown file", filename=filepath)
+        logger.debug("No frontmatter found in Markdown file", filename=filepath)
         return None
     metadata["url"] = get_url(filepath)
     return metadata
