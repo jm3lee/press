@@ -87,7 +87,7 @@ all: $(CSS)
 
 .update-index: $(MARKDOWNS) $(YAMLS)
 	$(call status,Updating Redis Index)
-	$(Q)update-index --host $(REDIS_HOST) --port $(REDIS_PORT) src
+	$(Q)for i in $(?); do update-index --host $(REDIS_HOST) --port $(REDIS_PORT) $$i; done
 	$(Q)touch $@
 
 # Target to minify HTML and CSS files
