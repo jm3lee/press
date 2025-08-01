@@ -4,7 +4,9 @@ Generate Makefile rules for processing ``.yml`` files with ``pandoc``.
 By default the script scans the ``src`` directory and writes rules that
 produce preprocessed ``.md`` and rendered ``.html`` files under ``build``.
 Both the source root and build root can be overridden via function
-parameters or command–line arguments.
+parameters or command–line arguments.  The script also emits dependency
+rules for cross-document links and ``include-filter`` directives so that
+changes to referenced files trigger a rebuild.
 """
 
 import argparse
@@ -58,6 +60,8 @@ def generate_rule(
 
 
 LINK_RE = re.compile(r"\{\{\s*[\"']([^\"']+)[\"']\s*\|\s*link[\w]*")
+PY_BLOCK_RE = re.compile(r"```python\n(.*?)```", re.DOTALL)
+INCLUDE_RE = re.compile(r"(?:include|include_deflist_entry|mermaid)\(\s*[\"']([^\"']+)[\"']")
 
 
 def collect_ids(src_root: Path) -> dict[str, Path]:
@@ -98,7 +102,7 @@ def collect_ids(src_root: Path) -> dict[str, Path]:
 
 
 def generate_dependencies(src_root: Path, build_root: Path) -> list[str]:
-    """Return Makefile dependency rules based on Jinja link references."""
+    """Return Makefile dependency rules based on Jinja links and include blocks."""
 
     id_map = collect_ids(src_root)
     rules: set[str] = set()
@@ -120,17 +124,29 @@ def generate_dependencies(src_root: Path, build_root: Path) -> list[str]:
             logger.warning("Failed to read file", file=str(path))
             continue
 
-        matches = LINK_RE.findall(text)
-        if not matches:
-            continue
-
         src_build = Path(build_path(path)).with_suffix(path.suffix)
-        for ref_id in matches:
+
+        # Jinja link references like {{"id"|link}}
+        for ref_id in LINK_RE.findall(text):
             ref_path = id_map.get(ref_id)
             if ref_path is None:
                 continue
             dep_build = Path(build_path(ref_path)).with_suffix(ref_path.suffix)
             rules.add(f"{src_build.as_posix()}: {dep_build.as_posix()}")
+
+        # ``include-filter`` blocks such as include("file.md")
+        for block in PY_BLOCK_RE.findall(text):
+            for dep in INCLUDE_RE.findall(block):
+                dep_path = Path(dep)
+                if not dep_path.is_absolute() and not dep.startswith(build_root.as_posix()):
+                    if dep_path.parts and dep_path.parts[0] == src_root.name:
+                        dep_full = src_root / Path(*dep_path.parts[1:])
+                    else:
+                        dep_full = src_root / dep_path
+                    dep_build = Path(build_path(dep_full)).with_suffix(dep_full.suffix).as_posix()
+                else:
+                    dep_build = dep_path.as_posix()
+                rules.add(f"{src_build.as_posix()}: {dep_build}")
 
     return sorted(rules)
 
