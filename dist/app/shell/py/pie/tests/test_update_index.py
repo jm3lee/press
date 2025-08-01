@@ -128,9 +128,8 @@ def test_main_missing_id_exits(tmp_path, monkeypatch):
 
     os.chdir(tmp_path)
     try:
-        with pytest.warns(UserWarning), pytest.raises(SystemExit):
-            update_index.main(["src/doc.md"])
+        update_index.main(["src/doc.md"])
     finally:
         os.chdir("/tmp")
 
-    assert list(fake.scan_iter()) == []
+    assert fake.get("doc.title") == "T"

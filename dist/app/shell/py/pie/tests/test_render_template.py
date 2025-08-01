@@ -1,4 +1,5 @@
 import pytest
+import fakeredis
 from pie import render_jinja_template as render_template
 
 
@@ -36,3 +37,25 @@ def test_missing_tracking_interpreted_as_false():
     desc = {"link": {}}
     opts = render_template.get_tracking_options(desc)
     assert opts == 'rel="noopener noreferrer" target="_blank"'
+
+
+def test_linktitle_uses_redis(monkeypatch):
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    fake.set("item.citation", "Item")
+    fake.set("item.url", "/i")
+    monkeypatch.setattr(render_template, "redis_conn", fake)
+    render_template.index_json = {}
+
+    html = render_template.linktitle("item")
+    assert '<a href="/i"' in html
+    assert ">Item<" in html
+
+
+def test_linktitle_fallback_index(monkeypatch):
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    monkeypatch.setattr(render_template, "redis_conn", fake)
+    render_template.index_json = {"foo": {"citation": "Foo", "url": "/f"}}
+
+    with pytest.warns(UserWarning):
+        html = render_template.linktitle("foo")
+    assert '<a href="/f"' in html

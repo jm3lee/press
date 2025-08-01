@@ -12,6 +12,9 @@ import os
 import re
 import sys
 import argparse
+import warnings
+
+import redis
 
 import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
@@ -19,8 +22,29 @@ from xmera.utils import read_json, read_utf8
 from pie.utils import add_file_logger, logger
 
 index_json = None  # Loaded in :func:`main`.
+redis_conn = None  # lazily initialised connection used by ``linktitle``.
 
 _whitespace_word_pattern = re.compile(r"(\S+)")
+
+
+def _get_redis_value(key: str):
+    """Return the decoded value for ``key`` from ``redis_conn`` or ``None``."""
+
+    global redis_conn
+    if redis_conn is None:
+        host = os.getenv("REDIS_HOST", "localhost")
+        port = int(os.getenv("REDIS_PORT", "6379"))
+        redis_conn = redis.Redis(host=host, port=port, decode_responses=True)
+    try:
+        val = redis_conn.get(key)
+    except Exception:
+        return None
+    if val is None:
+        return None
+    try:
+        return json.loads(val)
+    except Exception:
+        return val
 
 
 def get_tracking_options(desc):
@@ -54,7 +78,45 @@ def linktitle(desc):
     """
     Capitalize the first character of each word in the string,
     preserving ALL whitespace (spaces, tabs, newlines).
+
+    ``update-index`` inserts metadata into Redis with keys of the form
+    ``<id>.<property>``. When ``desc`` is a string, this function now looks up
+    the relevant fields in Redis. If the values are missing, ``index.json`` is
+    consulted as a fallback and a :class:`UserWarning` is emitted.
     """
+
+    if isinstance(desc, str):
+        name = desc
+        desc = {}
+        citation = _get_redis_value(f"{name}.citation")
+        url = _get_redis_value(f"{name}.url")
+        icon = _get_redis_value(f"{name}.icon")
+        link_class = _get_redis_value(f"{name}.link.class")
+        tracking = _get_redis_value(f"{name}.link.tracking")
+        if citation is not None:
+            desc["citation"] = citation
+        if url is not None:
+            desc["url"] = url
+        if icon is not None:
+            desc["icon"] = icon
+        link_opts = {}
+        if link_class is not None:
+            link_opts["class"] = link_class
+        if tracking is not None:
+            link_opts["tracking"] = tracking
+        if link_opts:
+            desc["link"] = link_opts
+
+        fallback = index_json.get(name) if index_json else None
+        if fallback and ("citation" not in desc or "url" not in desc):
+            warnings.warn(
+                f"Missing redis data for '{name}', using index.json fallback",
+                UserWarning,
+            )
+            for key in ("citation", "url", "icon", "link"):
+                if key in fallback and key not in desc:
+                    desc[key] = fallback[key]
+
     if not isinstance(desc, dict):
         return desc
 
