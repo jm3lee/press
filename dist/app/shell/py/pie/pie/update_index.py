@@ -89,6 +89,11 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
                 )
             combined[k] = v
 
+    if "id" not in combined:
+        base = path.with_suffix('')
+        combined["id"] = base.name
+        logger.info("Generated 'id'", filename=str(path.resolve().relative_to(Path.cwd())), id=combined["id"])
+
     return combined
 
 
@@ -134,9 +139,9 @@ def main(argv: Iterable[str] | None = None) -> None:
 
     if path.is_dir():
         index: dict[str, dict[str, Any]] = {}
-        for pattern in ("**/*.yml", "**/*.yaml"):
-            for yml in path.glob(pattern):
-                metadata = build_index.process_yaml(str(yml))
+        for pattern in ("**/*.md", "**/*.yml", "**/*.yaml"):
+            for p in path.glob(pattern):
+                metadata = load_metadata_pair(p)
                 if metadata:
                     index[metadata["id"]] = metadata
         update_redis(r, index)
