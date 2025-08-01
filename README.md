@@ -20,7 +20,7 @@ The build relies on three cooperating Makefiles:
 
 1. Run `git submodule update --init --recursive` after cloning to fetch
    required submodules such as `xmera`.
-2. Edit `docker-compose.yml`. Adjust `image` as necessary. **TODO: Examples**
+2. Edit `dist/docker-compose.yml`. Adjust `image` as necessary. **TODO: Examples**
 3. Edit `redo.mk`. Update the list of services.
 4. Edit documents under `src/`.
 5. Optionally customize `src/pandoc-template.html` for your project.
@@ -93,7 +93,7 @@ Custom filters:
 
 ## Overriding Python Modules
 
-In `docker-compose.yml`, map `./app/shell/py` to `/press/py`. Python modules are
+In `dist/docker-compose.yml`, map `./app/shell/py` to `/press/py`. Python modules are
 installed using the `-e` flag so you can edit them in place without reinstalling
 Python modules.
 
