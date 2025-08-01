@@ -63,3 +63,14 @@ time.
 ```python
 include("build/static/index/dist.md")
 ```
+
+## include_deflist_entry demo
+
+This variant inserts another Markdown file as a definition list entry:
+
+<dl>
+```python
+include_deflist_entry("src/dist/include-filter/a.md")
+include_deflist_entry("src/dist/include-filter/b.md")
+```
+</dl>
