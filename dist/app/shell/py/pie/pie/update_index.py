@@ -66,17 +66,22 @@ def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(list(argv) if argv is not None else None)
 
 
+def update_redis(conn: redis.Redis, index: Mapping[str, Mapping[str, Any]]) -> None:
+    """Insert each value from *index* into *conn*."""
+    for key, value in flatten_index(index):
+        conn.set(key, value)
+        logger.debug("Inserted", key=key, value=value)
+
+
 def main(argv: Iterable[str] | None = None) -> None:
-    """Entry point for the ``build-index-2`` console script."""
+    """Entry point for the ``update-index`` console script."""
     args = parse_args(argv)
     if args.log:
         add_file_logger(args.log, level="DEBUG")
 
     index = load_index(args.index)
     r = redis.Redis(host=args.host, port=args.port, decode_responses=True)
-    for key, value in flatten_index(index):
-        r.set(key, value)
-        logger.debug("Inserted", key=key, value=value)
+    update_redis(r, index)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 import json
 import fakeredis
-from pie import build_index_2
+from pie import update_index
 
 
 def test_main_inserts_keys(tmp_path, monkeypatch):
@@ -18,9 +18,9 @@ def test_main_inserts_keys(tmp_path, monkeypatch):
     idx.write_text(json.dumps(index_data))
 
     fake = fakeredis.FakeRedis(decode_responses=True)
-    monkeypatch.setattr(build_index_2.redis, "Redis", lambda *a, **kw: fake)
+    monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
 
-    build_index_2.main([str(idx)])
+    update_index.main([str(idx)])
 
     assert fake.get("quickstart.title") == "Quickstart"
     assert fake.get("quickstart.url") == "/quickstart.html"
@@ -42,9 +42,9 @@ def test_main_handles_arrays(tmp_path, monkeypatch):
     idx.write_text(json.dumps(index_data))
 
     fake = fakeredis.FakeRedis(decode_responses=True)
-    monkeypatch.setattr(build_index_2.redis, "Redis", lambda *a, **kw: fake)
+    monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
 
-    build_index_2.main([str(idx)])
+    update_index.main([str(idx)])
 
     assert fake.get("quickstart.tags.0") == "foo"
     assert fake.get("quickstart.tags.1") == "bar"
