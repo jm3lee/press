@@ -24,5 +24,5 @@ Within fenced `python` blocks the following functions are available:
 Any links ending with `.md` are automatically rewritten to point at the
 corresponding `.html` file.
 
-Typical usage in `app/shell/mk/build.mk` chains the command multiple times to
+Typical usage in `dist/app/shell/mk/build.mk` chains the command multiple times to
 resolve nested includes before passing the final Markdown to Pandoc.

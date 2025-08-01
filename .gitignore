@@ -69,7 +69,7 @@ instance/
 .scrapy
 
 # Sphinx documentation
-docs/_build/
+dist/docs/_build/
 
 # PyBuilder
 .pybuilder/
@@ -177,6 +177,6 @@ cython_debug/
 *.swp
 *.swo
 
-app/to-webp/input
-app/to-webp/output
+dist/app/webp/input
+dist/app/webp/output
 logs

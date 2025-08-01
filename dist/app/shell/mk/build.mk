@@ -1,15 +1,15 @@
 # Makefile for building and managing Press
-# This file executes inside the shell container. See docs/redo-mk.md
+# This file executes inside the shell container. See dist/docs/redo-mk.md
 # for how to run these targets from the host.
 
 # Override MAKEFLAGS (so your settings can’t be clobbered by the environment)
-# docker-make passes these flags to the container; see docs/docker-make.md
+# docker-make passes these flags to the container; see dist/docs/docker-make.md
 override MAKEFLAGS += --warn-undefined-variables  \
                       --no-builtin-rules        \
                       -j16                      \
 
 # Export it so sub-makes see the same flags
-# docker-make handles running this file inside Docker; see docs/docker-make.md
+# docker-make handles running this file inside Docker; see dist/docs/docker-make.md
 export MAKEFLAGS
 
 # Verbosity control
@@ -25,7 +25,7 @@ status = @echo "==> $(1)"
 
 # Define the Pandoc command used inside the container
 #       -T: Don't allocate pseudo-tty. Makes parallel builds work.
-# For container setup details, see docs/docker-make.md.
+# For container setup details, see dist/docs/docker-make.md.
 PANDOC_CMD := pandoc
 PANDOC_TEMPLATE := src/pandoc-template.html
 
@@ -80,7 +80,7 @@ all: $(CSS)
 all: build/static/index.json
 
 .PRECIOUS: build/static/index.json
-# See docs/build-index.md for how the index is generated.
+# See dist/docs/build-index.md for how the index is generated.
 build/static/index.json: $(MARKDOWNS) $(YAMLS) | build/static
 	$(call status,Build index $@)
 	$(Q)build-index src -o $@ --log log/build-index
@@ -93,7 +93,7 @@ build/.minify:
 	$(Q)touch $@
 
 .PHONY: test
-# Triggered by the test target in redo.mk; see docs/redo-mk.md.
+# Triggered by the test target in redo.mk; see dist/docs/redo-mk.md.
 test: build/.minify | log
 	$(call status,Run link check)
 	$(Q)$(CHECKLINKS_CMD) http://nginx-dev 2>&1 | tee log/checklinks.txt
@@ -114,7 +114,7 @@ build/%.css: %.css | build
 	$(Q)cp $< $@
 
 # Include and preprocess Markdown files up to three levels deep
-# See docs/preprocess.md for preprocessing details
+# See dist/docs/preprocess.md for preprocessing details
 build/%.md: %.md build/static/index.json | build
 	$(call status,Preprocess $<)
 	$(Q)preprocess $<
@@ -125,7 +125,7 @@ build/%.html: build/%.md $(PANDOC_TEMPLATE) | build
 	$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) -o $@ $<
 
 # Generate PDF from processed Markdown using Pandoc
-# include-filter usage is documented in docs/include-filter.md
+# include-filter usage is documented in dist/docs/include-filter.md
 build/%.pdf: %.md | build
 	$(call status,Generate PDF $@)
 	$(Q)include-filter build $< build/$*.1.md
@@ -142,7 +142,7 @@ clean:
 	$(call status,Remove build artifacts)
 	$(Q)-rm -rf build
 
-# Optionally include user dependencies; see docs/redo-mk.md.
+# Optionally include user dependencies; see dist/docs/redo-mk.md.
 -include /app/mk/dep.mk
 
 YAMLS := $(shell find src -name "*.yml")

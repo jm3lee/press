@@ -12,11 +12,11 @@ supported keys and defaults.
 # Scan 'content/' for .md, .yml, and .yaml files and print JSON result
 ./build_index.py content/
 
-# Scan 'docs/' and write the index to 'index.json'
-./build_index.py docs/ --output index.json
+# Scan 'dist/docs/' and write the index to 'index.json'
+./build_index.py dist/docs/ --output index.json
 
 # Write logs to a file
-./build_index.py docs/ -o index.json --log build-index.log
+./build_index.py dist/docs/ -o index.json --log build-index.log
 ```
 
 ### Arguments
