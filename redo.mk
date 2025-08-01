@@ -14,7 +14,10 @@ SERVICES := nginx-dev sync webp
 
 VPATH := src
 
-MAKE_CMD := docker compose run --rm --entrypoint make -u $(shell id -u) -T shell
+COMPOSE_FILE := $(if $(wildcard docker-compose.yml),docker-compose.yml,dist/docker-compose.yml)
+DOCKER_COMPOSE := docker compose -f $(COMPOSE_FILE)
+
+MAKE_CMD := $(DOCKER_COMPOSE) run --rm --entrypoint make -u $(shell id -u) -T shell
 
 # Verbosity control
 VERBOSE ?= 0
@@ -51,7 +54,7 @@ CONTAINER_REGISTRY := registry.digitalocean.com/artisticanatomy
 .PHONY: docker
 docker: test ## Build and push the Nginx image after running test
 	$(call status,Build nginx image)
-	$(Q)docker compose build nginx
+	$(Q)$(DOCKER_COMPOSE) build nginx
 	$(call status,Tag image)
 	$(Q)docker tag koreanbriancom-nginx $(CONTAINER_REGISTRY)/koreanbrian.com:latest
 	$(call status,Push image)
@@ -66,17 +69,17 @@ test: ## Restart nginx-dev and run tests
 .PHONY: up
 up: ## Start development containers defined in SERVICES
 	$(call status,Start services $(SERVICES))
-	$(Q)docker compose up $(SERVICES) --build --remove-orphans
+	$(Q)$(DOCKER_COMPOSE) up $(SERVICES) --build --remove-orphans
 
 .PHONY: upd
 upd: ## Start development containers in detached mode
 	$(call status,Start services $(SERVICES) detached)
-	$(Q)docker compose up $(SERVICES) --build --remove-orphans -d
+	$(Q)$(DOCKER_COMPOSE) up $(SERVICES) --build --remove-orphans -d
 
 .PHONY: down
 down: ## Stop and remove the compose stack
 	$(call status,Stop compose stack)
-	$(Q)docker compose down
+	$(Q)$(DOCKER_COMPOSE) down
 
 # Clean the build directory by removing all build artifacts
 .PHONY: clean
@@ -95,27 +98,27 @@ setup: ## Prepare app/webp directories and build all services
 	$(Q)mkdir -p app/webp/input
 	$(Q)mkdir -p app/webp/output
 	$(call status,Build all services)
-	$(Q)docker compose build
+	$(Q)$(DOCKER_COMPOSE) build
 
 .PHONY: seed
 seed: ## Run the seed container to populate initial data
 	$(call status,Seed database)
-	$(Q)docker compose run --build --rm -T seed
+	$(Q)$(DOCKER_COMPOSE) run --build --rm -T seed
 
 .PHONY: sync
 sync: ## Upload site files to S3 using the sync container
 	$(call status,Run sync container)
-	$(Q)docker compose run --build --rm -T sync
+	$(Q)$(DOCKER_COMPOSE) run --build --rm -T sync
 
 .PHONY: webp
 webp: ## Convert images to webp format
 	$(call status,Convert images to webp)
-	$(Q)docker compose run --build --rm -T webp
+	$(Q)$(DOCKER_COMPOSE) run --build --rm -T webp
 
 .PHONY: shell
 shell: ## Open an interactive shell container
 	$(call status,Open shell)
-	$(Q)docker compose run --rm --build shell
+	$(Q)$(DOCKER_COMPOSE) run --rm --build shell
 
 .PHONY: rmi
 rmi: ## Remove Docker images matching press-*
@@ -137,10 +140,10 @@ buildx: ## Run Docker buildx
 pytest:
 	# Add option -s to see stdout.
 	$(call status,Run pytest)
-	$(Q)docker compose run --entrypoint pytest --rm shell /press/py/pie/tests
+	$(Q)$(DOCKER_COMPOSE) run --entrypoint pytest --rm shell /press/py/pie/tests
 
 .PHONY: t
 t: ## Restart nginx-dev and run tests, ansi colors
 	$(call status,Run tests with colors)
-	$(Q)docker compose run --entrypoint make --rm shell -f /app/mk/build.mk VERBOSE=$(VERBOSE) test
-	$(Q)docker compose run --entrypoint pytest --rm shell /press/py/pie/tests
+	$(Q)$(DOCKER_COMPOSE) run --entrypoint make --rm shell -f /app/mk/build.mk VERBOSE=$(VERBOSE) test
+	$(Q)$(DOCKER_COMPOSE) run --entrypoint pytest --rm shell /press/py/pie/tests
