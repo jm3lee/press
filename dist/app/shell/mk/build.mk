@@ -78,7 +78,7 @@ all: | build $(BUILD_SUBDIRS)
 all: $(HTMLS)
 all: $(CSS)
 all: build/static/index.json
-	update-index --host redis --log=log/update-index src
+	update-index --host dragonfly --log=log/update-index src
 
 .PRECIOUS: build/static/index.json
 # See dist/docs/build-index.md for how the index is generated.
