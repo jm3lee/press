@@ -62,7 +62,7 @@ def process_dir(directory):
         entry_title = entry[1]
         entry_link = entry[3]
         if entry_link:
-            print("  " * level + f"- {{{{{entry_id}|linktitle}}}}")
+            print("  " * level + f"- {{{{\"{entry_id}\"|linktitle}}}}")
         else:
             print("  " * level + f"- {{{{'{entry_title}'|title}}}}")
         entry_path = entry[2]
