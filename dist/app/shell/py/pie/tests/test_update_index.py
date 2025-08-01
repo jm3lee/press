@@ -1,4 +1,5 @@
 import json
+import os
 import fakeredis
 from pie import update_index
 
@@ -50,3 +51,43 @@ def test_main_handles_arrays(tmp_path, monkeypatch):
     assert fake.get("quickstart.tags.1") == "bar"
     assert fake.get("quickstart.authors.0.name") == "Alice"
     assert fake.get("quickstart.authors.1.name") == "Bob"
+
+
+def test_main_directory_processes_yamls(tmp_path, monkeypatch):
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "a.yml").write_text('{"name": "Foo"}')
+    (src / "b.yml").write_text('{"name": "Bar"}')
+
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
+
+    os.chdir(tmp_path)
+    try:
+        update_index.main(["src"])
+    finally:
+        os.chdir("/tmp")
+
+    assert fake.get("a.name") == "Foo"
+    assert fake.get("a.url") == "/a.html"
+    assert fake.get("b.name") == "Bar"
+    assert fake.get("b.url") == "/b.html"
+
+
+def test_main_single_yaml_file(tmp_path, monkeypatch):
+    src = tmp_path / "src"
+    src.mkdir()
+    yml = src / "item.yml"
+    yml.write_text('{"name": "Foo"}')
+
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
+
+    os.chdir(tmp_path)
+    try:
+        update_index.main(["src/item.yml"])
+    finally:
+        os.chdir("/tmp")
+
+    assert fake.get("item.name") == "Foo"
+    assert fake.get("item.url") == "/item.html"
