@@ -2,7 +2,7 @@
 
 `picasso` scans the `src/` directory for YAML metadata files and emits Makefile
 rules that convert them to HTML using Pandoc. The generated rules are written to
-`build/picasso.mk` and included by `app/shell/mk/build.mk` during the build.
+`build/picasso.mk` and included by `dist/app/shell/mk/build.mk` during the build.
 Refer to [Metadata Fields](metadata-fields.md) for the supported metadata keys.
 
 ## Usage

@@ -1,7 +1,7 @@
 # dep.mk Custom Dependencies
 
 `dep.mk` is an optional Makefile that extends the build process with project specific rules.
-It is included at the end of `app/shell/mk/build.mk` if present.
+It is included at the end of `dist/app/shell/mk/build.mk` if present.
 
 ## How It Works
 
@@ -29,11 +29,11 @@ The provided `dep.mk` simply pulls in rules for building the React quiz
 interface:
 
 ```make
-include app/quiz/dep.mk
+include dist/app/quiz/dep.mk
 ```
 
-`app/quiz/dep.mk` compiles the quiz bundle with Vite and copies JSON quizzes into
-`build/quiz/`. See `docs/quiz-workflow.md` for the full workflow.
+`dist/app/quiz/dep.mk` compiles the quiz bundle with Vite and copies JSON quizzes into
+`build/quiz/`. See `dist/docs/quiz-workflow.md` for the full workflow.
 
 ## Customization
 
