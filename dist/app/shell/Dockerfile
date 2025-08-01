@@ -44,16 +44,18 @@ ENV LANG=en_US.UTF-8 \
 
 # -------------------------------------------------------------------
 # Python filters and backends
+# Copy Press Python libraries into the image. Users can override by mounting
+# /press/py
 # -------------------------------------------------------------------
-# Copy Press Python libraries into the image. Users can override by mounting /press/py
-COPY ./py /press/py
 # Install external libraries together to make use of caching.
+COPY ./py/xmera /press/py/xmera
 RUN pip install --break-system-packages \
         beautifulsoup4 \
         -r /press/py/xmera/backend/requirements.txt \
         -e /press/py/xmera/backend
 
 # Install library under development.
+COPY ./py/pie /press/py/pie
 RUN pip install --break-system-packages \
         -e /press/py/pie \
         -r /press/py/pie/requirements.txt
