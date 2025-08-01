@@ -37,6 +37,7 @@ status = @echo "==> $(1)"
 .PHONY: all
 all: ## Build the site by invoking /app/mk/build.mk inside the shell container
 	$(call status,Build site)
+	$(Q)$(DOCKER_COMPOSE) up -d dragonfly
 	$(Q)$(MAKE_CMD) -f /app/mk/build.mk VERBOSE=$(VERBOSE)
 
 build: ## Helper target used by other rules

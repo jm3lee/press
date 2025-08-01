@@ -52,6 +52,7 @@ services:
   #   docker compose exec dragonfly redis-cli
   dragonfly:
     image: docker.dragonflydb.io/dragonflydb/dragonfly
+    # Useful in avoiding conflicts from multiple active instances of press projects.
     container_name: press-dragonfly
 
   shell:
