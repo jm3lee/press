@@ -4,6 +4,8 @@ DIST_YAMLS = $(shell find src/dist -name '*.yml')
 
 all: build/static/index/dist.md
 
+build/index.md: build/static/index/dist.md
+
 build/static/index:
 	mkdir -p $@
 
