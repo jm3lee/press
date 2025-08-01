@@ -96,14 +96,8 @@ update-index-changed:
 all: update-index-changed | build $(BUILD_SUBDIRS)
 all: $(HTMLS)
 all: $(CSS)
-all: build/static/index.json
 	update-index --host $(REDIS_HOST) --port $(REDIS_PORT) --log=log/update-index src
 
-.PRECIOUS: build/static/index.json
-# See dist/docs/build-index.md for how the index is generated.
-build/static/index.json: $(MARKDOWNS) $(YAMLS) | build/static
-	$(call status,Build index $@)
-	$(Q)build-index src -o $@ --log log/build-index
 
 # Target to minify HTML and CSS files
 # Modifies file timestamps. The preserve option doesn't seem to work.
@@ -135,7 +129,7 @@ build/%.css: %.css | build
 
 # Include and preprocess Markdown files up to three levels deep
 # See dist/docs/preprocess.md for preprocessing details
-build/%.md: %.md build/static/index.json | build
+build/%.md: %.md | build
 	$(call status,Preprocess $<)
 	$(Q)preprocess $<
 
