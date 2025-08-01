@@ -140,8 +140,13 @@ def main(argv: Iterable[str] | None = None) -> None:
 
     if path.is_dir():
         index: dict[str, dict[str, Any]] = {}
+        processed: set[Path] = set()
         for pattern in ("**/*.md", "**/*.yml", "**/*.yaml"):
             for p in path.glob(pattern):
+                base = p.with_suffix("")
+                if base in processed:
+                    continue
+                processed.add(base)
                 metadata = load_metadata_pair(p)
                 if metadata:
                     index[metadata["id"]] = metadata
