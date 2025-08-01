@@ -12,9 +12,9 @@ import os
 import re
 import sys
 import argparse
-import warnings
 
 import redis
+from flatten_dict import unflatten
 
 import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
@@ -27,8 +27,12 @@ redis_conn = None  # lazily initialised connection used by ``linktitle``.
 _whitespace_word_pattern = re.compile(r"(\S+)")
 
 
-def _get_redis_value(key: str):
-    """Return the decoded value for ``key`` from ``redis_conn`` or ``None``."""
+def _get_redis_value(key: str, *, required: bool = False):
+    """Return the decoded value for ``key`` from ``redis_conn``.
+
+    If ``required`` is ``True`` and the key is missing, the process exits
+    with status 1 after logging an error.
+    """
 
     global redis_conn
     if redis_conn is None:
@@ -37,14 +41,78 @@ def _get_redis_value(key: str):
         redis_conn = redis.Redis(host=host, port=port, decode_responses=True)
     try:
         val = redis_conn.get(key)
-    except Exception:
-        return None
+    except Exception as exc:
+        logger.error("Redis lookup failed", key=key, exception=str(exc))
+        raise SystemExit(1)
+
     if val is None:
+        if required:
+            logger.error("Missing metadata", key=key)
+            raise SystemExit(1)
         return None
+
     try:
         return json.loads(val)
     except Exception:
         return val
+
+
+def _convert_lists(obj):
+    """Recursively convert dictionaries with integer keys to lists."""
+
+    if isinstance(obj, dict):
+        if obj and all(isinstance(k, str) and k.isdigit() for k in obj):
+            arr = [None] * (max(int(k) for k in obj) + 1)
+            for k, v in obj.items():
+                arr[int(k)] = _convert_lists(v)
+            return arr
+        return {k: _convert_lists(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_convert_lists(v) for v in obj]
+    return obj
+
+
+def _build_from_redis(prefix: str) -> dict | list | None:
+    """Return a nested structure for all keys starting with ``prefix``."""
+
+    global redis_conn
+    if redis_conn is None:
+        host = os.getenv("REDIS_HOST", "localhost")
+        port = int(os.getenv("REDIS_PORT", "6379"))
+        redis_conn = redis.Redis(host=host, port=port, decode_responses=True)
+
+    keys = redis_conn.keys(prefix + "*")
+    if not keys:
+        return None
+
+    flat = {}
+    for k in keys:
+        val = _get_redis_value(k, required=True)
+        flat[k[len(prefix):].lstrip(".")] = val
+
+    data = unflatten(flat, splitter="dot")
+    return _convert_lists(data)
+
+
+def _get_metadata(name: str) -> dict | None:
+    """Return metadata dictionary for ``name`` from Redis."""
+
+    return _build_from_redis(f"{name}.")
+
+
+def _load_desc(desc):
+    """Return a metadata dict for ``desc`` using Redis lookups when needed."""
+
+    if isinstance(desc, str):
+        data = _get_metadata(desc)
+        if data is None:
+            logger.error("Missing metadata", id=desc)
+            raise SystemExit(1)
+        return data
+    if not isinstance(desc, dict):
+        logger.error("Invalid descriptor type", type=str(type(desc)))
+        raise SystemExit(1)
+    return desc
 
 
 def get_tracking_options(desc):
@@ -85,40 +153,7 @@ def linktitle(desc):
     consulted as a fallback and a :class:`UserWarning` is emitted.
     """
 
-    if isinstance(desc, str):
-        name = desc
-        desc = {}
-        citation = _get_redis_value(f"{name}.citation")
-        url = _get_redis_value(f"{name}.url")
-        icon = _get_redis_value(f"{name}.icon")
-        link_class = _get_redis_value(f"{name}.link.class")
-        tracking = _get_redis_value(f"{name}.link.tracking")
-        if citation is not None:
-            desc["citation"] = citation
-        if url is not None:
-            desc["url"] = url
-        if icon is not None:
-            desc["icon"] = icon
-        link_opts = {}
-        if link_class is not None:
-            link_opts["class"] = link_class
-        if tracking is not None:
-            link_opts["tracking"] = tracking
-        if link_opts:
-            desc["link"] = link_opts
-
-        fallback = index_json.get(name) if index_json else None
-        if fallback and ("citation" not in desc or "url" not in desc):
-            warnings.warn(
-                f"Missing redis data for '{name}', using index.json fallback",
-                UserWarning,
-            )
-            for key in ("citation", "url", "icon", "link"):
-                if key in fallback and key not in desc:
-                    desc[key] = fallback[key]
-
-    if not isinstance(desc, dict):
-        return desc
+    desc = _load_desc(desc)
 
     citation = desc["citation"]
     url = desc["url"]
@@ -143,6 +178,7 @@ def link_icon_title(desc):
     Capitalize the first character of each word in the string,
     preserving ALL whitespace (spaces, tabs, newlines).
     """
+    desc = _load_desc(desc)
     citation = desc["citation"]
     url = desc["url"]
     icon = desc["icon"]
@@ -163,8 +199,7 @@ def linkcap(desc):
     Capitalize the first character of each word in the string,
     preserving ALL whitespace (spaces, tabs, newlines).
     """
-    if not isinstance(desc, dict):
-        return desc
+    desc = _load_desc(desc)
 
     citation = desc["citation"]
     citation = citation[0].upper() + citation[1:]
@@ -181,6 +216,7 @@ def linkicon(desc):
     Capitalize the first character of each word in the string,
     preserving ALL whitespace (spaces, tabs, newlines).
     """
+    desc = _load_desc(desc)
     citation = desc["citation"]
     url = desc["url"]
     icon = desc.get("icon")
@@ -195,6 +231,7 @@ def link(desc):
     Capitalize the first character of each word in the string,
     preserving ALL whitespace (spaces, tabs, newlines).
     """
+    desc = _load_desc(desc)
     citation = desc["citation"]
     url = desc["url"]
     a_attribs = get_tracking_options(desc)
@@ -258,46 +295,59 @@ def process_directory(root_dir: str) -> None:
 def get_origins(name):
     """Yield origin references for the given entry ``name``."""
 
-    j = index_json[name]
+    j = _get_metadata(name)
+    if j is None or "origins" not in j:
+        logger.error("Missing origins", id=name)
+        raise SystemExit(1)
     for i in j["origins"]:
-        if i in index_json:
-            yield index_json[i]
-        else:
-            yield i
+        meta = _get_metadata(str(i))
+        yield meta if meta is not None else i
 
 
 def get_insertions(name):
     """Yield insertion references for ``name``."""
 
-    j = index_json[name]
+    j = _get_metadata(name)
+    if j is None or "insertions" not in j:
+        logger.error("Missing insertions", id=name)
+        raise SystemExit(1)
     for i in j["insertions"]:
-        if i in index_json:
-            yield index_json[i]
-        else:
-            yield i
+        meta = _get_metadata(str(i))
+        yield meta if meta is not None else i
 
 
 def get_actions(name):
     """Yield actions associated with ``name`` from ``index_json``."""
 
-    j = index_json[name]
+    j = _get_metadata(name)
+    if j is None or "actions" not in j:
+        logger.error("Missing actions", id=name)
+        raise SystemExit(1)
     yield from j["actions"]
 
 
 def get_translations(name):
     """Yield key/value translation pairs for ``name``."""
 
-    j = index_json[name]
-    yield from j["translations"].items()
+    j = _get_metadata(name)
+    if j is None or "translations" not in j:
+        logger.error("Missing translations", id=name)
+        raise SystemExit(1)
+    if isinstance(j["translations"], dict):
+        yield from j["translations"].items()
+    else:
+        logger.error("Invalid translations format", id=name)
+        raise SystemExit(1)
 
 
 def get_desc(name):
-    """Return the metadata entry for ``name`` or ``name`` itself."""
+    """Return the metadata entry for ``name`` from Redis."""
 
-    d = index_json.get(name)
-    if d:
-        return d
-    return name
+    d = _get_metadata(name)
+    if d is None:
+        logger.error("Metadata not found", id=name)
+        raise SystemExit(1)
+    return d
 
 
 def render_jinja(snippet):

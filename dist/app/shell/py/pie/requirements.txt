@@ -2,3 +2,5 @@ PyYAML
 loguru
 redis
 fakeredis
+flatten-dict
+beautifulsoup4
