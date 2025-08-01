@@ -81,7 +81,7 @@ converter works.
 
 ## Jinja2 Template Rendering
 
-Script: `app/shell/bin/render_jinja_template`
+Command: `render-jinja-template`
 
 You can put metadata at the top of a markdown file. This metadata is optional.
 The system collects it. Then it uses it to fill Jinja2 templates.
