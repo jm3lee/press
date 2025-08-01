@@ -23,6 +23,12 @@ endif
 # Helper to print status messages
 status = @echo "==> $(1)"
 
+# Redis connection settings
+REDIS_HOST ?= dragonfly
+REDIS_PORT ?= 6379
+export REDIS_HOST
+export REDIS_PORT
+
 # Define the Pandoc command used inside the container
 #       -T: Don't allocate pseudo-tty. Makes parallel builds work.
 # For container setup details, see dist/docs/docker-make.md.
@@ -78,7 +84,7 @@ all: | build $(BUILD_SUBDIRS)
 all: $(HTMLS)
 all: $(CSS)
 all: build/static/index.json
-	update-index --host dragonfly --log=log/update-index src
+	update-index --host $(REDIS_HOST) --port $(REDIS_PORT) --log=log/update-index src
 
 .PRECIOUS: build/static/index.json
 # See dist/docs/build-index.md for how the index is generated.

@@ -9,6 +9,7 @@ inserts each value into a Redis compatible database using keys of the form
 from __future__ import annotations
 
 import argparse
+import os
 import json
 from pathlib import Path
 from typing import Any, Iterable, Mapping
@@ -110,14 +111,14 @@ def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
     parser.add_argument("-l", "--log", help="Write logs to the specified file")
     parser.add_argument(
         "--host",
-        default="localhost",
-        help="Redis host (default: localhost)",
+        default=os.getenv("REDIS_HOST", "dragonfly"),
+        help="Redis host (default: env REDIS_HOST or 'dragonfly')",
     )
     parser.add_argument(
         "--port",
         type=int,
-        default=6379,
-        help="Redis port (default: 6379)",
+        default=int(os.getenv("REDIS_PORT", "6379")),
+        help="Redis port (default: env REDIS_PORT or 6379)",
     )
     return parser.parse_args(list(argv) if argv is not None else None)
 

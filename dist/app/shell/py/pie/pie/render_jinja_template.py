@@ -32,7 +32,7 @@ def _get_redis_value(key: str):
 
     global redis_conn
     if redis_conn is None:
-        host = os.getenv("REDIS_HOST", "localhost")
+        host = os.getenv("REDIS_HOST", "dragonfly")
         port = int(os.getenv("REDIS_PORT", "6379"))
         redis_conn = redis.Redis(host=host, port=port, decode_responses=True)
     try:

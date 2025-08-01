@@ -75,6 +75,12 @@ ls app/webp/output
 See [dist/docs/webp-service.md](dist/docs/webp-service.md) for more about how the
 converter works.
 
+## Redis Configuration
+
+The build tools connect to DragonflyDB/Redis using the `REDIS_HOST` and
+`REDIS_PORT` environment variables. These default to `dragonfly` and `6379`
+respectively when not set.
+
 ## Wish List
 
 - May need a wizard
