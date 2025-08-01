@@ -1,6 +1,7 @@
 import json
 import os
 import fakeredis
+import pytest
 from pie import update_index
 
 
@@ -91,3 +92,45 @@ def test_main_single_yaml_file(tmp_path, monkeypatch):
 
     assert fake.get("item.name") == "Foo"
     assert fake.get("item.url") == "/item.html"
+
+
+def test_main_combines_md_and_yaml(tmp_path, monkeypatch):
+    src = tmp_path / "src"
+    src.mkdir()
+    md = src / "doc.md"
+    md.write_text("---\n{\"title\": \"Md\", \"foo\": \"bar\"}\n---\n")
+    yml = src / "doc.yml"
+    yml.write_text('{"id": "doc", "title": "Yaml", "baz": "qux", "name": "D"}')
+
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
+
+    os.chdir(tmp_path)
+    try:
+        with pytest.warns(UserWarning):
+            update_index.main(["src/doc.md"])
+    finally:
+        os.chdir("/tmp")
+
+    assert fake.get("doc.foo") == "bar"
+    assert fake.get("doc.baz") == "qux"
+    assert fake.get("doc.title") == "Yaml"
+
+
+def test_main_missing_id_exits(tmp_path, monkeypatch):
+    src = tmp_path / "src"
+    src.mkdir()
+    md = src / "doc.md"
+    md.write_text("---\n{\"title\": \"T\"}\n---\n")
+
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
+
+    os.chdir(tmp_path)
+    try:
+        with pytest.warns(UserWarning), pytest.raises(SystemExit):
+            update_index.main(["src/doc.md"])
+    finally:
+        os.chdir("/tmp")
+
+    assert list(fake.scan_iter()) == []
