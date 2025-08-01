@@ -9,11 +9,10 @@ inserts each value into a Redis compatible database using keys of the form
 from __future__ import annotations
 
 import argparse
-import glob
 import json
-import os
 from pathlib import Path
 from typing import Any, Iterable, Mapping
+import warnings
 
 import redis
 from pie import build_index
@@ -46,6 +45,51 @@ def flatten_index(index: Mapping[str, Mapping[str, Any]]) -> Iterable[tuple[str,
 
     for doc_id, props in index.items():
         yield from _walk(doc_id, props)
+
+
+def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
+    """Load metadata from ``path`` and a sibling Markdown/YAML file.
+
+    If both a ``.md`` and ``.yml``/``.yaml`` exist for the same base name,
+    the metadata from each file is combined. Values from YAML override those
+    from Markdown when keys conflict and a :class:`UserWarning` is emitted.
+    Returns ``None`` if neither file contains metadata.
+    """
+
+    base = path.with_suffix("")
+    md_path = base.with_suffix(".md")
+    yml_path = base.with_suffix(".yml")
+    yaml_path = base.with_suffix(".yaml")
+
+    md_data = None
+    if md_path.exists():
+        md_data = build_index.process_markdown(str(md_path))
+
+    yaml_data = None
+    yaml_file: Path | None = None
+    if yml_path.exists():
+        yaml_file = yml_path
+        yaml_data = build_index.process_yaml(str(yml_path))
+    elif yaml_path.exists():
+        yaml_file = yaml_path
+        yaml_data = build_index.process_yaml(str(yaml_path))
+
+    if md_data is None and yaml_data is None:
+        return None
+
+    combined: dict[str, Any] = {}
+    if md_data:
+        combined.update(md_data)
+    if yaml_data:
+        for k, v in yaml_data.items():
+            if k in combined and combined[k] != v:
+                warnings.warn(
+                    f"Conflict for '{k}', using value from {yaml_file.name}",
+                    UserWarning,
+                )
+            combined[k] = v
+
+    return combined
 
 
 def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
@@ -96,21 +140,29 @@ def main(argv: Iterable[str] | None = None) -> None:
                 if metadata:
                     index[metadata["id"]] = metadata
         update_redis(r, index)
-    else:
-        if path.suffix.lower() == ".json":
-            index = load_index(path)
-            update_redis(r, index)
-        else:
-            metadata = None
-            ext = path.suffix.lower()
-            if ext in (".yml", ".yaml"):
-                metadata = build_index.process_yaml(str(path))
-            elif ext == ".md":
-                metadata = build_index.process_markdown(str(path))
-            if metadata is None:
-                logger.error("No metadata found", filename=str(path))
-                raise SystemExit(1)
-            update_redis(r, {metadata["id"]: metadata})
+        return
+
+    if path.suffix.lower() == ".json":
+        index = load_index(path)
+        update_redis(r, index)
+        return
+
+    if path.suffix.lower() in {".md", ".yml", ".yaml"}:
+        metadata = load_metadata_pair(path)
+        if metadata is None:
+            logger.error("No metadata found", filename=str(path))
+            raise SystemExit(1)
+
+        doc_id = metadata.get("id")
+        if not doc_id:
+            warnings.warn("Missing 'id' field in metadata", UserWarning)
+            raise SystemExit(1)
+
+        update_redis(r, {doc_id: metadata})
+        return
+
+    logger.error("Unsupported file type", filename=str(path))
+    raise SystemExit(1)
 
 
 if __name__ == "__main__":
