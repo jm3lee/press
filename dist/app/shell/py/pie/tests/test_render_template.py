@@ -51,11 +51,10 @@ def test_linktitle_uses_redis(monkeypatch):
     assert ">Item<" in html
 
 
-def test_linktitle_fallback_index(monkeypatch):
+def test_linktitle_missing_raises(monkeypatch):
     fake = fakeredis.FakeRedis(decode_responses=True)
     monkeypatch.setattr(render_template, "redis_conn", fake)
-    render_template.index_json = {"foo": {"citation": "Foo", "url": "/f"}}
+    render_template.index_json = {}
 
-    with pytest.warns(UserWarning):
-        html = render_template.linktitle("foo")
-    assert '<a href="/f"' in html
+    with pytest.raises(SystemExit):
+        render_template.linktitle("foo")
