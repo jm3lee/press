@@ -47,13 +47,16 @@ ENV LANG=en_US.UTF-8 \
 # -------------------------------------------------------------------
 # Copy Press Python libraries into the image. Users can override by mounting /press/py
 COPY ./py /press/py
-# Install all Press plugins in one step
+# Install external libraries together to make use of caching.
 RUN pip install --break-system-packages \
         beautifulsoup4 \
-        -e /press/py/pie \
-        -r /press/py/pie/requirements.txt \
         -r /press/py/xmera/backend/requirements.txt \
         -e /press/py/xmera/backend
+
+# Install library under development.
+RUN pip install --break-system-packages \
+        -e /press/py/pie \
+        -r /press/py/pie/requirements.txt
 
 # -------------------------------------------------------------------
 # Custom helper scripts and makefiles
