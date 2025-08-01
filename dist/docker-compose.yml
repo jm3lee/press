@@ -2,7 +2,7 @@ services:
   nginx:
     build:
       context: ..
-      dockerfile: ../app/nginx/Dockerfile
+      dockerfile: ./app/nginx/Dockerfile
     ports:
       - "80:80"
       - "443:443"
@@ -11,7 +11,7 @@ services:
   nginx-dev:
     build:
       context: ..
-      dockerfile: ../app/nginx/Dockerfile
+      dockerfile: ./app/nginx/Dockerfile
     container_name: nginx-dev
     ports:
       - "80:80"
@@ -28,23 +28,23 @@ services:
     restart: unless-stopped
 
   sync:
-    build: ../app/s3
+    build: ./app/s3
     entrypoint: ["/app/bin/sync"]
     volumes:
       - ../s3:/s3
 
   seed:
-    build: ../app/s3
+    build: ./app/s3
     entrypoint: ["/app/bin/seed"]
     volumes:
       - ../s3:/s3
 
   webp:
-    build: ../app/webp
+    build: ./app/webp
     entrypoint: ["/app/bin/service"]
     volumes:
-      - ../app/webp/input:/app/input
-      - ../app/webp/output:/app/output
+      - ./app/webp/input:/app/input
+      - ./app/webp/output:/app/output
       - ../log:/app/log
 
   # Default port is 6379. Not exposed to the host to avoid port conflicts.
