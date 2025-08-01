@@ -9,9 +9,10 @@ these metadata fields, see [Metadata Fields](metadata-fields.md).
 
 ## `linktitle`
 
-`linktitle` capitalizes the first character of **each** word in the
-`citation` field. It returns an HTML `<a>` element using the supplied
-`url` and optional `icon`, `link.class`, or `link.tracking` fields.
+`linktitle` capitalizes the first character of each word in the
+`citation` field, except for short words like `in`, `a`, `an`, and `of`.
+It returns an HTML `<a>` element using the supplied `url` and optional
+`icon`, `link.class`, or `link.tracking` fields.
 
 Example:
 

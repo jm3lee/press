@@ -58,3 +58,10 @@ def test_linktitle_missing_raises(monkeypatch):
 
     with pytest.raises(SystemExit):
         render_template.linktitle("foo")
+
+
+def test_linktitle_skips_small_words():
+    desc = {"citation": "movement in a circle", "url": "/c"}
+    html = render_template.linktitle(desc)
+    assert ">Movement in a Circle<" in html
+
