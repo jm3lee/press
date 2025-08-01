@@ -78,26 +78,14 @@ BUILD_SUBDIRS := $(sort $(dir $(HTMLS))) log build/static
 CSS := $(wildcard src/*.css)
 CSS := $(patsubst src/%.css,build/%.css, $(CSS))
 
-# Command to list recently changed files under src/
-CHANGED_CMD = git status -s src | awk '{print $$2}'
-
-.PHONY: update-index-changed
-update-index-changed:
-	@changed=`$(CHANGED_CMD)`; \
-	if [ -n "$$changed" ]; then \
-		$(call status,Update index for changed files); \
-		for f in $$changed; do \
-			update-index --host $(REDIS_HOST) --port $(REDIS_PORT) $$f; \
-		done; \
-	fi
-
 # Define the default target to build everything
 .PHONY: all
-all: update-index-changed | build $(BUILD_SUBDIRS)
+all: .update-index | build $(BUILD_SUBDIRS)
 all: $(HTMLS)
 all: $(CSS)
-	update-index --host $(REDIS_HOST) --port $(REDIS_PORT) --log=log/update-index src
 
+.update-index: $(MARKDOWNS) $(YAMLS)
+	update-index --host $(REDIS_HOST) --port $(REDIS_PORT) src
 
 # Target to minify HTML and CSS files
 # Modifies file timestamps. The preserve option doesn't seem to work.
