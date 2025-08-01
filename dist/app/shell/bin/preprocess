@@ -21,8 +21,8 @@ process_file() {
         include-filter build "$input" "$output"
     done
 
-    # Render links
-    render-jinja-template build/static/index.json "$output" > "$output.$$"
+    # Render links using metadata from Redis
+    render-jinja-template "$output" > "$output.$$"
     mv "$output.$$" "$output"
     if [ $DEBUG -eq 1 ]; then cat "$output"; fi
 

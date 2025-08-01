@@ -15,8 +15,8 @@ Each input file is processed in place:
 
 1. **Expand includes** – `include-filter` runs three times to resolve nested
    `include()` blocks and render Mermaid diagrams.
-2. **Render links** – `render-jinja-template build/static/index.json` converts
-   special link syntax using the build index.
+2. **Render links** – `render-jinja-template` converts special link syntax
+   using metadata from Redis.
 3. **Emoji conversion** – `emojify` replaces `:emoji:` codes with Unicode
    characters.
 
@@ -25,7 +25,7 @@ Each input file is processed in place:
 `dist/app/shell/mk/build.mk` invokes `preprocess` when building `.md` targets:
 
 ```make
-build/%.md: %.md build/static/index.json | build
+build/%.md: %.md | build
     preprocess $<
 ```
 

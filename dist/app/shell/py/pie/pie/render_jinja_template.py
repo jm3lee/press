@@ -4,7 +4,7 @@
 
 This module exposes a set of Jinja2 filters and global functions used by the
 press build scripts.  It can also be executed as a small CLI to render a
-template using variables loaded from ``index.json``.
+template. Metadata is loaded from Redis and an optional ``index.json`` file.
 """
 
 import json
@@ -399,10 +399,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
 
     parser = argparse.ArgumentParser(
-        description="Render a template using variables from an index JSON file",
+        description="Render a template using metadata from Redis and an optional index file",
     )
-    parser.add_argument("index", help="Path to index.json")
     parser.add_argument("template", help="Template file to render")
+    parser.add_argument(
+        "-i",
+        "--index",
+        help="Optional path to index.json",
+    )
     parser.add_argument(
         "-l",
         "--log",
@@ -412,7 +416,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def main(argv: list[str] | None = None) -> None:
-    """Render the specified template using variables from ``index.json``."""
+    """Render the specified template using Redis and an optional ``index.json``."""
 
     global index_json
     args = parse_args(argv)
@@ -420,7 +424,7 @@ def main(argv: list[str] | None = None) -> None:
     if args.log:
         add_file_logger(args.log, level="DEBUG")
 
-    index_json = read_json(args.index)
+    index_json = read_json(args.index) if args.index else {}
     template = env.get_template(args.template)
     print(template.render(**index_json))
 
