@@ -25,7 +25,7 @@
 {{press_io_home|link}}
 
 ## Quiz Example
-{{quiz|linktitle}}
+{{"quiz"|linktitle}}
 
 ## include-filter example
 

@@ -29,7 +29,7 @@ You can also use it inside YAML fragments that feed into Jinja templates:
 
 ```yaml
 toc:
-  - "{{deltoid_tuberosity|linktitle}}"
+  - "{{\"deltoid_tuberosity\"|linktitle}}"
 ```
 
 This filter lives in `pie.render_jinja_template` and is also exposed by the

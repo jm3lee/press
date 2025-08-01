@@ -10,7 +10,7 @@ The canonical list of terms lives at `src/keyterms/index.json`. Each entry maps 
 {
   "abduction": {
     "term": "Abduction",
-    "def": "Movement of a limb or body part away from the midline.<br>Opposite: {{adduction|linktitle}}."
+    "def": "Movement of a limb or body part away from the midline.<br>Opposite: {{\"adduction\"|linktitle}}."
   },
   ...
 }
