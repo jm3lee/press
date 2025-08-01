@@ -18,7 +18,7 @@ setup(
     entry_points={
         'console_scripts': [
             'build-index=pie.build_index:main',
-            'build-index-2=pie.build_index_2:main',
+            'update-index=pie.update_index:main',
             'picasso=pie.picasso:main',
             'render-jinja-template=pie.render_jinja_template:main',
             'render-study-json=pie.render_study_json:main',
