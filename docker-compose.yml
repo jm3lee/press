@@ -47,6 +47,13 @@ services:
       - ./app/webp/output:/app/output
       - ./log:/app/log
 
+  # Default port is 6379. Not exposed to the host to avoid port conflicts.
+  # You can run redis-cli within this container.
+  #   docker compose exec dragonfly redis-cli
+  dragonfly:
+    image: docker.dragonflydb.io/dragonflydb/dragonfly
+    container_name: dragonfly
+
   shell:
     build: dist/app/shell
     entrypoint: ["bash"]
