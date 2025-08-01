@@ -67,6 +67,7 @@ VPATH := src
 
 # Find all Markdown files excluding specified directories
 MARKDOWNS := $(shell find src/ -name '*.md')
+YAMLS := $(shell find src -name "*.yml")
 
 # Define the corresponding HTML and PDF output files
 HTMLS := $(patsubst src/%.md, build/%.html, $(MARKDOWNS))
@@ -85,7 +86,9 @@ all: $(HTMLS)
 all: $(CSS)
 
 .update-index: $(MARKDOWNS) $(YAMLS)
-	update-index --host $(REDIS_HOST) --port $(REDIS_PORT) src
+	$(call status,Updating Redis Index)
+	$(Q)update-index --host $(REDIS_HOST) --port $(REDIS_PORT) src
+	$(Q)touch $@
 
 # Target to minify HTML and CSS files
 # Modifies file timestamps. The preserve option doesn't seem to work.
@@ -146,8 +149,6 @@ clean:
 
 # Optionally include user dependencies; see dist/docs/redo-mk.md.
 -include /app/mk/dep.mk
-
-YAMLS := $(shell find src -name "*.yml")
 
 build/picasso.mk: $(YAMLS) | build
 	$(call status,Generate picasso rules)
