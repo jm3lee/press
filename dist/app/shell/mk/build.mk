@@ -81,9 +81,15 @@ CSS := $(patsubst src/%.css,build/%.css, $(CSS))
 
 # Define the default target to build everything
 .PHONY: all
-all: .update-index | build $(BUILD_SUBDIRS)
-all: $(HTMLS)
-all: $(CSS)
+all: final | build $(BUILD_SUBDIRS)
+
+.PHONY: step1
+step1: .update-index
+
+.PHONY: step2
+final: step1
+final: $(HTMLS)
+final: $(CSS)
 
 .update-index: $(MARKDOWNS) $(YAMLS)
 	$(call status,Updating Redis Index)
