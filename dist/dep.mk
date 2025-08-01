@@ -1,4 +1,4 @@
-include app/quiz/dep.mk
+include dist/app/quiz/dep.mk
 
 DIST_YAMLS = $(shell find src/dist -name '*.yml')
 
