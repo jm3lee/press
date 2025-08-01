@@ -61,7 +61,7 @@ def generate_rule(
 
 LINK_RE = re.compile(r"\{\{\s*[\"']([^\"']+)[\"']\s*\|\s*link[\w]*")
 PY_BLOCK_RE = re.compile(r"```python\n(.*?)```", re.DOTALL)
-INCLUDE_RE = re.compile(r"(?:include|include_deflist_entry|mermaid)\(\s*[\"']([^\"']+)[\"']")
+INCLUDE_RE = re.compile(r"(?:include|include_deflist_entry)\(\s*[\"']([^\"']+)[\"']")
 
 
 def collect_ids(src_root: Path) -> dict[str, Path]:
