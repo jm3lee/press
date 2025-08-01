@@ -39,3 +39,19 @@ def test_main_writes_log_file(tmp_path):
     picasso.main(["--src", str(src), "--build", str(build), "--log", str(log)])
 
     assert log.exists()
+
+
+def test_generate_dependencies(tmp_path):
+    src = tmp_path / "src"
+    build = tmp_path / "build"
+    src.mkdir()
+
+    quick = src / "quickstart.md"
+    quick.write_text("---\nid: quickstart\n---\nbody")
+
+    index = src / "index.md"
+    index.write_text('{{"quickstart"|link}}')
+
+    deps = picasso.generate_dependencies(src, build)
+
+    assert deps == ["build/index.md: build/quickstart.md"]
