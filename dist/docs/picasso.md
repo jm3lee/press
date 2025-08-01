@@ -36,3 +36,8 @@ build/index.html: build/index.md build/index.yml
 
 Each `.yml` file produces similar targets for preprocessing the metadata and
 rendering the final HTML.
+
+The command also inspects Markdown files for cross-document links and any
+`include-filter` Python blocks.  Dependencies discovered this way are emitted as
+additional Makefile rules so that updates to referenced files trigger a rebuild
+of the including document.

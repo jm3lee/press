@@ -55,3 +55,19 @@ def test_generate_dependencies(tmp_path):
     deps = picasso.generate_dependencies(src, build)
 
     assert deps == ["build/index.md: build/quickstart.md"]
+
+
+def test_dependencies_from_include_filter(tmp_path):
+    src = tmp_path / "src"
+    build = tmp_path / "build"
+    src.mkdir()
+
+    inc = src / "inc.md"
+    inc.write_text("body")
+
+    main = src / "index.md"
+    main.write_text("```python\ninclude('src/inc.md')\n```\n")
+
+    deps = picasso.generate_dependencies(src, build)
+
+    assert deps == ["build/index.md: build/inc.md"]
