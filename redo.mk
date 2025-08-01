@@ -10,7 +10,7 @@ export MAKEFLAGS
 
 # Containers started when running `up`/`upd`.
 # See dist/docs/redo-mk.md for details on targets and variables.
-SERVICES := nginx-dev sync webp dragonfly
+SERVICES := nginx-dev dragonfly
 
 VPATH := src
 
@@ -86,6 +86,7 @@ down: ## Stop and remove the compose stack
 clean: ## Remove everything under build/
 	$(call status,Remove build artifacts)
 	$(Q)-rm -rf build/*
+	$(Q)-rm -f .update-index
 
 .PHONY: prune
 prune: ## Run docker system prune -f to clean unused resources

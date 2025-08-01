@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
-DEBUG=0
-if [ $DEBUG -eq 1 ]; then set -x; fi
+VERBOSE=0
+if [ $VERBOSE -eq 1 ]; then set -x; fi
 
 # process_file <input_markdown>
 #   - mirrors: build/%.md: %.md
@@ -24,7 +24,7 @@ process_file() {
     # Render links using metadata from Redis
     render-jinja-template "$output" > "$output.$$"
     mv "$output.$$" "$output"
-    if [ $DEBUG -eq 1 ]; then cat "$output"; fi
+    if [ $VERBOSE -eq 1 ]; then cat "$output"; fi
 
     # run emojify, write to a temp file and atomically move
     emojify < "$output" > "$output.tmp"
