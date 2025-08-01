@@ -9,8 +9,11 @@ update-index index.json [--host HOST] [--port PORT] [-l LOGFILE]
 ```
 
 - `index` path to the JSON index file or a directory of metadata
-- `--host` Redis host (default `localhost`)
-- `--port` Redis port (default `6379`)
+- `--host` Redis host (default `dragonfly` or `$REDIS_HOST`)
+- `--port` Redis port (default `6379` or `$REDIS_PORT`)
 - `-l, --log` optional log file
+
+`update-index` also reads the `REDIS_HOST` and `REDIS_PORT` environment
+variables when `--host` or `--port` are not specified.
 
 When a directory is given, `update-index` scans recursively for `.md`, `.yml`, and `.yaml` files, processing each Markdown/YAML pair only once. The command expects an index produced by [`build-index`](build-index.md). Each entry is written to the configured Redis instance using separate keys.
