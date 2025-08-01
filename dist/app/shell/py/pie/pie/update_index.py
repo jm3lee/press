@@ -94,6 +94,7 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
         combined["id"] = base.name
         logger.info("Generated 'id'", filename=str(path.resolve().relative_to(Path.cwd())), id=combined["id"])
 
+    logger.info(combined)
     return combined
 
 
