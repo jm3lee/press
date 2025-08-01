@@ -9,11 +9,14 @@ inserts each value into a Redis compatible database using keys of the form
 from __future__ import annotations
 
 import argparse
+import glob
 import json
+import os
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
 import redis
+from pie import build_index
 from pie.utils import add_file_logger, logger
 
 
@@ -50,7 +53,10 @@ def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Insert index values into a DragonflyDB/Redis instance",
     )
-    parser.add_argument("index", help="Path to index.json")
+    parser.add_argument(
+        "path",
+        help="Path to index.json, a metadata file, or a directory containing YAML",
+    )
     parser.add_argument("-l", "--log", help="Write logs to the specified file")
     parser.add_argument(
         "--host",
@@ -79,9 +85,32 @@ def main(argv: Iterable[str] | None = None) -> None:
     if args.log:
         add_file_logger(args.log, level="DEBUG")
 
-    index = load_index(args.index)
+    path = Path(args.path)
     r = redis.Redis(host=args.host, port=args.port, decode_responses=True)
-    update_redis(r, index)
+
+    if path.is_dir():
+        index: dict[str, dict[str, Any]] = {}
+        for pattern in ("**/*.yml", "**/*.yaml"):
+            for yml in path.glob(pattern):
+                metadata = build_index.process_yaml(str(yml))
+                if metadata:
+                    index[metadata["id"]] = metadata
+        update_redis(r, index)
+    else:
+        if path.suffix.lower() == ".json":
+            index = load_index(path)
+            update_redis(r, index)
+        else:
+            metadata = None
+            ext = path.suffix.lower()
+            if ext in (".yml", ".yaml"):
+                metadata = build_index.process_yaml(str(path))
+            elif ext == ".md":
+                metadata = build_index.process_markdown(str(path))
+            if metadata is None:
+                logger.error("No metadata found", filename=str(path))
+                raise SystemExit(1)
+            update_redis(r, {metadata["id"]: metadata})
 
 
 if __name__ == "__main__":
