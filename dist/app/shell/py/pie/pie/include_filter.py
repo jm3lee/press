@@ -17,7 +17,8 @@ import argparse
 import os
 import re
 import sys
-from typing import IO, Iterable
+from pathlib import Path
+from typing import IO, Iterable, Callable
 
 import yaml
 from pie.utils import add_file_logger, logger
@@ -69,18 +70,40 @@ def include(filename: str) -> None:
             print(line, end="", file=outfile)
 
 
-def include_deflist_entry(filename: str) -> None:
-    """Insert the contents of another Markdown file."""
+def include_deflist_entry(
+    *paths: str, glob_pattern: str = "*", sort_fn: Callable[[Iterable[Path]], Iterable[Path]] | None = None
+) -> None:
+    """Insert contents of Markdown files as definition list entries.
 
-    logger.info("include_deflist_entry", filename=filename)
-    with open(filename, "r", encoding="utf-8") as f:
-        metadata = parse_metadata_or_print_first_line(f)
-        if metadata and metadata.get("title"):
-            print("<dt>" + metadata["title"] + "</dt>", file=outfile)
-        print("<dd>", file=outfile)
-        for line in f:
-            print(line, end="", file=outfile)
-        print("</dd>", file=outfile)
+    Each argument in ``paths`` may be a file or directory.  Directories are
+    scanned recursively for files matching ``glob_pattern``.  All discovered
+    files are processed in alphabetical order by default, but a custom
+    ``sort_fn`` can be supplied to override the ordering.
+    """
+
+    files: list[Path] = []
+    for p in paths:
+        path = Path(p)
+        if path.is_dir():
+            files.extend(f for f in path.rglob(glob_pattern) if f.is_file())
+        else:
+            files.append(path)
+
+    if sort_fn is None:
+        files = sorted(files, key=lambda p: p.name)
+    else:
+        files = list(sort_fn(files))
+
+    for filename in files:
+        logger.info("include_deflist_entry", filename=str(filename))
+        with open(filename, "r", encoding="utf-8") as f:
+            metadata = parse_metadata_or_print_first_line(f)
+            if metadata and metadata.get("title"):
+                print("<dt>" + metadata["title"] + "</dt>", file=outfile)
+            print("<dd>", file=outfile)
+            for line in f:
+                print(line, end="", file=outfile)
+            print("</dd>", file=outfile)
 
 
 def yield_lines(infile: IO[str]) -> Iterable[str]:
