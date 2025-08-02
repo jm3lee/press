@@ -10,6 +10,7 @@ changes to referenced files trigger a rebuild.
 """
 
 import argparse
+import ast
 import re
 import sys
 from pathlib import Path
@@ -61,7 +62,7 @@ def generate_rule(
 
 LINK_RE = re.compile(r"\{\{\s*[\"']([^\"']+)[\"']\s*\|\s*link[\w]*")
 PY_BLOCK_RE = re.compile(r"```python\n(.*?)```", re.DOTALL)
-INCLUDE_RE = re.compile(r"(?:include|include_deflist_entry)\(\s*[\"']([^\"']+)[\"']")
+INCLUDE_RE = re.compile(r"(include(?:_deflist_entry)?)\(\s*([^)]*)\)")
 
 
 def collect_ids(src_root: Path) -> dict[str, Path]:
@@ -136,17 +137,50 @@ def generate_dependencies(src_root: Path, build_root: Path) -> list[str]:
 
         # ``include-filter`` blocks such as include("file.md")
         for block in PY_BLOCK_RE.findall(text):
-            for dep in INCLUDE_RE.findall(block):
-                dep_path = Path(dep)
-                if not dep_path.is_absolute() and not dep.startswith(build_root.as_posix()):
-                    if dep_path.parts and dep_path.parts[0] == src_root.name:
-                        dep_full = src_root / Path(*dep_path.parts[1:])
+            for func, arglist in INCLUDE_RE.findall(block):
+                try:
+                    call = ast.parse(f"f({arglist})", mode="eval").body
+                except SyntaxError:
+                    continue
+
+                paths: list[str] = []
+                glob_pattern = "*"
+                for arg in call.args:
+                    if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
+                        paths.append(arg.value)
+                for kw in call.keywords:
+                    if (
+                        func == "include_deflist_entry"
+                        and kw.arg == "glob_pattern"
+                        and isinstance(kw.value, ast.Constant)
+                        and isinstance(kw.value.value, str)
+                    ):
+                        glob_pattern = kw.value.value
+
+                for dep in paths:
+                    dep_path = Path(dep)
+                    dep_str = dep_path.as_posix()
+                    if not dep_path.is_absolute() and not dep_str.startswith(build_root.as_posix()):
+                        if dep_path.parts and dep_path.parts[0] == src_root.name:
+                            dep_full = src_root / Path(*dep_path.parts[1:])
+                        else:
+                            dep_full = src_root / dep_path
+                        targets = [dep_full]
+                        if dep_full.is_dir():
+                            pattern = glob_pattern if func == "include_deflist_entry" else "*"
+                            targets = [f for f in dep_full.rglob(pattern) if f.is_file()]
+                        for t in targets:
+                            dep_build = Path(build_path(t)).with_suffix(t.suffix).as_posix()
+                            rules.add(f"{src_build.as_posix()}: {dep_build}")
                     else:
-                        dep_full = src_root / dep_path
-                    dep_build = Path(build_path(dep_full)).with_suffix(dep_full.suffix).as_posix()
-                else:
-                    dep_build = dep_path.as_posix()
-                rules.add(f"{src_build.as_posix()}: {dep_build}")
+                        dep_full = dep_path
+                        targets = [dep_full]
+                        if dep_full.is_dir():
+                            pattern = glob_pattern if func == "include_deflist_entry" else "*"
+                            targets = [f for f in dep_full.rglob(pattern) if f.is_file()]
+                        for t in targets:
+                            dep_build = t.as_posix()
+                            rules.add(f"{src_build.as_posix()}: {dep_build}")
 
     return sorted(rules)
 
