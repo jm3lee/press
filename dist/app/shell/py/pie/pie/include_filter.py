@@ -71,12 +71,12 @@ def include(filename: str) -> None:
 
 
 def include_deflist_entry(
-    *paths: str, glob_pattern: str = "*", sort_fn: Callable[[Iterable[Path]], Iterable[Path]] | None = None
+    *paths: str, glob: str = "*", sort_fn: Callable[[Iterable[Path]], Iterable[Path]] | None = None
 ) -> None:
     """Insert contents of Markdown files as definition list entries.
 
     Each argument in ``paths`` may be a file or directory.  Directories are
-    scanned recursively for files matching ``glob_pattern``.  All discovered
+    scanned recursively for files matching ``glob``.  All discovered
     files are processed in alphabetical order by default, but a custom
     ``sort_fn`` can be supplied to override the ordering.
     """
@@ -85,7 +85,7 @@ def include_deflist_entry(
     for p in paths:
         path = Path(p)
         if path.is_dir():
-            files.extend(f for f in path.rglob(glob_pattern) if f.is_file())
+            files.extend(f for f in path.rglob(glob) if f.is_file())
         else:
             files.append(path)
 
