@@ -144,18 +144,18 @@ def generate_dependencies(src_root: Path, build_root: Path) -> list[str]:
                     continue
 
                 paths: list[str] = []
-                glob_pattern = "*"
+                glob = "*"
                 for arg in call.args:
                     if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
                         paths.append(arg.value)
                 for kw in call.keywords:
                     if (
                         func == "include_deflist_entry"
-                        and kw.arg == "glob_pattern"
+                        and kw.arg == "glob"
                         and isinstance(kw.value, ast.Constant)
                         and isinstance(kw.value.value, str)
                     ):
-                        glob_pattern = kw.value.value
+                        glob = kw.value.value
 
                 for dep in paths:
                     dep_path = Path(dep)
@@ -167,7 +167,7 @@ def generate_dependencies(src_root: Path, build_root: Path) -> list[str]:
                             dep_full = src_root / dep_path
                         targets = [dep_full]
                         if dep_full.is_dir():
-                            pattern = glob_pattern if func == "include_deflist_entry" else "*"
+                            pattern = glob if func == "include_deflist_entry" else "*"
                             targets = [f for f in dep_full.rglob(pattern) if f.is_file()]
                         for t in targets:
                             dep_build = Path(build_path(t)).with_suffix(t.suffix).as_posix()
@@ -176,7 +176,7 @@ def generate_dependencies(src_root: Path, build_root: Path) -> list[str]:
                         dep_full = dep_path
                         targets = [dep_full]
                         if dep_full.is_dir():
-                            pattern = glob_pattern if func == "include_deflist_entry" else "*"
+                            pattern = glob if func == "include_deflist_entry" else "*"
                             targets = [f for f in dep_full.rglob(pattern) if f.is_file()]
                         for t in targets:
                             dep_build = t.as_posix()
