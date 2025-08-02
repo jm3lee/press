@@ -7,21 +7,20 @@ press build scripts.  It can also be executed as a small CLI to render a
 template. Metadata is loaded from Redis and an optional ``index.json`` file.
 """
 
+import argparse
 import json
 import os
 import re
 import sys
-import argparse
 import time
 from pathlib import Path
 
 import redis
-from flatten_dict import unflatten
-
 import yaml
+from flatten_dict import unflatten
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
-from xmera.utils import read_json, read_utf8
 from pie.utils import add_file_logger, logger
+from xmera.utils import read_json, read_utf8
 
 DEFAULT_CONFIG = Path("cfg/render-jinja-template.yml")
 
@@ -93,7 +92,7 @@ def _build_from_redis(prefix: str) -> dict | list | None:
     flat = {}
     for k in keys:
         val = _get_redis_value(k, required=True)
-        flat[k[len(prefix):].lstrip(".")] = val
+        flat[k[len(prefix) :].lstrip(".")] = val
 
     data = unflatten(flat, splitter="dot")
     return _convert_lists(data)
@@ -180,7 +179,9 @@ def linktitle(desc):
 
     if icon:
         return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{icon} {citation}</a>"""
-    return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{citation}</a>"""
+    return (
+        f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{citation}</a>"""
+    )
 
 
 def link_icon_title(desc):
@@ -199,9 +200,7 @@ def link_icon_title(desc):
         return word[0].upper() + word[1:]
 
     citation = _whitespace_word_pattern.sub(cap_match, citation)
-    return (
-        f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{icon} {citation}</a>"""
-    )
+    return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{icon} {citation}</a>"""
 
 
 def linkcap(desc):
@@ -218,7 +217,9 @@ def linkcap(desc):
     a_attribs = get_tracking_options(desc)
     if icon:
         return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{icon} {citation}</a>"""
-    return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{citation}</a>"""
+    return (
+        f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{citation}</a>"""
+    )
 
 
 def linkicon(desc):
@@ -233,7 +234,9 @@ def linkicon(desc):
     a_attribs = get_tracking_options(desc)
     if icon:
         return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{icon} {citation}</a>"""
-    return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{citation}</a>"""
+    return (
+        f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{citation}</a>"""
+    )
 
 
 def link(desc):
@@ -245,7 +248,19 @@ def link(desc):
     citation = desc["citation"]
     url = desc["url"]
     a_attribs = get_tracking_options(desc)
-    return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{citation}</a>"""
+    return (
+        f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{citation}</a>"""
+    )
+
+
+def linkshort(desc):
+    desc = _load_desc(desc)
+    citation = desc["citation"]["short"]
+    url = desc["url"]
+    a_attribs = get_tracking_options(desc)
+    return (
+        f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{citation}</a>"""
+    )
 
 
 def extract_front_matter(file_path: str) -> dict | None:
@@ -297,9 +312,7 @@ def process_directory(root_dir: str) -> None:
                     file=full_path,
                 )
             else:
-                logger.warning(
-                    "No front matter or title", file=full_path
-                )
+                logger.warning("No front matter or title", file=full_path)
 
 
 def get_origins(name):
@@ -394,7 +407,9 @@ def load_config(path: str | Path = DEFAULT_CONFIG) -> dict:
         with cfg_path.open("r", encoding="utf-8") as cf:
             return yaml.safe_load(cf) or {}
     except Exception as exc:
-        logger.error("Failed to load configuration", path=str(cfg_path), exception=str(exc))
+        logger.error(
+            "Failed to load configuration", path=str(cfg_path), exception=str(exc)
+        )
         raise SystemExit(1)
 
 
@@ -407,6 +422,7 @@ def create_env():
     env.filters["linkcap"] = linkcap
     env.filters["link_icon_title"] = link_icon_title
     env.filters["linkicon"] = linkicon
+    env.filters["linkshort"] = linkshort
     env.filters["get_desc"] = get_desc
     env.globals["get_origins"] = get_origins
     env.globals["get_insertions"] = get_insertions
