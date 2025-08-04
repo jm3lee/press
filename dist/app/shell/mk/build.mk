@@ -84,14 +84,14 @@ CSS := $(patsubst src/%.css,build/%.css, $(CSS))
 all: final | build $(BUILD_SUBDIRS)
 
 .PHONY: step1
-step1: .update-index
+step1: build/.update-index
 
 .PHONY: step2
 final: step1
 final: $(HTMLS)
 final: $(CSS)
 
-.update-index: $(MARKDOWNS) $(YAMLS)
+build/.update-index: $(MARKDOWNS) $(YAMLS)
 	$(call status,Updating Redis Index)
 	$(Q)for i in $(?); do update-index --host $(REDIS_HOST) --port $(REDIS_PORT) $$i; done
 	$(Q)touch $@
