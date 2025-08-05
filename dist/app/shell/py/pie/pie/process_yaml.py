@@ -34,7 +34,7 @@ def main(argv: Iterable[str] | None = None) -> None:
         add_file_logger(args.log, level="DEBUG")
 
     try:
-        metadata = build_index.process_yaml(args.input)
+        metadata = build_index.parse_yaml_metadata(args.input)
     except Exception as exc:  # pragma: no cover - pass through message
         logger.error("Failed to process YAML", filename=args.input)
         raise SystemExit(1) from exc
