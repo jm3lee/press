@@ -41,3 +41,7 @@ The command also inspects Markdown files for cross-document links and any
 `include-filter` Python blocks.  Dependencies discovered this way are emitted as
 additional Makefile rules so that updates to referenced files trigger a rebuild
 of the including document.
+
+If these dependencies form a cycle, `picasso` logs a warning and drops the
+minimum number of rules required to break the loop. The build continues with the
+remaining rules.

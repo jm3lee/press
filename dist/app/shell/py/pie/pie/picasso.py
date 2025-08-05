@@ -11,6 +11,7 @@ changes to referenced files trigger a rebuild.
 
 import argparse
 import ast
+from collections import defaultdict
 import re
 import sys
 from pathlib import Path
@@ -102,6 +103,40 @@ def collect_ids(src_root: Path) -> dict[str, Path]:
     return id_map
 
 
+def _has_path(
+    graph: dict[str, set[str]], start: str, target: str, seen: set[str]
+) -> bool:
+    """Return True if *target* is reachable from *start* in *graph*."""
+
+    if start == target:
+        return True
+    if start in seen:
+        return False
+    seen.add(start)
+    for nxt in graph.get(start, set()):
+        if _has_path(graph, nxt, target, seen):
+            return True
+    return False
+
+
+def _remove_circular_dependencies(rules: set[str]) -> list[str]:
+    """Remove rules that would introduce circular dependencies."""
+
+    graph: dict[str, set[str]] = defaultdict(set)
+    result: list[str] = []
+    for rule in sorted(rules):
+        if ":" not in rule:
+            result.append(rule)
+            continue
+        src, dep = [s.strip() for s in rule.split(":", 1)]
+        if _has_path(graph, dep, src, set()):
+            logger.warning("Circular dependency detected", rule=rule)
+            continue
+        graph[src].add(dep)
+        result.append(rule)
+    return result
+
+
 def generate_dependencies(src_root: Path, build_root: Path) -> list[str]:
     """Return Makefile dependency rules based on Jinja links and include blocks."""
 
@@ -182,7 +217,7 @@ def generate_dependencies(src_root: Path, build_root: Path) -> list[str]:
                             dep_build = t.as_posix()
                             rules.add(f"{src_build.as_posix()}: {dep_build}")
 
-    return sorted(rules)
+    return _remove_circular_dependencies(rules)
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:

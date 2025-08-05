@@ -71,3 +71,24 @@ def test_dependencies_from_include_filter(tmp_path):
     deps = picasso.generate_dependencies(src, build)
 
     assert deps == ["build/index.md: build/inc.md"]
+
+
+def test_circular_dependencies_are_removed(tmp_path):
+    src = tmp_path / "src"
+    build = tmp_path / "build"
+    src.mkdir()
+
+    a = src / "a.md"
+    a.write_text("---\nid: a\n---\n{{\"b\"|link}}")
+    b = src / "b.md"
+    b.write_text("---\nid: b\n---\n{{\"a\"|link}}")
+
+    messages: list[str] = []
+    handle = picasso.logger.add(messages.append, level="WARNING")
+    try:
+        deps = picasso.generate_dependencies(src, build)
+    finally:
+        picasso.logger.remove(handle)
+
+    assert deps == ["build/a.md: build/b.md"]
+    assert any("Circular dependency detected" in m for m in messages)
