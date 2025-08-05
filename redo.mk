@@ -12,7 +12,10 @@ export MAKEFLAGS
 # See dist/docs/redo-mk.md for details on targets and variables.
 SERVICES := nginx-dev dragonfly
 
-VPATH := src
+SRC_DIR   := src
+BUILD_DIR := build
+
+VPATH := $(SRC_DIR)
 
 COMPOSE_FILE := $(if $(wildcard docker-compose.yml),docker-compose.yml,dist/docker-compose.yml)
 DOCKER_COMPOSE := docker compose -f $(COMPOSE_FILE)
@@ -38,9 +41,9 @@ status = @echo "==> $(1)"
 all: ## Build the site by invoking /app/mk/build.mk inside the shell container
 	$(call status,Build site)
 	$(Q)$(DOCKER_COMPOSE) up -d dragonfly
-	$(Q)$(MAKE_CMD) -f /app/mk/build.mk VERBOSE=$(VERBOSE)
+	$(Q)$(MAKE_CMD) -f /app/mk/build.mk VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR)
 
-build: ## Helper target used by other rules
+$(BUILD_DIR): ## Helper target used by other rules
 	$(call status,Prepare build directory $@)
 	$(Q)mkdir -p $@
 
@@ -64,7 +67,7 @@ docker: test ## Build and push the Nginx image after running test
 .PHONY: test
 test: ## Restart nginx-dev and run tests
 	$(call status,Run tests)
-	$(Q)$(MAKE_CMD) -f /app/mk/build.mk VERBOSE=$(VERBOSE) test
+	$(Q)$(MAKE_CMD) -f /app/mk/build.mk VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) test
 
 # Target to bring up the development Nginx container
 .PHONY: up
@@ -86,7 +89,7 @@ down: ## Stop and remove the compose stack
 .PHONY: clean
 clean: ## Remove everything under build/
 	$(call status,Remove build artifacts)
-	$(Q)-rm -rf build/*
+	$(Q)-rm -rf $(BUILD_DIR)/*
 	$(Q)-rm -f .update-index
 
 .PHONY: distclean
@@ -152,7 +155,7 @@ pytest:
 .PHONY: t
 t: ## Restart nginx-dev and run tests, ansi colors
 	$(call status,Run tests with colors)
-	$(Q)$(DOCKER_COMPOSE) run --entrypoint make --rm shell -f /app/mk/build.mk VERBOSE=$(VERBOSE) test
+	$(Q)$(DOCKER_COMPOSE) run --entrypoint make --rm shell -f /app/mk/build.mk VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) test
 	$(Q)$(DOCKER_COMPOSE) run --entrypoint pytest --rm shell /press/py/pie/tests
 
 .PHONY: t

@@ -16,6 +16,8 @@ This repository actually uses three Makefiles that work together:
 
 ## Variables
 
+- **`SRC_DIR`** – Directory containing source files (default: `src`).
+- **`BUILD_DIR`** – Directory for generated output (default: `build`).
 - **`SERVICES`** – Containers started by `up`/`upd` (default: `nginx-dev sync webp`).
 - **`MAKE_CMD`** – Helper command to run the lower-level makefile inside the `shell` service.
 - **`COMPOSE_FILE`** – Compose file used by commands. Defaults to `dist/docker-compose.yml` unless a local `docker-compose.yml` exists.

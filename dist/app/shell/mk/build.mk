@@ -29,11 +29,17 @@ REDIS_PORT ?= 6379
 export REDIS_HOST
 export REDIS_PORT
 
+# Directories
+SRC_DIR   := src
+BUILD_DIR := build
+LOG_DIR   := log
+CFG_DIR   := cfg
+
 # Define the Pandoc command used inside the container
 #       -T: Don't allocate pseudo-tty. Makes parallel builds work.
 # For container setup details, see dist/docs/docker-make.md.
 PANDOC_CMD := pandoc
-PANDOC_TEMPLATE := src/pandoc-template.html
+PANDOC_TEMPLATE := $(SRC_DIR)/pandoc-template.html
 
 # Options for generating HTML output with Pandoc
 PANDOC_OPTS := \
@@ -48,71 +54,71 @@ PANDOC_OPTS := \
 
 # Options for generating PDF output with Pandoc
 PANDOC_OPTS_PDF := \
-		--css "/style.css" \
-		--standalone \
-		-t pdf \
-		--toc \
-		--toc-depth=2 \
-		--number-sections \
-		--pdf-engine=xelatex \
-		--resource-path=build \
-		--filter pandoc-crossref \
+                --css "/style.css" \
+                --standalone \
+                -t pdf \
+                --toc \
+                --toc-depth=2 \
+                --number-sections \
+                --pdf-engine=xelatex \
+                --resource-path=$(BUILD_DIR) \
+                --filter pandoc-crossref \
 
 # Command for minifying HTML files
 MINIFY_CMD := minify
 
 CHECKLINKS_CMD := checklinks
 
-VPATH := src
+VPATH := $(SRC_DIR)
 
 # Find all Markdown files excluding specified directories
-MARKDOWNS := $(shell find src/ -name '*.md')
-YAMLS := $(shell find src -name "*.yml")
+MARKDOWNS := $(shell find $(SRC_DIR)/ -name '*.md')
+YAMLS := $(shell find $(SRC_DIR) -name "*.yml")
 
 # Define the corresponding HTML and PDF output files
-HTMLS := $(patsubst src/%.md, build/%.html, $(MARKDOWNS))
-PDFS := $(patsubst src/%.md, build/%.pdf, $(MARKDOWNS))
+HTMLS := $(patsubst $(SRC_DIR)/%.md, $(BUILD_DIR)/%.html, $(MARKDOWNS))
+PDFS := $(patsubst $(SRC_DIR)/%.md, $(BUILD_DIR)/%.pdf, $(MARKDOWNS))
 
 # Sort and define build subdirectories based on HTML files
-BUILD_SUBDIRS := $(sort $(dir $(HTMLS))) log build/static
+BUILD_SUBDIRS := $(sort $(dir $(HTMLS))) $(LOG_DIR) $(BUILD_DIR)/static
 
-CSS := $(wildcard src/*.css)
-CSS := $(patsubst src/%.css,build/%.css, $(CSS))
+CSS := $(wildcard $(SRC_DIR)/*.css)
+CSS := $(patsubst $(SRC_DIR)/%.css,$(BUILD_DIR)/%.css, $(CSS))
 
 # Define the default target to build everything
 .PHONY: all
-all: final | build $(BUILD_SUBDIRS)
+all: final | $(BUILD_DIR) $(BUILD_SUBDIRS)
 
 .PHONY: step1
-step1: build/.update-index
+step1: $(BUILD_DIR)/.update-index
 
 .PHONY: step2
 final: step1
 final: $(HTMLS)
 final: $(CSS)
 
-build/.update-index: $(MARKDOWNS) $(YAMLS)
+$(BUILD_DIR)/.update-index: $(MARKDOWNS) $(YAMLS)
 	$(call status,Updating Redis Index)
 	$(Q)for i in $(?); do update-index --host $(REDIS_HOST) --port $(REDIS_PORT) $$i; done
 	$(Q)touch $@
 
 # Target to minify HTML and CSS files
 # Modifies file timestamps. The preserve option doesn't seem to work.
-build/.minify:
+$(BUILD_DIR)/.minify:
 	$(call status,Minify HTML and CSS)
-	$(Q)cd build; $(MINIFY_CMD) -a -v -r -o . .
+	$(Q)cd $(BUILD_DIR); $(MINIFY_CMD) -a -v -r -o . .
 	$(Q)touch $@
 
 .PHONY: test
 # Triggered by the test target in redo.mk; see dist/docs/redo-mk.md.
-test: build/.minify | log
+test: $(BUILD_DIR)/.minify | $(LOG_DIR)
 	$(call status,Run link check)
-	$(Q)$(CHECKLINKS_CMD) http://nginx-dev 2>&1 | tee log/checklinks.txt
+	$(Q)$(CHECKLINKS_CMD) http://nginx-dev 2>&1 | tee $(LOG_DIR)/checklinks.txt
 	$(call status,Check page titles)
-	$(Q)check-page-title -x cfg/check-page-title-exclude.yml build
+	$(Q)check-page-title -x $(CFG_DIR)/check-page-title-exclude.yml $(BUILD_DIR)
 
 # Create necessary build directories
-build: | $(BUILD_SUBDIRS)
+$(BUILD_DIR): | $(BUILD_SUBDIRS)
 
 # Create each build subdirectory if it doesn't exist
 $(BUILD_SUBDIRS):
@@ -120,44 +126,44 @@ $(BUILD_SUBDIRS):
 	$(Q)mkdir -p $@
 
 # Copy CSS files to the build directory
-build/%.css: %.css | build
+$(BUILD_DIR)/%.css: %.css | $(BUILD_DIR)
 	$(call status,Copy CSS $<)
 	$(Q)cp $< $@
 
 # Include and preprocess Markdown files up to three levels deep
 # See dist/docs/preprocess.md for preprocessing details
-build/%.md: %.md | build
+$(BUILD_DIR)/%.md: %.md | $(BUILD_DIR)
 	$(call status,Preprocess $<)
 	$(Q)preprocess $<
 
 # Generate HTML from processed Markdown using Pandoc
-build/%.html: build/%.md $(PANDOC_TEMPLATE) | build
+$(BUILD_DIR)/%.html: $(BUILD_DIR)/%.md $(PANDOC_TEMPLATE) | $(BUILD_DIR)
 	$(call status,Generate HTML $@)
 	$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) -o $@ $<
 
 # Generate PDF from processed Markdown using Pandoc
 # include-filter usage is documented in dist/docs/include-filter.md
-build/%.pdf: %.md | build
+$(BUILD_DIR)/%.pdf: %.md | $(BUILD_DIR)
 	$(call status,Generate PDF $@)
-	$(Q)include-filter build $< build/$*.1.md
-	$(Q)include-filter build build/$*.1.md build/$*.2.md
-	$(Q)include-filter build build/$*.2.md build/$*.3.md
+	$(Q)include-filter $(BUILD_DIR) $< $(BUILD_DIR)/$*.1.md
+	$(Q)include-filter $(BUILD_DIR) $(BUILD_DIR)/$*.1.md $(BUILD_DIR)/$*.2.md
+	$(Q)include-filter $(BUILD_DIR) $(BUILD_DIR)/$*.2.md $(BUILD_DIR)/$*.3.md
 	$(Q)$(PANDOC_CMD) \
-	$(PANDOC_OPTS_PDF) \
-		-o $@ \
-		build/$*.3.md
+$(PANDOC_OPTS_PDF) \
+        -o $@ \
+        $(BUILD_DIR)/$*.3.md
 
 # Clean the build directory by removing all build artifacts
 .PHONY: clean
 clean:
 	$(call status,Remove build artifacts)
-	$(Q)-rm -rf build
+	$(Q)-rm -rf $(BUILD_DIR)
 
 # Optionally include user dependencies; see dist/docs/redo-mk.md.
 -include /app/mk/dep.mk
 
-build/picasso.mk: $(YAMLS) | build
+$(BUILD_DIR)/picasso.mk: $(YAMLS) | $(BUILD_DIR)
 	$(call status,Generate picasso rules)
-	$(Q)picasso --src src --build build > $@
+	$(Q)picasso --src $(SRC_DIR) --build $(BUILD_DIR) > $@
 
-include build/picasso.mk
+include $(BUILD_DIR)/picasso.mk
