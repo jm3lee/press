@@ -33,17 +33,17 @@ Example from `src/quiz/demo.json`:
 ## 2. Rendering JSON
 
 During the build the React quiz interface is compiled with Vite.  The
-`dist/app/quiz/dep.mk` makefile also copies the JSON files so they are
+`app/quiz/dep.mk` makefile also copies the JSON files so they are
 served from `/quiz/`:
 
 ```make
 all: build/quiz/quiz.js build/quiz/demo.json
 
-build/quiz/quiz.js: dist/app/build/static/js/quiz.js | build/quiz
-cp $< $@
+build/quiz/quiz.js: app/build/static/js/quiz.js | build/quiz
+    cp $< $@
 
-dist/app/build/static/js/quiz.js: $(wildcard dist/app/quiz/src/*) dist/app/quiz/.init
-    cd dist/app/quiz; npm run build
+app/build/static/js/quiz.js: $(wildcard app/quiz/src/*) app/quiz/.init
+    cd app/quiz; npm run build
 
 build/quiz/demo.json: src/quiz/demo.json
 mkdir -p $(dir $@)
@@ -54,7 +54,7 @@ The resulting assets live under `build/quiz/` and are served directly by the sit
 
 ## 3. Interactive Quiz Component
 
-For dynamic quizzes, the React component `dist/app/quiz/src/Quiz.jsx` fetches a JSON file and handles user interaction:
+For dynamic quizzes, the React component `app/quiz/src/Quiz.jsx` fetches a JSON file and handles user interaction:
 
 ```jsx
 const Quiz = ({ src = "/study/key_terms.json" }) => {
@@ -86,11 +86,11 @@ A page can embed the quiz with:
 
 ## 4. Styling
 
-Both the site CSS (`src/style.css`) and the React bundle’s stylesheet (`dist/app/quiz/src/index.css`) define classes like `.quiz-container`, `.question`, `.choice`, and `.answer` to style quizzes consistently.
+Both the site CSS (`src/style.css`) and the React bundle’s stylesheet (`app/quiz/src/index.css`) define classes like `.quiz-container`, `.question`, `.choice`, and `.answer` to style quizzes consistently.
 
 ## Summary
 
 1. Quizzes are defined as JSON under `src/quiz/`.
-2. `dist/app/quiz/dep.mk` compiles the React app and copies quizzes to `build/quiz/`.
+2. `app/quiz/dep.mk` compiles the React app and copies quizzes to `build/quiz/`.
 3. The React `Quiz` component fetches the built JSON for an interactive version and is included via `quiz.js`.
 

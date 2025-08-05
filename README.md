@@ -1,5 +1,5 @@
 Press is a static-site generator built on Pandoc and Docker. It uses
-`docker-compose` together with `redo.mk` to orchestrate services for building
+`docker compose` together with `redo.mk` to orchestrate services for building
 and serving content. The project includes helpers for rendering Markdown to HTML
 or PDF, converting images to WebP, and customizing Jinja templates. It's meant
 for building documentation or other small websites that can be served from a

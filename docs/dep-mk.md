@@ -1,7 +1,7 @@
 # dep.mk Custom Dependencies
 
 `dep.mk` is an optional Makefile that extends the build process with project specific rules.
-It is included at the end of `dist/app/shell/mk/build.mk` if present.
+It is included at the end of `app/shell/mk/build.mk` if present.
 
 ## How It Works
 
@@ -11,7 +11,7 @@ It is included at the end of `dist/app/shell/mk/build.mk` if present.
 -include /app/mk/dep.mk
 ```
 
-During `docker-compose` runs, the repository's `dep.mk` is mounted into the
+During `docker compose` runs, the repository's `dep.mk` is mounted into the
 shell container at `/app/mk/dep.mk`:
 
 ```yaml
@@ -29,10 +29,10 @@ The provided `dep.mk` simply pulls in rules for building the React quiz
 interface:
 
 ```make
-include dist/app/quiz/dep.mk
+include app/quiz/dep.mk
 ```
 
-`dist/app/quiz/dep.mk` compiles the quiz bundle with Vite and copies JSON quizzes into
+`app/quiz/dep.mk` compiles the quiz bundle with Vite and copies JSON quizzes into
 `build/quiz/`. See `docs/quiz-workflow.md` for the full workflow.
 
 ## Customization
