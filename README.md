@@ -164,6 +164,6 @@ build. Use `--src DIR` to search a different directory for `.yml` files and
 - [gen-markdown-index](docs/gen-markdown-index.md)
 - [process-yaml](docs/process-yaml.md)
 - [Nginx Dockerfile](docs/nginx.md)
-- [docker-make](docs/docker-make.md)
+- [make](docs/make.md)
 - [WebP Service](docs/webp-service.md)
 - [check-page-title](docs/check-page-title.md)

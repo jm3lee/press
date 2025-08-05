@@ -8,10 +8,10 @@
 #   to the underlying `make` command.
 #
 # Usage:
-#   docker-make [MAKE_TARGETS]
+#   make [MAKE_TARGETS]
 #
 # Example:
-#   docker-make all
+#   make all
 #
 # Run "make" in the container with the current user's UID so that
 # generated files are owned by the invoking user. The container is
