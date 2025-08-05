@@ -6,10 +6,8 @@ document's `id` to its metadata (including generated URLs).
 """
 
 import argparse
-import glob
 import json
 import os
-import sys
 from typing import Any, Dict, Optional
 
 import yaml
@@ -36,7 +34,7 @@ def get_url(filename: str) -> Optional[str]:
     if filename.startswith(prefix):
         relative_path = filename[len(prefix) :]
         base, ext = os.path.splitext(relative_path)
-        if ext.lower() in (".md", ".yml"):
+        if ext.lower() in (".md", ".yml", ".yaml"):
             html_path = base + ".html"
             return "/" + html_path
     logger.warning("Can't create a url.", filename=filename)
@@ -158,46 +156,54 @@ def validate_and_insert_metadata(
         )
 
 
-def build_index(source_dir: str, file_pattern: str = "**/*.md") -> Dict[str, Any]:
+def build_index(
+    source_dir: str, extensions: list[str] | tuple[str, ...] | None = None
+) -> Dict[str, Any]:
     """Build an index of document metadata from Markdown and YAML files.
 
-    Scans `source_dir` recursively for files matching `file_pattern`. For
-    Markdown files (`.md`), extracts YAML frontmatter and generates URLs for
-    those under `src/`. For YAML files (`.yml`/`.yaml`), loads the entire file
-    as metadata. Ensures each `id` is unique.
+    Scans ``source_dir`` recursively and processes any files whose extension is
+    in ``extensions``. Markdown files (``.md``) have their YAML frontmatter
+    extracted and URLs generated for those under ``src/``. YAML files
+    (``.yml``/``.yaml``) are loaded entirely as metadata. Each document's
+    ``id`` must be unique.
 
     Args:
         source_dir: Root directory to scan for files.
-        file_pattern: Glob pattern (relative to `source_dir`) to select files.
-            Defaults to `"**/*.md"`.
+        extensions: Iterable of file extensions to include. Defaults to
+            ``[".md", ".yml", ".yaml"]``.
 
     Returns:
-        A dict mapping each document `id` to its metadata (with added `url` for MD).
+        A dict mapping each document ``id`` to its metadata (with added ``url``
+        for Markdown sources).
 
     Raises:
-        KeyError: If duplicate `id` values are encountered.
+        KeyError: If duplicate ``id`` values are encountered.
     """
+    if extensions is None:
+        extensions = (".md", ".yml", ".yaml")
+
     index: Dict[str, Any] = {}
-    pattern = os.path.join(source_dir, file_pattern)
 
-    for filepath in glob.glob(pattern, recursive=True):
-        _, ext = os.path.splitext(filepath)
-        ext_lower = ext.lower()
-        logger.debug("Processing file", filename=filepath)
+    for root, _, files in os.walk(source_dir):
+        for name in files:
+            _, ext = os.path.splitext(name)
+            ext_lower = ext.lower()
+            if ext_lower not in extensions:
+                continue
 
-        metadata: Optional[Dict[str, Any]] = None
+            filepath = os.path.join(root, name)
+            logger.debug("Processing file", filename=filepath)
 
-        if ext_lower == ".md":
-            metadata = process_markdown(filepath)
-        elif ext_lower in (".yml", ".yaml"):
-            metadata = parse_yaml_metadata(filepath)
-        else:
-            # Skip files that are neither Markdown nor YAML
-            continue
+            metadata: Optional[Dict[str, Any]] = None
 
-        if metadata:
-            validate_and_insert_metadata(metadata, filepath, index)
-            logger.debug("Processed file", filename=filepath)
+            if ext_lower == ".md":
+                metadata = process_markdown(filepath)
+            elif ext_lower in (".yml", ".yaml"):
+                metadata = parse_yaml_metadata(filepath)
+
+            if metadata:
+                validate_and_insert_metadata(metadata, filepath, index)
+                logger.debug("Processed file", filename=filepath)
 
     return index
 
@@ -231,12 +237,9 @@ def main(argv: list[str] | None = None) -> None:
     if args.log:
         add_file_logger(args.log, level="DEBUG")
 
-    # Build index for Markdown and YAML separately
-    md_index = build_index(args.source_dir, file_pattern="**/*.md")
-    yaml_index = build_index(args.source_dir, file_pattern="**/*.yml")
-    combined = {**md_index, **yaml_index}
+    index = build_index(args.source_dir)
 
-    output_json = json.dumps(combined, ensure_ascii=False, indent=2)
+    output_json = json.dumps(index, ensure_ascii=False, indent=2)
 
     if args.output:
         with open(args.output, "w", encoding="utf-8") as outfile:
