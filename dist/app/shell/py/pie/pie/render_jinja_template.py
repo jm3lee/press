@@ -151,116 +151,73 @@ def get_link_class(desc):
     return "internal-link"
 
 
-def linktitle(desc):
-    """
-    Capitalize the first character of each word in the string,
-    preserving ALL whitespace (spaces, tabs, newlines).
+def render_link(desc, *, style: str = "plain", use_icon: bool = True, citation: str = "citation"):
+    """Return a formatted HTML anchor for ``desc``.
 
-    ``update-index`` inserts metadata into Redis with keys of the form
-    ``<id>.<property>``. When ``desc`` is a string, this function now looks up
-    the relevant fields in Redis. If the values are missing, ``index.json`` is
-    consulted as a fallback and a :class:`UserWarning` is emitted.
+    ``desc`` may be either a metadata dictionary or a string id which will be
+    looked up via :func:`_load_desc`.  ``style`` controls how the citation text
+    is capitalised: ``"plain"`` leaves it untouched, ``"title"`` applies
+    title‑case, and ``"cap"`` capitalises only the first character.  When
+    ``use_icon`` is ``True`` any ``icon`` field is prefixed to the citation.
+    ``citation`` selects which citation field to use; pass ``"short"`` to use
+    ``citation["short"]``.
     """
 
     desc = _load_desc(desc)
 
-    citation = desc["citation"]
+    # Determine citation text
+    citation_val = desc["citation"]
+    if citation == "short":
+        citation_text = citation_val["short"]
+    else:
+        if isinstance(citation_val, dict):
+            citation_text = citation_val.get(citation)
+        else:
+            citation_text = citation_val
+
+    # Apply requested capitalisation style
+    if style == "title":
+        def cap_match(m):
+            word = m.group(1)
+            if word.lower() in {"of", "in", "a", "an"}:
+                return word
+            return word[0].upper() + word[1:]
+
+        citation_text = _whitespace_word_pattern.sub(cap_match, citation_text)
+    elif style == "cap" and citation_text:
+        citation_text = citation_text[0].upper() + citation_text[1:]
+
     url = desc["url"]
-    icon = desc.get("icon")
+    icon = desc.get("icon") if use_icon else None
     a_attribs = get_tracking_options(desc)
 
-    def cap_match(m):
-        word = m.group(1)
-        if word.lower() in {"of", "in", "a", "an"}:
-            return word
-        return word[0].upper() + word[1:]
-
-    citation = _whitespace_word_pattern.sub(cap_match, citation)
-
     if icon:
-        return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{icon} {citation}</a>"""
-    return (
-        f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{citation}</a>"""
-    )
+        return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{icon} {citation_text}</a>"""
+    return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{citation_text}</a>"""
+
+
+def linktitle(desc):
+    return render_link(desc, style="title")
 
 
 def link_icon_title(desc):
-    """
-    Capitalize the first character of each word in the string,
-    preserving ALL whitespace (spaces, tabs, newlines).
-    """
-    desc = _load_desc(desc)
-    citation = desc["citation"]
-    url = desc["url"]
-    icon = desc["icon"]
-    a_attribs = get_tracking_options(desc)
-
-    def cap_match(m):
-        word = m.group(1)
-        return word[0].upper() + word[1:]
-
-    citation = _whitespace_word_pattern.sub(cap_match, citation)
-    return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{icon} {citation}</a>"""
+    return render_link(desc, style="title", use_icon=True)
 
 
 def linkcap(desc):
-    """
-    Capitalize the first character of each word in the string,
-    preserving ALL whitespace (spaces, tabs, newlines).
-    """
-    desc = _load_desc(desc)
-
-    citation = desc["citation"]
-    citation = citation[0].upper() + citation[1:]
-    url = desc["url"]
-    icon = desc.get("icon")
-    a_attribs = get_tracking_options(desc)
-    if icon:
-        return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{icon} {citation}</a>"""
-    return (
-        f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{citation}</a>"""
-    )
+    return render_link(desc, style="cap")
 
 
 def linkicon(desc):
-    """
-    Capitalize the first character of each word in the string,
-    preserving ALL whitespace (spaces, tabs, newlines).
-    """
-    desc = _load_desc(desc)
-    citation = desc["citation"]
-    url = desc["url"]
-    icon = desc.get("icon")
-    a_attribs = get_tracking_options(desc)
-    if icon:
-        return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{icon} {citation}</a>"""
-    return (
-        f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{citation}</a>"""
-    )
+    return render_link(desc, use_icon=True)
 
 
 def link(desc):
-    """
-    Capitalize the first character of each word in the string,
-    preserving ALL whitespace (spaces, tabs, newlines).
-    """
-    desc = _load_desc(desc)
-    citation = desc["citation"]
-    url = desc["url"]
-    a_attribs = get_tracking_options(desc)
-    return (
-        f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{citation}</a>"""
-    )
+    return render_link(desc, use_icon=False)
 
 
 def linkshort(desc):
-    desc = _load_desc(desc)
-    citation = desc["citation"]["short"]
-    url = desc["url"]
-    a_attribs = get_tracking_options(desc)
-    return (
-        f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{citation}</a>"""
-    )
+    return render_link(desc, use_icon=False, citation="short")
 
 
 def extract_front_matter(file_path: str) -> dict | None:
@@ -417,7 +374,7 @@ def create_env():
     """Create and configure the Jinja2 environment."""
 
     env = Environment(loader=FileSystemLoader("/data"), undefined=StrictUndefined)
-    env.filters["link"] = link
+    env.filters["link"] = render_link
     env.filters["linktitle"] = linktitle
     env.filters["linkcap"] = linkcap
     env.filters["link_icon_title"] = link_icon_title

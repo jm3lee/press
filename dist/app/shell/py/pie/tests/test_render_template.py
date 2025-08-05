@@ -5,13 +5,13 @@ from pie import render_jinja_template as render_template
 
 def test_default_class():
     desc = {"citation": "foo", "url": "/f"}
-    html = render_template.linktitle(desc)
+    html = render_template.render_link(desc, style="title")
     assert 'class="internal-link"' in html
 
 
 def test_override_class():
     desc = {"citation": "foo", "url": "/f", "link": {"class": "external"}}
-    html = render_template.linktitle(desc)
+    html = render_template.render_link(desc, style="title")
     assert 'class="external"' in html
 
 
@@ -46,7 +46,7 @@ def test_linktitle_uses_redis(monkeypatch):
     monkeypatch.setattr(render_template, "redis_conn", fake)
     render_template.index_json = {}
 
-    html = render_template.linktitle("item")
+    html = render_template.render_link("item", style="title")
     assert '<a href="/i"' in html
     assert ">Item<" in html
 
@@ -57,12 +57,12 @@ def test_linktitle_missing_raises(monkeypatch):
     render_template.index_json = {}
 
     with pytest.raises(SystemExit):
-        render_template.linktitle("foo")
+        render_template.render_link("foo", style="title")
 
 
 def test_linktitle_skips_small_words():
     desc = {"citation": "movement in a circle", "url": "/c"}
-    html = render_template.linktitle(desc)
+    html = render_template.render_link(desc, style="title")
     assert ">Movement in a Circle<" in html
 
 
@@ -75,7 +75,7 @@ def test_link_uses_redis_tracking_and_ignores_icon(monkeypatch):
     monkeypatch.setattr(render_template, "redis_conn", fake)
     render_template.index_json = {}
 
-    html = render_template.link("entry")
+    html = render_template.render_link("entry", use_icon=False)
     assert '<a href="/link"' in html
     assert 'link text' in html
     assert 'ICON' not in html
@@ -91,7 +91,7 @@ def test_linkcap_includes_icon_and_capitalizes(monkeypatch):
     monkeypatch.setattr(render_template, "redis_conn", fake)
     render_template.index_json = {}
 
-    html = render_template.linkcap("entry")
+    html = render_template.render_link("entry", style="cap")
     assert 'ICON Foo bar' in html
     assert 'Foo Bar' not in html
     assert 'rel="noopener noreferrer" target="_blank"' in html
@@ -106,7 +106,7 @@ def test_linkicon_includes_icon_without_capitalization(monkeypatch):
     monkeypatch.setattr(render_template, "redis_conn", fake)
     render_template.index_json = {}
 
-    html = render_template.linkicon("entry")
+    html = render_template.render_link("entry")
     assert 'ICON foo bar' in html
     assert 'Foo bar' not in html
     assert 'rel="noopener noreferrer" target="_blank"' in html
@@ -121,7 +121,7 @@ def test_link_icon_title_capitalizes_each_word_and_includes_icon(monkeypatch):
     monkeypatch.setattr(render_template, "redis_conn", fake)
     render_template.index_json = {}
 
-    html = render_template.link_icon_title("entry")
+    html = render_template.render_link("entry", style="title")
     assert 'ICON Foo Bar' in html
     assert 'rel="noopener noreferrer" target="_blank"' in html
 
@@ -135,7 +135,7 @@ def test_linkshort_uses_short_citation_and_ignores_icon(monkeypatch):
     monkeypatch.setattr(render_template, "redis_conn", fake)
     render_template.index_json = {}
 
-    html = render_template.linkshort("entry")
+    html = render_template.render_link("entry", citation="short", use_icon=False)
     assert '>Short<' in html
     assert 'ICON' not in html
     assert 'rel="noopener noreferrer" target="_blank"' in html

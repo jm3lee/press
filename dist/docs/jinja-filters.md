@@ -7,17 +7,24 @@ text, along with a `url` field. Optional keys like `icon`,
 `link.tracking`, and `link.class` customize the output.  For an overview of
 these metadata fields, see [Metadata Fields](metadata-fields.md).
 
-## `linktitle`
+## `link`
 
-`linktitle` capitalizes the first character of each word in the
-`citation` field, except for short words like `in`, `a`, `an`, and `of`.
-It returns an HTML `<a>` element using the supplied `url` and optional
-`icon`, `link.class`, or `link.tracking` fields.
+The `link` filter formats a metadata dictionary into an HTML anchor.  It
+accepts a few optional parameters to control the output:
+
+- `style` – controls capitalization of the citation text.  Use `"plain"`
+  (default) to leave text unchanged, `"title"` for title‑case, or `"cap"` to
+  capitalise only the first character.
+- `use_icon` – when `True` (default) any `icon` field in the metadata is
+  prefixed to the link text.  Set to `False` to suppress icons.
+- `citation` – selects which citation field to render.  The default `"citation"`
+  uses the main citation value; pass `"short"` to use `citation.short`.
 
 Example:
 
 ```jinja
-{{ {"citation": "deltoid tuberosity", "url": "/humerus.html#deltoid_tuberosity"} | linktitle }}
+{{ {"citation": "deltoid tuberosity", "url": "/humerus.html#deltoid_tuberosity"}
+   | link(style="title") }}
 ```
 
 renders as:
@@ -26,52 +33,15 @@ renders as:
 <a href="/humerus.html#deltoid_tuberosity" class="internal-link">Deltoid Tuberosity</a>
 ```
 
-You can also use it inside YAML fragments that feed into Jinja templates:
-
-```yaml
-toc:
-  - "{{\"deltoid_tuberosity\"|linktitle}}"
-```
-
-This filter lives in `pie.render_jinja_template` and is also exposed by the
-`render-jinja-template` command.
-
-When you pass a string instead of a dictionary, the filters fetch the
-corresponding metadata from Redis. The lookup now retries a few times before
+When you pass a string instead of a dictionary, the filter fetches the
+corresponding metadata from Redis. The lookup retries a few times before
 aborting so templates are more resilient when entries are added concurrently.
 
-## `linkcap`
+### Legacy filters
 
-`linkcap` capitalizes only the first character of the `citation` text. It uses
-the same metadata fields as `linktitle` and returns an anchor element.
-
-```jinja
-{{ {"citation": "deltoid tuberosity", "url": "/humerus.html#deltoid_tuberosity"} | linkcap }}
-```
-
-renders as:
-
-```html
-<a href="/humerus.html#deltoid_tuberosity" class="internal-link">Deltoid tuberosity</a>
-```
-
-## `linkicon`
-
-`linkicon` leaves the `citation` text unchanged but allows emoji or other icons
-to appear before it. Provide the optional `icon` field in the metadata to prefix
-the link text.
-
-## `link_icon_title`
-
-This filter combines the behavior of `linkicon` with word capitalization. It is
-primarily used when the metadata includes both an `icon` and a `citation`
-value.
-
-## `link`
-
-`link` renders the `citation` field as-is without altering capitalization.
-It is useful when no formatting is desired but you still want an anchor
-element with the correct `url` and optional link attributes.
+Older filters such as `linktitle`, `linkcap`, `linkicon`, `link_icon_title`,
+and `linkshort` remain available for backward compatibility but are now thin
+wrappers around `link`.  They will be removed in a future release.
 
 ## `get_desc`
 

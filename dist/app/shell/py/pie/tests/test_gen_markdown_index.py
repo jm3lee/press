@@ -24,11 +24,13 @@ def test_generate_lines_sorted_and_icon():
         "url": "/b",
     }
     expected_lines = [
-        "- {{ " + json.dumps(expected_a, ensure_ascii=False) + " | linktitle }}",
-        "- {{ " + json.dumps(expected_b, ensure_ascii=False) + " | linktitle }}",
+        "- {{ "
+        + json.dumps(expected_a, ensure_ascii=False)
+        + " | link(style='title') }}",
+        "- {{ " + json.dumps(expected_b, ensure_ascii=False) + " | link(style='title') }}",
     ]
-    # - {{ {"citation": "Alpha", "url": "/a", "icon": "*", "link": {"tracking": false}} | linktitle }}
-    # - {{ {"citation": "Beta", "url": "/b"} | linktitle }}
+    # - {{ {"citation": "Alpha", "url": "/a", "icon": "*", "link": {"tracking": false}} | link(style='title') }}
+    # - {{ {"citation": "Beta", "url": "/b"} | link(style='title') }}
     assert lines == expected_lines
 
 
@@ -46,8 +48,10 @@ def test_main_outputs_lines(tmp_path, capsys):
     gen_markdown_index.main([str(path)])
     out = capsys.readouterr().out.strip()
     desc = {"citation": "Foo", "url": "/foo", "link": {"tracking": False}}
-    expected = "- {{ " + json.dumps(desc, ensure_ascii=False) + " | linktitle }}"
-    # - {{ {"citation": "Foo", "url": "/foo", "link": {"tracking": false}} | linktitle }}
+    expected = (
+        "- {{ " + json.dumps(desc, ensure_ascii=False) + " | link(style='title') }}"
+    )
+    # - {{ {"citation": "Foo", "url": "/foo", "link": {"tracking": false}} | link(style='title') }}
     assert out == expected
 
 
