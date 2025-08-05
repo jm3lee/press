@@ -16,13 +16,24 @@ The build relies on three cooperating Makefiles:
 - **`dep.mk`** – optional file included by `build.mk` for custom dependencies.
   See [dist/docs/dep-mk.md](dist/docs/dep-mk.md).
 
+These Makefiles centralize key directories through variables so paths can be
+adjusted in one place:
+
+- `SRC_DIR` – source files (default `src`)
+- `BUILD_DIR` – generated output (default `build`)
+- `LOG_DIR` – log files (default `log`)
+- `CFG_DIR` – configuration files (default `cfg`)
+
+`SRC_DIR` and `BUILD_DIR` are mirrored in `redo.mk` to keep host targets and
+container builds aligned.
+
 ## Quickstart
 
 1. Run `git submodule update --init --recursive` after cloning to fetch
    required submodules such as `xmera`.
 2. Edit `dist/docker-compose.yml`. Adjust `image` as necessary. **TODO: Examples**
 3. Edit `redo.mk`. Update the list of services.
-4. Edit documents under `src/`.
+4. Edit documents under `src/` (or your configured `SRC_DIR`).
 5. Optionally customize `src/pandoc-template.html` for your project.
 6. Edit `docker` rule in `redo.mk` if you'd like to push docker images to a
    container registry.
