@@ -20,7 +20,7 @@ This repository actually uses three Makefiles that work together:
 - **`BUILD_DIR`** – Directory for generated output (default: `build`).
 - **`SERVICES`** – Containers started by `up`/`upd` (default: `nginx-dev sync webp`).
 - **`MAKE_CMD`** – Helper command to run the lower-level makefile inside the `shell` service.
-- **`COMPOSE_FILE`** – Compose file used by commands. Defaults to `docker-compose.yml` in the project root, falling back to `dist/docker-compose.yml` if missing.
+- **`COMPOSE_FILE`** – Compose file used by commands. Defaults to `docker-compose.yml` in the project root.
 - **`DOCKER_COMPOSE`** – Shortcut for `docker compose -f $(COMPOSE_FILE)`.
 - **`VERBOSE`** – Set to `1` to print each command executed by `make` in addition to status messages.
 
@@ -35,7 +35,7 @@ This repository actually uses three Makefiles that work together:
 | `down` | Stops and removes the compose stack. |
 | `clean` | Removes everything under `build/`. |
 | `prune` | Runs `docker system prune -f` to clean unused Docker resources. |
-| `setup` | Prepares `dist/app/webp` directories and builds all services. |
+| `setup` | Prepares `app/webp` directories and builds all services. |
 | `seed` | Runs the `seed` container to populate initial data. |
 | `sync` | Runs the `sync` container to upload site files to S3. |
 | `webp` | Runs the image conversion service. |

@@ -31,7 +31,7 @@ Example:
 ```markdown
 <dl>
 ```python
-include_deflist_entry("src/dist/include-filter", glob="*.md")
+include_deflist_entry("src/include-filter", glob="*.md")
 ```
 </dl>
 ```
@@ -39,5 +39,5 @@ include_deflist_entry("src/dist/include-filter", glob="*.md")
 Any links ending with `.md` are automatically rewritten to point at the
 corresponding `.html` file.
 
-Typical usage in `dist/app/shell/mk/build.mk` chains the command multiple times to
+Typical usage in `app/shell/mk/build.mk` chains the command multiple times to
 resolve nested includes before passing the final Markdown to Pandoc.

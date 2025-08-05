@@ -1,6 +1,6 @@
 # Nginx Dockerfile
 
-The `dist/app/nginx/Dockerfile` builds a minimal image for serving the static site.
+The `app/nginx/Dockerfile` builds a minimal image for serving the static site.
 It starts from `nginx:alpine-slim` and copies the generated `build/` directory
 into Nginx's default web root. Both the `nginx` and `nginx-dev` services in
 `docker-compose.yml` use this image.
@@ -15,7 +15,7 @@ COPY ./build /usr/share/nginx/html
 To test the container directly:
 
 ```bash
-docker build -f dist/app/nginx/Dockerfile -t press-nginx .
+docker build -f app/nginx/Dockerfile -t press-nginx .
 docker run -p 80:80 press-nginx
 ```
 
