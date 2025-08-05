@@ -113,7 +113,7 @@ $(BUILD_DIR)/.minify:
 # Triggered by the test target in redo.mk; see dist/docs/redo-mk.md.
 test: $(BUILD_DIR)/.minify | $(LOG_DIR)
 	$(call status,Run link check)
-	$(Q)$(CHECKLINKS_CMD) http://nginx-dev 2>&1 | tee $(LOG_DIR)/checklinks.txt
+	$(Q)$(CHECKLINKS_CMD) http://nginx-dev
 	$(call status,Check page titles)
 	$(Q)check-page-title -x $(CFG_DIR)/check-page-title-exclude.yml $(BUILD_DIR)
 

@@ -3,7 +3,6 @@ Welcome to the demo site for **Press**. Use the links below to explore key featu
 - [Quickstart](quickstart.md)
 - [Jinja Examples](examples/jinja.md)
 - [Link Filter Examples](examples/link-filters.md)
-- [Include Filter Examples](examples/include-filter.md)
 - [Quiz Demo](quiz/index.md)
 
 ## Emoji Replacement
@@ -21,10 +20,6 @@ For loops and other Jinja tricks see the [Jinja Examples](examples/jinja.md).
 ## Link Filters
 
 The [Link Filter Examples](examples/link-filters.md) page shows how to format links using different filters.
-
-## Include Filter
-
-Learn how to embed files and diagrams in [Include Filter Examples](examples/include-filter.md).
 
 ## Quiz Demo
 
