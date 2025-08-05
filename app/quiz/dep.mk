@@ -11,18 +11,18 @@ build/quiz:
 	mkdir -p $@
 
 # Copy the generated bundle from the app directory into the build tree
-build/quiz/quiz.js: dist/app/build/static/js/quiz.js | build/quiz
+build/quiz/quiz.js: app/build/static/js/quiz.js | build/quiz
 	cp $< $@
 
 # Build the React application with Vite.  The output lives under
-# `dist/app/build/static/js/` and mirrors Vite's default output directory.
-dist/app/build/static/js/quiz.js: $(wildcard dist/app/quiz/src/*) dist/app/quiz/.init
-	cd dist/app/quiz; npm run build
+# `app/build/static/js/` and mirrors Vite's default output directory.
+app/build/static/js/quiz.js: $(wildcard app/quiz/src/*) app/quiz/.init
+	cd app/quiz; npm run build
 
 
 # Install node modules once and mark completion.
-dist/app/quiz/.init:
-	cd dist/app/quiz; npm install
+app/quiz/.init:
+	cd app/quiz; npm install
 	touch $@
 
 # Example quiz data used for the demo page

@@ -90,7 +90,7 @@ down: ## Stop and remove the compose stack
 clean: ## Remove everything under build/
 	$(call status,Remove build artifacts)
 	$(Q)-rm -rf $(BUILD_DIR)/*
-	$(Q)-rm -f .update-index
+	$(Q)-rm -f $(BUILD_DIR)/.update-index
 
 .PHONY: distclean
 distclean: clean

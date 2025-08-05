@@ -1,8 +1,8 @@
 services:
   nginx:
     build:
-      context: ..
-      dockerfile: ./dist/app/nginx/Dockerfile
+      context: .
+      dockerfile: ./app/nginx/Dockerfile
     ports:
       - "80:80"
       - "443:443"
@@ -10,8 +10,8 @@ services:
 
   nginx-dev:
     build:
-      context: ..
-      dockerfile: ./dist/app/nginx/Dockerfile
+      context: .
+      dockerfile: ./app/nginx/Dockerfile
     container_name: press-nginx-dev
     ports:
       - "8000:80"
@@ -63,9 +63,9 @@ services:
       REDIS_HOST: dragonfly
       REDIS_PORT: 6379
     volumes:
-      - ../:/data
+      - ./:/data
       - ./app/shell/mk:/app/mk
       - ./app/shell/bin:/app/bin
       - ./app/shell/py/pie/pie:/press/py/pie/pie
       - ./app/shell/py/pie/tests:/press/py/pie/tests
-      - ./dep.mk:/app/mk/dep.mk
+      - ./src/dep.mk:/app/mk/dep.mk
