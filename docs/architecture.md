@@ -16,7 +16,7 @@ The top-level Makefile (`redo.mk`) drives all host-side automation. It launches 
 - A `test` target reruns the build's own tests from the host environment.
 
 ## Services
-`dist/docker-compose.yml` defines the container stack used by Press:
+`docker-compose.yml` defines the container stack used by Press:
 
 - `nginx` and `nginx-dev` serve generated content.
 - `shell` provides the build environment and exposes tools and tests.

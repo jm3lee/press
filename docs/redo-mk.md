@@ -20,7 +20,7 @@ This repository actually uses three Makefiles that work together:
 - **`BUILD_DIR`** – Directory for generated output (default: `build`).
 - **`SERVICES`** – Containers started by `up`/`upd` (default: `nginx-dev sync webp`).
 - **`MAKE_CMD`** – Helper command to run the lower-level makefile inside the `shell` service.
-- **`COMPOSE_FILE`** – Compose file used by commands. Defaults to `dist/docker-compose.yml` unless a local `docker-compose.yml` exists.
+- **`COMPOSE_FILE`** – Compose file used by commands. Defaults to `docker-compose.yml` in the project root, falling back to `dist/docker-compose.yml` if missing.
 - **`DOCKER_COMPOSE`** – Shortcut for `docker compose -f $(COMPOSE_FILE)`.
 - **`VERBOSE`** – Set to `1` to print each command executed by `make` in addition to status messages.
 
