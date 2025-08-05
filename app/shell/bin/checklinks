@@ -1,9 +1,35 @@
-#!/bin/bash -x
-wget \
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -ne 1 ]]; then
+    echo "Usage: $0 <url>" >&2
+    exit 1
+fi
+
+log=$(mktemp)
+trap 'rm -f "$log"' EXIT
+
+pattern='broken link!!!|ERROR [45][0-9]{2}'
+
+if ! wget \
     --spider \
     --recursive \
     --no-verbose \
     --level=3 \
     --no-directories \
     --hsts-file=/dev/null \
-    "$1"
+    "$1" 2>&1 | tee "$log"; then
+    if grep -qE "$pattern" "$log"; then
+        echo "Broken links detected" >&2
+    else
+        echo "Link check failed" >&2
+    fi
+    exit 1
+fi
+
+if grep -qE "$pattern" "$log"; then
+    echo "Broken links detected" >&2
+    exit 1
+fi
+
+echo "No broken links found."
