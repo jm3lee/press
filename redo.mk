@@ -89,6 +89,11 @@ clean: ## Remove everything under build/
 	$(Q)-rm -rf build/*
 	$(Q)-rm -f .update-index
 
+.PHONY: distclean
+distclean: clean
+	$(call status,Remove .init)
+	$(Q)-rm -f `find dist/app/ -name .init`
+
 .PHONY: prune
 prune: ## Run docker system prune -f to clean unused resources
 	$(call status,Docker prune)
