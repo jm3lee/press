@@ -37,10 +37,10 @@ def render_study(index: dict[str, Any], questions: Iterable[dict[str, Any]]) -> 
 
     env = create_env()
     rendered: List[dict[str, Any]] = []
-    for mc in questions:
-        q_text = env.from_string(mc["q"]).render(**index)
-        choices = [env.from_string(c).render(**index) for c in mc["c"]]
-        answer_idx, explanation = mc["a"]
+    for question in questions:
+        q_text = env.from_string(question["q"]).render(**index)
+        choices = [env.from_string(c).render(**index) for c in question["c"]]
+        answer_idx, explanation = question["a"]
         explanation = env.from_string(explanation).render(**index)
         rendered.append({"q": q_text, "c": choices, "a": [answer_idx, explanation]})
     return rendered
