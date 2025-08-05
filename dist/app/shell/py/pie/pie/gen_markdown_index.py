@@ -24,7 +24,9 @@ def generate_lines(index: Mapping[str, Mapping[str, str]]) -> List[str]:
         link = item.get("link")
         if isinstance(link, dict) and "tracking" in link:
             desc["link"] = {"tracking": link["tracking"]}
-        snippet = "{{ " + json.dumps(desc, ensure_ascii=False) + " | linktitle }}"
+        snippet = (
+            "{{ " + json.dumps(desc, ensure_ascii=False) + " | link(style='title') }}"
+        )
         lines.append(f"- {snippet}")
     return lines
 
