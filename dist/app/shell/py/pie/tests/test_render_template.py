@@ -65,3 +65,78 @@ def test_linktitle_skips_small_words():
     html = render_template.linktitle(desc)
     assert ">Movement in a Circle<" in html
 
+
+def test_link_uses_redis_tracking_and_ignores_icon(monkeypatch):
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    fake.set("entry.citation", "link text")
+    fake.set("entry.url", "/link")
+    fake.set("entry.icon", "ICON")
+    fake.set("entry.link.tracking", "false")
+    monkeypatch.setattr(render_template, "redis_conn", fake)
+    render_template.index_json = {}
+
+    html = render_template.link("entry")
+    assert '<a href="/link"' in html
+    assert 'link text' in html
+    assert 'ICON' not in html
+    assert 'rel="noopener noreferrer" target="_blank"' in html
+
+
+def test_linkcap_includes_icon_and_capitalizes(monkeypatch):
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    fake.set("entry.citation", "foo bar")
+    fake.set("entry.url", "/link")
+    fake.set("entry.icon", "ICON")
+    fake.set("entry.link.tracking", "false")
+    monkeypatch.setattr(render_template, "redis_conn", fake)
+    render_template.index_json = {}
+
+    html = render_template.linkcap("entry")
+    assert 'ICON Foo bar' in html
+    assert 'Foo Bar' not in html
+    assert 'rel="noopener noreferrer" target="_blank"' in html
+
+
+def test_linkicon_includes_icon_without_capitalization(monkeypatch):
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    fake.set("entry.citation", "foo bar")
+    fake.set("entry.url", "/link")
+    fake.set("entry.icon", "ICON")
+    fake.set("entry.link.tracking", "false")
+    monkeypatch.setattr(render_template, "redis_conn", fake)
+    render_template.index_json = {}
+
+    html = render_template.linkicon("entry")
+    assert 'ICON foo bar' in html
+    assert 'Foo bar' not in html
+    assert 'rel="noopener noreferrer" target="_blank"' in html
+
+
+def test_link_icon_title_capitalizes_each_word_and_includes_icon(monkeypatch):
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    fake.set("entry.citation", "foo bar")
+    fake.set("entry.url", "/link")
+    fake.set("entry.icon", "ICON")
+    fake.set("entry.link.tracking", "false")
+    monkeypatch.setattr(render_template, "redis_conn", fake)
+    render_template.index_json = {}
+
+    html = render_template.link_icon_title("entry")
+    assert 'ICON Foo Bar' in html
+    assert 'rel="noopener noreferrer" target="_blank"' in html
+
+
+def test_linkshort_uses_short_citation_and_ignores_icon(monkeypatch):
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    fake.set("entry.citation.short", "Short")
+    fake.set("entry.url", "/link")
+    fake.set("entry.icon", "ICON")
+    fake.set("entry.link.tracking", "false")
+    monkeypatch.setattr(render_template, "redis_conn", fake)
+    render_template.index_json = {}
+
+    html = render_template.linkshort("entry")
+    assert '>Short<' in html
+    assert 'ICON' not in html
+    assert 'rel="noopener noreferrer" target="_blank"' in html
+
