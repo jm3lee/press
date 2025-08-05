@@ -90,7 +90,7 @@ def process_markdown(filepath: str) -> Optional[Dict[str, Any]]:
     return metadata
 
 
-def process_yaml(filepath: str) -> Optional[Dict[str, Any]]:
+def parse_yaml_metadata(filepath: str) -> Optional[Dict[str, Any]]:
     """
     Load and validate metadata from a YAML file.
 
@@ -190,7 +190,7 @@ def build_index(source_dir: str, file_pattern: str = "**/*.md") -> Dict[str, Any
         if ext_lower == ".md":
             metadata = process_markdown(filepath)
         elif ext_lower in (".yml", ".yaml"):
-            metadata = process_yaml(filepath)
+            metadata = parse_yaml_metadata(filepath)
         else:
             # Skip files that are neither Markdown nor YAML
             continue

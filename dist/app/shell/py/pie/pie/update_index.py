@@ -70,10 +70,10 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
     yaml_file: Path | None = None
     if yml_path.exists():
         yaml_file = yml_path
-        yaml_data = build_index.process_yaml(str(yml_path))
+        yaml_data = build_index.parse_yaml_metadata(str(yml_path))
     elif yaml_path.exists():
         yaml_file = yaml_path
-        yaml_data = build_index.process_yaml(str(yaml_path))
+        yaml_data = build_index.parse_yaml_metadata(str(yaml_path))
 
     if md_data is None and yaml_data is None:
         return None

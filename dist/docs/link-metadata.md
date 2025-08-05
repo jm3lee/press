@@ -42,7 +42,7 @@ link:
 
 ## How IDs Are Generated
 
-During indexing, `process_yaml` from `pie.build_index` loads the file and assigns an `id` if it is absent:
+During indexing, `parse_yaml_metadata` from `pie.build_index` loads the file and assigns an `id` if it is absent:
 
 ```
 base, _ = os.path.splitext(filepath)

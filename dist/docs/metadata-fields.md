@@ -28,7 +28,7 @@ During indexing, `build_index.py` fills in several fields when they are missing:
 | `url`      | Derived from the source path (e.g. `src/foo.md` → `/foo.html`) |
 
 The `citation` value is used as the anchor text when other pages link to this document using Jinja filters such as `linktitle`.
-The helper that assigns these defaults lives in `process_yaml` within `pie.build_index`.
+The helper that assigns these defaults lives in `parse_yaml_metadata` within `pie.build_index`.
 
 `link.tracking` defaults to `true`, meaning links open in the same tab. `link.class` defaults to `internal-link`.
 

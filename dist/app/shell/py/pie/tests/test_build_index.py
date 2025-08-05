@@ -40,13 +40,13 @@ def test_process_markdown_parses_frontmatter(tmp_path):
     assert data == {"title": "T", "url": "/doc.html"}
 
 
-def test_process_yaml_generates_fields(tmp_path):
+def test_parse_yaml_metadata_generates_fields(tmp_path):
     yml = tmp_path / "src" / "item.yml"
     yml.parent.mkdir(parents=True)
     yml.write_text('{"name": "Foo"}')
     os.chdir(tmp_path)
     try:
-        data = build_index.process_yaml("src/item.yml")
+        data = build_index.parse_yaml_metadata("src/item.yml")
     finally:
         os.chdir("/tmp")
     assert data["name"] == "Foo"
