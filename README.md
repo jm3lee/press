@@ -14,7 +14,7 @@ The build relies on three cooperating Makefiles:
 - **`app/shell/mk/build.mk`** – executed by `make` inside the shell container to
   generate the site.
 - **`dep.mk`** – optional file included by `build.mk` for custom dependencies.
-  See [dist/docs/dep-mk.md](dist/docs/dep-mk.md).
+  See [docs/dep-mk.md](docs/dep-mk.md).
 
 These Makefiles centralize key directories through variables so paths can be
 adjusted in one place:
@@ -38,7 +38,7 @@ container builds aligned.
 6. Edit `docker` rule in `redo.mk` if you'd like to push docker images to a
    container registry.
 7. Run `r help` (or `make -f redo.mk help`) to see available tasks. See
-   `dist/docs/redo-mk.md` for more details.
+   `docs/redo-mk.md` for more details.
 
 ### Install prerequisites
 
@@ -83,7 +83,7 @@ cp foo.png app/webp/input
 r webp
 ls app/webp/output
 ```
-See [dist/docs/webp-service.md](dist/docs/webp-service.md) for more about how the
+See [docs/webp-service.md](docs/webp-service.md) for more about how the
 converter works.
 
 ## Redis Configuration
@@ -136,7 +136,7 @@ If you don’t provide these, Pandoc (or your build tooling) will generate them 
 - `id`: A unique identifier for cross-document linking (e.g., when using Jinja templates).
 - `citation`: Default anchor text for cross-document links. Jinja filters such as `linktitle` use this value.
 
-See [dist/docs/metadata-fields.md](dist/docs/metadata-fields.md) for a complete list of supported fields and defaults.
+See [docs/metadata-fields.md](docs/metadata-fields.md) for a complete list of supported fields and defaults.
 
 ### Examples
 - **Sidecar metadata**  
@@ -153,17 +153,17 @@ build. Use `--src DIR` to search a different directory for `.yml` files and
 
 ## Further Reading
 
-- [Jinja Filters](dist/docs/jinja-filters.md)
-- [Jinja Globals](dist/docs/jinja-globals.md)
-- [Build Index](dist/docs/build-index.md)
-- [update-index](dist/docs/update-index.md)
-- [Quiz Workflow](dist/docs/quiz-workflow.md)
-- [include-filter](dist/docs/include-filter.md)
-- [preprocess](dist/docs/preprocess.md)
-- [picasso](dist/docs/picasso.md)
-- [gen-markdown-index](dist/docs/gen-markdown-index.md)
-- [process-yaml](dist/docs/process-yaml.md)
-- [Nginx Dockerfile](dist/docs/nginx.md)
-- [docker-make](dist/docs/docker-make.md)
-- [WebP Service](dist/docs/webp-service.md)
-- [check-page-title](dist/docs/check-page-title.md)
+- [Jinja Filters](docs/jinja-filters.md)
+- [Jinja Globals](docs/jinja-globals.md)
+- [Build Index](docs/build-index.md)
+- [update-index](docs/update-index.md)
+- [Quiz Workflow](docs/quiz-workflow.md)
+- [include-filter](docs/include-filter.md)
+- [preprocess](docs/preprocess.md)
+- [picasso](docs/picasso.md)
+- [gen-markdown-index](docs/gen-markdown-index.md)
+- [process-yaml](docs/process-yaml.md)
+- [Nginx Dockerfile](docs/nginx.md)
+- [docker-make](docs/docker-make.md)
+- [WebP Service](docs/webp-service.md)
+- [check-page-title](docs/check-page-title.md)
