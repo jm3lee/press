@@ -44,4 +44,5 @@ The expected JSON file contains an array of nodes:
 
 Nodes are expandable when they contain a `children` array. Typing in the
 filter box hides entries whose titles do not include the query while
-keeping matching descendants visible.
+automatically expanding the paths to matching descendants so results are
+always visible.
