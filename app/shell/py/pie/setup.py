@@ -25,7 +25,7 @@ setup(
             'include-filter=pie.include_filter:main',
             'gen-markdown-index=pie.gen_markdown_index:main',
             'process-yaml=pie.process_yaml:main',
-            'check-html-for-python-dicts=pie.check_html_for_python_dicts:main',
+            'detect-html-dicts=pie.detect_html_dicts:main',
         ],
     },
 )
