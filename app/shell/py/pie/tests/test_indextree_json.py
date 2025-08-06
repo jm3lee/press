@@ -54,3 +54,37 @@ def test_scan_dir_uses_metadata(tmp_path: Path) -> None:
         {"id": "gamma-doc", "title": "Gamma Doc", "url": "/gamma.html"},
     ]
 
+
+def test_scan_dir_sorts_by_title(tmp_path: Path) -> None:
+    root = tmp_path / "src"
+    root.mkdir()
+
+    # File names intentionally do not match title order
+    (root / "b.md").write_text(
+        "---\n"
+        "title: A Doc\n"
+        "id: a-doc\n"
+        "---\n"
+        "b\n",
+        encoding="utf-8",
+    )
+    (root / "a.md").write_text(
+        "---\n"
+        "title: Z Doc\n"
+        "id: z-doc\n"
+        "---\n"
+        "a\n",
+        encoding="utf-8",
+    )
+
+    cwd = os.getcwd()
+    os.chdir(tmp_path)
+    try:
+        tree = scan_dir(Path("src"), "/")
+    finally:
+        os.chdir(cwd)
+    assert tree == [
+        {"id": "a-doc", "title": "A Doc", "url": "/b.html"},
+        {"id": "z-doc", "title": "Z Doc", "url": "/a.html"},
+    ]
+
