@@ -69,3 +69,12 @@ services:
       - ./app/shell/py/pie/pie:/press/py/pie/pie
       - ./app/shell/py/pie/tests:/press/py/pie/tests
       - ./src/dep.mk:/app/mk/dep.mk
+
+  pdoc:
+    build: ./app/pdoc
+    entrypoint: ["pdoc", "--http", "0.0.0.0:8080", "pie"]
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./app/shell/py/pie:/pie
+    profiles: ["pdoc"]

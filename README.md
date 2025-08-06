@@ -85,6 +85,17 @@ ls app/webp/output
 See [docs/guides/webp-service.md](docs/guides/webp-service.md) for more about how the
 converter works.
 
+### pdoc documentation server
+
+Use [pdoc](https://pdoc.dev) to browse API docs for the `pie` package.
+Start the service with the optional profile:
+
+```bash
+docker compose --profile pdoc up pdoc
+```
+
+Open <http://localhost:8080> to view the documentation.
+
 ## Redis Configuration
 
 The build tools connect to DragonflyDB/Redis using the `REDIS_HOST` and
