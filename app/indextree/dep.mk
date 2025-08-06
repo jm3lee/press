@@ -27,7 +27,7 @@ all: build/examples/indextree/demo.json
 INDEXTREE_SRC := src/examples/indextree/files
 
 build/examples/indextree/demo.json: $(shell find $(INDEXTREE_SRC) -type f) | build/examples/indextree
-	indextree-json $(INDEXTREE_SRC) > $@
+	indextree-json src > $@
 
 # Helper rule for copying example JSON into build tree
 build/%.json: %.json
