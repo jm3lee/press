@@ -25,9 +25,9 @@ def test_parse_metadata_prints_line():
 
 
 def test_md_to_html_links():
-    line = "See [Doc](dist/docs/file.md) and [X](x.md)"
+    line = "See [Doc](dist/docs/guides/file.md) and [X](x.md)"
     converted = include_filter.md_to_html_links(line)
-    assert converted == "See [Doc](dist/docs/file.html) and [X](x.html)"
+    assert converted == "See [Doc](dist/docs/guides/file.html) and [X](x.html)"
 
 
 def test_new_filestem_skips_existing(tmp_path):

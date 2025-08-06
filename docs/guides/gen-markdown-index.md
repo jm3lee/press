@@ -1,6 +1,6 @@
 # gen-markdown-index
 
-Generate a Jinja formatted list from `index.json`. The fields available in the index are described in [Metadata Fields](metadata-fields.md).
+Generate a Jinja formatted list from `index.json`. The fields available in the index are described in [Metadata Fields](../reference/metadata-fields.md).
 
 ```
 usage: gen-markdown-index <index.json>

@@ -33,7 +33,7 @@ include app/quiz/dep.mk
 ```
 
 `app/quiz/dep.mk` compiles the quiz bundle with Vite and copies JSON quizzes into
-`build/quiz/`. See `docs/quiz-workflow.md` for the full workflow.
+`build/quiz/`. See `docs/guides/quiz-workflow.md` for the full workflow.
 
 ## Customization
 

@@ -26,10 +26,10 @@ The top-level Makefile (`redo.mk`) drives all host-side automation. It launches 
 ## Build Pipeline
 The shell container executes `app/shell/mk/build.mk` to transform sources into deliverables:
 
-1. Discover Markdown and YAML files and update a Redis-backed index. See [build-index](build-index.md) and [update-index](update-index.md) for details on this step.
+1. Discover Markdown and YAML files and update a Redis-backed index. See [build-index](../guides/build-index.md) and [update-index](../guides/update-index.md) for details on this step.
 2. Convert preprocessed Markdown to HTML and PDF using Pandoc with a shared template and options for table of contents, math rendering, and cross references.
 3. Copy CSS assets and minify the resulting site.
-4. Run link checking and page title validation before marking the build complete. See [checklinks](checklinks.md) and [check-page-title](check-page-title.md).
+4. Run link checking and page title validation before marking the build complete. See [checklinks](../guides/checklinks.md) and [check-page-title](../guides/check-page-title.md).
 
 ## Data Flow
 Source files in `src/` become processed artifacts in `build/`. The development `nginx-dev` service mounts the build directory for local preview, while production content can be synchronized or served by `nginx`.
