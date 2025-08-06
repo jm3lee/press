@@ -157,8 +157,13 @@ def main(argv: Iterable[str] | None = None) -> None:
     if path.is_dir():
         processed: set[Path] = set()
         paths: list[Path] = []
-        for pattern in ("**/*.md", "**/*.yml", "**/*.yaml"):
-            for p in path.glob(pattern):
+        exts = {".md", ".yml", ".yaml"}
+        for root, _, files in os.walk(path):
+            root_path = Path(root)
+            for name in files:
+                p = root_path / name
+                if p.suffix.lower() not in exts:
+                    continue
                 base = p.with_suffix("")
                 if base in processed:
                     continue
