@@ -31,6 +31,8 @@ This repository actually uses three Makefiles that work together:
 | `all`  | Builds the site by invoking `/app/mk/build.mk` inside the shell container. |
 | `docker` | Builds and pushes the Nginx image after running `test`. |
 | `test` | Restarts `nginx-dev` and runs tests defined in `/app/mk/build.mk`. |
+| `pytest` | Runs unit tests for the `pie` package inside the shell container. |
+| `cov` | Generates a coverage report for the `pie` package inside the shell container. |
 | `up` / `upd` | Starts development containers (`SERVICES`). `upd` runs detached. |
 | `down` | Stops and removes the compose stack. |
 | `clean` | Removes everything under `build/`. |
