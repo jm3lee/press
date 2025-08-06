@@ -17,14 +17,15 @@ accepts a few optional parameters to control the output:
   capitalise only the first character.
 - `use_icon` – when `True` (default) any `icon` field in the metadata is
   prefixed to the link text.  Set to `False` to suppress icons.
+- `anchor` – appends a fragment identifier (`#anchor`) to the URL when provided.
 - `citation` – selects which citation field to render.  The default `"citation"`
   uses the main citation value; pass `"short"` to use `citation.short`.
 
 Example:
 
 ```jinja
-{{ {"citation": "deltoid tuberosity", "url": "/humerus.html#deltoid_tuberosity"}
-   | link(style="title") }}
+{{ {"citation": "deltoid tuberosity", "url": "/humerus.html"}
+   | link(style="title", anchor="deltoid_tuberosity") }}
 ```
 
 renders as:

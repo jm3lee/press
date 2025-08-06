@@ -150,7 +150,14 @@ def get_link_class(desc):
     return "internal-link"
 
 
-def render_link(desc, *, style: str = "plain", use_icon: bool = True, citation: str = "citation"):
+def render_link(
+    desc,
+    *,
+    style: str = "plain",
+    use_icon: bool = True,
+    citation: str = "citation",
+    anchor: str | None = None,
+):
     """Return a formatted HTML anchor for ``desc``.
 
     ``desc`` may be either a metadata dictionary or a string id which will be
@@ -187,6 +194,8 @@ def render_link(desc, *, style: str = "plain", use_icon: bool = True, citation: 
         citation_text = citation_text[0].upper() + citation_text[1:]
 
     url = desc["url"]
+    if anchor:
+        url += anchor if anchor.startswith("#") else f"#{anchor}"
     icon = desc.get("icon") if use_icon else None
     a_attribs = get_tracking_options(desc)
 
@@ -195,28 +204,28 @@ def render_link(desc, *, style: str = "plain", use_icon: bool = True, citation: 
     return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{citation_text}</a>"""
 
 
-def linktitle(desc):
-    return render_link(desc, style="title")
+def linktitle(desc, anchor: str | None = None):
+    return render_link(desc, style="title", anchor=anchor)
 
 
-def link_icon_title(desc):
-    return render_link(desc, style="title", use_icon=True)
+def link_icon_title(desc, anchor: str | None = None):
+    return render_link(desc, style="title", use_icon=True, anchor=anchor)
 
 
-def linkcap(desc):
-    return render_link(desc, style="cap")
+def linkcap(desc, anchor: str | None = None):
+    return render_link(desc, style="cap", anchor=anchor)
 
 
-def linkicon(desc):
-    return render_link(desc, use_icon=True)
+def linkicon(desc, anchor: str | None = None):
+    return render_link(desc, use_icon=True, anchor=anchor)
 
 
-def link(desc):
-    return render_link(desc, use_icon=False)
+def link(desc, anchor: str | None = None):
+    return render_link(desc, use_icon=False, anchor=anchor)
 
 
-def linkshort(desc):
-    return render_link(desc, use_icon=False, citation="short")
+def linkshort(desc, anchor: str | None = None):
+    return render_link(desc, use_icon=False, citation="short", anchor=anchor)
 
 
 def extract_front_matter(file_path: str) -> dict | None:
