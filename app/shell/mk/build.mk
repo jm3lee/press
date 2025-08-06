@@ -1,15 +1,15 @@
 # Makefile for building and managing Press
-# This file executes inside the shell container. See dist/docs/redo-mk.md
+# This file executes inside the shell container. See dist/docs/guides/redo-mk.md
 # for how to run these targets from the host.
 
 # Override MAKEFLAGS (so your settings can’t be clobbered by the environment)
-# docker-make passes these flags to the container; see dist/docs/docker-make.md
+# docker-make passes these flags to the container; see dist/docs/guides/docker-make.md
 override MAKEFLAGS += --warn-undefined-variables  \
                       --no-builtin-rules        \
                       -j16                      \
 
 # Export it so sub-makes see the same flags
-# docker-make handles running this file inside Docker; see dist/docs/docker-make.md
+# docker-make handles running this file inside Docker; see dist/docs/guides/docker-make.md
 export MAKEFLAGS
 
 # Verbosity control
@@ -37,7 +37,7 @@ CFG_DIR   := cfg
 
 # Define the Pandoc command used inside the container
 #       -T: Don't allocate pseudo-tty. Makes parallel builds work.
-# For container setup details, see dist/docs/docker-make.md.
+# For container setup details, see dist/docs/guides/docker-make.md.
 PANDOC_CMD := pandoc
 PANDOC_TEMPLATE := $(SRC_DIR)/pandoc-template.html
 
@@ -110,7 +110,7 @@ $(BUILD_DIR)/.minify:
 	$(Q)touch $@
 
 .PHONY: test
-# Triggered by the test target in redo.mk; see dist/docs/redo-mk.md.
+# Triggered by the test target in redo.mk; see dist/docs/guides/redo-mk.md.
 test: $(BUILD_DIR)/.minify | $(LOG_DIR)
 	$(call status,Run link check)
 	$(Q)$(CHECKLINKS_CMD) http://nginx-dev
@@ -131,7 +131,7 @@ $(BUILD_DIR)/%.css: %.css | $(BUILD_DIR)
 	$(Q)cp $< $@
 
 # Include and preprocess Markdown files up to three levels deep
-# See dist/docs/preprocess.md for preprocessing details
+# See dist/docs/guides/preprocess.md for preprocessing details
 $(BUILD_DIR)/%.md: %.md | $(BUILD_DIR)
 	$(call status,Preprocess $<)
 	$(Q)preprocess $<
@@ -142,7 +142,7 @@ $(BUILD_DIR)/%.html: $(BUILD_DIR)/%.md $(PANDOC_TEMPLATE) | $(BUILD_DIR)
 	$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) -o $@ $<
 
 # Generate PDF from processed Markdown using Pandoc
-# include-filter usage is documented in dist/docs/include-filter.md
+# include-filter usage is documented in dist/docs/guides/include-filter.md
 $(BUILD_DIR)/%.pdf: %.md | $(BUILD_DIR)
 	$(call status,Generate PDF $@)
 	$(Q)include-filter $(BUILD_DIR) $< $(BUILD_DIR)/$*.1.md
@@ -159,7 +159,7 @@ clean:
 	$(call status,Remove build artifacts)
 	$(Q)-rm -rf $(BUILD_DIR)
 
-# Optionally include user dependencies; see dist/docs/redo-mk.md.
+# Optionally include user dependencies; see dist/docs/guides/redo-mk.md.
 -include /app/mk/dep.mk
 
 $(BUILD_DIR)/picasso.mk: $(YAMLS) | $(BUILD_DIR)

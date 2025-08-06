@@ -9,7 +9,7 @@ override MAKEFLAGS += --warn-undefined-variables  \
 export MAKEFLAGS
 
 # Containers started when running `up`/`upd`.
-# See docs/redo-mk.md for details on targets and variables.
+# See docs/guides/redo-mk.md for details on targets and variables.
 SERVICES := nginx-dev dragonfly
 
 SRC_DIR   := src

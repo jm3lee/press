@@ -3,7 +3,7 @@
 A command-line tool to scan directories for Markdown (`.md`) and YAML
 (`.yml`/`.yaml`) files, extract their metadata, generate URLs for Markdown
 sources, and build a consolidated JSON index mapping each document’s `id` to its
-metadata. See [Metadata Fields](metadata-fields.md) for an overview of the
+metadata. See [Metadata Fields](../reference/metadata-fields.md) for an overview of the
 supported keys and defaults.
 
 ## Usage
