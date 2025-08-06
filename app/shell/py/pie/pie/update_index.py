@@ -85,61 +85,49 @@ def update_redis(conn: redis.Redis, index: Mapping[str, Mapping[str, Any]]) -> N
         pipe.execute()
 
 
-def main(argv: Iterable[str] | None = None) -> None:
-    """Entry point for the ``update-index`` console script."""
-    args = parse_args(argv)
-    if args.log:
-        add_file_logger(args.log, level="DEBUG")
+def load_directory_index(path: Path) -> tuple[dict[str, dict[str, Any]], int]:
+    """Return an index built from all metadata files under *path*.
 
-    start = time.perf_counter()
-    files_scanned = 0
+    The directory is scanned for ``.md``/``.yml`` files. Each pair of files
+    is loaded with :func:`load_metadata_pair` using a thread pool. The returned
+    tuple contains the combined index and the number of files that were
+    processed.
+    """
 
-    path = Path(args.path)
-    r = redis.Redis(host=args.host, port=args.port, decode_responses=True)
+    processed: set[Path] = set()
+    paths: list[Path] = []
+    exts = {".md", ".yml", ".yaml"}
 
-    def finish() -> None:
-        elapsed = time.perf_counter() - start
-        logger.info(
-            "update complete",
-            files=files_scanned,
-            elapsed=f"{elapsed:.2f}s",
-        )
+    for root, _, files in os.walk(path):
+        root_path = Path(root)
+        for name in files:
+            p = root_path / name
+            if p.suffix.lower() not in exts:
+                continue
+            base = p.with_suffix("")
+            if base in processed:
+                continue
+            processed.add(base)
+            paths.append(p)
+
+    index: dict[str, dict[str, Any]] = {}
+    num_workers = min(10, max(2, os.cpu_count() or 1))
+    with ThreadPoolExecutor(max_workers=num_workers) as executor:
+        for metadata in executor.map(load_metadata_pair, paths):
+            if metadata:
+                index[metadata["id"]] = metadata
+
+    return index, len(paths)
+
+
+def load_index_from_path(path: Path) -> tuple[dict[str, dict[str, Any]], int]:
+    """Load an index from *path* and return it with the number of files read."""
 
     if path.is_dir():
-        processed: set[Path] = set()
-        paths: list[Path] = []
-        exts = {".md", ".yml", ".yaml"}
-        for root, _, files in os.walk(path):
-            root_path = Path(root)
-            for name in files:
-                p = root_path / name
-                if p.suffix.lower() not in exts:
-                    continue
-                base = p.with_suffix("")
-                if base in processed:
-                    continue
-                processed.add(base)
-                paths.append(p)
-
-        files_scanned = len(paths)
-
-        index: dict[str, dict[str, Any]] = {}
-        num_workers = min(10, max(2, os.cpu_count() or 1))
-        with ThreadPoolExecutor(max_workers=num_workers) as executor:
-            for metadata in executor.map(load_metadata_pair, paths):
-                if metadata:
-                    index[metadata["id"]] = metadata
-
-        update_redis(r, index)
-        finish()
-        return
+        return load_directory_index(path)
 
     if path.suffix.lower() == ".json":
-        index = load_index(path)
-        update_redis(r, index)
-        files_scanned = 1
-        finish()
-        return
+        return load_index(path), 1
 
     if path.suffix.lower() in {".md", ".yml", ".yaml"}:
         metadata = load_metadata_pair(path)
@@ -152,13 +140,29 @@ def main(argv: Iterable[str] | None = None) -> None:
             warnings.warn("Missing 'id' field in metadata", UserWarning)
             raise SystemExit(1)
 
-        update_redis(r, {doc_id: metadata})
-        files_scanned = 1
-        finish()
-        return
+        return {doc_id: metadata}, 1
 
     logger.error("Unsupported file type", filename=str(path))
     raise SystemExit(1)
+
+
+def main(argv: Iterable[str] | None = None) -> None:
+    """Entry point for the ``update-index`` console script."""
+    args = parse_args(argv)
+    if args.log:
+        add_file_logger(args.log, level="DEBUG")
+
+    start = time.perf_counter()
+    path = Path(args.path)
+    r = redis.Redis(host=args.host, port=args.port, decode_responses=True)
+
+    index, files_scanned = load_index_from_path(path)
+    update_redis(r, index)
+
+    elapsed = time.perf_counter() - start
+    logger.info(
+        "update complete", files=files_scanned, elapsed=f"{elapsed:.2f}s"
+    )
 
 
 if __name__ == "__main__":
