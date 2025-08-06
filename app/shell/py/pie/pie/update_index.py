@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import os
 import json
+import time
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 import warnings
@@ -137,8 +138,19 @@ def main(argv: Iterable[str] | None = None) -> None:
     if args.log:
         add_file_logger(args.log, level="DEBUG")
 
+    start = time.perf_counter()
+    files_scanned = 0
+
     path = Path(args.path)
     r = redis.Redis(host=args.host, port=args.port, decode_responses=True)
+
+    def finish() -> None:
+        elapsed = time.perf_counter() - start
+        logger.info(
+            "update complete",
+            files=files_scanned,
+            elapsed=f"{elapsed:.2f}s",
+        )
 
     if path.is_dir():
         processed: set[Path] = set()
@@ -151,6 +163,8 @@ def main(argv: Iterable[str] | None = None) -> None:
                 processed.add(base)
                 paths.append(p)
 
+        files_scanned = len(paths)
+
         index: dict[str, dict[str, Any]] = {}
         with ThreadPoolExecutor() as executor:
             for metadata in executor.map(load_metadata_pair, paths):
@@ -158,11 +172,14 @@ def main(argv: Iterable[str] | None = None) -> None:
                     index[metadata["id"]] = metadata
 
         update_redis(r, index)
+        finish()
         return
 
     if path.suffix.lower() == ".json":
         index = load_index(path)
         update_redis(r, index)
+        files_scanned = 1
+        finish()
         return
 
     if path.suffix.lower() in {".md", ".yml", ".yaml"}:
@@ -177,6 +194,8 @@ def main(argv: Iterable[str] | None = None) -> None:
             raise SystemExit(1)
 
         update_redis(r, {doc_id: metadata})
+        files_scanned = 1
+        finish()
         return
 
     logger.error("Unsupported file type", filename=str(path))
