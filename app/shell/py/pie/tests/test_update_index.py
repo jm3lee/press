@@ -1,5 +1,6 @@
 import json
 import os
+import threading
 import fakeredis
 import pytest
 from pie import update_index
@@ -153,3 +154,31 @@ def test_main_missing_id_generates(tmp_path, monkeypatch):
         os.chdir("/tmp")
 
     assert fake.get("doc.title") == "T"
+
+
+def test_directory_processed_in_parallel(tmp_path, monkeypatch):
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "a.yml").write_text('{}')
+    (src / "b.yml").write_text('{}')
+
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
+
+    barrier = threading.Barrier(2)
+
+    def fake_loader(path):
+        barrier.wait(timeout=1)
+        base = path.with_suffix("")
+        return {"id": base.name, "name": base.name}
+
+    monkeypatch.setattr(update_index, "load_metadata_pair", fake_loader)
+
+    os.chdir(tmp_path)
+    try:
+        update_index.main(["src"])
+    finally:
+        os.chdir("/tmp")
+
+    assert fake.get("a.name") == "a"
+    assert fake.get("b.name") == "b"
