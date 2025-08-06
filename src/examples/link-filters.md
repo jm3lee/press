@@ -11,7 +11,7 @@ Press provides custom Jinja filters for formatting links. Each filter accepts a 
 {{"quickstart"|linktitle}}
 
 ## linktitle with anchor
-{{ {"citation": "deltoid tuberosity", "url": "/humerus.html"} | linktitle(anchor="deltoid_tuberosity") }}
+{{ {"citation": "home", "url": "/"} | linktitle(anchor="#example") }}
 
 ## linkcap
 {{"quickstart"|linkcap}}
