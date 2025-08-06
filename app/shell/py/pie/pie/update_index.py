@@ -152,7 +152,8 @@ def main(argv: Iterable[str] | None = None) -> None:
                 paths.append(p)
 
         index: dict[str, dict[str, Any]] = {}
-        with ThreadPoolExecutor() as executor:
+        num_workers = min(10, max(2, os.cpu_count() or 1))
+        with ThreadPoolExecutor(max_workers=num_workers) as executor:
             for metadata in executor.map(load_metadata_pair, paths):
                 if metadata:
                     index[metadata["id"]] = metadata
