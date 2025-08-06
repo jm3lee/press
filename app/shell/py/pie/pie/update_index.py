@@ -14,6 +14,7 @@ import json
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 import warnings
+from concurrent.futures import ThreadPoolExecutor
 
 import redis
 from pie import build_index
@@ -140,17 +141,22 @@ def main(argv: Iterable[str] | None = None) -> None:
     r = redis.Redis(host=args.host, port=args.port, decode_responses=True)
 
     if path.is_dir():
-        index: dict[str, dict[str, Any]] = {}
         processed: set[Path] = set()
+        paths: list[Path] = []
         for pattern in ("**/*.md", "**/*.yml", "**/*.yaml"):
             for p in path.glob(pattern):
                 base = p.with_suffix("")
                 if base in processed:
                     continue
                 processed.add(base)
-                metadata = load_metadata_pair(p)
+                paths.append(p)
+
+        index: dict[str, dict[str, Any]] = {}
+        with ThreadPoolExecutor() as executor:
+            for metadata in executor.map(load_metadata_pair, paths):
                 if metadata:
                     index[metadata["id"]] = metadata
+
         update_redis(r, index)
         return
 
