@@ -33,6 +33,12 @@ def getopt_link(meta):
     return True
 
 
+def getopt_show(meta):
+    if meta.get("gen-markdown-index-2"):
+        return meta.get("gen-markdown-index-2").get("show", True)
+    return True
+
+
 def visit(directory):
     for filename in os.listdir(directory):
         try:
@@ -40,10 +46,22 @@ def visit(directory):
             if os.path.isdir(p):
                 if os.path.isfile(os.path.join(p, "index.yml")):
                     meta = extract_metadata(os.path.join(p, "index.yml"))
-                    yield (meta["id"], meta["title"], p, getopt_link(meta))
+                    yield (
+                        meta["id"],
+                        meta["title"],
+                        p,
+                        getopt_link(meta),
+                        getopt_show(meta),
+                    )
             elif os.path.isfile(p) and p.endswith(".yml") and filename != "index.yml":
                 meta = extract_metadata(p)
-                yield (meta["id"], meta["title"], p, getopt_link(meta))
+                yield (
+                    meta["id"],
+                    meta["title"],
+                    p,
+                    getopt_link(meta),
+                    getopt_show(meta),
+                )
         except Exception as e:
             warnings.warn(f"Failed to process {p}")
             raise
@@ -60,16 +78,21 @@ def process_dir(directory):
     for entry in sorted(list(visit(directory)), key=lambda x: x[1].lower()):
         entry_id = entry[0]
         entry_title = entry[1]
-        entry_link = entry[3]
-        if entry_link:
-            print("  " * level + f"- {{{{\"{entry_id}\"|linktitle}}}}")
-        else:
-            print("  " * level + f"- {{{{'{entry_title}'|title}}}}")
         entry_path = entry[2]
+        entry_link = entry[3]
+        entry_show = entry[4]
+        if entry_show:
+            if entry_link:
+                print("  " * level + f"- {{{{\"{entry_id}\"|linktitle}}}}")
+            else:
+                print("  " * level + f"- {{{{'{entry_title}'|title}}}}")
         if os.path.isdir(entry_path):
-            level += 1
-            process_dir(entry_path)
-            level -= 1
+            if entry_show:
+                level += 1
+                process_dir(entry_path)
+                level -= 1
+            else:
+                process_dir(entry_path)
 
 
 if __name__ == "__main__":
