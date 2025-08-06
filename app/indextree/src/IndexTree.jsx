@@ -1,4 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import {
+  TextField,
+  List,
+  ListItemButton,
+  ListItemText,
+  Collapse
+} from '@mui/material';
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
 
 /**
  * @typedef {Object} TreeNodeData
@@ -38,26 +46,27 @@ function TreeNode({ node }) {
   const hasChildren = Boolean(node.children && node.children.length);
 
   return (
-    <li style={{ listStyle: 'none' }}>
-      <div
-        style={{ cursor: hasChildren ? 'pointer' : 'default' }}
-        onClick={() => hasChildren && setOpen((o) => !o)}
-      >
-        {hasChildren && (open ? '▼ ' : '▶ ')}
+    <>
+      <ListItemButton onClick={() => hasChildren && setOpen((o) => !o)} sx={{ pl: 0 }}>
+        {hasChildren && (open ? <ExpandLess /> : <ExpandMore />)}
         {node.url ? (
-          <a href={node.url}>{node.title}</a>
+          <ListItemText
+            primary={<a href={node.url} onClick={(e) => e.stopPropagation()}>{node.title}</a>}
+          />
         ) : (
-          node.title
+          <ListItemText primary={node.title} />
         )}
-      </div>
-      {hasChildren && open && (
-        <ul style={{ paddingLeft: '1rem', margin: 0 }}>
-          {node.children.map((child) => (
-            <TreeNode key={child.id} node={child} />
-          ))}
-        </ul>
+      </ListItemButton>
+      {hasChildren && (
+        <Collapse in={open} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding sx={{ pl: 4 }}>
+            {node.children.map((child) => (
+              <TreeNode key={child.id} node={child} />
+            ))}
+          </List>
+        </Collapse>
       )}
-    </li>
+    </>
   );
 }
 
@@ -84,23 +93,19 @@ export default function IndexTree({ src }) {
 
   return (
     <div>
-      <input
-        type="text"
-        placeholder="Filter…"
+      <TextField
+        fullWidth
+        variant="outlined"
+        label="Filter…"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        style={{
-          width: '100%',
-          padding: '0.5rem',
-          marginBottom: '1rem',
-          boxSizing: 'border-box'
-        }}
+        sx={{ mb: 2 }}
       />
-      <ul style={{ paddingLeft: 0 }}>
+      <List sx={{ p: 0 }}>
         {filtered.map((node) => (
           <TreeNode key={node.id} node={node} />
         ))}
-      </ul>
+      </List>
     </div>
   );
 }
