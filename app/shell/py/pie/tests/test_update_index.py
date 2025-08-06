@@ -159,8 +159,8 @@ def test_main_missing_id_generates(tmp_path, monkeypatch):
 def test_directory_processed_in_parallel(tmp_path, monkeypatch):
     src = tmp_path / "src"
     src.mkdir()
-    (src / "a.yml").write_text('{}')
-    (src / "b.yml").write_text('{}')
+    (src / "a.yml").write_text('{"name": "A"}')
+    (src / "b.yml").write_text('{"name": "B"}')
 
     fake = fakeredis.FakeRedis(decode_responses=True)
     monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
@@ -182,3 +182,29 @@ def test_directory_processed_in_parallel(tmp_path, monkeypatch):
 
     assert fake.get("a.name") == "a"
     assert fake.get("b.name") == "b"
+
+
+def test_logs_execution_time_and_count(tmp_path, monkeypatch):
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "a.yml").write_text('{"name": "A"}')
+    (src / "b.yml").write_text('{"name": "B"}')
+
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
+
+    calls = []
+
+    def fake_info(msg, **kwargs):
+        calls.append((msg, kwargs))
+
+    monkeypatch.setattr(update_index.logger, "info", fake_info)
+
+    os.chdir(tmp_path)
+    try:
+        update_index.main(["src"])
+    finally:
+        os.chdir("/tmp")
+
+    assert any(msg == "update complete" and kw.get("files") == 2 for msg, kw in calls)
+    assert any("elapsed" in kw for msg, kw in calls if msg == "update complete")
