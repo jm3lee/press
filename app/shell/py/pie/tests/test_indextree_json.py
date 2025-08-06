@@ -30,6 +30,8 @@ def test_scan_dir_uses_metadata(tmp_path: Path) -> None:
         encoding="utf-8",
     )
 
+    (root / "delta.md").write_text("delta\n", encoding="utf-8")
+
     cwd = os.getcwd()
     os.chdir(tmp_path)
     try:

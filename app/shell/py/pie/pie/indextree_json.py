@@ -4,66 +4,16 @@ from __future__ import annotations
 
 import argparse
 import json
-import warnings
 from pathlib import Path
 from typing import Any, Dict, Iterable, List
 
-from pie import build_index
 from pie.utils import add_file_logger, logger
+from pie.load_metadata import load_metadata_pair
 
 
 def title_from(name: str) -> str:
     """Return a human readable title for *name*."""
     return name.replace("-", " ").title()
-
-
-def load_metadata_pair(path: Path) -> Dict[str, Any] | None:
-    """Load metadata from ``path`` and a sibling Markdown/YAML file."""
-
-    base = path.with_suffix("")
-    md_path = base.with_suffix(".md")
-    yml_path = base.with_suffix(".yml")
-    yaml_path = base.with_suffix(".yaml")
-
-    md_data = None
-    if md_path.exists():
-        md_data = build_index.process_markdown(str(md_path))
-
-    yaml_data = None
-    yaml_file: Path | None = None
-    if yml_path.exists():
-        yaml_file = yml_path
-        yaml_data = build_index.parse_yaml_metadata(str(yml_path))
-    elif yaml_path.exists():
-        yaml_file = yaml_path
-        yaml_data = build_index.parse_yaml_metadata(str(yaml_path))
-
-    if md_data is None and yaml_data is None:
-        return None
-
-    combined: Dict[str, Any] = {}
-    if md_data:
-        combined.update(md_data)
-    if yaml_data:
-        for k, v in yaml_data.items():
-            if k in combined and combined[k] != v:
-                warnings.warn(
-                    f"Conflict for '{k}', using value from {yaml_file.name}",
-                    UserWarning,
-                )
-            combined[k] = v
-
-    if "id" not in combined:
-        base = path.with_suffix("")
-        combined["id"] = base.name
-        logger.info(
-            "Generated 'id'",
-            filename=str(path.resolve().relative_to(Path.cwd())),
-            id=combined["id"],
-        )
-
-    logger.debug(combined)
-    return combined
 
 
 def scan_dir(root: Path, base: str) -> List[Dict[str, object]]:
@@ -102,17 +52,21 @@ def scan_dir(root: Path, base: str) -> List[Dict[str, object]]:
             if child.name in {"index.md", "index.yml", "index.yaml"}:
                 continue
 
-            stem = child.stem
-            metadata = None
-            if child.suffix.lower() in {".md", ".yml", ".yaml"}:
-                try:
-                    metadata = load_metadata_pair(child)
-                except Exception:  # pragma: no cover - fall back
-                    metadata = None
+            if child.suffix.lower() not in {".md", ".yml", ".yaml"}:
+                continue
 
-            node_id = metadata.get("id") if metadata else stem
-            title = metadata.get("title") if metadata else title_from(stem)
-            url = metadata.get("url") if metadata else f"{base}{stem}"
+            try:
+                metadata = load_metadata_pair(child)
+            except Exception:  # pragma: no cover - fall back
+                metadata = None
+
+            if not metadata:
+                continue
+
+            stem = child.stem
+            node_id = metadata.get("id", stem)
+            title = metadata.get("title", title_from(stem))
+            url = metadata.get("url", f"{base}{stem}")
 
             nodes.append({"id": node_id, "title": title, "url": url})
 
