@@ -28,14 +28,14 @@ def extract_metadata(filepath):
 
 
 def getopt_link(meta):
-    if meta.get("gen-markdown-index-2"):
-        return meta.get("gen-markdown-index-2").get("link", True)
+    if meta.get("gen-markdown-index"):
+        return meta.get("gen-markdown-index").get("link", True)
     return True
 
 
 def getopt_show(meta):
-    if meta.get("gen-markdown-index-2"):
-        return meta.get("gen-markdown-index-2").get("show", True)
+    if meta.get("gen-markdown-index"):
+        return meta.get("gen-markdown-index").get("show", True)
     return True
 
 
