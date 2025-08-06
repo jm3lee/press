@@ -38,12 +38,18 @@ function filterTree(nodes, query) {
 /**
  * Render a single tree node with optional children.
  *
- * @param {{ node: TreeNodeData }} props
+ * @param {{ node: TreeNodeData, forceOpen: boolean }} props
  * @returns {JSX.Element}
  */
-function TreeNode({ node }) {
+function TreeNode({ node, forceOpen }) {
   const [open, setOpen] = useState(false);
   const hasChildren = Boolean(node.children && node.children.length);
+
+  useEffect(() => {
+    if (forceOpen) {
+      setOpen(true);
+    }
+  }, [forceOpen]);
 
   return (
     <>
@@ -61,7 +67,7 @@ function TreeNode({ node }) {
         <Collapse in={open} timeout="auto" unmountOnExit>
           <List component="div" disablePadding sx={{ pl: 4 }}>
             {node.children.map((child) => (
-              <TreeNode key={child.id} node={child} />
+              <TreeNode key={child.id} node={child} forceOpen={forceOpen} />
             ))}
           </List>
         </Collapse>
@@ -103,7 +109,7 @@ export default function IndexTree({ src }) {
       />
       <List sx={{ p: 0 }}>
         {filtered.map((node) => (
-          <TreeNode key={node.id} node={node} />
+          <TreeNode key={node.id} node={node} forceOpen={Boolean(query)} />
         ))}
       </List>
     </div>
