@@ -7,6 +7,13 @@ list, and provides a text box to filter entries by title. The demo is
 styled using [Material UI](https://mui.com/), so make sure
 `@mui/material` and `@mui/icons-material` are available in your project.
 
+The `indextree-json` console script can generate the required JSON by
+scanning a directory and producing nodes for each file and subdirectory:
+
+```bash
+indextree-json docs > doc-tree.json
+```
+
 A runnable demo lives in `app/indextree` and can be started with `npm run dev`.
 
 ## Usage

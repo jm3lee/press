@@ -24,6 +24,11 @@ app/indextree/.init:
 # Example tree data used for the demo page
 all: build/examples/indextree/demo.json
 
+INDEXTREE_SRC := src/examples/indextree/files
+
+build/examples/indextree/demo.json: $(shell find $(INDEXTREE_SRC) -type f) | build/examples/indextree
+	PYTHONPATH=app/shell/py/pie python -m pie.indextree_json $(INDEXTREE_SRC) > $@
+
 # Helper rule for copying example JSON into build tree
 build/%.json: %.json
 	mkdir -p $(dir $@)
