@@ -1,0 +1,11 @@
+[
+  {
+    "id": "alpha",
+    "title": "Alpha",
+    "url": "/alpha",
+    "children": [
+      { "id": "beta", "title": "Beta", "url": "/alpha/beta" }
+    ]
+  },
+  { "id": "gamma", "title": "Gamma", "url": "/gamma" }
+]
