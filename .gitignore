@@ -180,4 +180,5 @@ cython_debug/
 dist/app/webp/input
 dist/app/webp/output
 logs
+log/
 .update-index
