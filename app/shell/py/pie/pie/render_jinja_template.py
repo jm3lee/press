@@ -280,54 +280,6 @@ def process_directory(root_dir: str) -> None:
                 logger.warning("No front matter or title", file=full_path)
 
 
-def get_origins(name):
-    """Yield origin references for the given entry ``name``."""
-
-    j = _get_metadata(name)
-    if j is None or "origins" not in j:
-        logger.error("Missing origins", id=name)
-        raise SystemExit(1)
-    for i in j["origins"]:
-        meta = _get_metadata(str(i))
-        yield meta if meta is not None else i
-
-
-def get_insertions(name):
-    """Yield insertion references for ``name``."""
-
-    j = _get_metadata(name)
-    if j is None or "insertions" not in j:
-        logger.error("Missing insertions", id=name)
-        raise SystemExit(1)
-    for i in j["insertions"]:
-        meta = _get_metadata(str(i))
-        yield meta if meta is not None else i
-
-
-def get_actions(name):
-    """Yield actions associated with ``name`` from ``index_json``."""
-
-    j = _get_metadata(name)
-    if j is None or "actions" not in j:
-        logger.error("Missing actions", id=name)
-        raise SystemExit(1)
-    yield from j["actions"]
-
-
-def get_translations(name):
-    """Yield key/value translation pairs for ``name``."""
-
-    j = _get_metadata(name)
-    if j is None or "translations" not in j:
-        logger.error("Missing translations", id=name)
-        raise SystemExit(1)
-    if isinstance(j["translations"], dict):
-        yield from j["translations"].items()
-    else:
-        logger.error("Invalid translations format", id=name)
-        raise SystemExit(1)
-
-
 def get_desc(name):
     """Return the metadata entry for ``name`` from Redis."""
 
@@ -389,10 +341,6 @@ def create_env():
     env.filters["linkicon"] = linkicon
     env.filters["linkshort"] = linkshort
     env.filters["get_desc"] = get_desc
-    env.globals["get_origins"] = get_origins
-    env.globals["get_insertions"] = get_insertions
-    env.globals["get_actions"] = get_actions
-    env.globals["get_translations"] = get_translations
     env.globals["render_jinja"] = render_jinja
     env.globals["to_alpha_index"] = to_alpha_index
     env.globals["read_json"] = read_json
