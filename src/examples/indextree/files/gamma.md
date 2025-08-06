@@ -1,1 +1,4 @@
+---
+title: gamma
+---
 Gamma file
