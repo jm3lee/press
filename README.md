@@ -29,8 +29,7 @@ container builds aligned.
 
 ## Quickstart
 
-1. Run `git submodule update --init --recursive` after cloning to fetch
-   required submodules such as `xmera`.
+1. Clone the repository.
 2. Edit `docker-compose.yml`. Adjust `image` as necessary. **TODO: Examples**
 3. Edit `redo.mk`. Update the list of services.
 4. Edit documents under `src/` (or your configured `SRC_DIR`).

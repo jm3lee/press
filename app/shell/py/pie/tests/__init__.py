@@ -1,21 +1,7 @@
 import sys
-import json
 import types
 from pathlib import Path
-from unittest.mock import Mock
 import re
-
-# Provide minimal fallbacks for optional dependencies so test collection works
-if 'xmera' not in sys.modules:
-    xmera = types.ModuleType('xmera')
-    xmera.logger = Mock()
-    utils = types.ModuleType('xmera.utils')
-    utils.read_json = lambda p: json.loads(Path(p).read_text(encoding='utf-8'))
-    utils.read_utf8 = lambda p: Path(p).read_text(encoding='utf-8')
-    xmera.utils = utils
-    sys.modules['xmera'] = xmera
-    sys.modules['xmera.utils'] = utils
-    sys.modules['xmera.logger'] = xmera.logger
 
 # Simple templating fallback used when jinja2 is unavailable
 class _Template:
