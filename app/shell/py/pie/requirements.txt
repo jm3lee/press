@@ -4,3 +4,6 @@ redis
 fakeredis
 flatten-dict
 beautifulsoup4
+jinja2
+pytest
+pytest-cov

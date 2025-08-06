@@ -18,8 +18,6 @@ RUN apt update -qq \
         locales \
         make \
         minify \
-        python3-jinja2 \
-        python3-pytest \
         linkchecker
 
 # Install curl to install nodejs
