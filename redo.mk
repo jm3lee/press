@@ -152,6 +152,10 @@ pytest:
 	$(call status,Run pytest)
 	$(Q)$(DOCKER_COMPOSE) run --entrypoint pytest --rm shell /press/py/pie/tests
 
+.PHONY: cov
+cov:
+	$(call status,Run coverage)
+	$(Q)$(DOCKER_COMPOSE) run --entrypoint pytest --rm shell --cov=pie --cov-report=term-missing /press/py/pie/tests
 .PHONY: t
 t: ## Restart nginx-dev and run tests, ansi colors
 	$(call status,Run tests with colors)
