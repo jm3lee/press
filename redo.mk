@@ -166,3 +166,6 @@ t: ## Restart nginx-dev and run tests, ansi colors
 .PHONY: t
 redis:
 	$(Q)$(DOCKER_COMPOSE) exec dragonfly redis-cli
+
+tags:
+	$(Q)ctags -R app/shell/py
