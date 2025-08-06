@@ -140,3 +140,20 @@ def test_linkshort_uses_short_citation_and_ignores_icon(monkeypatch):
     assert 'ICON' not in html
     assert 'rel="noopener noreferrer" target="_blank"' in html
 
+
+def test_render_link_with_anchor():
+    desc = {"citation": "foo", "url": "/f"}
+    html = render_template.render_link(desc, anchor="bar")
+    assert '<a href="/f#bar"' in html
+
+
+def test_wrapper_accepts_anchor(monkeypatch):
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    fake.set("entry.citation", "Foo")
+    fake.set("entry.url", "/link")
+    monkeypatch.setattr(render_template, "redis_conn", fake)
+    render_template.index_json = {}
+
+    html = render_template.link("entry", anchor="top")
+    assert '<a href="/link#top"' in html
+
