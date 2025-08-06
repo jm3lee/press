@@ -8,7 +8,9 @@ styled using [Material UI](https://mui.com/), so make sure
 `@mui/material` and `@mui/icons-material` are available in your project.
 
 The `indextree-json` console script can generate the required JSON by
-scanning a directory and producing nodes for each file and subdirectory:
+scanning a directory and producing nodes for each file and subdirectory.
+Metadata from Markdown frontmatter or companion YAML files is used for
+each entry, mirroring the behaviour of `update-index`:
 
 ```bash
 indextree-json docs > doc-tree.json
@@ -34,9 +36,9 @@ The expected JSON file contains an array of nodes:
   {
     "id": "alpha",
     "title": "Alpha",
-    "url": "/alpha",
+    "url": "/alpha/index.html",
     "children": [
-      { "id": "beta", "title": "Beta", "url": "/alpha/beta" }
+      { "id": "beta", "title": "Beta", "url": "/alpha/beta.html" }
     ]
   }
 ]
