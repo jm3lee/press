@@ -7,6 +7,7 @@
 override MAKEFLAGS += --warn-undefined-variables  \
                       --no-builtin-rules        \
                       -j16                      \
+                      --no-print-directory      \
 
 # Export it so sub-makes see the same flags
 # docker-make handles running this file inside Docker; see dist/docs/guides/docker-make.md
@@ -87,13 +88,10 @@ CSS := $(patsubst $(SRC_DIR)/%.css,$(BUILD_DIR)/%.css, $(CSS))
 
 # Define the default target to build everything
 .PHONY: all
-all: final | $(BUILD_DIR) $(BUILD_SUBDIRS)
+all: | $(BUILD_DIR) $(BUILD_SUBDIRS)
+	$(Q)make -s -f /app/mk/build.mk $(BUILD_DIR)/.update-index VERBOSE=$(VERBOSE)
+	$(Q)make -s -f /app/mk/build.mk final VERBOSE=$(VERBOSE)
 
-.PHONY: step1
-step1: $(BUILD_DIR)/.update-index
-
-.PHONY: step2
-final: step1
 final: $(HTMLS)
 final: $(CSS)
 
