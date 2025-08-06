@@ -70,6 +70,7 @@ def scan_dir(root: Path, base: str) -> List[Dict[str, object]]:
 
             nodes.append({"id": node_id, "title": title, "url": url})
 
+    nodes.sort(key=lambda n: str(n["title"]).casefold())
     return nodes
 
 
