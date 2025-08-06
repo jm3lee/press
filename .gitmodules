@@ -1,3 +1,0 @@
-[submodule "app/shell/py/xmera"]
-	path = app/shell/py/xmera
-	url = git@github.com:jm3lee/xmera.git

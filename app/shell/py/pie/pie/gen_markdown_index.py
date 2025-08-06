@@ -6,8 +6,7 @@ import argparse
 from typing import Iterable, Mapping, List
 import json
 
-from xmera.utils import read_json
-from pie.utils import add_file_logger, logger
+from pie.utils import add_file_logger, logger, read_json
 
 
 def generate_lines(index: Mapping[str, Mapping[str, str]]) -> List[str]:

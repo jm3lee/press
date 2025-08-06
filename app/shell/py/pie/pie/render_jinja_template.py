@@ -19,8 +19,7 @@ import redis
 import yaml
 from flatten_dict import unflatten
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
-from pie.utils import add_file_logger, logger
-from xmera.utils import read_json, read_utf8
+from pie.utils import add_file_logger, logger, read_json, read_utf8
 
 DEFAULT_CONFIG = Path("cfg/render-jinja-template.yml")
 

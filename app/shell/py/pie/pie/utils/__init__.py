@@ -8,6 +8,7 @@ directed to additional files if required.
 
 from __future__ import annotations
 
+import json
 import sys
 
 from loguru import logger
@@ -29,6 +30,13 @@ def read_utf8(filename: str) -> str:
 
     with open(filename, "r", encoding="utf-8") as f:
         return f.read()
+
+
+def read_json(filename: str):
+    """Return JSON-decoded data from *filename*."""
+
+    with open(filename, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 
 def write_utf8(text: str, filename: str) -> None:
