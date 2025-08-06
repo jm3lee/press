@@ -3,3 +3,4 @@ name: gen-markdown-index
 id: dist_gen_markdown_index
 gen-markdown-index-2:
   link: false
+  show: false

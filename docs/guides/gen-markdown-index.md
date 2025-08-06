@@ -17,3 +17,10 @@ Example output:
 ```jinja
 - {{ {"citation": "Example", "url": "/ex", "link": {"tracking": false}} | linktitle }}
 ```
+
+## gen-markdown-index-2
+
+`gen-markdown-index-2` walks a directory tree of YAML metadata files and prints a
+Markdown list. To exclude an item from the output, set
+`gen-markdown-index-2.show` to `false` in its metadata. When a directory is
+hidden this way, its children are still processed at the same indentation level.
