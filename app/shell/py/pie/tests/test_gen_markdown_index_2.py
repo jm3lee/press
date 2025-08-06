@@ -1,7 +1,7 @@
 from pathlib import Path
 import subprocess
 
-SCRIPT = Path(__file__).resolve().parents[3] / "bin" / "gen-markdown-index-2"
+SCRIPT = Path("/app") / "bin" / "gen-markdown-index-2"
 
 
 def test_show_property(tmp_path):
