@@ -1,7 +1,7 @@
 # React Index Tree
 
 Render a collapsible navigation tree for metadata processed by
-`gen-markdown-index-2`. The `IndexTree` component loads a JSON
+`gen-markdown-index`. The `IndexTree` component loads a JSON
 representation of the directory structure, displays it as an expandable
 list, and provides a text box to filter entries by title. The demo is
 styled using [Material UI](https://mui.com/), so make sure
