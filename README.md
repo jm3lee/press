@@ -135,7 +135,8 @@ If you don’t provide these, Pandoc (or your build tooling) will generate them 
 - `id`: A unique identifier for cross-document linking (e.g., when using Jinja templates).
 - `citation`: Default anchor text for cross-document links. Jinja filters such as `linktitle` use this value.
 
-See [docs/metadata-fields.md](docs/metadata-fields.md) for a complete list of supported fields and defaults.
+See [docs/metadata-fields.md](docs/metadata-fields.md) for a complete list of supported fields and defaults. For describing
+external URLs in YAML, refer to [docs/link-metadata.md](docs/link-metadata.md).
 
 ### Examples
 - **Sidecar metadata**  
@@ -166,3 +167,6 @@ build. Use `--src DIR` to search a different directory for `.yml` files and
 - [make](docs/make.md)
 - [WebP Service](docs/webp-service.md)
 - [check-page-title](docs/check-page-title.md)
+- [Architecture](docs/architecture.md)
+- [Link Metadata](docs/link-metadata.md)
+- [checklinks](docs/checklinks.md)

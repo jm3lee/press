@@ -50,3 +50,5 @@ metadata["id"] = base.split(os.sep)[-1]
 ```
 
 Thus `src/links/press_io_home.yml` results in the `id` `press_io_home`.
+
+After defining link metadata, run [checklinks](checklinks.md) to ensure each target resolves correctly.
