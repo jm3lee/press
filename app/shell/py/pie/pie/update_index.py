@@ -126,10 +126,12 @@ def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
 
 
 def update_redis(conn: redis.Redis, index: Mapping[str, Mapping[str, Any]]) -> None:
-    """Insert each value from *index* into *conn*."""
-    for key, value in flatten_index(index):
-        conn.set(key, value)
-        logger.debug("Inserted", key=key, value=value)
+    """Insert each value from *index* into *conn* using pipelined writes."""
+    with conn.pipeline(transaction=False) as pipe:
+        for key, value in flatten_index(index):
+            pipe.set(key, value)
+            logger.debug("Inserted", key=key, value=value)
+        pipe.execute()
 
 
 def main(argv: Iterable[str] | None = None) -> None:
