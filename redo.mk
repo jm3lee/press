@@ -69,6 +69,11 @@ test: ## Restart nginx-dev and run tests
 	$(call status,Run tests)
 	$(Q)$(MAKE_CMD) -f /app/mk/build.mk VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) test
 
+.PHONY: profile-update-index
+profile-update-index: ## Generate cProfile stats for update-index
+	$(call status,Profile update-index)
+	$(Q)$(MAKE_CMD) -f /app/mk/build.mk VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) profile-update-index
+
 # Target to bring up the development Nginx container
 .PHONY: up
 up: ## Start development containers defined in SERVICES
@@ -159,7 +164,7 @@ cov:
 	$(Q)$(DOCKER_COMPOSE) run --entrypoint pytest --rm shell --cov=pie --cov-report=term-missing --cov-report=html:/data/log/cov /press/py/pie/tests
 .PHONY: t
 t: ## Restart nginx-dev and run tests, ansi colors
-	$(call status,Run tests with colors)
+		$(call status,Run tests with colors)
 	$(Q)$(DOCKER_COMPOSE) run --entrypoint make --rm shell -f /app/mk/build.mk VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) test
 	$(Q)$(DOCKER_COMPOSE) run --entrypoint pytest --rm shell /press/py/pie/tests
 

@@ -100,6 +100,14 @@ $(BUILD_DIR)/.update-index: $(MARKDOWNS) $(YAMLS)
 	$(Q)for i in $(?); do update-index --host $(REDIS_HOST) --port $(REDIS_PORT) $$i; done
 	$(Q)touch $@
 
+# Generate a cProfile report for update-index
+$(LOG_DIR)/update-index.prof: $(MARKDOWNS) $(YAMLS) | $(LOG_DIR)
+	$(call status,Profile update-index)
+	$(Q)python -m cProfile -o $@ -m pie.update_index $(SRC_DIR)
+
+.PHONY: profile-update-index
+profile-update-index: $(LOG_DIR)/update-index.prof
+
 # Target to minify HTML and CSS files
 # Modifies file timestamps. The preserve option doesn't seem to work.
 $(BUILD_DIR)/.minify:
@@ -147,9 +155,9 @@ $(BUILD_DIR)/%.pdf: %.md | $(BUILD_DIR)
 	$(Q)include-filter $(BUILD_DIR) $(BUILD_DIR)/$*.1.md $(BUILD_DIR)/$*.2.md
 	$(Q)include-filter $(BUILD_DIR) $(BUILD_DIR)/$*.2.md $(BUILD_DIR)/$*.3.md
 	$(Q)$(PANDOC_CMD) \
-$(PANDOC_OPTS_PDF) \
-        -o $@ \
-        $(BUILD_DIR)/$*.3.md
+	$(PANDOC_OPTS_PDF) \
+	-o $@ \
+	$(BUILD_DIR)/$*.3.md
 
 # Clean the build directory by removing all build artifacts
 .PHONY: clean
