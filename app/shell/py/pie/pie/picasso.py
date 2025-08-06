@@ -57,7 +57,7 @@ def generate_rule(
         f"\t$(Q)process-yaml $< $@\n"
         f"{output_html}: {preprocessed_md} {preprocessed_yml}\n"
         f"\t$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) --metadata-file={preprocessed_yml} -o $@ $<\n"
-        f"\t$(Q)check-html-for-python-dicts $@"
+        f"\t$(Q)detect-html-dicts $@"
     )
 
 

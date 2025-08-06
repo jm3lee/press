@@ -12,7 +12,7 @@ def test_generate_rule_basic():
         "\t$(Q)process-yaml $< $@\n"
         "build/foo/bar.html: build/foo/bar.md build/foo/bar.yml\n"
         "\t$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) --metadata-file=build/foo/bar.yml -o $@ $<\n"
-        "\t$(Q)check-html-for-python-dicts $@"
+        "\t$(Q)detect-html-dicts $@"
     )
     assert rule == expected
 

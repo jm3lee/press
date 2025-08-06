@@ -31,7 +31,7 @@ build/index.yml: src/index.yml
     emojify < $< > $@
 build/index.html: build/index.md build/index.yml
     $(PANDOC_CMD) $(PANDOC_OPTS) --metadata-file=build/index.yml -o $@ $<
-    check-html-for-python-dicts $@
+    detect-html-dicts $@
 ```
 
 Each `.yml` file produces similar targets for preprocessing the metadata and
