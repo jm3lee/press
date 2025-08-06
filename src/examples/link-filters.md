@@ -10,6 +10,9 @@ Press provides custom Jinja filters for formatting links. Each filter accepts a 
 ## linktitle
 {{"quickstart"|linktitle}}
 
+## linktitle with anchor
+{{ {"citation": "home", "url": "/"} | linktitle(anchor="#example") }}
+
 ## linkcap
 {{"quickstart"|linkcap}}
 

@@ -44,6 +44,19 @@ Older filters such as `linktitle`, `linkcap`, `linkicon`, `link_icon_title`,
 and `linkshort` remain available for backward compatibility but are now thin
 wrappers around `link`.  They will be removed in a future release.
 
+Example:
+
+```jinja
+{{ {"citation": "deltoid tuberosity", "url": "/humerus.html"}
+   | linktitle(anchor="deltoid_tuberosity") }}
+```
+
+renders as:
+
+```html
+<a href="/humerus.html#deltoid_tuberosity" class="internal-link">Deltoid Tuberosity</a>
+```
+
 ## `get_desc`
 
 Looks up a description object from the build index. If the name is not present,
