@@ -94,6 +94,10 @@ all: | $(BUILD_DIR) $(BUILD_SUBDIRS)
 
 final: $(HTMLS)
 final: $(CSS)
+final: $(BUILD_DIR)/robots.txt
+
+$(BUILD_DIR)/robots.txt: $(SRC_DIR)/robots.txt
+	cp $< $@
 
 $(BUILD_DIR)/.update-index: $(MARKDOWNS) $(YAMLS)
 	$(call status,Updating Redis Index)

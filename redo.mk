@@ -173,5 +173,6 @@ tags:
 	$(Q)ctags -R app/shell/py
 
 .PHONY: release
-release: all
+release: all test
+	$(Q)$(DOCKER_COMPOSE) build shell
 	$(Q)$(DOCKER_COMPOSE) build release
