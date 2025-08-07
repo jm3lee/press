@@ -1,5 +1,7 @@
 import os
 import io
+import runpy
+import sys
 from unittest import mock
 
 import pytest
@@ -53,7 +55,7 @@ def test_mermaid_creates_files(tmp_path):
     include_filter.outfile = io.StringIO()
 
     mmd = tmp_path / "src.mmd"
-    mmd.write_text("```mermaid\nA-->B\n```\n")
+    mmd.write_text("preamble\n```mermaid\nA-->B\n```\n")
 
     with mock.patch("pie.include_filter.new_filestem", return_value=str(tmp_path / "diagram0")) as nf, \
          mock.patch("os.system") as os_sys:
@@ -100,3 +102,60 @@ def test_parse_args_parses_all_options():
     assert args.infile == "in.md"
     assert args.outfile == "out.md"
     assert args.log == "log.txt"
+
+
+def test_include_deflist_entry_handles_files_and_dirs(tmp_path):
+    f1 = tmp_path / "a.md"
+    f1.write_text("---\n{\"title\": \"A\"}\n---\nA body\n")
+    sub = tmp_path / "sub"
+    sub.mkdir()
+    f2 = sub / "b.md"
+    f2.write_text("---\n{}\n---\nB body\n")
+    include_filter.outfile = io.StringIO()
+    include_filter.include_deflist_entry(str(f1), str(sub))
+    expected = "<dt>A</dt>\n<dd>\nA body\n</dd>\n<dd>\nB body\n</dd>\n"
+    assert include_filter.outfile.getvalue() == expected
+
+
+def test_include_deflist_entry_sort_fn(tmp_path):
+    f1 = tmp_path / "a.md"
+    f1.write_text("---\n{\"title\": \"A\"}\n---\nA\n")
+    f2 = tmp_path / "b.md"
+    f2.write_text("---\n{\"title\": \"B\"}\n---\nB\n")
+    include_filter.outfile = io.StringIO()
+    include_filter.include_deflist_entry(
+        str(f1),
+        str(f2),
+        sort_fn=lambda files: sorted(files, key=lambda p: p.name, reverse=True),
+    )
+    expected = "<dt>B</dt>\n<dd>\nB\n</dd>\n<dt>A</dt>\n<dd>\nA\n</dd>\n"
+    assert include_filter.outfile.getvalue() == expected
+
+
+def test_main_executes_lines_individually_and_tracks_headings(tmp_path):
+    outdir = tmp_path / "out"
+    outdir.mkdir()
+    infile = tmp_path / "doc.md"
+    infile.write_text("# H1\n```python\n1\n2\n```\n")
+    outfile = tmp_path / "out.md"
+    include_filter.heading_level = 0
+    include_filter.main([str(outdir), str(infile), str(outfile)])
+    assert outfile.read_text() == "# H1\n"
+    assert include_filter.heading_level == 1
+
+
+def test_script_entry_point(tmp_path, monkeypatch):
+    outdir = tmp_path / "out"
+    outdir.mkdir()
+    infile = tmp_path / "doc.md"
+    infile.write_text("Hello")
+    outfile = tmp_path / "out.md"
+    monkeypatch.setattr(sys, "argv", [
+        "include_filter.py",
+        str(outdir),
+        str(infile),
+        str(outfile),
+    ])
+    runpy.run_module("pie.include_filter", run_name="__main__")
+    assert outfile.read_text() == "Hello"
+
