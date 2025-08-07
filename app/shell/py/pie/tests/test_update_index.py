@@ -138,6 +138,26 @@ def test_directory_pair_processed_once(tmp_path, monkeypatch):
     assert fake.get("doc.title") == "Yaml"
 
 
+def test_main_inserts_path(tmp_path, monkeypatch):
+    src = tmp_path / "src"
+    src.mkdir()
+    md = src / "doc.md"
+    md.write_text("---\n{\"title\": \"Md\"}\n---\n")
+    yml = src / "doc.yml"
+    yml.write_text('{"title": "Yaml", "name": "Y"}')
+
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
+
+    os.chdir(tmp_path)
+    try:
+        update_index.main(["src/doc.md"])
+    finally:
+        os.chdir("/tmp")
+
+    assert fake.get("doc.path") == json.dumps(["src/doc.yml", "src/doc.md"])
+
+
 def test_main_missing_id_generates(tmp_path, monkeypatch):
     src = tmp_path / "src"
     src.mkdir()

@@ -1,6 +1,6 @@
 # update-index
 
-Load a JSON index and insert each value into DragonflyDB or Redis. Keys use a dot-separated format of `<id>.<property>` with nested objects and arrays flattened. Complex values are stored as JSON strings.
+Load a JSON index and insert each value into DragonflyDB or Redis. Keys use a dot-separated format of `<id>.<property>` with nested objects and arrays flattened. Complex values are stored as JSON strings. When processing metadata files, the paths to the source files are recorded under `<id>.path` as a JSON array; this `path` array is stored unflattened.
 
 ## Usage
 
@@ -16,4 +16,4 @@ update-index index.json [--host HOST] [--port PORT] [-l LOGFILE]
 `update-index` also reads the `REDIS_HOST` and `REDIS_PORT` environment
 variables when `--host` or `--port` are not specified.
 
-When a directory is given, `update-index` scans recursively for `.md`, `.yml`, and `.yaml` files, processing each Markdown/YAML pair only once. The command expects an index produced by [`build-index`](build-index.md). Entries are written to the configured Redis instance using pipelined batch writes, with each value stored under its own key.
+When a directory is given, `update-index` scans recursively for `.md`, `.yml`, and `.yaml` files, processing each Markdown/YAML pair only once. The command expects an index produced by [`build-index`](build-index.md). Entries are written to the configured Redis instance using pipelined batch writes, with each value stored under its own key, including `id.path` entries pointing to the original files.
