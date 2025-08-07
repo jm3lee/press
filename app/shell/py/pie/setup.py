@@ -19,6 +19,7 @@ setup(
         'console_scripts': [
             'build-index=pie.build_index:main',
             'update-index=pie.update_index:main',
+            'update-pubdate=pie.update_pubdate:main',
             'picasso=pie.picasso:main',
             'render-jinja-template=pie.render_jinja_template:main',
             'render-study-json=pie.render_study_json:main',
