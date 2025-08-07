@@ -1,15 +1,15 @@
 # Build rules for the IndexTree React interface.
 # Included by src/dep.mk so build.mk knows how to generate assets.
 
-# Ensure built JS is available under build/examples/indextree/
-all: build/examples/indextree/indextree.js
+# Ensure built JS is available under build/static/
+all: build/static/indextree.js
 
 # Directory for built assets
-build/examples/indextree:
+build/static:
 	mkdir -p $@
 
 # Copy the generated bundle from the app directory into the build tree
-build/examples/indextree/indextree.js: app/build/static/js/indextree.js | build/examples/indextree
+build/static/indextree.js: app/build/static/js/indextree.js | build/static
 	cp $< $@
 
 # Build the React application with Vite; output lives under app/build/static/js
@@ -25,6 +25,10 @@ app/indextree/.init:
 all: build/examples/indextree/demo.json
 
 INDEXTREE_SRC := src/examples/indextree/files
+
+# Directory for example assets
+build/examples/indextree:
+	mkdir -p $@
 
 build/examples/indextree/demo.json: $(shell find $(INDEXTREE_SRC) -type f) | build/examples/indextree
 	indextree-json src > $@
