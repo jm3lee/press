@@ -28,6 +28,7 @@ setup(
             'indextree-json=pie.indextree_json:main',
             'gen-markdown-index=pie.gen_markdown_index:main',
             'check-page-title=pie.check_page_title:main',
+            'check-post-build=pie.check_post_build:main',
         ],
     },
 )
