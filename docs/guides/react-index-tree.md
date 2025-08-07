@@ -5,7 +5,7 @@ Render a collapsible navigation tree for metadata processed by
 representation of the directory structure, displays it as an expandable
 list, and provides a text box to filter entries by label. The demo is
 styled using [Material UI](https://mui.com/), so make sure
-`@mui/material`, `@mui/lab`, and `@mui/icons-material` are available in
+`@mui/material`, `@mui/x-tree-view`, and `@mui/icons-material` are available in
 your project.
 
 The `indextree-json` console script can generate the required JSON by
