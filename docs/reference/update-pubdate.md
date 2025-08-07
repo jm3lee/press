@@ -13,3 +13,6 @@ update-pubdate
 
 Each updated file is printed as `<path>: <old> -> <new>` and the same information
 is logged to `log/update-pubdate.txt`.
+
+If a file under `src` is modified but no `pubdate` field can be updated, a
+warning is logged.

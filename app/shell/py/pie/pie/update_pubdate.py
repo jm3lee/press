@@ -5,9 +5,9 @@ from datetime import datetime
 from pathlib import Path
 import subprocess
 from typing import Iterable, Sequence
-import logging
 
 from pie.load_metadata import load_metadata_pair
+from pie.utils import add_file_logger, logger
 
 
 __all__ = ["main"]
@@ -89,14 +89,18 @@ def update_files(paths: Iterable[Path], pubdate: str) -> list[str]:
         if metadata and "path" in metadata:
             file_paths.update(Path(p) for p in metadata["path"])
 
+        updated = False
         for fp in file_paths:
             if not fp.exists():
                 continue
             changed, old = _replace_pubdate(fp, pubdate)
             if changed and old is not None:
                 msg = f"{fp}: {old} -> {pubdate}"
-                logging.info(msg)
+                logger.info(msg)
                 changes.append(msg)
+                updated = True
+        if not updated and str(path).startswith("src/"):
+            logger.warning("pubdate not updated", filename=str(path))
     return changes
 
 
@@ -104,12 +108,7 @@ def configure_logging() -> None:
     """Configure logging to write to ``log/update-pubdate.txt``."""
     log_file = Path("log") / "update-pubdate.txt"
     log_file.parent.mkdir(parents=True, exist_ok=True)
-    logging.basicConfig(
-        filename=log_file,
-        level=logging.INFO,
-        format="%(message)s",
-        force=True,
-    )
+    add_file_logger(str(log_file), level="INFO")
 
 
 def main(argv: Sequence[str] | None = None) -> int:
