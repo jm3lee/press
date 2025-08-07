@@ -1,5 +1,6 @@
 # Build rules for the IndexTree React interface.
 # Included by src/dep.mk so build.mk knows how to generate assets.
+# See docs/guides/dep-mk.md for details on dependency makefiles.
 
 # Ensure built JS is available under build/static/
 all: build/static/indextree.js
