@@ -9,9 +9,11 @@ styled using [Material UI](https://mui.com/), so make sure
 your project.
 
 The `indextree-json` console script can generate the required JSON by
-scanning a directory and producing nodes for each file and subdirectory.
-Metadata from Markdown frontmatter or companion YAML files is used for
-each entry, mirroring the behaviour of `update-index`:
+scanning a directory of YAML metadata files and producing nodes for each
+file and subdirectory. Entries honour the same `gen-markdown-index`
+options (`show` and `link`) used by the Markdown index generator. When
+linking is enabled, the `url` property is copied from the metadata
+without modification:
 
 ```bash
 indextree-json docs > doc-tree.json
