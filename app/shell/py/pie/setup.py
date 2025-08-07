@@ -26,6 +26,7 @@ setup(
             'process-yaml=pie.process_yaml:main',
             'detect-html-dicts=pie.detect_html_dicts:main',
             'indextree-json=pie.indextree_json:main',
+            'gen-markdown-index=pie.gen_markdown_index:main',
         ],
     },
 )
