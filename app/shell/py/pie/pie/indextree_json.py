@@ -11,8 +11,8 @@ from pie.utils import add_file_logger
 from pie.update_index import load_index_from_path
 
 
-def title_from(name: str) -> str:
-    """Return a human readable title for *name*."""
+def label_from(name: str) -> str:
+    """Return a human readable label for *name*."""
     return name.replace("-", " ").title()
 
 
@@ -33,7 +33,7 @@ def scan_dir(root: Path, base: str) -> List[Dict[str, object]]:
             name = path[-1]
             node: Dict[str, Any] = {
                 "id": name,
-                "title": title_from(name),
+                "label": label_from(name),
                 "url": f"{base_prefix}/{'/'.join(path)}",
             }
             parent.setdefault("children", []).append(node)
@@ -53,7 +53,7 @@ def scan_dir(root: Path, base: str) -> List[Dict[str, object]]:
             segs = parts[:-1]
             node = get_node(segs)
             node["id"] = metadata.get("id", node["id"])
-            node["title"] = metadata.get("title", node["title"])
+            node["label"] = metadata.get("title", node["label"])
             node["url"] = f"{base_prefix}{url}"
         else:
             parent = get_node(parts[:-1])
@@ -61,13 +61,13 @@ def scan_dir(root: Path, base: str) -> List[Dict[str, object]]:
             parent.setdefault("children", []).append(
                 {
                     "id": metadata.get("id", stem),
-                    "title": metadata.get("title", title_from(stem)),
+                    "label": metadata.get("title", label_from(stem)),
                     "url": f"{base_prefix}{url}",
                 }
             )
 
     def sort(nodes: List[Dict[str, Any]]) -> None:
-        nodes.sort(key=lambda n: str(n["title"]).casefold())
+        nodes.sort(key=lambda n: str(n["label"]).casefold())
         for node in nodes:
             if "children" in node:
                 sort(node["children"])
