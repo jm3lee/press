@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { TextField } from '@mui/material';
-import { TreeView } from '@mui/x-tree-view/TreeView';
-import { TreeItem } from '@mui/x-tree-view/TreeItem';
+import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
@@ -50,27 +49,6 @@ function collectIds(nodes, ids = []) {
 }
 
 /**
- * Render a TreeItem for a given node.
- *
- * @param {TreeNodeData} node
- * @returns {JSX.Element}
- */
-function renderTree(node) {
-  const label = node.url ? (
-    <a href={node.url} onClick={(e) => e.stopPropagation()}>{node.label}</a>
-  ) : (
-    node.label
-  );
-  return (
-    <TreeItem key={node.id} nodeId={node.id} label={label}>
-      {Array.isArray(node.children)
-        ? node.children.map((child) => renderTree(child))
-        : null}
-    </TreeItem>
-  );
-}
-
-/**
  * Display a collapsible, searchable tree of navigation entries.
  *
  * @param {{ src: string }} props - Location of the JSON tree data.
@@ -101,6 +79,20 @@ export default function IndexTree({ src }) {
     }
   }, [query, filtered]);
 
+  const idMap = useMemo(() => {
+    const map = new Map();
+    function walk(nodes) {
+      nodes.forEach((n) => {
+        map.set(n.id, n);
+        if (n.children) {
+          walk(n.children);
+        }
+      });
+    }
+    walk(filtered);
+    return map;
+  }, [filtered]);
+
   return (
     <div>
       <TextField
@@ -111,14 +103,25 @@ export default function IndexTree({ src }) {
         onChange={(e) => setQuery(e.target.value)}
         sx={{ mb: 2 }}
       />
-      <TreeView
+      <RichTreeView
+        items={filtered}
         defaultCollapseIcon={<ExpandMoreIcon />}
         defaultExpandIcon={<ChevronRightIcon />}
-        expanded={expanded}
-        onNodeToggle={(event, ids) => setExpanded(ids)}
-      >
-        {filtered.map((node) => renderTree(node))}
-      </TreeView>
+        expandedItems={expanded}
+        onExpandedItemsChange={(event, ids) => setExpanded(ids)}
+        slotProps={{
+          item: ({ itemId, label }) => {
+            const node = idMap.get(itemId);
+            return {
+              label: node?.url ? (
+                <a href={node.url} onClick={(e) => e.stopPropagation()}>{label}</a>
+              ) : (
+                label
+              ),
+            };
+          },
+        }}
+      />
     </div>
   );
 }
