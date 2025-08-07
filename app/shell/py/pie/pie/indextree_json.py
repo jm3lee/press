@@ -1,122 +1,103 @@
-"""Generate JSON data for the React ``IndexTree`` component.
+#!/usr/bin/env python3
 
-This module walks a directory tree of YAML metadata files in the same
-fashion as the ``gen-markdown-index`` script and produces a nested data
-structure describing the entries.  Each item exposes an ``id`` and
-``label`` and, when links are enabled, copies the ``url`` from the
-metadata verbatim.  Directories are represented by items containing a
-``children`` list.
-"""
-
-from __future__ import annotations
-
-import argparse
 import json
 import os
+import warnings
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Tuple
 
 import yaml
-
-from pie.utils import add_file_logger
-
-
-def _load_meta(path: Path) -> Dict[str, Any]:
-    """Load YAML metadata from *path*."""
-
-    with path.open("r", encoding="utf-8") as handle:
-        return yaml.safe_load(handle) or {}
+from pie.load_metadata import load_metadata_pair
 
 
-def _opt(meta: Dict[str, Any], key: str, default: bool = True) -> bool:
-    """Return a boolean option from the ``gen-markdown-index`` section."""
-
-    section = meta.get("gen-markdown-index") or {}
-    return bool(section.get(key, default))
-
-
-def _visit(directory: Path) -> Iterable[Tuple[Dict[str, Any], Path, bool]]:
-    """Yield ``(meta, path, is_dir)`` tuples for *directory* entries."""
-
-    for name in os.listdir(directory):
-        p = directory / name
-        if p.is_dir():
-            index = p / "index.yml"
-            if index.is_file():
-                yield _load_meta(index), p, True
-        elif p.is_file() and p.suffix == ".yml" and p.name != "index.yml":
-            yield _load_meta(p), p, False
+def getopt_link(meta):
+    if meta.get("gen-markdown-index"):
+        return meta.get("gen-markdown-index").get("link", True)
+    return True
 
 
-def scan_dir(root: Path) -> List[Dict[str, Any]]:
-    """Return IndexTree nodes for *root* using ``gen-markdown-index`` rules."""
+def getopt_show(meta):
+    if meta.get("gen-markdown-index"):
+        return meta.get("gen-markdown-index").get("show", True)
+    return True
 
-    nodes: List[Dict[str, Any]] = []
-    for meta, path, is_dir in sorted(
-        _visit(root), key=lambda x: str(x[0].get("title", "")).casefold()
-    ):
-        show = _opt(meta, "show")
-        link = _opt(meta, "link")
-        entry_id = meta.get("id")
-        label = meta.get("title", entry_id)
-        url = meta.get("url")
 
-        if is_dir:
-            children = scan_dir(path)
-            if show:
-                node: Dict[str, Any] = {"id": entry_id, "label": label}
-                if link and url:
-                    node["url"] = url
-                if children:
-                    node["children"] = children
-                nodes.append(node)
+def visit(directory):
+    for filename in os.listdir(directory):
+        try:
+            p = os.path.join(directory, filename)
+            if os.path.isdir(p):
+                if os.path.isfile(os.path.join(p, "index.yml")):
+                    meta = load_metadata_pair(Path(os.path.join(p, "index.yml")))
+                    yield (
+                        meta["id"],
+                        meta["title"],
+                        meta.get("url"),
+                        p,
+                        getopt_link(meta),
+                        getopt_show(meta),
+                    )
+            elif os.path.isfile(p) and p.endswith(".yml") and filename != "index.yml":
+                meta = load_metadata_pair(Path(p))
+                yield (
+                    meta["id"],
+                    meta["title"],
+                    meta.get("url"),
+                    p,
+                    getopt_link(meta),
+                    getopt_show(meta),
+                )
+        except Exception as e:
+            warnings.warn(f"Failed to process {p}")
+            raise
+
+
+def process_dir(directory):
+    """
+    Recursively process a directory tree to print structured link entries.
+
+    Args:
+        directory (str): Path to the current directory.
+    """
+    for entry in sorted(list(visit(directory)), key=lambda x: x[1].lower()):
+        entry_id = entry[0]
+        entry_title = entry[1]
+        entry_url = entry[2]
+        entry_path = entry[3]
+        entry_link = entry[4]
+        entry_show = entry[5]
+        if os.path.isdir(entry_path):
+            if entry_show:
+                if entry_link:
+                    yield {
+                        "id": entry_id,
+                        "label": entry_title,
+                        "url": entry_url,
+                        "children": list(process_dir(entry_path)),
+                    }
+                else:
+                    yield {
+                        "id": entry_id,
+                        "label": entry_title,
+                        "children": list(process_dir(entry_path)),
+                    }
             else:
-                nodes.extend(children)
+                process_dir(entry_path)
+                yield from process_dir(entry_path)
         else:
-            if not show:
-                continue
-            node = {"id": entry_id, "label": label}
-            if link and url:
-                node["url"] = url
-            nodes.append(node)
-
-    return nodes
+            if entry_show:
+                if entry_link:
+                    yield {"id": entry_id, "label": entry_title, "url": entry_url}
+                else:
+                    yield {"id": entry_id, "label": entry_title}
 
 
-def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
-    """Parse command line arguments."""
+def main():
+    import sys
 
-    parser = argparse.ArgumentParser(
-        description="Generate IndexTree JSON from YAML metadata",
-    )
-    parser.add_argument("root", help="Root directory to scan")
-    parser.add_argument(
-        "-o",
-        "--outfile",
-        help="Write JSON output to this file",
-    )
-    parser.add_argument(
-        "-l",
-        "--log",
-        help="Write debug logs to the specified file",
-    )
-    return parser.parse_args(list(argv) if argv is not None else None)
+    root_dir = sys.argv[1] if len(sys.argv) > 1 else "."
+    data = list(process_dir(root_dir))
+    print(json.dumps(data, indent=2))
 
 
-def main(argv: Iterable[str] | None = None) -> None:
-    """Entry point for the ``indextree-json`` console script."""
-
-    args = parse_args(argv)
-    if args.log:
-        add_file_logger(args.log, level="DEBUG")
-    tree = scan_dir(Path(args.root))
-    data = json.dumps(tree, indent=2, ensure_ascii=False)
-    if args.outfile:
-        Path(args.outfile).write_text(data + "\n", encoding="utf-8")
-    else:
-        print(data)
-
-
-if __name__ == "__main__":  # pragma: no cover
+if __name__ == "__main__":
     main()
-
