@@ -114,6 +114,8 @@ test: $(BUILD_DIR)/.minify | $(LOG_DIR)
 	$(Q)$(CHECKLINKS_CMD) http://nginx-dev
 	$(call status,Check page titles)
 	$(Q)check-page-title -x $(CFG_DIR)/check-page-title-exclude.yml $(BUILD_DIR)
+	$(call status,Check post-build artifacts)
+	$(Q)check-post-build -c $(CFG_DIR)/check-post-build.yml
 
 # Create necessary build directories
 $(BUILD_DIR): | $(BUILD_SUBDIRS)

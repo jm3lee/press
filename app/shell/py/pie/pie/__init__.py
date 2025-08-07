@@ -18,6 +18,7 @@ The most commonly used modules are:
 * :mod:`detect_html_dicts` – identify dictionary-like data structures within
   HTML snippets.
 * :mod:`picasso` – bundle assets for diagrams and interactive code examples.
+* :mod:`check_post_build` – verify that expected build artifacts exist.
 
 Use ``help(pie.<module>)`` to view documentation for any of the individual
 modules.
@@ -33,4 +34,5 @@ __all__ = [
     "process_yaml",
     "detect_html_dicts",
     "picasso",
+    "check_post_build",
 ]
