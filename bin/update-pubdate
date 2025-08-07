@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+#
+# Description:
+#   Update the pubdate field for files that have been staged or modified in git.
+#   The script searches for a line starting with "pubdate:" and replaces it
+#   with today's date in the format used by bin/pubdate.
+#
+# Usage:
+#   update-pubdate
+#
+# Example:
+#   update-pubdate
+#
+set -euo pipefail
+
+PUBDATE="pubdate: $(date +"%b %d, %Y")"
+CHANGED_FILES=$(git status --porcelain | awk '$1 != "??" {print $2}')
+COUNT=0
+
+for FILE in $CHANGED_FILES; do
+  if [ -f "$FILE" ] && grep -q '^pubdate:' "$FILE"; then
+    sed -i.bak -E "s/^pubdate: .*/$PUBDATE/" "$FILE"
+    rm "$FILE.bak"
+    COUNT=$((COUNT + 1))
+  fi
+done
+
+echo "$COUNT"
