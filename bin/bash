@@ -1,0 +1,7 @@
+#!/bin/bash
+
+BASH_CMD="docker compose run \
+  --rm --entrypoint bash -u $(id -u) \
+  shell"
+
+$BASH_CMD "$@"
