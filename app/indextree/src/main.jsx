@@ -18,7 +18,7 @@ function initializeIndexTree() {
     getComputedStyle(document.documentElement).getPropertyValue('--font-base') ||
     '"minion-pro", serif';
   const theme = createTheme({
-    typography: { fontFamily: fontBase.trim() },
+      typography: { fontFamily: fontBase.trim(), fontSize: "1em" },
   });
   const root = createRoot(mount);
   root.render(
