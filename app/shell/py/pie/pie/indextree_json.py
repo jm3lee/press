@@ -7,8 +7,8 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Iterable, List
 
-from pie.utils import add_file_logger, logger
-from pie.load_metadata import load_metadata_pair
+from pie.utils import add_file_logger
+from pie.update_index import load_index_from_path
 
 
 def title_from(name: str) -> str:
@@ -19,59 +19,62 @@ def title_from(name: str) -> str:
 def scan_dir(root: Path, base: str) -> List[Dict[str, object]]:
     """Return IndexTree nodes for *root* using file metadata."""
 
-    nodes: List[Dict[str, object]] = []
-    for child in sorted(root.iterdir(), key=lambda p: p.name):
-        if child.name.startswith('.'):
-            continue
+    index, _ = load_index_from_path(root)
 
-        if child.is_dir():
-            metadata = None
-            for ext in (".md", ".yml", ".yaml"):
-                index_file = child / f"index{ext}"
-                if index_file.exists():
-                    try:
-                        metadata = load_metadata_pair(index_file)
-                    except Exception:  # pragma: no cover - fall back
-                        metadata = None
-                    break
+    base_prefix = base.rstrip("/")
 
-            node_id = metadata.get("id") if metadata else child.name
-            title = metadata.get("title") if metadata else title_from(child.name)
-            url = metadata.get("url") if metadata else f"{base}{child.name}"
+    root_node: Dict[str, Any] = {"children": []}
+    nodes: Dict[tuple[str, ...], Dict[str, Any]] = {(): root_node}
 
+    def get_node(path: List[str]) -> Dict[str, Any]:
+        key = tuple(path)
+        if key not in nodes:
+            parent = get_node(path[:-1])
+            name = path[-1]
             node: Dict[str, Any] = {
-                "id": node_id,
-                "title": title,
-                "url": url,
+                "id": name,
+                "title": title_from(name),
+                "url": f"{base_prefix}/{'/'.join(path)}",
             }
-            children = scan_dir(child, f"{base}{child.name}/")
-            if children:
-                node["children"] = children
-            nodes.append(node)
-        elif child.is_file():
-            if child.name in {"index.md", "index.yml", "index.yaml"}:
-                continue
+            parent.setdefault("children", []).append(node)
+            nodes[key] = node
+        return nodes[key]
 
-            if child.suffix.lower() not in {".md", ".yml", ".yaml"}:
-                continue
+    for metadata in index.values():
+        url = metadata.get("url")
+        if not url:
+            continue
+        parts = [p for p in url.lstrip("/").split("/") if p]
+        if not parts:
+            continue
+        if parts == ["index.html"]:
+            continue
+        if parts[-1] == "index.html":
+            segs = parts[:-1]
+            node = get_node(segs)
+            node["id"] = metadata.get("id", node["id"])
+            node["title"] = metadata.get("title", node["title"])
+            node["url"] = f"{base_prefix}{url}"
+        else:
+            parent = get_node(parts[:-1])
+            stem = parts[-1].rsplit(".", 1)[0]
+            parent.setdefault("children", []).append(
+                {
+                    "id": metadata.get("id", stem),
+                    "title": metadata.get("title", title_from(stem)),
+                    "url": f"{base_prefix}{url}",
+                }
+            )
 
-            try:
-                metadata = load_metadata_pair(child)
-            except Exception:  # pragma: no cover - fall back
-                metadata = None
+    def sort(nodes: List[Dict[str, Any]]) -> None:
+        nodes.sort(key=lambda n: str(n["title"]).casefold())
+        for node in nodes:
+            if "children" in node:
+                sort(node["children"])
 
-            if not metadata:
-                continue
-
-            stem = child.stem
-            node_id = metadata.get("id", stem)
-            title = metadata.get("title", title_from(stem))
-            url = metadata.get("url", f"{base}{stem}")
-
-            nodes.append({"id": node_id, "title": title, "url": url})
-
-    nodes.sort(key=lambda n: str(n["title"]).casefold())
-    return nodes
+    children = root_node["children"]
+    sort(children)
+    return children
 
 
 def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
