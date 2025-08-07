@@ -40,8 +40,11 @@ def flatten_index(index: Mapping[str, Mapping[str, Any]]) -> Iterable[tuple[str,
             for k, v in obj.items():
                 yield from _walk(f"{prefix}.{k}", v)
         elif isinstance(obj, list):
-            for i, item in enumerate(obj):
-                yield from _walk(f"{prefix}.{i}", item)
+            if prefix.endswith(".path"):
+                yield prefix, json.dumps(obj, ensure_ascii=False)
+            else:
+                for i, item in enumerate(obj):
+                    yield from _walk(f"{prefix}.{i}", item)
         else:
             val = obj if isinstance(obj, str) else json.dumps(obj, ensure_ascii=False)
             yield prefix, val

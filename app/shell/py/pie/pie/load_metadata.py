@@ -50,6 +50,12 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
                 )
             combined[k] = v
 
+    files: list[Path] = []
+    if yaml_file:
+        files.append(yaml_file)
+    if md_path.exists():
+        files.append(md_path)
+
     if "id" not in combined:
         base = path.with_suffix("")
         combined["id"] = base.name
@@ -58,6 +64,9 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
             filename=str(path.resolve().relative_to(Path.cwd())),
             id=combined["id"],
         )
+
+    if files:
+        combined["path"] = [str(p.resolve().relative_to(Path.cwd())) for p in files]
 
     logger.debug(combined)
     return combined
