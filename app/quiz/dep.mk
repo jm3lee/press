@@ -1,6 +1,7 @@
 # Build rules for the React quiz interface.
 # Included by the main `dep.mk` so that `build.mk` knows how to
 # generate and copy quiz assets.
+# See docs/guides/dep-mk.md for details on dependency makefiles.
 #
 # The `all` target ensures that the compiled JavaScript bundle and any
 # accompanying JSON files are present under `build/quiz/`.
