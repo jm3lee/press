@@ -7,6 +7,7 @@ def make_cfg(path):
 
 
 def test_main_reports_missing(tmp_path):
+    """Missing file -> exit code 1."""
     build = tmp_path / "build"
     build.mkdir()
     cfg = make_cfg(tmp_path / "cfg.yml")
@@ -15,6 +16,7 @@ def test_main_reports_missing(tmp_path):
 
 
 def test_main_passes_and_logs(tmp_path):
+    """Existing file -> exit 0 and write log."""
     build = tmp_path / "build" / "static"
     build.mkdir(parents=True)
     (build / "indextree.json").write_text("{}", encoding="utf-8")
@@ -26,6 +28,7 @@ def test_main_passes_and_logs(tmp_path):
 
 
 def test_parse_args_defaults():
+    """parse_args returns default paths."""
     args = check_post_build.parse_args([])
     assert args.directory == "build"
     assert args.config == "cfg/check-post-build.yml"

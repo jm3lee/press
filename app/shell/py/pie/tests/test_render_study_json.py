@@ -5,6 +5,7 @@ from pie import render_study_json
 
 
 def test_render_study_basic():
+    """Template question -> rendered with index data."""
     index = {"item": {"name": "Foo"}}
     questions = [
         {"q": "Name {{item['name']}}", "c": ["A", "B"], "a": [0, "Because {{item['name']}}"]}
@@ -14,6 +15,7 @@ def test_render_study_basic():
 
 
 def test_main_outputs_stdout(tmp_path, capsys):
+    """CLI prints rendered study JSON."""
     index_file = tmp_path / "index.json"
     study_file = tmp_path / "study.json"
     index = {"val": {"name": "Bar"}}
@@ -27,6 +29,7 @@ def test_main_outputs_stdout(tmp_path, capsys):
 
 
 def test_main_writes_file(tmp_path):
+    """'-o out.json' writes output file."""
     index_file = tmp_path / "index.json"
     study_file = tmp_path / "study.json"
     out_file = tmp_path / "out.json"
@@ -39,6 +42,7 @@ def test_main_writes_file(tmp_path):
 
 
 def test_main_writes_log_file(tmp_path):
+    """'--log study.log' creates log file."""
     index_file = tmp_path / "index.json"
     study_file = tmp_path / "study.json"
     log_file = tmp_path / "study.log"

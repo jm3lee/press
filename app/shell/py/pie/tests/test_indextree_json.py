@@ -10,6 +10,7 @@ def write_yaml(path: Path, data: dict) -> None:
 
 
 def test_process_dir_builds_tree(tmp_path):
+    """YAML files -> hierarchical tree."""
     src = tmp_path / "src"
     alpha = src / "alpha"
     alpha.mkdir(parents=True)
@@ -37,6 +38,7 @@ def test_process_dir_builds_tree(tmp_path):
 
 
 def test_process_dir_honours_show_and_link(tmp_path):
+    """show:False hides nodes; link:False omits URL."""
     src = tmp_path / "src"
     alpha = src / "alpha"
     delta = src / "delta"

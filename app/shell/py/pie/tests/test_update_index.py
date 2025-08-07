@@ -7,6 +7,7 @@ from pie import update_index
 
 
 def test_main_inserts_keys(tmp_path, monkeypatch):
+    """JSON index -> Redis keys like quickstart.title."""
     index_data = {
         "quickstart": {
             "title": "Quickstart",
@@ -32,6 +33,7 @@ def test_main_inserts_keys(tmp_path, monkeypatch):
 
 
 def test_main_handles_arrays(tmp_path, monkeypatch):
+    """Lists become indexed Redis keys."""
     index_data = {
         "quickstart": {
             "tags": ["foo", "bar"],
@@ -56,6 +58,7 @@ def test_main_handles_arrays(tmp_path, monkeypatch):
 
 
 def test_main_directory_processes_yamls(tmp_path, monkeypatch):
+    """Directory of yml -> Redis entries for each."""
     src = tmp_path / "src"
     src.mkdir()
     (src / "a.yml").write_text('{"name": "Foo"}')
@@ -77,6 +80,7 @@ def test_main_directory_processes_yamls(tmp_path, monkeypatch):
 
 
 def test_main_single_yaml_file(tmp_path, monkeypatch):
+    """Single YAML file populates Redis."""
     src = tmp_path / "src"
     src.mkdir()
     yml = src / "item.yml"
@@ -96,6 +100,7 @@ def test_main_single_yaml_file(tmp_path, monkeypatch):
 
 
 def test_main_combines_md_and_yaml(tmp_path, monkeypatch):
+    """Markdown + YAML -> merged metadata."""
     src = tmp_path / "src"
     src.mkdir()
     md = src / "doc.md"
@@ -119,6 +124,7 @@ def test_main_combines_md_and_yaml(tmp_path, monkeypatch):
 
 
 def test_directory_pair_processed_once(tmp_path, monkeypatch):
+    """Processing a directory handles md/yml pair once."""
     src = tmp_path / "src"
     src.mkdir()
     (src / "doc.md").write_text("---\n{\"title\": \"Md\"}\n---\n")
@@ -139,6 +145,7 @@ def test_directory_pair_processed_once(tmp_path, monkeypatch):
 
 
 def test_main_inserts_path(tmp_path, monkeypatch):
+    """Stores source paths as JSON array."""
     src = tmp_path / "src"
     src.mkdir()
     md = src / "doc.md"
@@ -159,6 +166,7 @@ def test_main_inserts_path(tmp_path, monkeypatch):
 
 
 def test_main_missing_id_generates(tmp_path, monkeypatch):
+    """Missing id -> generated from filename."""
     src = tmp_path / "src"
     src.mkdir()
     md = src / "doc.md"
@@ -177,6 +185,7 @@ def test_main_missing_id_generates(tmp_path, monkeypatch):
 
 
 def test_directory_processed_in_parallel(tmp_path, monkeypatch):
+    """Concurrent processing still populates Redis."""
     src = tmp_path / "src"
     src.mkdir()
     (src / "a.yml").write_text('{"name": "A"}')
@@ -205,6 +214,7 @@ def test_directory_processed_in_parallel(tmp_path, monkeypatch):
 
 
 def test_logs_execution_time_and_count(tmp_path, monkeypatch):
+    """Logging shows file count and elapsed time."""
     src = tmp_path / "src"
     src.mkdir()
     (src / "a.yml").write_text('{"name": "A"}')

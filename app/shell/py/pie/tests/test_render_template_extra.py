@@ -8,6 +8,7 @@ from pie import render_jinja_template as render_template
 
 
 def test_get_redis_value_initialises(monkeypatch):
+    """Missing redis_conn -> initialised from env."""
     fake = fakeredis.FakeRedis(decode_responses=True)
     monkeypatch.setenv("REDIS_HOST", "h")
     monkeypatch.setenv("REDIS_PORT", "1234")
@@ -20,6 +21,7 @@ def test_get_redis_value_initialises(monkeypatch):
 
 
 def test_get_redis_value_required_missing(monkeypatch):
+    """required=True and missing key -> SystemExit."""
     fake = fakeredis.FakeRedis(decode_responses=True)
     monkeypatch.setattr(render_template, "redis_conn", fake)
     with pytest.raises(SystemExit):
@@ -27,6 +29,7 @@ def test_get_redis_value_required_missing(monkeypatch):
 
 
 def test_get_redis_value_error(monkeypatch):
+    """Redis get() error -> SystemExit."""
     class Bad:
         def get(self, key):
             raise RuntimeError("boom")
@@ -37,6 +40,7 @@ def test_get_redis_value_error(monkeypatch):
 
 
 def test_build_from_redis_initialises(monkeypatch):
+    """_build_from_redis lazy-loads connection."""
     fake = fakeredis.FakeRedis(decode_responses=True)
     fake.set("entry.citation", '"Foo"')
     fake.set("entry.url", '"/foo"')
@@ -51,22 +55,26 @@ def test_build_from_redis_initialises(monkeypatch):
 
 
 def test_convert_lists():
+    """Nested dict with numeric keys -> lists."""
     obj = {"0": {"0": "x", "1": "y"}, "1": [{"0": "z"}]}
     assert render_template._convert_lists(obj) == [["x", "y"], [["z"]]]
 
 
 def test_load_desc_invalid_type():
+    """Non-str/dict input -> SystemExit."""
     with pytest.raises(SystemExit):
         render_template._load_desc(123)
 
 
 def test_render_link_uses_citation_dict():
+    """citation dict with 'alt' renders that text."""
     desc = {"citation": {"citation": "Foo", "alt": "Alt"}, "url": "/f"}
     html = render_template.render_link(desc, citation="alt", use_icon=False)
     assert ">Alt<" in html
 
 
 def test_wrapper_functions():
+    """Wrapper helpers render variants of links."""
     desc = {"citation": "foo bar", "url": "/f", "icon": "I"}
     assert "Foo Bar" in render_template.linktitle(desc)
     assert "I Foo Bar" in render_template.link_icon_title(desc)
@@ -78,12 +86,14 @@ def test_wrapper_functions():
 
 
 def test_extract_front_matter_invalid_yaml(tmp_path):
+    """Bad YAML front matter -> None."""
     md = tmp_path / "f.md"
     md.write_text("---\n: bad\n---\n", encoding="utf-8")
     assert render_template.extract_front_matter(md) is None
 
 
 def test_process_directory(monkeypatch, tmp_path):
+    """process_directory logs good titles and warns on bad files."""
     good = tmp_path / "good.md"
     good.write_text("---\ntitle: T\n---\n", encoding="utf-8")
     bad = tmp_path / "bad.md"
@@ -109,15 +119,18 @@ def test_process_directory(monkeypatch, tmp_path):
 
 
 def test_load_config_default_missing():
+    """No config file -> empty dict."""
     assert render_template.load_config() == {}
 
 
 def test_load_config_missing_custom(tmp_path):
+    """Missing custom config -> SystemExit."""
     with pytest.raises(SystemExit):
         render_template.load_config(tmp_path / "missing.yml")
 
 
 def test_load_config_invalid_yaml(tmp_path):
+    """Invalid YAML raises SystemExit."""
     cfg = tmp_path / "c.yml"
     cfg.write_text(": bad\n", encoding="utf-8")
     with pytest.raises(SystemExit):
@@ -125,6 +138,7 @@ def test_load_config_invalid_yaml(tmp_path):
 
 
 def test_load_config_valid(tmp_path):
+    """Valid YAML returns dict."""
     cfg = tmp_path / "c.yml"
     cfg.write_text("a: 1\n", encoding="utf-8")
     assert render_template.load_config(cfg) == {"a": 1}
