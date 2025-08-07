@@ -1,0 +1,19 @@
+[
+  {
+    "id": "alpha",
+    "label": "Alpha",
+    "children": [
+      {
+        "id": "beta",
+        "label": "Beta",
+        "url": "/examples/indextree/files/alpha/beta.html"
+      }
+    ],
+    "url": "/examples/indextree/files/alpha/index.html"
+  },
+  {
+    "id": "gamma",
+    "label": "Gamma",
+    "url": "/examples/indextree/files/gamma.html"
+  }
+]
