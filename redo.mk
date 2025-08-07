@@ -171,3 +171,7 @@ redis:
 .PHONY: tags
 tags:
 	$(Q)ctags -R app/shell/py
+
+.PHONY: release
+release: all
+	$(Q)$(DOCKER_COMPOSE) build release

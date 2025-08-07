@@ -75,6 +75,12 @@ services:
       - ./app/shell/py/pie/tests:/press/py/pie/tests
       - ./src/dep.mk:/app/mk/dep.mk
 
+  release:
+    image: press-release
+    build:
+      context: .
+      dockerfile: ./app/release/Dockerfile
+
   pdoc:
     build: ./app/pdoc
     container_name: press-pdoc
