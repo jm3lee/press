@@ -5,6 +5,7 @@
  */
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import './index.css';
 import IndexTree from './IndexTree';
 
@@ -13,10 +14,18 @@ function initializeIndexTree() {
   if (!mount) {
     return;
   }
+  const fontBase =
+    getComputedStyle(document.documentElement).getPropertyValue('--font-base') ||
+    '"minion-pro", serif';
+  const theme = createTheme({
+    typography: { fontFamily: fontBase.trim() },
+  });
   const root = createRoot(mount);
   root.render(
     <StrictMode>
-      <IndexTree src={mount.getAttribute('data-src')} />
+      <ThemeProvider theme={theme}>
+        <IndexTree src={mount.getAttribute('data-src')} />
+      </ThemeProvider>
     </StrictMode>
   );
 }
