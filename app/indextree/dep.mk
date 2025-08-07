@@ -4,10 +4,6 @@
 # Ensure built JS is available under build/static/
 all: build/static/indextree.js
 
-# Directory for built assets
-build/static:
-	mkdir -p $@
-
 # Copy the generated bundle from the app directory into the build tree
 build/static/indextree.js: app/build/static/js/indextree.js | build/static
 	cp $< $@
@@ -24,13 +20,11 @@ app/indextree/.init:
 # Example tree data used for the demo page
 all: build/examples/indextree/demo.json
 
-INDEXTREE_SRC := src/examples/indextree/files
-
 # Directory for example assets
 build/examples/indextree:
 	mkdir -p $@
 
-build/examples/indextree/demo.json: $(shell find $(INDEXTREE_SRC) -type f) | build/examples/indextree
+build/examples/indextree/demo.json: | build/examples/indextree
 	indextree-json src > $@
 
 # Helper rule for copying example JSON into build tree
