@@ -41,17 +41,17 @@ def test_scan_dir_uses_metadata(tmp_path: Path) -> None:
     assert tree == [
         {
             "id": "alpha-sec",
-            "title": "Alpha Section",
+            "label": "Alpha Section",
             "url": "/alpha/index.html",
             "children": [
                 {
                     "id": "beta-doc",
-                    "title": "Beta Doc",
+                    "label": "Beta Doc",
                     "url": "/alpha/beta.html",
                 }
             ],
         },
-        {"id": "gamma-doc", "title": "Gamma Doc", "url": "/gamma.html"},
+        {"id": "gamma-doc", "label": "Gamma Doc", "url": "/gamma.html"},
     ]
 
 
@@ -84,7 +84,7 @@ def test_scan_dir_sorts_by_title(tmp_path: Path) -> None:
     finally:
         os.chdir(cwd)
     assert tree == [
-        {"id": "a-doc", "title": "A Doc", "url": "/b.html"},
-        {"id": "z-doc", "title": "Z Doc", "url": "/a.html"},
+        {"id": "a-doc", "label": "A Doc", "url": "/b.html"},
+        {"id": "z-doc", "label": "Z Doc", "url": "/a.html"},
     ]
 

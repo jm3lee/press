@@ -1,23 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import {
-  TextField,
-  List,
-  ListItemButton,
-  ListItemText,
-  Collapse
-} from '@mui/material';
-import { ExpandLess, ExpandMore } from '@mui/icons-material';
+import React, { useState, useEffect, useMemo } from 'react';
+import { TextField } from '@mui/material';
+import TreeView from '@mui/lab/TreeView';
+import TreeItem from '@mui/lab/TreeItem';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 /**
  * @typedef {Object} TreeNodeData
  * @property {string} id - Unique identifier.
- * @property {string} title - Display title.
+ * @property {string} label - Display label.
  * @property {string} [url] - Optional link URL.
  * @property {TreeNodeData[]} [children] - Nested entries.
  */
 
 /**
- * Recursively filter a tree of nodes by title.
+ * Recursively filter a tree of nodes by label.
  *
  * @param {TreeNodeData[]} nodes - Original tree.
  * @param {string} query - Lowercase substring to match.
@@ -27,7 +24,7 @@ function filterTree(nodes, query) {
   return nodes
     .map((node) => {
       const children = node.children ? filterTree(node.children, query) : [];
-      if (node.title.toLowerCase().includes(query) || children.length) {
+      if (node.label.toLowerCase().includes(query) || children.length) {
         return { ...node, children };
       }
       return null;
@@ -36,43 +33,40 @@ function filterTree(nodes, query) {
 }
 
 /**
- * Render a single tree node with optional children.
+ * Collect all node IDs from the tree.
  *
- * @param {{ node: TreeNodeData, forceOpen: boolean }} props
+ * @param {TreeNodeData[]} nodes
+ * @param {string[]} ids
+ * @returns {string[]}
+ */
+function collectIds(nodes, ids = []) {
+  nodes.forEach((node) => {
+    ids.push(node.id);
+    if (node.children) {
+      collectIds(node.children, ids);
+    }
+  });
+  return ids;
+}
+
+/**
+ * Render a TreeItem for a given node.
+ *
+ * @param {TreeNodeData} node
  * @returns {JSX.Element}
  */
-function TreeNode({ node, forceOpen }) {
-  const [open, setOpen] = useState(false);
-  const hasChildren = Boolean(node.children && node.children.length);
-
-  useEffect(() => {
-    if (forceOpen) {
-      setOpen(true);
-    }
-  }, [forceOpen]);
-
+function renderTree(node) {
+  const label = node.url ? (
+    <a href={node.url} onClick={(e) => e.stopPropagation()}>{node.label}</a>
+  ) : (
+    node.label
+  );
   return (
-    <>
-      <ListItemButton onClick={() => hasChildren && setOpen((o) => !o)} sx={{ pl: 0 }}>
-        {hasChildren && (open ? <ExpandLess /> : <ExpandMore />)}
-        {node.url ? (
-          <ListItemText
-            primary={<a href={node.url} onClick={(e) => e.stopPropagation()}>{node.title}</a>}
-          />
-        ) : (
-          <ListItemText primary={node.title} />
-        )}
-      </ListItemButton>
-      {hasChildren && (
-        <Collapse in={open} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding sx={{ pl: 4 }}>
-            {node.children.map((child) => (
-              <TreeNode key={child.id} node={child} forceOpen={forceOpen} />
-            ))}
-          </List>
-        </Collapse>
-      )}
-    </>
+    <TreeItem key={node.id} nodeId={node.id} label={label}>
+      {Array.isArray(node.children)
+        ? node.children.map((child) => renderTree(child))
+        : null}
+    </TreeItem>
   );
 }
 
@@ -85,6 +79,7 @@ function TreeNode({ node, forceOpen }) {
 export default function IndexTree({ src }) {
   const [tree, setTree] = useState([]);
   const [query, setQuery] = useState('');
+  const [expanded, setExpanded] = useState([]);
 
   useEffect(() => {
     fetch(src)
@@ -93,9 +88,18 @@ export default function IndexTree({ src }) {
       .catch(console.error);
   }, [src]);
 
-  const filtered = query
-    ? filterTree(tree, query.toLowerCase())
-    : tree;
+  const filtered = useMemo(
+    () => (query ? filterTree(tree, query.toLowerCase()) : tree),
+    [tree, query],
+  );
+
+  useEffect(() => {
+    if (query) {
+      setExpanded(collectIds(filtered));
+    } else {
+      setExpanded([]);
+    }
+  }, [query, filtered]);
 
   return (
     <div>
@@ -107,11 +111,15 @@ export default function IndexTree({ src }) {
         onChange={(e) => setQuery(e.target.value)}
         sx={{ mb: 2 }}
       />
-      <List sx={{ p: 0 }}>
-        {filtered.map((node) => (
-          <TreeNode key={node.id} node={node} forceOpen={Boolean(query)} />
-        ))}
-      </List>
+      <TreeView
+        defaultCollapseIcon={<ExpandMoreIcon />}
+        defaultExpandIcon={<ChevronRightIcon />}
+        expanded={expanded}
+        onNodeToggle={(event, ids) => setExpanded(ids)}
+      >
+        {filtered.map((node) => renderTree(node))}
+      </TreeView>
     </div>
   );
 }
+
