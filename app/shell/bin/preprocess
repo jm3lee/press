@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
-set -euo pipefail
-VERBOSE=0
-if [ $VERBOSE -eq 1 ]; then set -x; fi
 
-# process_file <input_markdown>
-#   - mirrors: build/%.md: %.md
-#   - runs include-filter 3× (3 levels of include expansion)
-#   - then runs link, then emojify
+# preprocess
+# Expand includes, render links, and substitute emoji in Markdown files.
+
+set -euo pipefail
+
+VERBOSE="${VERBOSE:-0}"
+(( VERBOSE )) && set -x
+
 process_file() {
     local input="$1"
     # strip leading src/ if present, then prefix with build/
@@ -24,19 +25,26 @@ process_file() {
     # Render links using metadata from Redis
     render-jinja-template "$output" > "$output.$$"
     mv "$output.$$" "$output"
-    if [ $VERBOSE -eq 1 ]; then cat "$output"; fi
+    (( VERBOSE )) && cat "$output"
 
     # run emojify, write to a temp file and atomically move
     emojify < "$output" > "$output.tmp"
     mv "$output.tmp" "$output"
 }
 
-# main
-if [[ $# -lt 1 ]]; then
-    echo "Usage: $0 <markdown-file> [more-markdown-files...]"
-    exit 1
-fi
+usage() {
+    echo "Usage: $0 <markdown-file>..." >&2
+}
 
-for md in "$@"; do
-    process_file "$md"
-done
+main() {
+    if [[ $# -lt 1 ]]; then
+        usage
+        exit 1
+    fi
+
+    for md in "$@"; do
+        process_file "$md"
+    done
+}
+
+main "$@"
