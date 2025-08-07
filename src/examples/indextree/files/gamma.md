@@ -1,4 +1,4 @@
 ---
-title: gamma
+title: Gamma
 ---
 Gamma file

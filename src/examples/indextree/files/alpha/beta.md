@@ -1,4 +1,4 @@
 ---
-title: beta
+title: Beta
 ---
 Beta file
