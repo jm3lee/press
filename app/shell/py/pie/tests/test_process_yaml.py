@@ -4,6 +4,7 @@ from pie import process_yaml
 
 
 def test_main_generates_metadata(tmp_path):
+    """item.yml -> metadata with url/citation/id."""
     src = tmp_path / "src"
     src.mkdir()
     inp = src / "item.yml"
@@ -23,6 +24,7 @@ def test_main_generates_metadata(tmp_path):
 
 
 def test_main_writes_log_file(tmp_path):
+    """CLI writes processed YAML and log."""
     src = tmp_path / "src"
     src.mkdir()
     inp = src / "doc.yml"

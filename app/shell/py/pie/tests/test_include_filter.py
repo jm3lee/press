@@ -10,6 +10,7 @@ from pie import include_filter
 
 
 def test_parse_metadata_returns_dict():
+    """Front matter -> metadata dict."""
     include_filter.outfile = io.StringIO()
     f = io.StringIO("---\n{\"title\": \"Foo\"}\n---\nBody")
     data = include_filter.parse_metadata_or_print_first_line(f)
@@ -18,6 +19,7 @@ def test_parse_metadata_returns_dict():
 
 
 def test_parse_metadata_prints_line():
+    """No front matter -> first line output."""
     out = io.StringIO()
     include_filter.outfile = out
     f = io.StringIO("First line\nSecond")
@@ -27,12 +29,14 @@ def test_parse_metadata_prints_line():
 
 
 def test_md_to_html_links():
+    """'.md' links -> '.html' links."""
     line = "See [Doc](dist/docs/guides/file.md) and [X](x.md)"
     converted = include_filter.md_to_html_links(line)
     assert converted == "See [Doc](dist/docs/guides/file.html) and [X](x.html)"
 
 
 def test_new_filestem_skips_existing(tmp_path):
+    """Find next available stem like diagram2."""
     (tmp_path / "diagram0.svg").write_text("")
     (tmp_path / "diagram1.mmd").write_text("")
     stem = include_filter.new_filestem(str(tmp_path / "diagram"))
@@ -40,6 +44,7 @@ def test_new_filestem_skips_existing(tmp_path):
 
 
 def test_include_writes_output(tmp_path):
+    """include() writes processed markdown."""
     md = tmp_path / "doc.md"
     md.write_text("---\n{\"title\": \"Title\"}\n---\n# H1\nText\n")
     include_filter.outfile = io.StringIO()
@@ -50,6 +55,7 @@ def test_include_writes_output(tmp_path):
 
 
 def test_mermaid_creates_files(tmp_path):
+    """Mermaid block -> .mmd and .png files."""
     include_filter.figcount = 0
     include_filter.outdir = str(tmp_path)
     include_filter.outfile = io.StringIO()
@@ -68,6 +74,7 @@ def test_mermaid_creates_files(tmp_path):
 
 
 def test_main_writes_log_file(tmp_path):
+    """CLI writes output and log."""
     outdir = tmp_path / "out"
     outdir.mkdir()
     infile = tmp_path / "doc.md"
@@ -88,6 +95,7 @@ def test_main_writes_log_file(tmp_path):
 
 
 def test_yield_lines_reads_until_fence():
+    """yield_lines stops before ``` fence."""
     f = io.StringIO("one\ntwo\n```\nthree\n")
     lines = list(include_filter.yield_lines(f))
     assert lines == ["one\n", "two\n"]
@@ -95,6 +103,7 @@ def test_yield_lines_reads_until_fence():
 
 
 def test_parse_args_parses_all_options():
+    """parse_args reads outdir, infile, outfile, log."""
     args = include_filter.parse_args([
         "out", "in.md", "out.md", "--log", "log.txt"
     ])
@@ -105,6 +114,7 @@ def test_parse_args_parses_all_options():
 
 
 def test_include_deflist_entry_handles_files_and_dirs(tmp_path):
+    """Files + directory -> combined <dt>/<dd> output."""
     f1 = tmp_path / "a.md"
     f1.write_text("---\n{\"title\": \"A\"}\n---\nA body\n")
     sub = tmp_path / "sub"
@@ -118,6 +128,7 @@ def test_include_deflist_entry_handles_files_and_dirs(tmp_path):
 
 
 def test_include_deflist_entry_sort_fn(tmp_path):
+    """Custom sort_fn orders entries descending."""
     f1 = tmp_path / "a.md"
     f1.write_text("---\n{\"title\": \"A\"}\n---\nA\n")
     f2 = tmp_path / "b.md"
@@ -133,6 +144,7 @@ def test_include_deflist_entry_sort_fn(tmp_path):
 
 
 def test_main_executes_lines_individually_and_tracks_headings(tmp_path):
+    """Main runs each line; heading_level increments."""
     outdir = tmp_path / "out"
     outdir.mkdir()
     infile = tmp_path / "doc.md"
@@ -145,6 +157,7 @@ def test_main_executes_lines_individually_and_tracks_headings(tmp_path):
 
 
 def test_script_entry_point(tmp_path, monkeypatch):
+    """Running module executes main."""
     outdir = tmp_path / "out"
     outdir.mkdir()
     infile = tmp_path / "doc.md"

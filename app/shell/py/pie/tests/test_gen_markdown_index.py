@@ -2,6 +2,7 @@ from pie.gen_markdown_index import generate
 
 
 def test_show_property(tmp_path):
+    """Nodes with 'show: false' are skipped."""
     (tmp_path / "alpha.yml").write_text("id: alpha\ntitle: Alpha\n")
     (tmp_path / "beta.yml").write_text(
         "id: beta\ntitle: Beta\n" "gen-markdown-index:\n  show: false\n",

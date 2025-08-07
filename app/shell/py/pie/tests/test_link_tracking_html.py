@@ -31,7 +31,7 @@ def _collect_tracking_disabled_urls(src_root: Path) -> list[str]:
 
 
 def test_tracking_false_links_have_attributes():
-    """Ensure disabled-tracking links in HTML have the expected attributes."""
+    """Links with ``tracking: false`` -> rel/target attrs."""
 
     build_dir = Path("/data/build")
     if not build_dir.is_dir():

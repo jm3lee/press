@@ -7,6 +7,7 @@ from pie import picasso
 
 
 def test_generate_rule_basic():
+    """generate_rule('src/foo/bar.yml') -> build/foo/bar.{yml,html} rule."""
     rule = picasso.generate_rule(Path("src/foo/bar.yml")).strip()
     expected = (
         "build/foo/bar.yml: src/foo/bar.yml\n"
@@ -21,6 +22,7 @@ def test_generate_rule_basic():
 
 
 def test_main_prints_rules(tmp_path, capsys):
+    """CLI prints rule for doc.yml."""
     src = tmp_path / "src"
     build = tmp_path / "build"
     src.mkdir()
@@ -33,6 +35,7 @@ def test_main_prints_rules(tmp_path, capsys):
 
 
 def test_main_writes_log_file(tmp_path):
+    """--log writes picasso.log."""
     src = tmp_path / "src"
     build = tmp_path / "build"
     src.mkdir()
@@ -45,6 +48,7 @@ def test_main_writes_log_file(tmp_path):
 
 
 def test_generate_dependencies(tmp_path):
+    """link to 'quickstart' -> build/index.md: build/quickstart.md."""
     src = tmp_path / "src"
     build = tmp_path / "build"
     src.mkdir()
@@ -61,6 +65,7 @@ def test_generate_dependencies(tmp_path):
 
 
 def test_dependencies_from_include_filter(tmp_path):
+    """include('src/inc.md') -> build/index.md: build/inc.md."""
     src = tmp_path / "src"
     build = tmp_path / "build"
     src.mkdir()
@@ -77,6 +82,7 @@ def test_dependencies_from_include_filter(tmp_path):
 
 
 def test_circular_dependencies_are_removed(tmp_path):
+    """Circular links a<->b -> only a:b and warning."""
     src = tmp_path / "src"
     build = tmp_path / "build"
     src.mkdir()
@@ -98,6 +104,7 @@ def test_circular_dependencies_are_removed(tmp_path):
 
 
 def test_collect_ids_invalid_yaml(tmp_path):
+    """Malformed YAML still yields id in set."""
     src = tmp_path / "src"
     src.mkdir()
     (src / "bad.yml").write_text(":\n- [")
@@ -108,16 +115,19 @@ def test_collect_ids_invalid_yaml(tmp_path):
 
 
 def test_has_path_seen_returns_false():
+    """_has_path({}, 'a','b',{'a'}) -> False."""
     assert picasso._has_path({}, "a", "b", {"a"}) is False
 
 
 def test_remove_circular_dependencies_no_colon():
+    """'_remove_circular_dependencies({'phony','a: b'})' preserves phony."""
     rules = {"phony", "a: b"}
     result = picasso._remove_circular_dependencies(rules)
     assert result == ["a: b", "phony"]
 
 
 def test_generate_dependencies_skips_other_extensions(tmp_path):
+    """note.txt in src -> no dependencies."""
     src = tmp_path / "src"
     build = tmp_path / "build"
     src.mkdir()
@@ -129,6 +139,7 @@ def test_generate_dependencies_skips_other_extensions(tmp_path):
 
 
 def test_generate_dependencies_logs_read_error(tmp_path, monkeypatch):
+    """Read failure -> empty deps."""
     src = tmp_path / "src"
     build = tmp_path / "build"
     src.mkdir()
@@ -150,6 +161,7 @@ def test_generate_dependencies_logs_read_error(tmp_path, monkeypatch):
 
 
 def test_generate_dependencies_ignores_missing_id(tmp_path):
+    """link to missing id -> no deps."""
     src = tmp_path / "src"
     build = tmp_path / "build"
     src.mkdir()
@@ -163,6 +175,7 @@ def test_generate_dependencies_ignores_missing_id(tmp_path):
 
 
 def test_generate_dependencies_handles_syntax_error(tmp_path):
+    """Bad include syntax -> no deps."""
     src = tmp_path / "src"
     build = tmp_path / "build"
     src.mkdir()
@@ -176,6 +189,7 @@ def test_generate_dependencies_handles_syntax_error(tmp_path):
 
 
 def test_include_deflist_entry_with_glob_and_directory(tmp_path):
+    """include_deflist_entry('defs', glob='*.md') -> deps for each file."""
     src = tmp_path / "src"
     build = tmp_path / "build"
     src.mkdir()
@@ -197,6 +211,7 @@ def test_include_deflist_entry_with_glob_and_directory(tmp_path):
 
 
 def test_include_with_absolute_directory(tmp_path):
+    """include('/abs/path') -> dependency uses absolute path."""
     src = tmp_path / "src"
     build = tmp_path / "build"
     src.mkdir()
@@ -215,6 +230,7 @@ def test_include_with_absolute_directory(tmp_path):
 
 
 def test_main_errors_on_missing_directory(tmp_path):
+    """Missing src dir -> SystemExit 1."""
     build = tmp_path / "build"
     with pytest.raises(SystemExit) as exc:
         picasso.main(["--src", str(tmp_path / "missing"), "--build", str(build)])
@@ -222,6 +238,7 @@ def test_main_errors_on_missing_directory(tmp_path):
 
 
 def test_main_prints_dependencies(tmp_path, capsys):
+    """main prints build/index.md: build/quickstart.md."""
     src = tmp_path / "src"
     build = tmp_path / "build"
     src.mkdir()
@@ -237,6 +254,7 @@ def test_main_prints_dependencies(tmp_path, capsys):
 
 
 def test_run_as_module_executes_main(tmp_path, monkeypatch, capsys):
+    """runpy.run_path executes picasso.main."""
     src = tmp_path / "src"
     build = tmp_path / "build"
     src.mkdir()

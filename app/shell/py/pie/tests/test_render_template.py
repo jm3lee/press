@@ -10,36 +10,42 @@ def test_default_class():
 
 
 def test_override_class():
+    """link.class overrides default."""
     desc = {"citation": "foo", "url": "/f", "link": {"class": "external"}}
     html = render_template.render_link(desc, style="title")
     assert 'class="external"' in html
 
 
 def test_tracking_false_adds_attributes():
+    """tracking False -> rel/target attrs."""
     desc = {"link": {"tracking": False}}
     opts = render_template.get_tracking_options(desc)
     assert opts == 'rel="noopener noreferrer" target="_blank"'
 
 
 def test_tracking_true_returns_empty():
+    """tracking True -> no extra attrs."""
     desc = {"link": {"tracking": True}}
     opts = render_template.get_tracking_options(desc)
     assert opts == ""
 
 
 def test_no_link_returns_empty():
+    """No link section -> empty options."""
     desc = {"citation": "foo"}
     opts = render_template.get_tracking_options(desc)
     assert opts == ""
 
 
 def test_missing_tracking_interpreted_as_false():
+    """Absent tracking treated as False."""
     desc = {"link": {}}
     opts = render_template.get_tracking_options(desc)
     assert opts == 'rel="noopener noreferrer" target="_blank"'
 
 
 def test_linktitle_uses_redis(monkeypatch):
+    """Redis provides citation and url."""
     fake = fakeredis.FakeRedis(decode_responses=True)
     fake.set("item.citation", "Item")
     fake.set("item.url", "/i")
@@ -52,6 +58,7 @@ def test_linktitle_uses_redis(monkeypatch):
 
 
 def test_linktitle_missing_raises(monkeypatch):
+    """Unknown key -> SystemExit."""
     fake = fakeredis.FakeRedis(decode_responses=True)
     monkeypatch.setattr(render_template, "redis_conn", fake)
     render_template.index_json = {}
@@ -61,12 +68,14 @@ def test_linktitle_missing_raises(monkeypatch):
 
 
 def test_linktitle_skips_small_words():
+    """Title style capitalizes but skips small words."""
     desc = {"citation": "movement in a circle", "url": "/c"}
     html = render_template.render_link(desc, style="title")
     assert ">Movement in a Circle<" in html
 
 
 def test_link_uses_redis_tracking_and_ignores_icon(monkeypatch):
+    """Redis data with tracking adds attrs, icon skipped."""
     fake = fakeredis.FakeRedis(decode_responses=True)
     fake.set("entry.citation", "link text")
     fake.set("entry.url", "/link")
@@ -83,6 +92,7 @@ def test_link_uses_redis_tracking_and_ignores_icon(monkeypatch):
 
 
 def test_linkcap_includes_icon_and_capitalizes(monkeypatch):
+    """style='cap' prepends icon and capitalizes first word."""
     fake = fakeredis.FakeRedis(decode_responses=True)
     fake.set("entry.citation", "foo bar")
     fake.set("entry.url", "/link")
@@ -98,6 +108,7 @@ def test_linkcap_includes_icon_and_capitalizes(monkeypatch):
 
 
 def test_linkicon_includes_icon_without_capitalization(monkeypatch):
+    """Default style shows icon; citation unchanged."""
     fake = fakeredis.FakeRedis(decode_responses=True)
     fake.set("entry.citation", "foo bar")
     fake.set("entry.url", "/link")
@@ -113,6 +124,7 @@ def test_linkicon_includes_icon_without_capitalization(monkeypatch):
 
 
 def test_link_icon_title_capitalizes_each_word_and_includes_icon(monkeypatch):
+    """style='title' capitalizes all words and shows icon."""
     fake = fakeredis.FakeRedis(decode_responses=True)
     fake.set("entry.citation", "foo bar")
     fake.set("entry.url", "/link")
@@ -127,6 +139,7 @@ def test_link_icon_title_capitalizes_each_word_and_includes_icon(monkeypatch):
 
 
 def test_linkshort_uses_short_citation_and_ignores_icon(monkeypatch):
+    """citation='short' uses short text without icon."""
     fake = fakeredis.FakeRedis(decode_responses=True)
     fake.set("entry.citation.short", "Short")
     fake.set("entry.url", "/link")
@@ -142,12 +155,14 @@ def test_linkshort_uses_short_citation_and_ignores_icon(monkeypatch):
 
 
 def test_render_link_with_anchor():
+    """anchor='bar' -> href endswith '#bar'."""
     desc = {"citation": "foo", "url": "/f"}
     html = render_template.render_link(desc, anchor="bar")
     assert '<a href="/f#bar"' in html
 
 
 def test_wrapper_accepts_anchor(monkeypatch):
+    """link() adds anchor to href."""
     fake = fakeredis.FakeRedis(decode_responses=True)
     fake.set("entry.citation", "Foo")
     fake.set("entry.url", "/link")

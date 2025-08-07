@@ -7,6 +7,7 @@ from pie import build_index
 
 
 def test_get_url_from_src_md(tmp_path):
+    """'src/foo.md' -> '/foo.html'."""
     path = tmp_path / "src" / "foo.md"
     path.parent.mkdir(parents=True)
     path.write_text("")
@@ -18,6 +19,7 @@ def test_get_url_from_src_md(tmp_path):
 
 
 def test_get_url_invalid_raises(tmp_path):
+    """Unknown path raises an error."""
     bad = tmp_path / "foo.md"
     bad.write_text("")
     os.chdir(tmp_path)
@@ -29,6 +31,7 @@ def test_get_url_invalid_raises(tmp_path):
 
 
 def test_process_markdown_parses_frontmatter(tmp_path):
+    """Frontmatter {'title': 'T'} -> {'title': 'T', 'url': '/doc.html'}."""
     md = tmp_path / "src" / "doc.md"
     md.parent.mkdir(parents=True)
     md.write_text("---\n{\"title\": \"T\"}\n---\nbody")
@@ -41,6 +44,7 @@ def test_process_markdown_parses_frontmatter(tmp_path):
 
 
 def test_parse_yaml_metadata_generates_fields(tmp_path):
+    """YAML {'name': 'Foo'} -> metadata with url/id/citation."""
     yml = tmp_path / "src" / "item.yml"
     yml.parent.mkdir(parents=True)
     yml.write_text('{"name": "Foo"}')
@@ -56,12 +60,14 @@ def test_parse_yaml_metadata_generates_fields(tmp_path):
 
 
 def test_validate_and_insert_duplicate(tmp_path):
+    """Duplicate id triggers KeyError."""
     index = {"a": {"id": "a"}}
     with pytest.raises(KeyError):
         build_index.validate_and_insert_metadata({"id": "a"}, "file", index)
 
 
 def test_build_index_handles_multiple_extensions(tmp_path):
+    """'.md' and '.yml' -> index with both entries."""
     src = tmp_path / "src"
     src.mkdir()
     md = src / "doc.md"
@@ -79,6 +85,7 @@ def test_build_index_handles_multiple_extensions(tmp_path):
 
 
 def test_main_writes_log_file(tmp_path):
+    """CLI writes index.json and build.log."""
     src = tmp_path / "src"
     src.mkdir()
     md = src / "doc.md"
