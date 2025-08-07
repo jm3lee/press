@@ -235,50 +235,17 @@ a {
   padding: 2px;
 }
 
-.internal-link {
-    /*
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4em;
-  padding: 0.2em 0.4em;
-  background-color: #f5f0fa;
-  border: 1px solid #d5c4e6;
-  border-radius: 1em;
-  text-decoration: none;
-  transition: all 0.2s ease-in-out;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
-  margin: 3px;
-  */
-}
-
-/*
-.internal-link:hover {
-  background-color: #e9def6;
-  border-color: #bca2da;
-  color: #3f1d6b;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-*/
-
 .emoji {
   font-size: 1.1em;
   line-height: 1;
 }
-
-.question {
-    font-weight: 600;
-    margin-bottom: 5px;
-}
-
 ol + details.answer {
-    margin-top: 15px;
+  margin-top: 15px;
 }
-
 
 .quiz-container {
   max-width: 600px;
   margin: 2rem auto;
-  font-family: sans-serif;
 }
 
 .question-block {
