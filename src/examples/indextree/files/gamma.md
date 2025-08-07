@@ -1,4 +1,0 @@
----
-title: Gamma
----
-Gamma file
