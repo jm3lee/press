@@ -1,11 +1,21 @@
-#!/usr/bin/env python3
-"""Check that HTML files contain non-empty <h1> tags."""
+"""Check that HTML files contain non-empty ``<h1>`` tags.
+
+This module provides a ``check-page-title`` console script that scans a
+directory tree for HTML files and verifies that each file contains a first
+level heading.  It mirrors the behaviour of the legacy
+``app/shell/bin/check-page-title`` script.
+"""
+
+from __future__ import annotations
+
+import argparse
 import os
 import sys
 from pathlib import Path
+
 from bs4 import BeautifulSoup
-import argparse
 import yaml
+
 
 # Detect whether we should emit ANSI colour codes. We only use colours when
 # stdout is a TTY and the TERM environment variable is not set to "dumb".
@@ -17,6 +27,7 @@ RESET = "\x1b[0m" if USE_COLOR else ""
 
 
 def check_file(path: Path) -> bool:
+    """Return ``True`` if ``path`` contains a non-empty ``<h1>`` tag."""
     with open(path, "r", encoding="utf-8") as f:
         soup = BeautifulSoup(f, "html.parser")
     h1 = soup.find("h1")
@@ -50,6 +61,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Entry point used by the ``check-page-title`` console script."""
     args = parse_args(argv)
     directory = Path(args.directory).resolve()
     html_files = list(directory.rglob("*.html"))
@@ -80,3 +92,4 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv[1:]))
+
