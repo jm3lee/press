@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: ./app/nginx/Dockerfile
+    container_name: press-nginx
     ports:
       - "80:80"
       - "443:443"
@@ -28,18 +29,21 @@ services:
 
   sync:
     build: ./app/s3
+    container_name: press-sync
     entrypoint: ["/app/bin/sync"]
     volumes:
       - ../s3:/s3
 
   seed:
     build: ./app/s3
+    container_name: press-seed
     entrypoint: ["/app/bin/seed"]
     volumes:
       - ../s3:/s3
 
   webp:
     build: ./app/webp
+    container_name: press-webp
     entrypoint: ["/app/bin/service"]
     volumes:
       - ./app/webp/input:/app/input
@@ -57,6 +61,7 @@ services:
   shell:
     image: press-shell
     build: ./app/shell
+    container_name: press-shell
     entrypoint: ["bash"]
     environment:
       OPENAI_API_KEY: "${OPENAI_API_KEY}"
@@ -72,6 +77,7 @@ services:
 
   pdoc:
     build: ./app/pdoc
+    container_name: press-pdoc
     entrypoint: ["pdoc", "--http", "0.0.0.0:8080", "pie"]
     ports:
       - "8080:8080"
