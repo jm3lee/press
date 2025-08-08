@@ -30,5 +30,9 @@ During indexing, `build_index.py` fills in several fields when they are missing:
 The `citation` value is used as the anchor text when other pages link to this document using Jinja filters such as `linktitle`.
 The helper that assigns these defaults lives in `parse_yaml_metadata` within `pie.build_index`.
 
+For bibliographic references the `citation` field may instead be a mapping with
+`author`, `year`, and `page` keys.  This structure is consumed by the `cite`
+Jinja global to render Chicago style links.
+
 `link.tracking` defaults to `true`, meaning links open in the same tab. `link.class` defaults to `internal-link`.
 

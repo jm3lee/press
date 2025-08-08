@@ -172,3 +172,59 @@ def test_wrapper_accepts_anchor(monkeypatch):
     html = render_template.link("entry", anchor="top")
     assert '<a href="/link#top"' in html
 
+
+def test_cite_single(monkeypatch):
+    """Single citation renders with parentheses inside the link."""
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    fake.set("hull.citation.author", "hull")
+    fake.set("hull.citation.year", "2016")
+    fake.set("hull.citation.page", "307")
+    fake.set("hull.url", "/hull")
+    monkeypatch.setattr(render_template, "redis_conn", fake)
+    render_template.index_json = {}
+
+    html = render_template.cite("hull")
+    assert '<a href="/hull"' in html
+    assert '(Hull 2016, 307)' in html
+
+
+def test_cite_combines_pages(monkeypatch):
+    """Multiple pages for same source are grouped into one link."""
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    fake.set("hull1.citation.author", "hull")
+    fake.set("hull1.citation.year", "2016")
+    fake.set("hull1.citation.page", "307")
+    fake.set("hull1.url", "/hull")
+    fake.set("hull2.citation.author", "hull")
+    fake.set("hull2.citation.year", "2016")
+    fake.set("hull2.citation.page", "311")
+    fake.set("hull2.url", "/hull")
+    monkeypatch.setattr(render_template, "redis_conn", fake)
+    render_template.index_json = {}
+
+    html = render_template.cite("hull1", "hull2")
+    assert '<a href="/hull"' in html
+    assert '(Hull 2016, 307, 311)' in html
+
+
+def test_cite_multiple_sources(monkeypatch):
+    """Different sources produce multiple links separated by ';'."""
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    fake.set("hull.citation.author", "hull")
+    fake.set("hull.citation.year", "2016")
+    fake.set("hull.citation.page", "307")
+    fake.set("hull.url", "/hull")
+    fake.set("x.citation.author", "x")
+    fake.set("x.citation.year", "2016")
+    fake.set("x.citation.page", "311")
+    fake.set("x.url", "/x")
+    monkeypatch.setattr(render_template, "redis_conn", fake)
+    render_template.index_json = {}
+
+    html = render_template.cite("hull", "x")
+    assert html.startswith('(')
+    assert ';' in html
+    assert 'Hull 2016, 307' in html
+    assert 'X 2016, 311' in html
+    assert html.endswith(')')
+
