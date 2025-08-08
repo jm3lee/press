@@ -229,6 +229,64 @@ def linkshort(desc, anchor: str | None = None):
     return render_link(desc, use_icon=False, citation="short", anchor=anchor)
 
 
+def cite(*names: str) -> str:
+    """Return Chicago style citation links for ``names``.
+
+    Each ``name`` is looked up using :func:`_load_desc`.  ``citation`` may be a
+    simple string (legacy format) or a mapping with ``author``, ``year`` and
+    ``page`` keys.  When multiple references share the same author, year and
+    URL their page numbers are combined.
+
+    When a single reference is provided the parentheses are included inside the
+    returned anchor.  Multiple references are separated by ``;`` with the outer
+    parentheses wrapping the entire group.
+    """
+
+    descs = [_load_desc(n) for n in names]
+
+    groups: list[dict] = []
+    for d in descs:
+        cit = d.get("citation")
+        if isinstance(cit, dict):
+            author = str(cit.get("author", "")).title()
+            year = cit.get("year")
+            page = cit.get("page")
+            key = (author, year, d.get("url"))
+            for g in groups:
+                if g.get("key") == key:
+                    g["pages"].append(page)
+                    break
+            else:
+                groups.append({
+                    "key": key,
+                    "author": author,
+                    "year": year,
+                    "pages": [page],
+                    "desc": d,
+                })
+        else:
+            groups.append({"text": cit, "desc": d})
+
+    parts: list[str] = []
+    single = len(groups) == 1
+    for g in groups:
+        desc = dict(g["desc"])
+        if "text" in g:
+            text = g["text"]
+        else:
+            pages = ", ".join(str(p) for p in g["pages"] if p is not None)
+            text = f"{g['author']} {g['year']}"
+            if pages:
+                text += f", {pages}"
+        if single:
+            desc["citation"] = f"({text})"
+            return render_link(desc, use_icon=False)
+        desc["citation"] = text
+        parts.append(render_link(desc, use_icon=False))
+
+    return "(" + "; ".join(parts) + ")"
+
+
 def extract_front_matter(file_path: str) -> dict | None:
     """
     Read a Markdown file and return its YAML front matter as a dict,
@@ -345,6 +403,7 @@ def create_env():
     env.globals["to_alpha_index"] = to_alpha_index
     env.globals["read_json"] = read_json
     env.globals["read_yaml"] = read_yaml
+    env.globals["cite"] = cite
     return env
 
 
