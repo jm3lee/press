@@ -13,6 +13,7 @@ from typing import Iterable
 
 from pie.load_metadata import load_metadata_pair
 from pie.logging import logger
+import os
 
 __all__ = [
     "get_changed_files",
@@ -22,7 +23,8 @@ __all__ = [
 
 
 def get_changed_files() -> list[Path]:
-    """Return paths of tracked files changed in git."""
+    """Return paths of tracked files changed in git. Skip submodules by checking
+    for directories."""
     result = subprocess.run(
         ["git", "status", "--short"],
         check=True,
@@ -31,10 +33,10 @@ def get_changed_files() -> list[Path]:
     )
     paths: list[Path] = []
     for line in result.stdout.splitlines():
-        if not line:
+        if not line or line.startswith("??"):
             continue
         parts = line.split()
-        if parts and parts[0] == "??":
+        if os.path.isdir(parts[1]):
             continue
         if len(parts) >= 2:
             paths.append(Path(parts[-1]))
