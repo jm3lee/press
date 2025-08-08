@@ -73,6 +73,13 @@ def test_render_link_uses_citation_dict():
     assert ">Alt<" in html
 
 
+def test_render_link_handles_citation_metadata():
+    """citation with author/year/page formats like cite."""
+    desc = {"citation": {"author": "hull", "year": "2016", "page": "307"}, "url": "/h"}
+    html = render_template.render_link(desc, use_icon=False)
+    assert ">(Hull 2016, 307)<" in html
+
+
 def test_wrapper_functions():
     """Wrapper helpers render variants of links."""
     desc = {"citation": "foo bar", "url": "/f", "icon": "I"}

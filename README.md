@@ -144,7 +144,7 @@ Pandoc lets you define document metadata in two ways:
 ### Auto-Generated Fields
 If you don’t provide these, Pandoc (or your build tooling) will generate them automatically:
 - `id`: A unique identifier for cross-document linking (e.g., when using Jinja templates).
-- `citation`: Default anchor text for cross-document links. Jinja filters such as `linktitle` use this value.
+- `citation`: Default anchor text for cross-document links. Jinja filters such as `linktitle` use this value. For bibliographic references this may instead be a mapping with `author`, `year`, and `page`, which the filters and the `cite` global render as Chicago style text in parentheses.
 
 See [docs/reference/metadata-fields.md](docs/reference/metadata-fields.md) for a complete list of supported fields and defaults. For describing
 external URLs in YAML, refer to [docs/reference/link-metadata.md](docs/reference/link-metadata.md).
