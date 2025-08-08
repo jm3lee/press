@@ -4,7 +4,8 @@ import argparse
 from pathlib import Path
 from typing import Sequence
 
-from pie.utils import add_file_logger, get_pubdate, logger, write_yaml
+from pie.logging import add_file_logger, logger
+from pie.utils import get_pubdate, write_yaml
 
 
 __all__ = ["main"]

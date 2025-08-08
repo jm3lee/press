@@ -4,11 +4,8 @@ import argparse
 from pathlib import Path
 from typing import Iterable, Sequence
 
-from pie.update_common import (
-    configure_logging as common_configure_logging,
-    get_changed_files,
-    update_files as update_common_files,
-)
+from pie.logging import add_log_argument, setup_file_logger
+from pie.update_common import get_changed_files, update_files as update_common_files
 from pie.utils import get_pubdate
 
 
@@ -20,6 +17,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Update the pubdate field in modified metadata files",
     )
+    add_log_argument(parser, default="log/update-pubdate.txt")
     return parser.parse_args(list(argv) if argv is not None else None)
 
 
@@ -28,15 +26,12 @@ def update_files(paths: Iterable[Path], pubdate: str) -> list[str]:
     return update_common_files(paths, "pubdate", pubdate)
 
 
-def configure_logging() -> None:
-    """Configure logging to write to ``log/update-pubdate.txt``."""
-    common_configure_logging("update-pubdate.txt")
-
-
 def main(argv: Sequence[str] | None = None) -> int:
     """Entry point for the ``update-pubdate`` console script."""
-    parse_args(argv)
-    configure_logging()
+    args = parse_args(argv)
+    if args.log:
+        Path(args.log).parent.mkdir(parents=True, exist_ok=True)
+    setup_file_logger(args.log, level="INFO")
     today = get_pubdate()
     changed = get_changed_files()
     messages = update_files(changed, today)

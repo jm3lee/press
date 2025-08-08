@@ -17,7 +17,8 @@ import sys
 from pathlib import Path
 
 import yaml
-from pie.utils import logger, add_log_argument, setup_file_logger, read_yaml
+from pie.logging import logger, add_log_argument, setup_file_logger
+from pie.utils import read_yaml
 
 
 def generate_rule(

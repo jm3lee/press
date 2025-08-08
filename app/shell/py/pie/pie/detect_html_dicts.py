@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 import re
 from bs4 import BeautifulSoup
-from pie.utils import logger, add_log_argument, setup_file_logger
+from pie.logging import logger, add_log_argument, setup_file_logger
 
 def contains_python_dict(text: str) -> bool:
     """Return ``True`` if *text* looks like a Python dictionary literal."""
