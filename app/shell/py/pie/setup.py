@@ -32,6 +32,7 @@ setup(
             'check-page-title=pie.check_page_title:main',
             'check-post-build=pie.check_post_build:main',
             'create-post=pie.create_post:main',
+            'create=pie.create:main',
         ],
     },
 )
