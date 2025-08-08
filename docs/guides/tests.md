@@ -1,7 +1,8 @@
 # Running Tests
 
-Press runs its test suite inside the `shell` Docker container. From the project
-root you can execute:
+Press runs its test suite inside the `shell` Docker container (see the
+[architecture](../reference/architecture.md) reference for an overview of the
+environment). From the project root you can execute:
 
 ```bash
 r pytest
