@@ -16,9 +16,8 @@ import re
 import sys
 from pathlib import Path
 
-import yaml
 from pie.logging import logger, add_log_argument, setup_file_logger
-from pie.utils import read_yaml
+from pie.load_metadata import load_metadata_pair
 
 
 def generate_rule(
@@ -71,34 +70,29 @@ def collect_ids(src_root: Path) -> dict[str, Path]:
     """Return a mapping of metadata ``id`` values to source files."""
 
     id_map: dict[str, Path] = {}
+    processed: set[Path] = set()
 
     for path in src_root.rglob("*"):
-        if path.suffix.lower() in {".md", ".yml", ".yaml"}:
-            doc_id = None
-            try:
-                if path.suffix.lower() == ".md":
-                    with open(path, "r", encoding="utf-8") as f:
-                        lines = f.readlines()
-                    if lines and lines[0].strip() == "---":
-                        y = []
-                        for line in lines[1:]:
-                            if line.strip() == "---":
-                                break
-                            y.append(line)
-                        data = yaml.safe_load("".join(y)) or {}
-                        if isinstance(data, dict):
-                            doc_id = data.get("id")
-                else:
-                    data = read_yaml(str(path)) or {}
-                    if isinstance(data, dict):
-                        doc_id = data.get("id")
-            except Exception:
-                logger.warning("Failed to parse metadata", file=str(path))
+        if path.suffix.lower() not in {".md", ".yml", ".yaml"}:
+            continue
 
-            if not doc_id:
-                doc_id = path.stem
+        base = path.with_suffix("")
+        if base in processed:
+            continue
+        processed.add(base)
 
-            id_map[doc_id] = path
+        doc_id = None
+        try:
+            metadata = load_metadata_pair(path)
+            if metadata:
+                doc_id = metadata.get("id")
+        except Exception:
+            logger.warning("Failed to parse metadata", file=str(path))
+
+        if not doc_id:
+            doc_id = path.stem
+
+        id_map[doc_id] = path
 
     return id_map
 
