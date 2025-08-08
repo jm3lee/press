@@ -5,6 +5,7 @@ documents provide context for the task‑oriented
 [guides](../guides/README.md).
 
 ## Contents
+
 - [architecture.md](architecture.md) – overview of the site's architecture.
 - [jinja-filters.md](jinja-filters.md) – custom Jinja filters available to templates.
 - [jinja-globals.md](jinja-globals.md) – global variables exposed to templates.
