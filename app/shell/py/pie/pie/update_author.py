@@ -41,8 +41,13 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(list(argv) if argv is not None else None)
 
 
-def update_files(paths: Iterable[Path], author: str) -> list[str]:
-    """Update ``author`` in files related to *paths* and return messages."""
+def update_files(paths: Iterable[Path], author: str) -> tuple[list[str], int]:
+    """Update ``author`` in files related to *paths*.
+
+    Returns a tuple ``(messages, checked)`` where ``messages`` contains log
+    entries for each modified file and ``checked`` is the number of files that
+    were examined.
+    """
     return update_common_files(paths, "author", author)
 
 
@@ -53,9 +58,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         Path(args.log).parent.mkdir(parents=True, exist_ok=True)
     setup_file_logger(args.log, level="INFO")
     changed = get_changed_files()
-    messages = update_files(changed, args.author)
+    messages, checked = update_files(changed, args.author)
     for msg in messages:
         print(msg)
+    print(f"{checked} {'file' if checked == 1 else 'files'} checked")
+    changed_count = len(messages)
+    print(f"{changed_count} {'file' if changed_count == 1 else 'files'} changed")
     return 0
 
 

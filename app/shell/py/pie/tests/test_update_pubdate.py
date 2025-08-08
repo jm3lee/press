@@ -26,7 +26,11 @@ def test_updates_yaml_from_markdown_change(tmp_path: Path, monkeypatch, capsys) 
     assert f"pubdate: {expected}" in yml.read_text(encoding="utf-8")
     expected_line = f"src/doc.yml: Jan 01, 2000 -> {expected}"
     captured = capsys.readouterr()
-    assert captured.out.strip() == expected_line
+    assert captured.out.strip().splitlines() == [
+        expected_line,
+        "2 files checked",
+        "1 file changed",
+    ]
     log_text = (tmp_path / "log/update-pubdate.txt").read_text(encoding="utf-8")
     assert expected_line in log_text
 
@@ -49,7 +53,11 @@ def test_updates_markdown_frontmatter(tmp_path: Path, monkeypatch, capsys) -> No
     assert f"pubdate: {expected}" in md.read_text(encoding="utf-8")
     expected_line = f"src/doc.md: Jan 01, 2000 -> {expected}"
     captured = capsys.readouterr()
-    assert captured.out.strip() == expected_line
+    assert captured.out.strip().splitlines() == [
+        expected_line,
+        "1 file checked",
+        "1 file changed",
+    ]
     log_text = (tmp_path / "log/update-pubdate.txt").read_text(encoding="utf-8")
     assert expected_line in log_text
 
@@ -67,4 +75,7 @@ def test_ignores_pubdate_in_body(tmp_path: Path, monkeypatch, capsys) -> None:
     update_pubdate.main([])
     assert "Jan 01, 2000" in md.read_text(encoding="utf-8")
     captured = capsys.readouterr()
-    assert captured.out.strip() == ""
+    assert captured.out.strip().splitlines() == [
+        "1 file checked",
+        "0 files changed",
+    ]
