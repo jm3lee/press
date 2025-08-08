@@ -2,8 +2,8 @@
 
 Update the `author` field in metadata files for documents modified in git.
 
-The console script scans `git status --short` for files that have been added,
-changed, or are untracked. For each path it locates the associated Markdown and YAML
+The console script scans `git status --short` for tracked files that have been added
+or changed. For each path it locates the associated Markdown and YAML
 metadata pair using `load_metadata_pair` and replaces the `author` field in
 Markdown frontmatter or metadata YAML with the author configured in
 `cfg/update-author.yml`.

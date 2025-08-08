@@ -6,7 +6,7 @@ from pie import update_common
 
 
 def test_get_changed_files_parses_git_status(monkeypatch: object) -> None:
-    """Tracked and untracked modifications are returned."""
+    """Only tracked modifications are returned."""
     def fake_run(cmd, check, capture_output, text):
         class Result:
             stdout = " M src/doc.md\n?? src/untracked.txt\nA src/doc.yml\n"
@@ -16,7 +16,6 @@ def test_get_changed_files_parses_git_status(monkeypatch: object) -> None:
     paths = update_common.get_changed_files()
     assert paths == [
         Path("src/doc.md"),
-        Path("src/untracked.txt"),
         Path("src/doc.yml"),
     ]
 
