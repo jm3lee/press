@@ -113,7 +113,7 @@ def test_parse_args_parses_all_options():
     assert args.log == "log.txt"
 
 
-def test_include_deflist_entry_handles_files_and_dirs(tmp_path):
+def test_include_deflist_entry_handles_files_and_dirs(tmp_path, monkeypatch):
     """Files + directory -> combined <dt>/<dd> output."""
     f1 = tmp_path / "a.md"
     f1.write_text("---\n{\"title\": \"A\"}\n---\nA body\n")
@@ -122,24 +122,42 @@ def test_include_deflist_entry_handles_files_and_dirs(tmp_path):
     f2 = sub / "b.md"
     f2.write_text("---\n{}\n---\nB body\n")
     include_filter.outfile = io.StringIO()
+    monkeypatch.setattr(
+        include_filter,
+        "get_cached_metadata",
+        lambda key: {"a": {"title": "A", "url": "/a"}, "b": {}}[key],
+    )
     include_filter.include_deflist_entry(str(f1), str(sub))
-    expected = "<dt>A</dt>\n<dd>\nA body\n</dd>\n<dd>\nB body\n</dd>\n"
+    expected = (
+        "<dt>A <a href=\"/a\">#</a></dt>\n<dd>\nA body\n</dd>\n<dd>\nB body\n</dd>\n"
+    )
     assert include_filter.outfile.getvalue() == expected
 
 
-def test_include_deflist_entry_sort_fn(tmp_path):
+def test_include_deflist_entry_sort_fn(tmp_path, monkeypatch):
     """Custom sort_fn orders entries descending."""
     f1 = tmp_path / "a.md"
     f1.write_text("---\n{\"title\": \"A\"}\n---\nA\n")
     f2 = tmp_path / "b.md"
     f2.write_text("---\n{\"title\": \"B\"}\n---\nB\n")
     include_filter.outfile = io.StringIO()
+    monkeypatch.setattr(
+        include_filter,
+        "get_cached_metadata",
+        lambda key: {
+            "a": {"title": "A", "url": "/a"},
+            "b": {"title": "B", "url": "/b"},
+        }[key],
+    )
     include_filter.include_deflist_entry(
         str(f1),
         str(f2),
         sort_fn=lambda files: sorted(files, key=lambda p: p.name, reverse=True),
     )
-    expected = "<dt>B</dt>\n<dd>\nB\n</dd>\n<dt>A</dt>\n<dd>\nA\n</dd>\n"
+    expected = (
+        "<dt>B <a href=\"/b\">#</a></dt>\n<dd>\nB\n</dd>\n"
+        "<dt>A <a href=\"/a\">#</a></dt>\n<dd>\nA\n</dd>\n"
+    )
     assert include_filter.outfile.getvalue() == expected
 
 

@@ -104,24 +104,28 @@ def _get_metadata(name: str) -> dict | None:
     return _build_from_redis(f"{name}.")
 
 
-def _load_desc(desc):
-    """Return a metadata dict for ``desc`` using Redis lookups when needed."""
+_metadata_cache: dict[str, dict] = {}
 
-    if isinstance(desc, str):
+
+def get_cached_metadata(key: str) -> dict:
+    """Return cached metadata for ``key``.
+
+    Metadata is looked up from Redis on the first request and stored in a
+    module‑level cache. Subsequent lookups reuse the cached value.
+    """
+
+    if key not in _metadata_cache:
         data = None
         for _ in range(3):
-            data = _get_metadata(desc)
+            data = _get_metadata(key)
             if data is not None:
                 break
             time.sleep(0.5)
         if data is None:
-            logger.error("Missing metadata", id=desc)
+            logger.error("Missing metadata", id=key)
             raise SystemExit(1)
-        return data
-    if not isinstance(desc, dict):
-        logger.error("Invalid descriptor type", type=str(type(desc)))
-        raise SystemExit(1)
-    return desc
+        _metadata_cache[key] = data
+    return _metadata_cache[key]
 
 
 def get_tracking_options(desc):
@@ -162,15 +166,19 @@ def render_link(
     """Return a formatted HTML anchor for ``desc``.
 
     ``desc`` may be either a metadata dictionary or a string id which will be
-    looked up via :func:`_load_desc`.  ``style`` controls how the citation text
-    is capitalised: ``"plain"`` leaves it untouched, ``"title"`` applies
-    title‑case, and ``"cap"`` capitalises only the first character.  When
-    ``use_icon`` is ``True`` any ``icon`` field is prefixed to the citation.
-    ``citation`` selects which citation field to use; pass ``"short"`` to use
-    ``citation["short"]``.
+    looked up via :func:`get_cached_metadata`.  ``style`` controls how the
+    citation text is capitalised: ``"plain"`` leaves it untouched, ``"title"``
+    applies title‑case, and ``"cap"`` capitalises only the first character.
+    When ``use_icon`` is ``True`` any ``icon`` field is prefixed to the
+    citation. ``citation`` selects which citation field to use; pass
+    ``"short"`` to use ``citation["short"]``.
     """
 
-    desc = _load_desc(desc)
+    if isinstance(desc, str):
+        desc = get_cached_metadata(desc)
+    elif not isinstance(desc, dict):
+        logger.error("Invalid descriptor type", type=str(type(desc)))
+        raise SystemExit(1)
 
     # Determine citation text
     citation_val = desc["citation"]
@@ -248,7 +256,7 @@ def linkshort(desc, anchor: str | None = None):
 def cite(*names: str) -> str:
     """Return Chicago style citation links for ``names``.
 
-    Each ``name`` is looked up using :func:`_load_desc`.  ``citation`` may be a
+    Each ``name`` is looked up using :func:`get_cached_metadata`. ``citation`` may be a
     simple string (legacy format) or a mapping with ``author``, ``year`` and
     ``page`` keys.  When multiple references share the same author, year and
     URL their page numbers are combined.
@@ -258,7 +266,7 @@ def cite(*names: str) -> str:
     parentheses wrapping the entire group.
     """
 
-    descs = [_load_desc(n) for n in names]
+    descs = [get_cached_metadata(n) if isinstance(n, str) else n for n in names]
 
     groups: list[dict] = []
     for d in descs:
