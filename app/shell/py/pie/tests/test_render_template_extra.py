@@ -60,10 +60,19 @@ def test_convert_lists():
     assert render_template._convert_lists(obj) == [["x", "y"], [["z"]]]
 
 
-def test_load_desc_invalid_type():
-    """Non-str/dict input -> SystemExit."""
-    with pytest.raises(SystemExit):
-        render_template._load_desc(123)
+def test_get_cached_metadata_caches(monkeypatch):
+    """Second lookup uses cached value."""
+    calls: list[str] = []
+
+    def fake_get(key):
+        calls.append(key)
+        return {"id": key}
+
+    monkeypatch.setattr(render_template, "_get_metadata", fake_get)
+    monkeypatch.setattr(render_template, "_metadata_cache", {})
+    assert render_template.get_cached_metadata("x") == {"id": "x"}
+    assert render_template.get_cached_metadata("x") == {"id": "x"}
+    assert calls == ["x"]
 
 
 def test_render_link_uses_citation_dict():

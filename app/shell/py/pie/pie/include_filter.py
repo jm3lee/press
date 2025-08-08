@@ -22,6 +22,7 @@ from typing import IO, Iterable, Callable
 
 import yaml
 from pie.logging import logger, add_log_argument, setup_file_logger
+from pie.render_jinja_template import get_cached_metadata
 
 MD_LINK_PATTERN = re.compile(r"\[([^\]]+)\]\(([^)]+)\.md\)")
 
@@ -54,6 +55,19 @@ def parse_metadata_or_print_first_line(f: IO[str]) -> dict | None:
             return yaml.safe_load(y)
         print(line, end="", file=outfile)
         break
+
+
+def _skip_front_matter(f: IO[str]) -> None:
+    """Advance *f* past a YAML front matter block if present."""
+
+    pos = f.tell()
+    first = f.readline()
+    if first.strip() == "---":
+        for line in f:
+            if line.strip() == "---":
+                break
+    else:
+        f.seek(pos)
 
 
 def include(filename: str) -> None:
@@ -97,10 +111,16 @@ def include_deflist_entry(
     for filename in files:
         logger.info("include_deflist_entry", filename=str(filename))
         with open(filename, "r", encoding="utf-8") as f:
-            metadata = parse_metadata_or_print_first_line(f)
+            metadata = get_cached_metadata(filename.stem)
             if metadata and metadata.get("title"):
-                print("<dt>" + metadata["title"] + "</dt>", file=outfile)
+                title = metadata["title"]
+                url = metadata.get("url")
+                if url:
+                    print(f"<dt>{title} <a href=\"{url}\">#</a></dt>", file=outfile)
+                else:
+                    print(f"<dt>{title}</dt>", file=outfile)
             print("<dd>", file=outfile)
+            _skip_front_matter(f)
             for line in f:
                 print(line, end="", file=outfile)
             print("</dd>", file=outfile)
