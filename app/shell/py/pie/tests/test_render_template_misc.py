@@ -1,4 +1,5 @@
 import pytest
+import fakeredis
 from pie import render_jinja_template as render_template
 
 
@@ -45,3 +46,29 @@ def test_render_jinja_renders_snippet():
     """Template uses variables from index_json."""
     render_template.index_json = {"name": "world"}
     assert render_template.render_jinja("Hello {{ name }}") == "Hello world"
+
+
+def test_linkparent_uses_index_json(monkeypatch):
+    """linkparent() links to parent id from metadata."""
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    fake.set("p.citation", "Parent")
+    fake.set("p.url", "/p")
+    monkeypatch.setattr(render_template, "redis_conn", fake)
+    render_template.index_json = {"parent": "p"}
+    html = render_template.linkparent()
+    assert html.startswith("Parent: ")
+    assert '<a href="/p"' in html
+
+
+def test_linkparent_override(monkeypatch):
+    """Explicit id overrides metadata value."""
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    fake.set("p.citation", "Parent")
+    fake.set("p.url", "/p")
+    fake.set("q.citation", "Q")
+    fake.set("q.url", "/q")
+    monkeypatch.setattr(render_template, "redis_conn", fake)
+    render_template.index_json = {"parent": "p"}
+    html = render_template.linkparent("q")
+    assert '<a href="/q"' in html
+    assert '>Q<' in html
