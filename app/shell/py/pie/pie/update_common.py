@@ -23,7 +23,7 @@ __all__ = [
 
 
 def get_changed_files() -> list[Path]:
-    """Return paths of files changed in git, excluding untracked files."""
+    """Return paths of files changed or untracked in git."""
     result = subprocess.run(
         ["git", "status", "--short"],
         check=True,
@@ -80,10 +80,16 @@ def replace_field(fp: Path, field: str, value: str) -> tuple[bool, str | None]:
     return False, None
 
 
-def update_files(paths: Iterable[Path], field: str, value: str) -> list[str]:
-    """Update ``field`` in files related to *paths* and return messages."""
+def update_files(paths: Iterable[Path], field: str, value: str) -> tuple[list[str], int]:
+    """Update ``field`` in files related to *paths*.
+
+    Returns a tuple ``(messages, checked)`` where ``messages`` contains log
+    entries for each modified file and ``checked`` is the number of files that
+    were examined.
+    """
     changes: list[str] = []
     processed: set[Path] = set()
+    checked = 0
     for path in paths:
         base = path.with_suffix("")
         if base in processed:
@@ -98,12 +104,13 @@ def update_files(paths: Iterable[Path], field: str, value: str) -> list[str]:
         for fp in file_paths:
             if not fp.exists():
                 continue
+            checked += 1
             changed, old = replace_field(fp, field, value)
             if changed and old is not None:
                 msg = f"{fp}: {old} -> {value}"
                 logger.info(msg)
                 changes.append(msg)
-    return changes
+    return changes, checked
 
 
 def configure_logging(log_name: str) -> None:

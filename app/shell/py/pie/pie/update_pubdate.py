@@ -23,8 +23,13 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(list(argv) if argv is not None else None)
 
 
-def update_files(paths: Iterable[Path], pubdate: str) -> list[str]:
-    """Update ``pubdate`` in files related to *paths* and return messages."""
+def update_files(paths: Iterable[Path], pubdate: str) -> tuple[list[str], int]:
+    """Update ``pubdate`` in files related to *paths*.
+
+    Returns a tuple ``(messages, checked)`` where ``messages`` contains log
+    entries for each modified file and ``checked`` is the number of files that
+    were examined.
+    """
     return update_common_files(paths, "pubdate", pubdate)
 
 
@@ -39,9 +44,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     configure_logging()
     today = get_pubdate()
     changed = get_changed_files()
-    messages = update_files(changed, today)
+    messages, checked = update_files(changed, today)
     for msg in messages:
         print(msg)
+    print(f"{checked} {'file' if checked == 1 else 'files'} checked")
+    changed_count = len(messages)
+    print(f"{changed_count} {'file' if changed_count == 1 else 'files'} changed")
     return 0
 
 

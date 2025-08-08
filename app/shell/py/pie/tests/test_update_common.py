@@ -6,7 +6,7 @@ from pie import update_common
 
 
 def test_get_changed_files_parses_git_status(monkeypatch: object) -> None:
-    """Only tracked modifications are returned."""
+    """Tracked and untracked modifications are returned."""
     def fake_run(cmd, check, capture_output, text):
         class Result:
             stdout = " M src/doc.md\n?? src/untracked.txt\nA src/doc.yml\n"
@@ -14,7 +14,11 @@ def test_get_changed_files_parses_git_status(monkeypatch: object) -> None:
     monkeypatch.setattr(update_common.subprocess, "run", fake_run)
 
     paths = update_common.get_changed_files()
-    assert paths == [Path("src/doc.md"), Path("src/doc.yml")]
+    assert paths == [
+        Path("src/doc.md"),
+        Path("src/untracked.txt"),
+        Path("src/doc.yml"),
+    ]
 
 
 def test_replace_field_updates_yaml(tmp_path: Path) -> None:
@@ -49,7 +53,8 @@ def test_update_files_updates_all_related(tmp_path: Path, monkeypatch: object) -
     yml.write_text("name: T\ntitle: T\nauthor: Old\n", encoding="utf-8")
 
     monkeypatch.chdir(tmp_path)
-    messages = update_common.update_files([Path("src/doc.md")], "author", "New")
+    messages, checked = update_common.update_files([Path("src/doc.md")], "author", "New")
+    assert checked == 2
     assert set(messages) == {
         "src/doc.md: Old -> New",
         "src/doc.yml: Old -> New",
