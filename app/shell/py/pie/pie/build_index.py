@@ -11,7 +11,8 @@ import os
 from typing import Any, Dict, Optional
 
 import yaml
-from pie.utils import logger, add_log_argument, setup_file_logger, read_yaml
+from pie.logging import logger, add_log_argument, setup_file_logger
+from pie.utils import read_yaml
 
 
 def get_url(filename: str) -> Optional[str]:

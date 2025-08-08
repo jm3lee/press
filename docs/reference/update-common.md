@@ -10,7 +10,6 @@ The module provides utilities used by command line tools such as
   Markdown frontmatter.
 - `update_files(paths, field, value)` – update a metadata field across the
   Markdown/YAML pair associated with each path.
-- `configure_logging(log_name)` – write log output to `log/<log_name>`.
 
 These helpers centralize behavior that was previously duplicated across the
 individual update scripts.

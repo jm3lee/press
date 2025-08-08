@@ -9,11 +9,12 @@ Markdown frontmatter or metadata YAML with the author configured in
 `cfg/update-author.yml`.
 
 ```bash
-update-author
+update-author [-l LOGFILE]
 ```
 
-Each updated file is printed as `<path>: <old> -> <new>` and the same
-information is logged to `log/update-author.txt`.
+Each updated file is printed as `<path>: <old> -> <new>` and logged to
+`LOGFILE`.  When not specified, log output is written to
+`log/update-author.txt`.
 
 If a file under `src` is modified but no `author` field can be updated, a
 warning is logged.

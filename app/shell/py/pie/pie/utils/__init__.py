@@ -1,31 +1,20 @@
 """Utility helpers used throughout the ``pie`` package.
 
-This module exposes a pre-configured :class:`loguru.logger` instance and a few
-convenience functions for reading and writing UTF-8 encoded files.  The logger
-defaults to writing INFO level messages to standard error but can be disabled or
-directed to additional files if required.
+This module provides convenience functions for reading and writing UTF-8
+encoded files as well as helper routines such as :func:`get_pubdate`. Logging
+behaviour is centralised in :mod:`pie.logging` and the pre-configured
+``loguru`` logger from that module is re-exported here for backwards
+compatibility.
 """
 
 from __future__ import annotations
 
-import argparse
 import json
-import sys
 from datetime import datetime
 
 import yaml
-from loguru import logger
 
-# Remove default handlers provided by :mod:`loguru` so we can configure logging
-# behaviour explicitly.
-logger.remove()
-
-LOG_FORMAT = (
-    "{time:HH:mm:ss} {module:>25}:{function:<25}:{line:<4} {level:.4s} {message} {extra}"
-)
-
-# Configure the console sink that all tests and scripts rely on.
-logger.add(sys.stderr, format=LOG_FORMAT, level="INFO")
+from pie.logging import logger
 
 
 def read_utf8(filename: str) -> str:
@@ -72,39 +61,6 @@ def write_yaml(data, filename: str) -> None:
     logger.debug("Writing YAML", filename=filename)
     with open(filename, "w", encoding="utf-8") as f:
         yaml.safe_dump(data, f, allow_unicode=True, sort_keys=False)
-
-
-def disable_logging() -> None:
-    """Disable all logging output for the :mod:`pie` helpers."""
-
-    logger.remove()
-
-
-def add_file_logger(filename: str, level: str = "DEBUG") -> None:
-    """Add a log sink that writes to *filename* at the given *level*."""
-
-    logger.add(filename, format=LOG_FORMAT, level=level)
-
-
-def add_log_argument(parser: argparse.ArgumentParser, *, default: str | None = None) -> None:
-    """Add a standard ``--log`` argument to *parser*.
-
-    Parameters
-    ----------
-    parser:
-        ``argparse`` parser to which the argument should be added.
-    default:
-        Optional default path for the log file.
-    """
-
-    parser.add_argument("-l", "--log", default=default, help="Write logs to the specified file")
-
-
-def setup_file_logger(log_path: str | None, *, level: str = "DEBUG") -> None:
-    """Configure file logging when ``log_path`` is provided."""
-
-    if log_path:
-        add_file_logger(log_path, level=level)
 
 
 def get_pubdate(date: datetime | None = None) -> str:
