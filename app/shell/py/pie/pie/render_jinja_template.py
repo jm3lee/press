@@ -420,6 +420,7 @@ def create_env():
     env.globals["read_json"] = read_json
     env.globals["read_yaml"] = read_yaml
     env.globals["cite"] = cite
+    env.globals["linktitle"] = linktitle
     return env
 
 

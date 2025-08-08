@@ -14,7 +14,6 @@ This document lists the common metadata keys used by Press and explains how miss
 - `og_image` – OpenGraph image path.
 - `meta` – Array of additional `<meta>` tag definitions for Pandoc.
 - `icon` – Emoji or icon displayed by link filters.
-- `parent` – ID of a parent page.
 - `link.tracking` – Boolean controlling external link behaviour.
 - `link.class` – CSS class for rendered links.
 
