@@ -97,6 +97,8 @@ clean: ## Remove everything under build/
 distclean: clean
 	$(call status,Remove .init)
 	$(Q)-rm -f `find app/ -name .init`
+	$(call status,Empty Index Cache)
+	$(Q)./bin/redis-cli flushall
 
 .PHONY: prune
 prune: ## Run docker system prune -f to clean unused resources
