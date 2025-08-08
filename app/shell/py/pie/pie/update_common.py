@@ -22,7 +22,7 @@ __all__ = [
 
 
 def get_changed_files() -> list[Path]:
-    """Return paths of files changed or untracked in git."""
+    """Return paths of tracked files changed in git."""
     result = subprocess.run(
         ["git", "status", "--short"],
         check=True,
@@ -34,6 +34,8 @@ def get_changed_files() -> list[Path]:
         if not line:
             continue
         parts = line.split()
+        if parts and parts[0] == "??":
+            continue
         if len(parts) >= 2:
             paths.append(Path(parts[-1]))
     return paths
