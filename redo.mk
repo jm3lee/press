@@ -166,8 +166,8 @@ t: ## Restart nginx-dev and run tests, ansi colors
 	$(Q)$(DOCKER_COMPOSE) run --entrypoint make --rm shell -f /app/mk/build.mk VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) test
 	$(Q)$(DOCKER_COMPOSE) run --entrypoint pytest --rm shell /press/py/pie/tests
 
-.PHONY: t
-redis:
+.PHONY: redis
+redis: ## Open redis-cli on the dragonfly service
 	$(Q)$(DOCKER_COMPOSE) exec dragonfly redis-cli
 
 .PHONY: tags

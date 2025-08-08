@@ -42,6 +42,7 @@ This repository actually uses three Makefiles that work together:
 | `sync` | Runs the `sync` container to upload site files to S3. |
 | `webp` | Runs the image conversion service. |
 | `shell` | Opens an interactive shell container. |
+| `redis` | Opens a Redis CLI connected to the `dragonfly` service. |
 | `rmi` | Removes Docker images matching `press-*` using `./bin/docker-rmi-pattern`. |
 
 Run `make -f redo.mk <target>` (or `r <target>` if you use the alias from the README) to execute any of these commands.

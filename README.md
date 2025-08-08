@@ -181,3 +181,4 @@ build. Use `--src DIR` to search a different directory for `.yml` files and
 - [Architecture](docs/reference/architecture.md)
 - [Link Metadata](docs/reference/link-metadata.md)
 - [checklinks](docs/guides/checklinks.md)
+- [redis-cli helper](docs/guides/redis-cli.md)
