@@ -30,6 +30,7 @@ setup(
             'gen-markdown-index=pie.gen_markdown_index:main',
             'check-page-title=pie.check_page_title:main',
             'check-post-build=pie.check_post_build:main',
+            'create-post=pie.create_post:main',
         ],
     },
 )
