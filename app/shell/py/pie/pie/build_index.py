@@ -11,7 +11,7 @@ import os
 from typing import Any, Dict, Optional
 
 import yaml
-from pie.utils import add_file_logger, logger
+from pie.utils import logger, add_log_argument, setup_file_logger
 
 
 def get_url(filename: str) -> Optional[str]:
@@ -222,11 +222,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--output",
         help="Path to write the JSON index (defaults to stdout)",
     )
-    parser.add_argument(
-        "-l",
-        "--log",
-        help="Write logs to the specified file",
-    )
+    add_log_argument(parser)
     return parser.parse_args(argv)
 
 
@@ -234,8 +230,7 @@ def main(argv: list[str] | None = None) -> None:
     """Build the index and write JSON output."""
     args = parse_args(argv)
 
-    if args.log:
-        add_file_logger(args.log, level="DEBUG")
+    setup_file_logger(args.log)
 
     index = build_index(args.source_dir)
 

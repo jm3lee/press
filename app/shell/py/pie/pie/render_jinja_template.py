@@ -19,7 +19,7 @@ import redis
 import yaml
 from flatten_dict import unflatten
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
-from pie.utils import add_file_logger, logger, read_json, read_utf8
+from pie.utils import logger, read_json, read_utf8, add_log_argument, setup_file_logger
 
 DEFAULT_CONFIG = Path("cfg/render-jinja-template.yml")
 
@@ -363,11 +363,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--index",
         help="Optional path to index.json",
     )
-    parser.add_argument(
-        "-l",
-        "--log",
-        help="Write logs to the specified file",
-    )
+    add_log_argument(parser)
     parser.add_argument(
         "-c",
         "--config",
@@ -383,8 +379,7 @@ def main(argv: list[str] | None = None) -> None:
     global index_json
     args = parse_args(argv)
 
-    if args.log:
-        add_file_logger(args.log, level="DEBUG")
+    setup_file_logger(args.log)
 
     global config
     config = load_config(args.config)

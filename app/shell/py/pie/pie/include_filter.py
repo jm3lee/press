@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import IO, Iterable, Callable
 
 import yaml
-from pie.utils import add_file_logger, logger
+from pie.utils import logger, add_log_argument, setup_file_logger
 
 MD_LINK_PATTERN = re.compile(r"\[([^\]]+)\]\(([^)]+)\.md\)")
 
@@ -165,11 +165,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("outdir", help="Output directory for diagrams")
     parser.add_argument("infile", help="Input Markdown file")
     parser.add_argument("outfile", help="Output Markdown file")
-    parser.add_argument(
-        "-l",
-        "--log",
-        help="Write logs to the specified file",
-    )
+    add_log_argument(parser)
     return parser.parse_args(argv)
 
 
@@ -186,8 +182,7 @@ def main(argv: list[str] | None = None) -> None:
 
     args = parse_args(argv)
 
-    if args.log:
-        add_file_logger(args.log, level="DEBUG")
+    setup_file_logger(args.log)
 
     outdir = args.outdir
     infilename = args.infile
