@@ -23,6 +23,7 @@ from typing import IO, Iterable, Callable
 import yaml
 from pie.logging import logger, add_log_argument, setup_file_logger
 from pie.render_jinja_template import get_cached_metadata
+from pie.load_metadata import load_metadata_pair
 
 MD_LINK_PATTERN = re.compile(r"\[([^\]]+)\]\(([^)]+)\.md\)")
 
@@ -109,14 +110,14 @@ def include_deflist_entry(
         files = list(sort_fn(files))
 
     for filename in files:
-        logger.info("include_deflist_entry", filename=str(filename))
+        logger.debug("include_deflist_entry", filename=str(filename))
         with open(filename, "r", encoding="utf-8") as f:
-            metadata = get_cached_metadata(filename.stem)
+            metadata = load_metadata_pair(filename)
             if metadata and metadata.get("title"):
                 title = metadata["title"]
                 url = metadata.get("url")
                 if url:
-                    print(f"<dt>{title} <a href=\"{url}\">#</a></dt>", file=outfile)
+                    print(f"<dt>{title} <a href=\"{url}\">↗</a></dt>", file=outfile)
                 else:
                     print(f"<dt>{title}</dt>", file=outfile)
             print("<dd>", file=outfile)

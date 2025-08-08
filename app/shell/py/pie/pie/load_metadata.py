@@ -60,7 +60,7 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
     if "id" not in combined:
         base = path.with_suffix("")
         combined["id"] = base.name
-        logger.info(
+        logger.debug(
             "Generated 'id'",
             filename=str(path.resolve().relative_to(Path.cwd())),
             id=combined["id"],
