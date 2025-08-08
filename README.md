@@ -110,6 +110,8 @@ respectively when not set.
 
 Command: `render-jinja-template`
 
+Usage: `render-jinja-template <template> <output> [--index index.json]`
+
 You can put metadata at the top of a markdown file. This metadata is optional.
 The system collects it. Then it uses it to fill Jinja2 templates.
 

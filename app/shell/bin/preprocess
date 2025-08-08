@@ -23,7 +23,7 @@ process_file() {
     done
 
     # Render links using metadata from Redis
-    render-jinja-template "$output" > "$output.$$"
+    render-jinja-template "$output" "$output.$$"
     mv "$output.$$" "$output"
     (( VERBOSE )) && cat "$output"
 
