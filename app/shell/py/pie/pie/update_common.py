@@ -32,7 +32,7 @@ def get_changed_files() -> list[Path]:
     )
     paths: list[Path] = []
     for line in result.stdout.splitlines():
-        if not line or line.startswith("??"):
+        if not line:
             continue
         parts = line.split()
         if len(parts) >= 2:
