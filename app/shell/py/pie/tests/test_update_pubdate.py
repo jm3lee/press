@@ -68,23 +68,3 @@ def test_ignores_pubdate_in_body(tmp_path: Path, monkeypatch, capsys) -> None:
     assert "Jan 01, 2000" in md.read_text(encoding="utf-8")
     captured = capsys.readouterr()
     assert captured.out.strip() == ""
-
-
-def test_warns_when_pubdate_missing(tmp_path: Path, monkeypatch) -> None:
-    """A warning is logged when pubdate can't be updated for a src file."""
-    src = tmp_path / "src"
-    src.mkdir()
-    md = src / "doc.md"
-    md.write_text("---\ntitle: Test\n---\n", encoding="utf-8")
-
-    monkeypatch.chdir(tmp_path)
-    monkeypatch.setattr(update_pubdate, "get_changed_files", lambda: [Path("src/doc.md")])
-
-    warnings: list[str] = []
-    handle = update_pubdate.logger.add(warnings.append, level="WARNING")
-    try:
-        update_pubdate.main([])
-    finally:
-        update_pubdate.logger.remove(handle)
-
-    assert any("pubdate not updated" in m for m in warnings)

@@ -47,10 +47,15 @@ def _replace_pubdate(fp: Path, pubdate: str) -> tuple[bool, str | None]:
         for i, line in enumerate(lines):
             if line.startswith("pubdate:"):
                 old = line.split(":", 1)[1].strip()
-                lines[i] = f"pubdate: {pubdate}\n"
-                fp.write_text("".join(lines), encoding="utf-8")
-                return True, old
-        return False, None
+                if old != pubdate:
+                    lines[i] = f"pubdate: {pubdate}\n"
+                    fp.write_text("".join(lines), encoding="utf-8")
+                    return True, old
+                else:
+                    return True, None
+        lines.append(f"pubdate: {pubdate}\n")
+        fp.write_text("".join(lines), encoding="utf-8")
+        return True, "undefined"
 
     if fp.suffix == ".md":
         lines = text.splitlines(keepends=True)
@@ -99,8 +104,6 @@ def update_files(paths: Iterable[Path], pubdate: str) -> list[str]:
                 logger.info(msg)
                 changes.append(msg)
                 updated = True
-        if not updated and str(path).startswith("src/"):
-            logger.warning("pubdate not updated", filename=str(path))
     return changes
 
 
