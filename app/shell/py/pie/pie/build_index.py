@@ -11,7 +11,7 @@ import os
 from typing import Any, Dict, Optional
 
 import yaml
-from pie.utils import logger, add_log_argument, setup_file_logger
+from pie.utils import logger, add_log_argument, setup_file_logger, read_yaml
 
 
 def get_url(filename: str) -> Optional[str]:
@@ -103,18 +103,17 @@ def parse_yaml_metadata(filepath: str) -> Optional[Dict[str, Any]]:
         `None`.
     """
     try:
-        with open(filepath, encoding="utf-8") as yf:
-            metadata = yaml.safe_load(yf)
-            if "url" not in metadata:
-                metadata["url"] = get_url(filepath)
-            if "citation" not in metadata:
-                # Intentionally use indexing so we get an exception here.
-                # The name field must exist.
-                metadata["citation"] = metadata["name"].lower()
-            if "id" not in metadata:
-                base, _ = os.path.splitext(filepath)
-                metadata["id"] = base.split(os.sep)[-1]
-            return metadata
+        metadata = read_yaml(filepath)
+        if "url" not in metadata:
+            metadata["url"] = get_url(filepath)
+        if "citation" not in metadata:
+            # Intentionally use indexing so we get an exception here.
+            # The name field must exist.
+            metadata["citation"] = metadata["name"].lower()
+        if "id" not in metadata:
+            base, _ = os.path.splitext(filepath)
+            metadata["id"] = base.split(os.sep)[-1]
+        return metadata
     except yaml.YAMLError:
         logger.warning("Failed to parse YAML file", filename=filepath)
         raise

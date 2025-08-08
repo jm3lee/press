@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 import yaml
-from pie.utils import logger, add_log_argument, setup_file_logger
+from pie.utils import logger, add_log_argument, setup_file_logger, read_yaml
 
 
 def generate_rule(
@@ -88,10 +88,9 @@ def collect_ids(src_root: Path) -> dict[str, Path]:
                         if isinstance(data, dict):
                             doc_id = data.get("id")
                 else:
-                    with open(path, "r", encoding="utf-8") as f:
-                        data = yaml.safe_load(f) or {}
-                        if isinstance(data, dict):
-                            doc_id = data.get("id")
+                    data = read_yaml(str(path)) or {}
+                    if isinstance(data, dict):
+                        doc_id = data.get("id")
             except Exception:
                 logger.warning("Failed to parse metadata", file=str(path))
 

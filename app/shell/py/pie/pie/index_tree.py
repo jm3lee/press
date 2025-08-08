@@ -4,14 +4,13 @@ import warnings
 from pathlib import Path
 from typing import Iterator, Mapping, Any, Tuple, Callable
 
-import yaml
+from pie.utils import read_yaml
 
 
 def load_yaml_metadata(filepath: Path) -> Mapping[str, Any] | None:
     """Return parsed YAML metadata for *filepath* or ``None`` if invalid."""
     try:
-        with filepath.open("r", encoding="utf-8") as f:
-            return yaml.safe_load(f) or {}
+        return read_yaml(str(filepath)) or {}
     except Exception as e:  # pragma: no cover - warning path
         warnings.warn(f"Invalid YAML: {filepath} ({e})")
         return None

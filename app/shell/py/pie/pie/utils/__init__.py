@@ -8,10 +8,11 @@ directed to additional files if required.
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
-import argparse
 
+import yaml
 from loguru import logger
 
 # Remove default handlers provided by :mod:`loguru` so we can configure logging
@@ -36,8 +37,17 @@ def read_utf8(filename: str) -> str:
 def read_json(filename: str):
     """Return JSON-decoded data from *filename*."""
 
+    logger.debug("Reading JSON", filename=filename)
     with open(filename, "r", encoding="utf-8") as f:
         return json.load(f)
+
+
+def write_json(data, filename: str) -> None:
+    """Write *data* as JSON to *filename*."""
+
+    logger.debug("Writing JSON", filename=filename)
+    with open(filename, "w", encoding="utf-8") as f:
+        json.dump(data, f)
 
 
 def write_utf8(text: str, filename: str) -> None:
@@ -45,6 +55,22 @@ def write_utf8(text: str, filename: str) -> None:
 
     with open(filename, "w", encoding="utf-8") as f:
         f.write(text)
+
+
+def read_yaml(filename: str):
+    """Return YAML-decoded data from *filename*."""
+
+    logger.debug("Reading YAML", filename=filename)
+    with open(filename, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+def write_yaml(data, filename: str) -> None:
+    """Write *data* as YAML to *filename*."""
+
+    logger.debug("Writing YAML", filename=filename)
+    with open(filename, "w", encoding="utf-8") as f:
+        yaml.safe_dump(data, f, allow_unicode=True, sort_keys=False)
 
 
 def disable_logging() -> None:
