@@ -6,7 +6,7 @@ from typing import Sequence
 
 import yaml
 
-from pie.utils import add_file_logger, logger
+from pie.utils import add_file_logger, get_pubdate, logger
 
 __all__ = ["main"]
 
@@ -38,7 +38,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     yml_path = base.with_suffix(".yml")
 
     md_path.touch()
-    metadata = {"author": "", "pubdate": "", "title": "", "name": base.name}
+    metadata = {"author": "", "pubdate": get_pubdate(), "title": "", "name": base.name}
     with yml_path.open("w", encoding="utf-8") as yf:
         yaml.safe_dump(metadata, yf, sort_keys=False)
 

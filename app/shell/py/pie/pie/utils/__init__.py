@@ -8,9 +8,10 @@ directed to additional files if required.
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
-import argparse
+from datetime import datetime
 
 from loguru import logger
 
@@ -78,3 +79,15 @@ def setup_file_logger(log_path: str | None, *, level: str = "DEBUG") -> None:
 
     if log_path:
         add_file_logger(log_path, level=level)
+
+
+def get_pubdate(date: datetime | None = None) -> str:
+    """Return *date* formatted as ``Mon DD, YYYY``.
+
+    If *date* is ``None`` the current date is used. This helper centralises the
+    pubdate formatting used throughout the ``pie`` tools.
+    """
+
+    if date is None:
+        date = datetime.now()
+    return date.strftime("%b %d, %Y")

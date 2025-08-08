@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from datetime import datetime
 from pathlib import Path
 
 from pie import update_pubdate
+from pie.utils import get_pubdate
 
 
 def test_updates_yaml_from_markdown_change(tmp_path: Path, monkeypatch, capsys) -> None:
@@ -22,7 +22,7 @@ def test_updates_yaml_from_markdown_change(tmp_path: Path, monkeypatch, capsys) 
     monkeypatch.setattr(update_pubdate, "get_changed_files", lambda: [Path("src/doc.md")])
 
     update_pubdate.main([])
-    expected = datetime.now().strftime("%b %d, %Y")
+    expected = get_pubdate()
     assert f"pubdate: {expected}" in yml.read_text(encoding="utf-8")
     expected_line = f"src/doc.yml: Jan 01, 2000 -> {expected}"
     captured = capsys.readouterr()
@@ -45,7 +45,7 @@ def test_updates_markdown_frontmatter(tmp_path: Path, monkeypatch, capsys) -> No
     monkeypatch.setattr(update_pubdate, "get_changed_files", lambda: [Path("src/doc.md")])
 
     update_pubdate.main([])
-    expected = datetime.now().strftime("%b %d, %Y")
+    expected = get_pubdate()
     assert f"pubdate: {expected}" in md.read_text(encoding="utf-8")
     expected_line = f"src/doc.md: Jan 01, 2000 -> {expected}"
     captured = capsys.readouterr()

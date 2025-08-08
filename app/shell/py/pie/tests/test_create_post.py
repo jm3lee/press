@@ -5,6 +5,7 @@ from pathlib import Path
 import yaml
 
 from pie import create_post
+from pie.utils import get_pubdate
 
 
 def test_create_post_creates_files(tmp_path: Path) -> None:
@@ -20,3 +21,4 @@ def test_create_post_creates_files(tmp_path: Path) -> None:
     data = yaml.safe_load(yml_file.read_text(encoding="utf-8"))
     assert set(data) == {"author", "pubdate", "title", "name"}
     assert data["name"] == "my-post"
+    assert data["pubdate"] == get_pubdate()
