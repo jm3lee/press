@@ -9,6 +9,8 @@ This section contains background material and technical specifications for the p
 - `keyterms.md` – glossary of important terminology.
 - `link-metadata.md` – link metadata format and usage.
 - `metadata-fields.md` – description of common metadata fields.
+- `update-author.md` – update the `author` field for modified files.
+- `update-common.md` – shared helpers for metadata update scripts.
 - `update-pubdate.md` – update the `pubdate` field for modified files.
 
 Refer back to [../guides](../guides) for step-by-step workflows and tutorials.
