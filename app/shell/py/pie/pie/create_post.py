@@ -4,9 +4,8 @@ import argparse
 from pathlib import Path
 from typing import Sequence
 
-import yaml
+from pie.utils import add_file_logger, get_pubdate, logger, write_yaml
 
-from pie.utils import add_file_logger, get_pubdate, logger
 
 __all__ = ["main"]
 
@@ -39,9 +38,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     md_path.touch()
     metadata = {"author": "", "pubdate": get_pubdate(), "title": "", "name": base.name}
-    with yml_path.open("w", encoding="utf-8") as yf:
-        yaml.safe_dump(metadata, yf, sort_keys=False)
-
+    write_yaml(metadata, str(yml_path))
+    
     logger.info("Created post", md=str(md_path), yml=str(yml_path))
     return 0
 

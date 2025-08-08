@@ -6,9 +6,7 @@ import argparse
 import sys
 from typing import Iterable
 
-import yaml
-
-from pie.utils import logger, add_log_argument, setup_file_logger
+from pie.utils import logger, add_log_argument, setup_file_logger, write_yaml
 from pie import build_index
 
 
@@ -38,8 +36,7 @@ def main(argv: Iterable[str] | None = None) -> None:
         logger.error("No metadata found", filename=args.input)
         sys.exit(1)
 
-    with open(args.output, "w", encoding="utf-8") as out:
-        yaml.safe_dump(metadata, out, allow_unicode=True, sort_keys=False)
+    write_yaml(metadata, args.output)
 
     logger.info("Processed YAML written", path=args.output)
 

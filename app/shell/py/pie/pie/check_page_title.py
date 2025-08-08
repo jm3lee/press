@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 from bs4 import BeautifulSoup
-import yaml
+from pie.utils import read_yaml
 
 
 # Detect whether we should emit ANSI colour codes. We only use colours when
@@ -67,8 +67,7 @@ def main(argv: list[str] | None = None) -> int:
     html_files = list(directory.rglob("*.html"))
     exclude: set[Path] = set()
     if args.exclude:
-        with open(args.exclude, "r", encoding="utf-8") as exf:
-            data = yaml.safe_load(exf) or []
+        data = read_yaml(args.exclude) or []
         for item in data:
             p = Path(item)
             if not p.is_absolute():

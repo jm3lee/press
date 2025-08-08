@@ -5,9 +5,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
-import yaml
-
-from pie.utils import logger, add_log_argument, setup_file_logger
+from pie.utils import logger, add_log_argument, setup_file_logger, read_yaml
 
 DEFAULT_LOG = "log/check-post-build.txt"
 DEFAULT_CFG = "cfg/check-post-build.yml"
@@ -42,8 +40,7 @@ def main(argv: list[str] | None = None) -> int:
     Path(args.log).parent.mkdir(parents=True, exist_ok=True)
     setup_file_logger(args.log)
 
-    with open(args.config, "r", encoding="utf-8") as cfg:
-        required = yaml.safe_load(cfg) or []
+    required = read_yaml(args.config) or []
 
     base = Path(args.directory)
     missing = False

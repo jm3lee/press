@@ -19,7 +19,14 @@ import redis
 import yaml
 from flatten_dict import unflatten
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
-from pie.utils import logger, read_json, read_utf8, add_log_argument, setup_file_logger
+from pie.utils import (
+    logger,
+    read_json,
+    read_utf8,
+    read_yaml as load_yaml_file,
+    add_log_argument,
+    setup_file_logger,
+)
 
 DEFAULT_CONFIG = Path("cfg/render-jinja-template.yml")
 
@@ -321,8 +328,7 @@ def load_config(path: str | Path = DEFAULT_CONFIG) -> dict:
         logger.error("Configuration file not found", path=str(cfg_path))
         raise SystemExit(1)
     try:
-        with cfg_path.open("r", encoding="utf-8") as cf:
-            return yaml.safe_load(cf) or {}
+        return load_yaml_file(str(cfg_path)) or {}
     except Exception as exc:
         logger.error(
             "Failed to load configuration", path=str(cfg_path), exception=str(exc)
