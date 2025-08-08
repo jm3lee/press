@@ -20,7 +20,7 @@ import yaml
 from flatten_dict import unflatten
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from pie.logging import logger, add_log_argument, setup_file_logger
-from pie.utils import read_json, read_utf8, read_yaml as load_yaml_file
+from pie.utils import read_json, read_utf8, write_utf8, read_yaml as load_yaml_file
 
 DEFAULT_CONFIG = Path("cfg/render-jinja-template.yml")
 
@@ -451,6 +451,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         description="Render a template using metadata from Redis and an optional index file",
     )
     parser.add_argument("template", help="Template file to render")
+    parser.add_argument("output", help="File to write rendered template to")
     parser.add_argument(
         "-i",
         "--index",
@@ -478,7 +479,8 @@ def main(argv: list[str] | None = None) -> None:
     config = load_config(args.config)
     index_json = read_json(args.index) if args.index else {}
     template = env.get_template(args.template)
-    print(template.render(**index_json))
+    rendered = template.render(**index_json)
+    write_utf8(rendered, args.output)
 
 
 if __name__ == "__main__":
