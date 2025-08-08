@@ -4,10 +4,10 @@
 Press is a static-site generator that wraps Pandoc tooling in a containerized build and runtime environment. Docker Compose services and Makefiles coordinate building Markdown content into HTML or PDF and serving the generated site.
 
 ## Repository Layout
-- `src/` – markdown sources, templates, and static assets.
 - `app/` – Dockerfiles, Docker Compose templates, and build scripts used inside containers.
 - `bin/` – host-side helper scripts for container management.
 - `cfg/` – configuration files used during validation tasks.
+- `src/` – markdown sources, templates, and static assets.
 
 ## Orchestration
 The top-level Makefile (`redo.mk`) drives all host-side automation. It launches required services and executes the inner build Makefile within the shell container:
@@ -35,5 +35,8 @@ The shell container executes `app/shell/mk/build.mk` to transform sources into d
 Source files in `src/` become processed artifacts in `build/`. The development `nginx-dev` service mounts the build directory for local preview, while production content can be synchronized or served by `nginx`.
 
 ## Testing
-Python utilities that support the build live under `app/shell/py/pie`. Unit tests for these helpers execute with `pytest` via the host Makefile or directly inside the shell container.
+Python utilities that support the build live under `app/shell/py/pie`. Unit
+tests for these helpers execute with `pytest` via the host Makefile or directly
+inside the shell container. See the [tests guide](../guides/tests.md) for
+usage.
 
