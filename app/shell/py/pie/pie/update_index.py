@@ -18,7 +18,7 @@ import warnings
 from concurrent.futures import ThreadPoolExecutor
 
 import redis
-from pie.utils import logger, add_log_argument, setup_file_logger
+from pie.logging import logger, add_log_argument, setup_file_logger
 from pie.load_metadata import load_metadata_pair
 
 

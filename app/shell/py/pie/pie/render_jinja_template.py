@@ -19,14 +19,8 @@ import redis
 import yaml
 from flatten_dict import unflatten
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
-from pie.utils import (
-    logger,
-    read_json,
-    read_utf8,
-    read_yaml as load_yaml_file,
-    add_log_argument,
-    setup_file_logger,
-)
+from pie.logging import logger, add_log_argument, setup_file_logger
+from pie.utils import read_json, read_utf8, read_yaml as load_yaml_file
 
 DEFAULT_CONFIG = Path("cfg/render-jinja-template.yml")
 

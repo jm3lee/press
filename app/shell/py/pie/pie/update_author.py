@@ -6,11 +6,8 @@ from typing import Iterable, Sequence
 
 import yaml
 
-from pie.update_common import (
-    configure_logging as common_configure_logging,
-    get_changed_files,
-    update_files as update_common_files,
-)
+from pie.logging import add_log_argument, setup_file_logger
+from pie.update_common import get_changed_files, update_files as update_common_files
 
 __all__ = ["main"]
 
@@ -40,6 +37,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         default=default_author,
         help="Author name to set (default: value from cfg/update-author.yml)",
     )
+    add_log_argument(parser, default="log/update-author.txt")
     return parser.parse_args(list(argv) if argv is not None else None)
 
 
@@ -53,15 +51,12 @@ def update_files(paths: Iterable[Path], author: str) -> tuple[list[str], int]:
     return update_common_files(paths, "author", author)
 
 
-def configure_logging() -> None:
-    """Configure logging to write to ``log/update-author.txt``."""
-    common_configure_logging("update-author.txt")
-
-
 def main(argv: Sequence[str] | None = None) -> int:
     """Entry point for the ``update-author`` console script."""
     args = parse_args(argv)
-    configure_logging()
+    if args.log:
+        Path(args.log).parent.mkdir(parents=True, exist_ok=True)
+    setup_file_logger(args.log, level="INFO")
     changed = get_changed_files()
     messages, checked = update_files(changed, args.author)
     for msg in messages:

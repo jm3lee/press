@@ -5,7 +5,7 @@ from typing import Any, Mapping
 import warnings
 
 from pie import build_index
-from pie.utils import logger
+from pie.logging import logger
 
 
 def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:

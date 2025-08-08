@@ -12,13 +12,12 @@ import subprocess
 from typing import Iterable
 
 from pie.load_metadata import load_metadata_pair
-from pie.utils import add_file_logger, logger
+from pie.logging import logger
 
 __all__ = [
     "get_changed_files",
     "replace_field",
     "update_files",
-    "configure_logging",
 ]
 
 
@@ -113,8 +112,3 @@ def update_files(paths: Iterable[Path], field: str, value: str) -> tuple[list[st
     return changes, checked
 
 
-def configure_logging(log_name: str) -> None:
-    """Configure logging to write to ``log/<log_name>``."""
-    log_file = Path("log") / log_name
-    log_file.parent.mkdir(parents=True, exist_ok=True)
-    add_file_logger(str(log_file), level="INFO")

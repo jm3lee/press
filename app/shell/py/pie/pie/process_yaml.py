@@ -6,7 +6,8 @@ import argparse
 import sys
 from typing import Iterable
 
-from pie.utils import logger, add_log_argument, setup_file_logger, write_yaml
+from pie.logging import logger, add_log_argument, setup_file_logger
+from pie.utils import write_yaml
 from pie import build_index
 
 

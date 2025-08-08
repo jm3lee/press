@@ -13,7 +13,8 @@ import json
 from pathlib import Path
 from typing import Any, Iterable, List
 
-from pie.utils import logger, read_json, add_log_argument, setup_file_logger
+from pie.logging import logger, add_log_argument, setup_file_logger
+from pie.utils import read_json
 
 from .render_jinja_template import create_env
 

@@ -8,11 +8,12 @@ metadata pair using `load_metadata_pair` and replaces the `pubdate` field in
 Markdown frontmatter or metadata YAML with today's date in the format `%b %d, %Y`.
 
 ```bash
-update-pubdate
+update-pubdate [-l LOGFILE]
 ```
 
 Each updated file is printed as `<path>: <old> -> <new>` and the same information
-is logged to `log/update-pubdate.txt`.
+is logged to `LOGFILE`. When omitted, log output is written to
+`log/update-pubdate.txt`.
 
 When finished, the script reports how many files were checked and how many were
 updated.

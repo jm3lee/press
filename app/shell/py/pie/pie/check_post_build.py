@@ -5,7 +5,8 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
-from pie.utils import logger, add_log_argument, setup_file_logger, read_yaml
+from pie.logging import logger, add_log_argument, setup_file_logger
+from pie.utils import read_yaml
 
 DEFAULT_LOG = "log/check-post-build.txt"
 DEFAULT_CFG = "cfg/check-post-build.yml"

@@ -89,6 +89,10 @@ CSS := $(patsubst $(SRC_DIR)/%.css,$(BUILD_DIR)/%.css, $(CSS))
 # Define the default target to build everything
 .PHONY: all
 all: | $(BUILD_DIR) $(BUILD_SUBDIRS)
+	$(call status,Updating author)
+	$(Q)update-author
+	$(call status,Updating pubdate)
+	$(Q)update-pubdate
 	$(Q)make -s -f /app/mk/build.mk $(BUILD_DIR)/.update-index VERBOSE=$(VERBOSE)
 	$(Q)make -s -f /app/mk/build.mk final VERBOSE=$(VERBOSE)
 
