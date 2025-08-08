@@ -27,6 +27,8 @@ RUN apt install -y --no-install-recommends curl
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
  && apt install -y --no-install-recommends nodejs
 
+RUN apt install -y --no-install-recommends git
+
 RUN rm -rf /var/lib/apt/lists/*
 
 # -------------------------------------------------------------------
