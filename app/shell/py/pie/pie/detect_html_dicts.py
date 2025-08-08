@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 import re
 from bs4 import BeautifulSoup
-from pie.utils import add_file_logger, logger
+from pie.utils import logger, add_log_argument, setup_file_logger
 
 def contains_python_dict(text: str) -> bool:
     """Return ``True`` if *text* looks like a Python dictionary literal."""
@@ -20,11 +20,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         description="Check for Python dictionaries in HTML text nodes",
     )
     parser.add_argument("html_file", help="Path to the HTML file to inspect")
-    parser.add_argument(
-        "-l",
-        "--log",
-        help="Write logs to the specified file",
-    )
+    add_log_argument(parser)
     return parser.parse_args(argv)
 
 
@@ -33,8 +29,7 @@ def main(argv: list[str] | None = None) -> int:
 
     args = parse_args(argv)
 
-    if args.log:
-        add_file_logger(args.log, level="DEBUG")
+    setup_file_logger(args.log)
 
     with open(args.html_file, "r", encoding="utf-8") as f:
         soup = BeautifulSoup(f, "html.parser")

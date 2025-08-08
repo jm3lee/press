@@ -7,7 +7,7 @@ import argparse
 from pathlib import Path
 import yaml
 
-from pie.utils import add_file_logger, logger
+from pie.utils import logger, add_log_argument, setup_file_logger
 
 DEFAULT_LOG = "log/check-post-build.txt"
 DEFAULT_CFG = "cfg/check-post-build.yml"
@@ -31,12 +31,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=DEFAULT_CFG,
         help="YAML file listing required paths",
     )
-    parser.add_argument(
-        "-l",
-        "--log",
-        default=DEFAULT_LOG,
-        help="Write logs to the specified file",
-    )
+    add_log_argument(parser, default=DEFAULT_LOG)
     return parser.parse_args(argv)
 
 
@@ -45,7 +40,7 @@ def main(argv: list[str] | None = None) -> int:
 
     args = parse_args(argv)
     Path(args.log).parent.mkdir(parents=True, exist_ok=True)
-    add_file_logger(args.log)
+    setup_file_logger(args.log)
 
     with open(args.config, "r", encoding="utf-8") as cfg:
         required = yaml.safe_load(cfg) or []

@@ -18,7 +18,7 @@ import warnings
 from concurrent.futures import ThreadPoolExecutor
 
 import redis
-from pie.utils import add_file_logger, logger
+from pie.utils import logger, add_log_argument, setup_file_logger
 from pie.load_metadata import load_metadata_pair
 
 
@@ -64,7 +64,7 @@ def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
         "path",
         help="Path to index.json, a metadata file, or a directory containing YAML",
     )
-    parser.add_argument("-l", "--log", help="Write logs to the specified file")
+    add_log_argument(parser)
     parser.add_argument(
         "--host",
         default=os.getenv("REDIS_HOST", "dragonfly"),
@@ -152,8 +152,7 @@ def load_index_from_path(path: Path) -> tuple[dict[str, dict[str, Any]], int]:
 def main(argv: Iterable[str] | None = None) -> None:
     """Entry point for the ``update-index`` console script."""
     args = parse_args(argv)
-    if args.log:
-        add_file_logger(args.log, level="DEBUG")
+    setup_file_logger(args.log)
 
     start = time.perf_counter()
     path = Path(args.path)
