@@ -4,7 +4,7 @@ setup(
     name="pie",
     version="0.1.0",
     packages=find_packages(),
-    install_requires=[],
+    install_requires=["emoji"],
     author="",
     author_email="",
     description="",
@@ -33,6 +33,7 @@ setup(
             'check-post-build=pie.check_post_build:main',
             'create-post=pie.create_post:main',
             'create=pie.create:main',
+            'emojify=pie.emojify:main',
         ],
     },
 )
