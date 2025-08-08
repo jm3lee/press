@@ -21,6 +21,11 @@ accepts a few optional parameters to control the output:
 - `citation` – selects which citation field to render.  The default `"citation"`
   uses the main citation value; pass `"short"` to use `citation.short`.
 
+When the `citation` field is itself a mapping with `author`, `year`, and an
+optional `page`, the filter formats the text using Chicago style
+(`"Author Year, Page"`) and encloses it in parentheses, matching the behaviour
+of the `cite` global.
+
 Example:
 
 ```jinja
@@ -32,6 +37,18 @@ renders as:
 
 ```html
 <a href="/humerus.html#deltoid_tuberosity" class="internal-link">Deltoid Tuberosity</a>
+```
+
+Bibliographic citations render similarly:
+
+```jinja
+{{ {"citation": {"author": "hull", "year": 2016, "page": 307}, "url": "/hull"} | link }}
+```
+
+produces:
+
+```html
+<a href="/hull" class="internal-link">(Hull 2016, 307)</a>
 ```
 
 When you pass a string instead of a dictionary, the filter fetches the

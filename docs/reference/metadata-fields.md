@@ -32,7 +32,8 @@ The helper that assigns these defaults lives in `parse_yaml_metadata` within `pi
 
 For bibliographic references the `citation` field may instead be a mapping with
 `author`, `year`, and `page` keys.  This structure is consumed by the `cite`
-Jinja global to render Chicago style links.
+Jinja global and by the link-formatting filters to render Chicago style text in
+parentheses.
 
 `link.tracking` defaults to `true`, meaning links open in the same tab. `link.class` defaults to `internal-link`.
 

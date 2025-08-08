@@ -154,6 +154,20 @@ def test_linkshort_uses_short_citation_and_ignores_icon(monkeypatch):
     assert 'rel="noopener noreferrer" target="_blank"' in html
 
 
+def test_link_handles_citation_metadata(monkeypatch):
+    """Bibliographic citation dict -> formatted text."""
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    fake.set("hull.citation.author", "hull")
+    fake.set("hull.citation.year", "2016")
+    fake.set("hull.citation.page", "307")
+    fake.set("hull.url", "/hull")
+    monkeypatch.setattr(render_template, "redis_conn", fake)
+    render_template.index_json = {}
+
+    html = render_template.link("hull")
+    assert '(Hull 2016, 307)' in html
+
+
 def test_render_link_with_anchor():
     """anchor='bar' -> href endswith '#bar'."""
     desc = {"citation": "foo", "url": "/f"}

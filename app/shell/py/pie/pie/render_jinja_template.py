@@ -174,11 +174,25 @@ def render_link(
 
     # Determine citation text
     citation_val = desc["citation"]
+    needs_parens = False
     if citation == "short":
         citation_text = citation_val["short"]
     else:
         if isinstance(citation_val, dict):
-            citation_text = citation_val.get(citation)
+            if {"author", "year"}.issubset(citation_val):
+                author = str(citation_val.get("author", "")).title()
+                year = citation_val.get("year")
+                pages = citation_val.get("page")
+                citation_text = author
+                if year is not None:
+                    citation_text += f" {year}"
+                if pages:
+                    if isinstance(pages, (list, tuple)):
+                        pages = ", ".join(str(p) for p in pages)
+                    citation_text += f", {pages}"
+                needs_parens = True
+            else:
+                citation_text = citation_val.get(citation)
         else:
             citation_text = citation_val
 
@@ -193,6 +207,9 @@ def render_link(
         citation_text = _whitespace_word_pattern.sub(cap_match, citation_text)
     elif style == "cap" and citation_text:
         citation_text = citation_text[0].upper() + citation_text[1:]
+
+    if needs_parens:
+        citation_text = f"({citation_text})"
 
     url = desc["url"]
     if anchor:
