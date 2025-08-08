@@ -5,14 +5,14 @@
 #
 # The `all` target ensures that the compiled JavaScript bundle and any
 # accompanying JSON files are present under `build/quiz/`.
-all: build/quiz/quiz.js
+all: build/static/js/quiz.js
 
 # Directory for built quiz assets
-build/quiz:
+build/static/js:
 	mkdir -p $@
 
 # Copy the generated bundle from the app directory into the build tree
-build/quiz/quiz.js: app/build/static/js/quiz.js | build/quiz
+build/static/js/quiz.js: app/build/static/js/quiz.js | build/static/js
 	cp $< $@
 
 # Build the React application with Vite.  The output lives under

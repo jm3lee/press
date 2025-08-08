@@ -1,2 +1,3 @@
 # Required build artifacts
-- static/indextree.js
+- static/js/indextree.js
+- static/js/quiz.js

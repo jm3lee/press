@@ -3,10 +3,10 @@
 # See docs/guides/dep-mk.md for details on dependency makefiles.
 
 # Ensure built JS is available under build/static/
-all: build/static/indextree.js
+all: build/static/js/indextree.js
 
 # Copy the generated bundle from the app directory into the build tree
-build/static/indextree.js: app/build/static/js/indextree.js | build/static
+build/static/js/indextree.js: app/build/static/js/indextree.js | build/static/js
 	cp $< $@
 
 # Build the React application with Vite; output lives under app/build/static/js
