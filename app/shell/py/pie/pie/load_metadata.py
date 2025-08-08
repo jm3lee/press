@@ -6,6 +6,7 @@ import warnings
 
 from pie import build_index
 from pie.logging import logger
+from pie.utils import read_yaml
 
 
 def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
@@ -70,3 +71,28 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
 
     logger.debug(combined)
     return combined
+
+
+def load_yaml_metadata(path: Path) -> Mapping[str, Any] | None:
+    """Return metadata loaded from a YAML file.
+
+    Missing fields like ``id`` and ``url`` are generated when possible to
+    provide a consistent shape with :func:`load_metadata_pair`.
+    """
+
+    try:
+        data = read_yaml(str(path)) or {}
+    except Exception as exc:  # pragma: no cover - warning path
+        warnings.warn(f"Invalid YAML: {path} ({exc})")
+        return None
+
+    if "id" not in data:
+        data["id"] = path.with_suffix("").name
+
+    if "url" not in data:
+        try:
+            data["url"] = build_index.get_url(str(path))
+        except Exception:
+            pass
+
+    return data

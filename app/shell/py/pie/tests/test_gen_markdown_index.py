@@ -19,3 +19,12 @@ def test_show_property(tmp_path):
         '- {{"alpha"|linktitle}}',
         '- {{"child"|linktitle}}',
     ]
+
+
+def test_missing_id_uses_filename(tmp_path):
+    """Files without an explicit id derive it from the filename."""
+    (tmp_path / "foo.yml").write_text("name: Foo\ntitle: Foo\n")
+
+    lines = list(generate(tmp_path))
+
+    assert lines == ['- {{"foo"|linktitle}}']
