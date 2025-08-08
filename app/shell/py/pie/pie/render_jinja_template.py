@@ -229,6 +229,22 @@ def linkshort(desc, anchor: str | None = None):
     return render_link(desc, use_icon=False, citation="short", anchor=anchor)
 
 
+def linkparent(parent_id: str | None = None) -> str:
+    """Return a link to a parent page.
+
+    When ``parent_id`` is ``None`` the ``parent`` field from ``index_json`` is
+    used.  Passing an explicit ``parent_id`` is useful when experimenting with
+    different hierarchies.  If no parent is available an empty string is
+    returned.
+    """
+
+    if parent_id is None:
+        parent_id = index_json.get("parent") if isinstance(index_json, dict) else None
+    if not parent_id:
+        return ""
+    return f"Parent: {linktitle(parent_id)}"
+
+
 def cite(*names: str) -> str:
     """Return Chicago style citation links for ``names``.
 
@@ -403,6 +419,7 @@ def create_env():
     env.globals["to_alpha_index"] = to_alpha_index
     env.globals["read_json"] = read_json
     env.globals["read_yaml"] = read_yaml
+    env.globals["linkparent"] = linkparent
     env.globals["cite"] = cite
     return env
 
