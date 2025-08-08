@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 import argparse
-from datetime import datetime
 from pathlib import Path
 import subprocess
 from typing import Iterable, Sequence
 
 from pie.load_metadata import load_metadata_pair
-from pie.utils import add_file_logger, logger
+from pie.utils import add_file_logger, get_pubdate, logger
 
 
 __all__ = ["main"]
@@ -118,7 +117,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     """Entry point for the ``update-pubdate`` console script."""
     parse_args(argv)
     configure_logging()
-    today = datetime.now().strftime("%b %d, %Y")
+    today = get_pubdate()
     changed = get_changed_files()
     messages = update_files(changed, today)
     for msg in messages:
