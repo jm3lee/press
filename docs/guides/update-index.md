@@ -5,13 +5,14 @@ Load a JSON index and insert each value into DragonflyDB or Redis. Keys use a do
 ## Usage
 
 - ```bash
-update-index index.json [--host HOST] [--port PORT] [-l LOGFILE]
+update-index index.json [--host HOST] [--port PORT] [-l LOGFILE] [-v]
 ```
 
 - `index` path to the JSON index file or a directory of metadata
 - `--host` Redis host (default `dragonfly` or `$REDIS_HOST`)
 - `--port` Redis port (default `6379` or `$REDIS_PORT`)
 - `-l, --log` optional log file
+- `-v, --verbose` show debug output
 
 `update-index` also reads the `REDIS_HOST` and `REDIS_PORT` environment
 variables when `--host` or `--port` are not specified.
