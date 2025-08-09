@@ -2,21 +2,45 @@ import os
 import json
 from pathlib import Path
 
-from pie import indextree_json
+import fakeredis
+
+from pie import indextree_json, metadata
 
 
-def write_yaml(path: Path, data: dict) -> None:
-    path.write_text(json.dumps(data))
+def save_meta(store: fakeredis.FakeRedis, filepath: str, doc_id: str, meta: dict) -> None:
+    """Store *meta* for *doc_id* and map *filepath* to that id."""
+    store.set(filepath, doc_id)
+
+    meta_with_id = {"id": doc_id, **meta}
+
+    def recurse(prefix: str, data: dict) -> None:
+        for key, value in data.items():
+            if isinstance(value, dict):
+                recurse(f"{prefix}{key}.", value)
+            else:
+                if key == "id":
+                    store.set(prefix + key, value)
+                else:
+                    store.set(prefix + key, json.dumps(value))
+
+    recurse(f"{doc_id}.", meta_with_id)
 
 
-def test_process_dir_builds_tree(tmp_path):
-    """YAML files -> hierarchical tree."""
+def test_process_dir_builds_tree(tmp_path, monkeypatch):
+    """Redis metadata -> hierarchical tree."""
     src = tmp_path / "src"
     alpha = src / "alpha"
     alpha.mkdir(parents=True)
-    write_yaml(alpha / "index.yml", {"id": "alpha", "name": "Alpha", "title": "Alpha"})
-    write_yaml(alpha / "beta.yml", {"id": "beta", "name": "Beta", "title": "Beta"})
-    write_yaml(src / "gamma.yml", {"id": "gamma", "name": "Gamma", "title": "Gamma"})
+    (alpha / "index.yml").touch()
+    (alpha / "beta.yml").touch()
+    (src / "gamma.yml").touch()
+
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    monkeypatch.setattr(metadata, "redis_conn", fake)
+
+    save_meta(fake, "src/alpha/index.yml", "alpha", {"title": "Alpha", "url": "/alpha/index.html"})
+    save_meta(fake, "src/alpha/beta.yml", "beta", {"title": "Beta", "url": "/alpha/beta.html"})
+    save_meta(fake, "src/gamma.yml", "gamma", {"title": "Gamma", "url": "/gamma.html"})
 
     os.chdir(tmp_path)
     try:
@@ -37,7 +61,7 @@ def test_process_dir_builds_tree(tmp_path):
     ]
 
 
-def test_process_dir_honours_show_and_link(tmp_path):
+def test_process_dir_honours_show_and_link(tmp_path, monkeypatch):
     """show:False hides nodes; link:False omits URL."""
     src = tmp_path / "src"
     alpha = src / "alpha"
@@ -45,26 +69,35 @@ def test_process_dir_honours_show_and_link(tmp_path):
     alpha.mkdir(parents=True)
     delta.mkdir(parents=True)
 
-    write_yaml(alpha / "index.yml", {"id": "alpha", "name": "Alpha", "title": "Alpha"})
-    write_yaml(alpha / "beta.yml", {
-        "id": "beta",
-        "name": "Beta",
-        "title": "Beta",
-        "gen-markdown-index": {"link": False},
-    })
-    write_yaml(src / "gamma.yml", {
-        "id": "gamma",
-        "name": "Gamma",
-        "title": "Gamma",
-        "gen-markdown-index": {"show": False},
-    })
-    write_yaml(delta / "index.yml", {
-        "id": "delta",
-        "name": "Delta",
-        "title": "Delta",
-        "gen-markdown-index": {"show": False},
-    })
-    write_yaml(delta / "epsilon.yml", {"id": "epsilon", "name": "Epsilon", "title": "Epsilon"})
+    (alpha / "index.yml").touch()
+    (alpha / "beta.yml").touch()
+    (src / "gamma.yml").touch()
+    (delta / "index.yml").touch()
+    (delta / "epsilon.yml").touch()
+
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    monkeypatch.setattr(metadata, "redis_conn", fake)
+
+    save_meta(fake, "src/alpha/index.yml", "alpha", {"title": "Alpha", "url": "/alpha/index.html"})
+    save_meta(
+        fake,
+        "src/alpha/beta.yml",
+        "beta",
+        {"title": "Beta", "url": "/alpha/beta.html", "gen-markdown-index": {"link": False}},
+    )
+    save_meta(
+        fake,
+        "src/gamma.yml",
+        "gamma",
+        {"title": "Gamma", "url": "/gamma.html", "gen-markdown-index": {"show": False}},
+    )
+    save_meta(
+        fake,
+        "src/delta/index.yml",
+        "delta",
+        {"title": "Delta", "url": "/delta/index.html", "gen-markdown-index": {"show": False}},
+    )
+    save_meta(fake, "src/delta/epsilon.yml", "epsilon", {"title": "Epsilon", "url": "/delta/epsilon.html"})
 
     os.chdir(tmp_path)
     try:
