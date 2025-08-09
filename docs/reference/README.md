@@ -14,6 +14,7 @@ documents provide context for the task‑oriented
 - [metadata-fields.md](metadata-fields.md) – description of common metadata fields referenced in
   [build-index](../guides/build-index.md).
 - [update-author.md](update-author.md) – refresh the `author` field for existing documents.
+- [update-index.md](update-index.md) – insert index values into Redis.
 - [update-pubdate.md](update-pubdate.md) – update the `pubdate` field for modified files.
 
 For step‑by‑step workflows and tutorials, head back to the
