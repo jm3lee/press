@@ -33,7 +33,7 @@ setup(
             'check-post-build=pie.check.post_build:main',
             'create-post=pie.create.post:main',
             'create-site=pie.create.site:main',
-            'emojify=pie.emojify:main',
+            'emojify=pie.filter.emojify:main',
             'store-files=pie.store_files:main',
         ],
     },

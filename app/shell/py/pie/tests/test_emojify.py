@@ -1,6 +1,6 @@
 import sys
 
-from pie import emojify
+from pie.filter import emojify
 
 
 def test_emojify_replaces_aliases(capsys):
