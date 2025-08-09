@@ -17,7 +17,7 @@ The most commonly used modules are:
 * :mod:`process_yaml` – parse and augment YAML frontmatter.
 * :mod:`check.bad_jinja_output` – identify dictionary-like data structures within
   HTML snippets.
-* :mod:`picasso` – bundle assets for diagrams and interactive code examples.
+* :mod:`build.picasso` – bundle assets for diagrams and interactive code examples.
 * :mod:`check.page_title` – ensure HTML files contain non-empty ``<h1>`` tags.
 * :mod:`check.post_build` – verify that expected build artifacts exist.
 * :mod:`emojify` – convert ``:emoji:`` codes to Unicode characters.
@@ -34,7 +34,7 @@ __all__ = [
     "render_study_json",
     "gen_markdown_index",
     "process_yaml",
-    "picasso",
+    "build",
     "check",
     "update",
     "emojify",

@@ -3,7 +3,7 @@ import runpy
 import sys
 
 import pytest
-from pie import picasso
+from pie.build import picasso
 
 
 def test_generate_rule_basic():
