@@ -22,6 +22,9 @@ def test_create_scaffolding(tmp_path: Path) -> None:
 
     assert (target / "redo.mk").exists()
 
+    assert (target / "src/style.css").exists()
+    assert (target / "src/pandoc-template.html").exists()
+
     shell_dockerfile = target / "app/shell/Dockerfile"
     assert shell_dockerfile.exists()
     assert shell_dockerfile.read_text(encoding="utf-8").startswith("FROM press-release")
@@ -32,7 +35,10 @@ def test_create_scaffolding(tmp_path: Path) -> None:
     assert "Welcome" in md_text
     assert "view it locally" in md_text
 
-    assert (target / "src/index.yml").exists()
+    index_yml = target / "src/index.yml"
+    assert index_yml.exists()
+    yml_text = index_yml.read_text(encoding="utf-8")
+    assert "name:" in yml_text
 
     readme = target / "README.md"
     assert readme.exists(), "README should be created"
