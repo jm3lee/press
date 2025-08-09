@@ -165,6 +165,28 @@ def test_main_inserts_path(tmp_path, monkeypatch):
     assert fake.get("doc.path") == json.dumps(["src/doc.yml", "src/doc.md"])
 
 
+def test_main_adds_path_id_mapping(tmp_path, monkeypatch):
+    """Each source path maps back to the document id."""
+    src = tmp_path / "src"
+    src.mkdir()
+    md = src / "doc.md"
+    md.write_text("---\n{\"title\": \"Md\"}\n---\n")
+    yml = src / "doc.yml"
+    yml.write_text('{"title": "Yaml", "name": "Y"}')
+
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
+
+    os.chdir(tmp_path)
+    try:
+        update_index.main(["src/doc.md"])
+    finally:
+        os.chdir("/tmp")
+
+    assert fake.get("src/doc.md") == "doc"
+    assert fake.get("src/doc.yml") == "doc"
+
+
 def test_main_missing_id_generates(tmp_path, monkeypatch):
     """Missing id -> generated from filename."""
     src = tmp_path / "src"

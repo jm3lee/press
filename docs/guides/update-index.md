@@ -1,6 +1,6 @@
 # update-index
 
-Load a JSON index and insert each value into DragonflyDB or Redis. Keys use a dot-separated format of `<id>.<property>` with nested objects and arrays flattened. Complex values are stored as JSON strings. When processing metadata files, the paths to the source files are recorded under `<id>.path` as a JSON array; this `path` array is stored unflattened.
+Load a JSON index and insert each value into DragonflyDB or Redis. Keys use a dot-separated format of `<id>.<property>` with nested objects and arrays flattened. Complex values are stored as JSON strings. When processing metadata files, the paths to the source files are recorded under `<id>.path` as a JSON array; this `path` array is stored unflattened. Each source path is also stored separately with the path as the key and the document `id` as the value for quick reverse lookups.
 
 ## Usage
 

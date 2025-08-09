@@ -94,6 +94,41 @@ def test_main_writes_log_file(tmp_path):
     assert log.exists()
 
 
+def test_include_deflist_entry_uses_metadata(tmp_path, monkeypatch):
+    """Entries use metadata looked up via Redis."""
+    defs = tmp_path / "defs"
+    defs.mkdir()
+    f = defs / "a.md"
+    f.write_text("body\n")
+
+    from pie import metadata
+
+    class Dummy:
+        def __init__(self):
+            self.store: dict[str, str] = {}
+
+        def get(self, key: str):
+            return self.store.get(key)
+
+    dummy = Dummy()
+    dummy.store["defs/a.md"] = "doc1"
+    dummy.store["doc1.title"] = "Title"
+    dummy.store["doc1.url"] = "/doc.html"
+
+    monkeypatch.setattr(metadata, "redis_conn", dummy)
+
+    include_filter.outfile = io.StringIO()
+    include_filter.heading_level = 0
+    os.chdir(tmp_path)
+    try:
+        include_filter.include_deflist_entry(str(f))
+    finally:
+        os.chdir("/tmp")
+
+    expected = "<dt>Title <a href=\"/doc.html\">↗</a></dt>\n<dd>\nbody\n</dd>\n"
+    assert include_filter.outfile.getvalue() == expected
+
+
 def test_yield_lines_reads_until_fence():
     """yield_lines stops before ``` fence."""
     f = io.StringIO("one\ntwo\n```\nthree\n")
