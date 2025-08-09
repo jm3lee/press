@@ -7,7 +7,7 @@ through console scripts and are also importable for use in other Python code.
 The most commonly used modules are:
 
 * :mod:`build_index` – scan Markdown and YAML files and produce a site index.
-* :mod:`update_index` – update an existing index file with new entries.
+* :mod:`update.index` – update an existing index file with new entries.
 * :mod:`include_filter` – preprocess Markdown and expand custom ``include``
   directives.
 * :mod:`render_jinja_template` – render Jinja templates with Press metadata.
@@ -28,7 +28,6 @@ modules.
 
 __all__ = [
     "build_index",
-    "update_index",
     "include_filter",
     "metadata",
     "render_jinja_template",
