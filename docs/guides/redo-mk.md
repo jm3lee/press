@@ -38,8 +38,8 @@ This repository actually uses three Makefiles that work together:
 | `clean` | Removes everything under `build/`. |
 | `prune` | Runs `docker system prune -f` to clean unused Docker resources. |
 | `setup` | Prepares `app/webp` directories and builds all services. |
-| `seed` | Runs the `seed` container to populate initial data. |
-| `sync` | Runs the `sync` container to upload site files to S3. |
+| `seed` | Runs the `seed` container to populate initial data (bucket from `S3_BUCKET_PATH`, default `s3://press`). |
+| `sync` | Runs the `sync` container to upload site files to S3 (bucket from `S3_BUCKET_PATH`, default `s3://press`). |
 | `webp` | Runs the image conversion service. |
 | `shell` | Opens an interactive shell container. |
 | `redis` | Opens a Redis CLI connected to the `dragonfly` service. |

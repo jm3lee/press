@@ -1,6 +1,6 @@
 """Shared helpers for metadata update scripts.
 
-These utilities power :mod:`pie.update_author` and :mod:`pie.update_pubdate` by
+These utilities power :mod:`pie.update.author` and :mod:`pie.update.pubdate` by
 providing common routines for discovering changed files, modifying metadata, and
 configuring log output.
 """
@@ -11,7 +11,7 @@ from pathlib import Path
 import subprocess
 from typing import Iterable
 
-from pie.load_metadata import load_metadata_pair
+from pie.metadata import load_metadata_pair
 from pie.logging import logger
 import os
 

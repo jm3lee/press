@@ -16,12 +16,14 @@ echo "Starting work… (PID $$)"
 # Example loop with interruptible sleep
 while true; do
     echo "Starting sync $(date +'%T')"
+    DEST="${S3_BUCKET_PATH:-s3://press}"
+    DEST="${DEST%/}/"
     s3cmd sync \
         --delete-removed \
         --delete-after \
         --acl-public \
         /s3/ \
-        s3://artisticanatomy/
+        "$DEST"
 
     # Start sleep in the background and record its PID
     echo "Sleeping for 10 seconds..."

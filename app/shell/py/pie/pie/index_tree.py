@@ -4,7 +4,7 @@ import warnings
 from pathlib import Path
 from typing import Iterator, Mapping, Any, Tuple, Callable
 
-from pie.load_metadata import load_yaml_metadata
+from pie.metadata import load_yaml_metadata
 
 
 def getopt_link(meta: Mapping[str, Any]) -> bool:

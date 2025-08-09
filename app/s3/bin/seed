@@ -1,3 +1,5 @@
 #!/bin/sh
 
-s3cmd sync s3://artisticanatomy/ s3/
+SRC="${S3_BUCKET_PATH:-s3://press}"
+SRC="${SRC%/}/"
+s3cmd sync "$SRC" s3/
