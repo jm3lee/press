@@ -8,7 +8,7 @@ The most commonly used modules are:
 
 * :mod:`build_index` – scan Markdown and YAML files and produce a site index.
 * :mod:`update.index` – update an existing index file with new entries.
-* :mod:`include_filter` – preprocess Markdown and expand custom ``include``
+* :mod:`filter.include` – preprocess Markdown and expand custom ``include``
   directives.
 * :mod:`render_jinja_template` – render Jinja templates with Press metadata.
 * :mod:`render_study_json` – convert an index tree to a JSON structure used by
@@ -28,7 +28,7 @@ modules.
 
 __all__ = [
     "build_index",
-    "include_filter",
+    "filter",
     "metadata",
     "render_jinja_template",
     "render_study_json",

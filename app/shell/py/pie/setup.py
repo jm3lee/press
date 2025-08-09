@@ -24,7 +24,7 @@ setup(
             'picasso=pie.picasso:main',
             'render-jinja-template=pie.render_jinja_template:main',
             'render-study-json=pie.render_study_json:main',
-            'include-filter=pie.include_filter:main',
+            'include-filter=pie.filter.include:main',
             'process-yaml=pie.process_yaml:main',
             'check-bad-jinja-output=pie.check.bad_jinja_output:main',
             'indextree-json=pie.indextree_json:main',

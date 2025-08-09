@@ -4,7 +4,7 @@ from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
-import pie.include_filter as include_filter
+import pie.filter.include as include_filter
 
 
 def test_parse_metadata_or_print_first_line_parses_front_matter(tmp_path):
@@ -74,7 +74,7 @@ def test_include_deflist_entry_writes_entries(tmp_path, monkeypatch):
         }
         return data.get(path, {}).get(key)
 
-    with patch("pie.include_filter.get_metadata_by_path", side_effect=fake_meta):
+    with patch("pie.filter.include.get_metadata_by_path", side_effect=fake_meta):
         include_filter.include_deflist_entry("a.md", "b.md")
     try:
         assert (
