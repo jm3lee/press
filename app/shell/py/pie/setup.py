@@ -34,6 +34,7 @@ setup(
             'create-post=pie.create.post:main',
             'create-site=pie.create.site:main',
             'emojify=pie.emojify:main',
+            'store-files=pie.store_files:main',
         ],
     },
 )

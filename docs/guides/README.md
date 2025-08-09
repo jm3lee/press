@@ -20,6 +20,7 @@ concepts and data formats, see the
 - [nginx.md](nginx.md) – development and production server configuration.
 - [pdoc-service.md](pdoc-service.md) – generate API documentation.
 - [react-index-tree.md](react-index-tree.md) – browse index data interactively.
+- [store-files.md](store-files.md) – move files into S3 staging and create metadata.
 - [webp-service.md](webp-service.md) – convert images to WebP using the helper
   container.
 
