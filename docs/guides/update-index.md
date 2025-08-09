@@ -12,6 +12,7 @@ update-index PATH [--host HOST] [--port PORT] [-l LOGFILE]
 - `--host` Redis host (default `dragonfly` or `$REDIS_HOST`)
 - `--port` Redis port (default `6379` or `$REDIS_PORT`)
 - `-l, --log` optional log file
+- `-v, --verbose` show debug output
 
 `update-index` also reads the `REDIS_HOST` and `REDIS_PORT` environment
 variables when `--host` or `--port` are not specified.

@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 import threading
 import fakeredis
 import pytest
@@ -260,3 +261,31 @@ def test_logs_execution_time_and_count(tmp_path, monkeypatch):
 
     assert any(msg == "update complete" and kw.get("files") == 2 for msg, kw in calls)
     assert any("elapsed" in kw for msg, kw in calls if msg == "update complete")
+
+
+def test_verbose_enables_debug_logging(tmp_path, monkeypatch):
+    """--verbose sets the console log level to DEBUG."""
+    idx = tmp_path / "index.json"
+    idx.write_text('{"doc": {"title": "T"}}')
+
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
+
+    levels = []
+    original_add = update_index.logger.add
+
+    def fake_add(*args, **kwargs):
+        levels.append(kwargs.get("level"))
+        return original_add(*args, **kwargs)
+
+    monkeypatch.setattr(update_index.logger, "add", fake_add)
+
+    update_index.main(["--verbose", str(idx)])
+
+    assert "DEBUG" in levels
+
+    # Restore default logging configuration
+    update_index.logger.remove()
+    from pie.logging import LOG_FORMAT
+
+    update_index.logger.add(sys.stderr, format=LOG_FORMAT, level="INFO")
