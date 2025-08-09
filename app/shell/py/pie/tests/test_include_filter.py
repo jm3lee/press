@@ -2,9 +2,28 @@ import os
 import io
 import runpy
 import sys
+from pathlib import Path
 from unittest import mock
+import types
 
 import pytest
+
+# Stub optional dependencies used by include_filter.
+
+def _stub_add(sink, *a, **k):
+    if isinstance(sink, (str, os.PathLike)):
+        Path(sink).touch()
+
+stub_logger = types.SimpleNamespace(
+    remove=lambda *a, **k: None,
+    add=_stub_add,
+    info=lambda *a, **k: None,
+    debug=lambda *a, **k: None,
+)
+sys.modules.setdefault("loguru", types.SimpleNamespace(logger=stub_logger))
+sys.modules.setdefault(
+    "pie.render_jinja_template", types.SimpleNamespace(get_cached_metadata=lambda *a, **k: None)
+)
 
 from pie import include_filter
 
@@ -141,4 +160,60 @@ def test_script_entry_point(tmp_path, monkeypatch):
     ])
     runpy.run_module("pie.include_filter", run_name="__main__")
     assert outfile.read_text() == "Hello"
+
+
+def test_skip_front_matter_skips_block():
+    f = io.StringIO("---\na: b\n---\nbody\n")
+    include_filter._skip_front_matter(f)
+    assert f.readline() == "body\n"
+
+
+def test_skip_front_matter_rewinds_without_block():
+    f = io.StringIO("no front matter\nsecond\n")
+    include_filter._skip_front_matter(f)
+    assert f.readline() == "no front matter\n"
+
+
+def test_include_deflist_entry_outputs_expected_html(tmp_path):
+    file_with_front = tmp_path / "b.md"
+    file_with_front.write_text("---\n---\ncontent1\n")
+    file_plain = tmp_path / "a.md"
+    file_plain.write_text("content2\n")
+
+    out = io.StringIO()
+    include_filter.outfile = out
+
+    def fake_metadata(path: Path):
+        if Path(path).name == "a.md":
+            return {"title": "A", "url": "http://a"}
+        else:
+            return {"title": "B"}
+
+    with mock.patch("pie.include_filter.load_metadata_pair", side_effect=fake_metadata):
+        include_filter.include_deflist_entry(str(tmp_path))
+
+    expected = (
+        "<dt>A <a href=\"http://a\">↗</a></dt>\n"
+        "<dd>\ncontent2\n</dd>\n"
+        "<dt>B</dt>\n"
+        "<dd>\ncontent1\n</dd>\n"
+    )
+    assert out.getvalue() == expected
+
+
+def test_include_deflist_entry_respects_sort_fn(tmp_path):
+    file_a = tmp_path / "a.md"
+    file_a.write_text("A\n")
+    file_b = tmp_path / "b.md"
+    file_b.write_text("B\n")
+
+    out = io.StringIO()
+    include_filter.outfile = out
+
+    with mock.patch("pie.include_filter.load_metadata_pair", return_value=None):
+        include_filter.include_deflist_entry(
+            str(file_a), str(file_b), sort_fn=lambda files: reversed(sorted(files))
+        )
+
+    assert out.getvalue() == "<dd>\nB\n</dd>\n<dd>\nA\n</dd>\n"
 
