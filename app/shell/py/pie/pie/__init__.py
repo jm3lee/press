@@ -15,7 +15,7 @@ The most commonly used modules are:
   study tools.
 * :mod:`gen_markdown_index` – generate a Markdown index from YAML metadata.
 * :mod:`process_yaml` – parse and augment YAML frontmatter.
-* :mod:`detect_html_dicts` – identify dictionary-like data structures within
+* :mod:`check.bad_jinja_output` – identify dictionary-like data structures within
   HTML snippets.
 * :mod:`picasso` – bundle assets for diagrams and interactive code examples.
 * :mod:`check.page_title` – ensure HTML files contain non-empty ``<h1>`` tags.
@@ -35,7 +35,6 @@ __all__ = [
     "render_study_json",
     "gen_markdown_index",
     "process_yaml",
-    "detect_html_dicts",
     "picasso",
     "check",
     "update",

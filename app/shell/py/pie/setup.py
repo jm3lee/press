@@ -26,7 +26,7 @@ setup(
             'render-study-json=pie.render_study_json:main',
             'include-filter=pie.include_filter:main',
             'process-yaml=pie.process_yaml:main',
-            'detect-html-dicts=pie.detect_html_dicts:main',
+            'check-bad-jinja-output=pie.check.bad_jinja_output:main',
             'indextree-json=pie.indextree_json:main',
             'gen-markdown-index=pie.gen_markdown_index:main',
             'check-page-title=pie.check.page_title:main',
