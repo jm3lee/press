@@ -4,7 +4,6 @@ Welcome to the demo site for **Press**. Use the links below to explore key featu
 - [Jinja Examples](examples/jinja.md)
 - [Link Filter Examples](examples/link-filters.md)
 - [Chicago Citation Examples](examples/chicago-citations.md)
-- [Mermaid Diagram](examples/diagram.mmd)
 - [Index Tree Demo](examples/indextree/index.md)
 - [Quiz Demo](quiz/index.md)
 
