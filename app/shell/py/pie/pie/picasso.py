@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 from pie.logging import logger, add_log_argument, setup_file_logger
-from pie.load_metadata import load_metadata_pair
+from pie.metadata import load_metadata_pair
 
 
 def generate_rule(
