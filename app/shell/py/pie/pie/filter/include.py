@@ -135,6 +135,13 @@ def yield_lines(infile: IO[str]) -> Iterable[str]:
         yield line
 
 
+def execute_python_block(lines: Iterable[str]) -> None:
+    """Execute a Python code block gathered from ``yield_lines``."""
+
+    code = "".join(lines)
+    exec(code, globals())
+
+
 def new_filestem(stem: str) -> str:
     """Return *stem* with a numeric suffix that doesn't clash with existing files."""
 
@@ -213,15 +220,7 @@ def main(argv: list[str] | None = None) -> None:
     ) as outfile:
         for line in infile:
             if line.strip() == "```python":
-                # FIXME Terrible. Some times, there is one statement with a
-                # multiline string. Some times, there are multiple statements.
-                # Probably need a proper parser here.
-                lines = list(yield_lines(infile))
-                try:
-                    eval("".join(lines))
-                except:
-                    for l in lines:
-                        eval(l)
+                execute_python_block(yield_lines(infile))
             else:
                 if line.startswith("#"):
                     parts = line.split(" ")

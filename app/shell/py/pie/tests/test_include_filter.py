@@ -112,6 +112,23 @@ def test_md_to_html_links_rewrites_extension():
     )
 
 
+def test_execute_python_block_executes_all_lines():
+    """execute_python_block runs multiple statements in order."""
+
+    include_filter.outfile = StringIO()
+    include_filter.execute_python_block(
+        [
+            "a = 1\n",
+            "b = 2\n",
+            "print(a + b, file=outfile)\n",
+        ]
+    )
+    try:
+        assert include_filter.outfile.getvalue() == "3\n"
+    finally:
+        include_filter.outfile = None
+
+
 def test_parse_args_parses_positions():
     """parse_args returns expected positional arguments."""
     args = include_filter.parse_args(["out", "in.md", "out.md"])
