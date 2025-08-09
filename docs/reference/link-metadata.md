@@ -22,7 +22,7 @@ This file generates an entry with the `id` `press_io_home` because the filename 
 
 If the nested `link.tracking` value is set to `false`, rendered HTML links include `rel="noopener noreferrer"` and `target="_blank"`. This prevents referral information from being sent and opens the link in a new tab. Omitting the field or setting it to `true` keeps the default behaviour.
 
-The logic lives in `pie.render_jinja_template.get_tracking_options()` which checks the metadata for this flag.
+The logic lives in `pie.render.jinja.get_tracking_options()` which checks the metadata for this flag.
 
 ```
 if "link" in desc:

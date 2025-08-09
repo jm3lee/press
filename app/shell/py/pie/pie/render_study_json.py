@@ -16,7 +16,7 @@ from typing import Any, Iterable, List
 from pie.logging import logger, add_log_argument, setup_file_logger
 from pie.utils import read_json
 
-from .render_jinja_template import create_env
+from .render.jinja import create_env
 
 
 def render_study(index: dict[str, Any], questions: Iterable[dict[str, Any]]) -> List[dict[str, Any]]:
