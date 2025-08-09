@@ -20,6 +20,15 @@ def test_create_scaffolding(tmp_path: Path) -> None:
     assert "      - ./src/dep.mk:/app/mk/dep.mk" in text
     assert (target / "src").is_dir()
 
+    dep_mk = target / "src/dep.mk"
+    assert dep_mk.exists()
+    assert dep_mk.read_text(encoding="utf-8") == ""
+
+    robots = target / "src/robots.txt"
+    assert robots.exists()
+    robots_text = robots.read_text(encoding="utf-8")
+    assert "User-agent: *" in robots_text
+
     assert (target / "redo.mk").exists()
 
     assert (target / "src/style.css").exists()

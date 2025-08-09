@@ -39,6 +39,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         "src/index.yml": "index.yml.jinja",
         "src/style.css": "style.css.jinja",
         "src/pandoc-template.html": "pandoc-template.html.jinja",
+        "src/dep.mk": "dep.mk.jinja",
+        "src/robots.txt": "robots.txt.jinja",
         "README.md": "README.md.jinja",
         "app/shell/Dockerfile": "shell.Dockerfile.jinja",
         "redo.mk": "redo.mk.jinja",
