@@ -1,182 +1,181 @@
-/*!
- * Press Theme – Elegant Modern
- * A fresh, minimalist stylesheet designed to showcase thoughtful vision.
+/*
+ * Press Theme – Bookish Minimalism
+ * A calm, readable stylesheet inspired by printed pages.
  */
 
 :root {
-  /* Color palette */
-  --color-bg: #fafafa;
-  --color-text: #222;
-  --color-accent: #0066ff;
-  --color-muted: #666;
-  --color-border: #e0e0e0;
+  /* Colors */
+  --page-bg: #fdfcf7;
+  --page-text: #2b2b2b;
+  --page-accent: #005f87;
+  --page-accent-hover: #004466;
+  --page-muted: #666;
+  --page-border: #ddd;
 
   /* Typography */
-  --font-body: "Inter", system-ui, sans-serif;
-  --font-heading: "Playfair Display", serif;
+  --font-body: "Georgia", serif;
+  --font-heading: "Georgia", serif;
 
   /* Layout */
-  --max-width: 70ch;
-  --radius: 8px;
+  --max-width: 45rem;
 
   /* Spacing */
-  --space-xs: 0.25rem;
-  --space-sm: 0.5rem;
-  --space-md: 1rem;
-  --space-lg: 2rem;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 1rem;
+  --space-4: 2rem;
 }
 
-* {
+*, *::before, *::after {
   box-sizing: border-box;
 }
 
 body {
   margin: 0 auto;
-  padding: var(--space-lg) var(--space-md);
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-family: var(--font-body);
-  line-height: 1.6;
+  padding: var(--space-4) var(--space-3);
   max-width: var(--max-width);
-  min-width: 300px;
+  background: var(--page-bg);
+  color: var(--page-text);
+  font-family: var(--font-body);
+  line-height: 1.7;
+  font-size: 1rem;
 }
 
 h1,
 h2,
-h3 {
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-heading);
-  color: var(--color-text);
-  line-height: 1.2;
-}
-
-h1 {
-  font-size: 2rem;
-  margin-top: var(--space-lg);
-}
-
-h2 {
-  font-size: 1.5rem;
-  margin-top: var(--space-lg);
-}
-
-h3 {
-  font-size: 1.2rem;
-  margin-top: var(--space-md);
+  font-weight: normal;
+  color: var(--page-text);
+  margin-top: var(--space-4);
+  line-height: 1.3;
 }
 
 p {
-  margin-top: 0;
-  margin-bottom: var(--space-md);
+  margin: 0 0 var(--space-3);
 }
 
-/* Navigation */
-nav.site-nav {
-  margin: var(--space-lg) 0;
-  border-bottom: 1px solid var(--color-border);
-}
-
-nav.site-nav ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-md);
-}
-
-nav.site-nav a {
-  color: var(--color-accent);
-  text-decoration: none;
-  padding-bottom: var(--space-xs);
-  border-bottom: 2px solid transparent;
-}
-
-nav.site-nav a:hover {
-  border-color: var(--color-accent);
-}
-
-/* Links */
 a {
-  color: var(--color-accent);
+  color: var(--page-accent);
   text-decoration: underline;
 }
 
 a:hover {
-  color: var(--color-text);
+  color: var(--page-accent-hover);
+}
+
+/* Navigation */
+nav.site-nav {
+  margin-bottom: var(--space-4);
+  border-bottom: 1px solid var(--page-border);
+}
+
+nav.site-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+nav.site-nav a {
+  text-decoration: none;
+  padding-bottom: var(--space-1);
+  border-bottom: 2px solid transparent;
+  color: var(--page-accent);
+}
+
+nav.site-nav a:hover {
+  border-color: var(--page-accent);
 }
 
 /* Tables */
 table {
   width: 100%;
   border-collapse: collapse;
-  margin: var(--space-lg) 0;
+  margin: var(--space-4) 0;
+  font-size: 0.9rem;
 }
 
 th,
 td {
-  padding: var(--space-sm);
-  border: 1px solid var(--color-border);
+  padding: var(--space-2);
+  border: 1px solid var(--page-border);
 }
 
 th {
-  background: var(--color-accent);
-  color: #fff;
+  background: #f3f3f3;
+  font-weight: normal;
   text-align: left;
 }
 
 /* Blockquotes */
 blockquote {
-  border-left: 4px solid var(--color-accent);
-  margin: var(--space-lg) 0;
-  padding: 0 var(--space-md);
-  color: var(--color-muted);
+  margin: var(--space-4) 0;
+  padding-left: var(--space-3);
+  border-left: 4px solid var(--page-border);
+  color: var(--page-muted);
   font-style: italic;
 }
 
 /* Code */
-pre,
-code {
+code,
+pre {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  background: #f4f4f4;
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: var(--radius);
+  background: #f5f2f0;
+  border-radius: 4px;
+}
+
+code {
+  padding: 0 0.25em;
 }
 
 pre {
+  padding: var(--space-3);
   overflow: auto;
+}
+
+pre code {
+  padding: 0;
+  background: transparent;
 }
 
 /* Figures */
 figure {
-  margin: var(--space-lg) 0;
+  margin: var(--space-4) 0;
   text-align: center;
 }
 
 figure img {
   max-width: 100%;
   height: auto;
-  border-radius: var(--radius);
 }
 
 figcaption {
-  margin-top: var(--space-sm);
-  color: var(--color-muted);
-  font-size: 0.875rem;
+  margin-top: var(--space-2);
+  color: var(--page-muted);
+  font-size: 0.9rem;
 }
 
 /* Misc */
 .pubdate {
-  color: var(--color-muted);
-  font-size: 0.875rem;
-  margin-top: calc(-1 * var(--space-sm));
+  color: var(--page-muted);
+  font-size: 0.9rem;
+  margin-top: calc(-1 * var(--space-2));
 }
 
 @media (max-width: 600px) {
   body {
-    padding: var(--space-md);
+    padding: var(--space-3) var(--space-2);
   }
+
   nav.site-nav ul {
     flex-direction: column;
-    align-items: flex-start;
+    gap: var(--space-2);
   }
 }
+
