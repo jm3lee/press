@@ -51,6 +51,10 @@ def flatten_index(index: Mapping[str, Mapping[str, Any]]) -> Iterable[tuple[str,
 
     for doc_id, props in index.items():
         yield from _walk(doc_id, props)
+        paths = props.get("path")
+        if isinstance(paths, list):
+            for p in paths:
+                yield p, doc_id
 
 
 

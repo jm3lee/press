@@ -30,6 +30,7 @@ __all__ = [
     "build_index",
     "update_index",
     "include_filter",
+    "metadata",
     "render_jinja_template",
     "render_study_json",
     "gen_markdown_index",
