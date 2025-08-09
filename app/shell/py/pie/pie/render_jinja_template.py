@@ -15,97 +15,25 @@ import sys
 import time
 from pathlib import Path
 
-import redis
 import yaml
-from flatten_dict import unflatten
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from pie.logging import logger, add_log_argument, setup_file_logger
 from pie.utils import read_json, read_utf8, write_utf8, read_yaml as load_yaml_file
+from pie import metadata
 
 DEFAULT_CONFIG = Path("cfg/render-jinja-template.yml")
 
 index_json = None  # Loaded in :func:`main`.
 config = {}
-redis_conn = None  # lazily initialised connection used by ``linktitle``.
 
 _whitespace_word_pattern = re.compile(r"(\S+)")
-
-
-def _get_redis_value(key: str, *, required: bool = False):
-    """Return the decoded value for ``key`` from ``redis_conn``.
-
-    If ``required`` is ``True`` and the key is missing, the process exits
-    with status 1 after logging an error.
-    """
-
-    global redis_conn
-    if redis_conn is None:
-        host = os.getenv("REDIS_HOST", "dragonfly")
-        port = int(os.getenv("REDIS_PORT", "6379"))
-        redis_conn = redis.Redis(host=host, port=port, decode_responses=True)
-    try:
-        val = redis_conn.get(key)
-    except Exception as exc:
-        logger.error("Redis lookup failed", key=key, exception=str(exc))
-        raise SystemExit(1)
-
-    if val is None:
-        if required:
-            logger.error("Missing metadata", key=key)
-            raise SystemExit(1)
-        return None
-
-    try:
-        return json.loads(val)
-    except Exception:
-        return val
-
-
-def _convert_lists(obj):
-    """Recursively convert dictionaries with integer keys to lists."""
-
-    if isinstance(obj, dict):
-        if obj and all(isinstance(k, str) and k.isdigit() for k in obj):
-            arr = [None] * (max(int(k) for k in obj) + 1)
-            for k, v in obj.items():
-                arr[int(k)] = _convert_lists(v)
-            return arr
-        return {k: _convert_lists(v) for k, v in obj.items()}
-    if isinstance(obj, list):
-        return [_convert_lists(v) for v in obj]
-    return obj
-
-
-def _build_from_redis(prefix: str) -> dict | list | None:
-    """Return a nested structure for all keys starting with ``prefix``."""
-
-    global redis_conn
-    if redis_conn is None:
-        host = os.getenv("REDIS_HOST", "localhost")
-        port = int(os.getenv("REDIS_PORT", "6379"))
-        redis_conn = redis.Redis(host=host, port=port, decode_responses=True)
-
-    keys = redis_conn.keys(prefix + "*")
-    if not keys:
-        return None
-
-    flat = {}
-    for k in keys:
-        val = _get_redis_value(k, required=True)
-        flat[k[len(prefix) :].lstrip(".")] = val
-
-    data = unflatten(flat, splitter="dot")
-    return _convert_lists(data)
-
 
 def _get_metadata(name: str) -> dict | None:
     """Return metadata dictionary for ``name`` from Redis."""
 
-    return _build_from_redis(f"{name}.")
-
+    return metadata.build_from_redis(f"{name}.")
 
 _metadata_cache: dict[str, dict] = {}
-
 
 def get_cached_metadata(key: str) -> dict:
     """Return cached metadata for ``key``.
@@ -127,7 +55,6 @@ def get_cached_metadata(key: str) -> dict:
         _metadata_cache[key] = data
     return _metadata_cache[key]
 
-
 def get_tracking_options(desc):
     """Return HTML attributes for link tracking behaviour.
 
@@ -144,7 +71,6 @@ def get_tracking_options(desc):
             return 'rel="noopener noreferrer" target="_blank"'
     return ""
 
-
 def get_link_class(desc):
     """Return the CSS class to use for a link."""
 
@@ -153,7 +79,6 @@ def get_link_class(desc):
         if isinstance(link_options, dict) and "class" in link_options:
             return link_options["class"]
     return "internal-link"
-
 
 def render_link(
     desc,
@@ -229,26 +154,20 @@ def render_link(
         return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{icon} {citation_text}</a>"""
     return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{citation_text}</a>"""
 
-
 def linktitle(desc, anchor: str | None = None):
     return render_link(desc, style="title", anchor=anchor)
-
 
 def link_icon_title(desc, anchor: str | None = None):
     return render_link(desc, style="title", use_icon=True, anchor=anchor)
 
-
 def linkcap(desc, anchor: str | None = None):
     return render_link(desc, style="cap", anchor=anchor)
-
 
 def linkicon(desc, anchor: str | None = None):
     return render_link(desc, use_icon=True, anchor=anchor)
 
-
 def link(desc, anchor: str | None = None):
     return render_link(desc, use_icon=False, anchor=anchor)
-
 
 def linkshort(desc, anchor: str | None = None):
     return render_link(desc, use_icon=False, citation="short", anchor=anchor)
@@ -310,7 +229,6 @@ def cite(*names: str) -> str:
 
     return "(" + "; ".join(parts) + ")"
 
-
 def extract_front_matter(file_path: str) -> dict | None:
     """
     Read a Markdown file and return its YAML front matter as a dict,
@@ -337,7 +255,6 @@ def extract_front_matter(file_path: str) -> dict | None:
             return None
     return None
 
-
 def process_directory(root_dir: str) -> None:
     """
     Walk `root_dir` recursively, find all .md files, and:
@@ -362,7 +279,6 @@ def process_directory(root_dir: str) -> None:
             else:
                 logger.warning("No front matter or title", file=full_path)
 
-
 def get_desc(name):
     """Return the metadata entry for ``name`` from Redis."""
 
@@ -372,19 +288,16 @@ def get_desc(name):
         raise SystemExit(1)
     return d
 
-
 def render_jinja(snippet):
     """Render a Jinja snippet using the current environment."""
 
     logger.info(snippet)
     return env.from_string(snippet).render(**index_json)
 
-
 def to_alpha_index(i):
     """Convert ``0``–``3`` to ``a``–``d``."""
 
     return ("a", "b", "c", "d")[i]
-
 
 def read_yaml(filename):
     """Read ``filename`` as YAML and yield the ``toc`` sequence."""
@@ -392,7 +305,6 @@ def read_yaml(filename):
     y = yaml.safe_load(read_utf8(filename))
     logger.info(y["toc"])
     yield from y["toc"]
-
 
 def load_config(path: str | Path = DEFAULT_CONFIG) -> dict:
     """Load configuration from *path* and return a dict."""
@@ -410,7 +322,6 @@ def load_config(path: str | Path = DEFAULT_CONFIG) -> dict:
             "Failed to load configuration", path=str(cfg_path), exception=str(exc)
         )
         raise SystemExit(1)
-
 
 def create_env():
     """Create and configure the Jinja2 environment."""
@@ -431,9 +342,7 @@ def create_env():
     env.globals["linktitle"] = linktitle
     return env
 
-
 env = create_env()
-
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
@@ -457,7 +366,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     return parser.parse_args(argv)
 
-
 def main(argv: list[str] | None = None) -> None:
     """Render the specified template using Redis and an optional ``index.json``."""
 
@@ -472,7 +380,6 @@ def main(argv: list[str] | None = None) -> None:
     template = env.get_template(args.template)
     rendered = template.render(**index_json)
     write_utf8(rendered, args.output)
-
 
 if __name__ == "__main__":
     main()

@@ -5,6 +5,7 @@ import fakeredis
 import pytest
 
 from pie import render_jinja_template as render_template
+from pie import metadata
 
 
 def test_get_redis_value_initialises(monkeypatch):
@@ -12,20 +13,20 @@ def test_get_redis_value_initialises(monkeypatch):
     fake = fakeredis.FakeRedis(decode_responses=True)
     monkeypatch.setenv("REDIS_HOST", "h")
     monkeypatch.setenv("REDIS_PORT", "1234")
-    monkeypatch.setattr(render_template, "redis_conn", None)
+    monkeypatch.setattr(metadata, "redis_conn", None)
     monkeypatch.setattr(
-        render_template.redis, "Redis", lambda host, port, decode_responses: fake
+        metadata.redis, "Redis", lambda host, port, decode_responses: fake
     )
     fake.set("foo", '"bar"')
-    assert render_template._get_redis_value("foo") == "bar"
+    assert metadata._get_redis_value("foo") == "bar"
 
 
 def test_get_redis_value_required_missing(monkeypatch):
     """required=True and missing key -> SystemExit."""
     fake = fakeredis.FakeRedis(decode_responses=True)
-    monkeypatch.setattr(render_template, "redis_conn", fake)
+    monkeypatch.setattr(metadata, "redis_conn", fake)
     with pytest.raises(SystemExit):
-        render_template._get_redis_value("missing", required=True)
+        metadata._get_redis_value("missing", required=True)
 
 
 def test_get_redis_value_error(monkeypatch):
@@ -34,9 +35,9 @@ def test_get_redis_value_error(monkeypatch):
         def get(self, key):
             raise RuntimeError("boom")
 
-    monkeypatch.setattr(render_template, "redis_conn", Bad())
+    monkeypatch.setattr(metadata, "redis_conn", Bad())
     with pytest.raises(SystemExit):
-        render_template._get_redis_value("foo")
+        metadata._get_redis_value("foo")
 
 
 def test_build_from_redis_initialises(monkeypatch):
@@ -44,11 +45,11 @@ def test_build_from_redis_initialises(monkeypatch):
     fake = fakeredis.FakeRedis(decode_responses=True)
     fake.set("entry.citation", '"Foo"')
     fake.set("entry.url", '"/foo"')
-    monkeypatch.setattr(render_template, "redis_conn", None)
+    monkeypatch.setattr(metadata, "redis_conn", None)
     monkeypatch.setattr(
-        render_template.redis, "Redis", lambda host, port, decode_responses: fake
+        metadata.redis, "Redis", lambda host, port, decode_responses: fake
     )
-    assert render_template._build_from_redis("entry.") == {
+    assert metadata.build_from_redis("entry.") == {
         "citation": "Foo",
         "url": "/foo",
     }
@@ -57,7 +58,7 @@ def test_build_from_redis_initialises(monkeypatch):
 def test_convert_lists():
     """Nested dict with numeric keys -> lists."""
     obj = {"0": {"0": "x", "1": "y"}, "1": [{"0": "z"}]}
-    assert render_template._convert_lists(obj) == [["x", "y"], [["z"]]]
+    assert metadata._convert_lists(obj) == [["x", "y"], [["z"]]]
 
 
 def test_get_cached_metadata_caches(monkeypatch):
