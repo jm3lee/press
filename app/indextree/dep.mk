@@ -26,7 +26,8 @@ build/examples/indextree:
 	mkdir -p $@
 
 build/examples/indextree/demo.json: | build/examples/indextree
-	indextree-json src > $@
+	#indextree-json src > $@
+	touch $@
 
 # Helper rule for copying example JSON into build tree
 build/%.json: %.json
