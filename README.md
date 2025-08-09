@@ -16,6 +16,8 @@ The build relies on three cooperating Makefiles:
 - **`dep.mk`** – optional file included by `build.mk` for custom dependencies.
   See [docs/guides/dep-mk.md](docs/guides/dep-mk.md).
 
+For a step-by-step walkthrough of the build pipeline, see [docs/guides/build-process.md](docs/guides/build-process.md).
+
 These Makefiles centralize key directories through variables so paths can be
 adjusted in one place:
 
