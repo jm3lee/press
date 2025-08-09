@@ -15,6 +15,6 @@ for details on the structure of this metadata.
   citations. When multiple entries share the same author and year their page
   numbers are combined.
 
-These helpers live in `app/shell/py/pie/pie/render_jinja_template.py` and are
+These helpers live in `app/shell/py/pie/pie/render/jinja.py` and are
 registered with the Jinja environment by `create_env()`.
 

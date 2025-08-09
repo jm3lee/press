@@ -1,5 +1,5 @@
 import pytest
-from pie import render_jinja_template as render_template
+from pie.render import jinja as render_template
 
 
 def test_get_desc_returns_metadata(monkeypatch):

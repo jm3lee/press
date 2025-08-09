@@ -10,7 +10,7 @@ The most commonly used modules are:
 * :mod:`update.index` – update an existing index file with new entries.
 * :mod:`filter.include` – preprocess Markdown and expand custom ``include``
   directives.
-* :mod:`render_jinja_template` – render Jinja templates with Press metadata.
+* :mod:`render.jinja` – render Jinja templates with Press metadata.
 * :mod:`render_study_json` – convert an index tree to a JSON structure used by
   study tools.
 * :mod:`gen_markdown_index` – generate a Markdown index from YAML metadata.
@@ -30,7 +30,7 @@ __all__ = [
     "build_index",
     "filter",
     "metadata",
-    "render_jinja_template",
+    "render",
     "render_study_json",
     "gen_markdown_index",
     "process_yaml",

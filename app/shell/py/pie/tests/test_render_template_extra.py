@@ -4,7 +4,7 @@ from pathlib import Path
 import fakeredis
 import pytest
 
-from pie import render_jinja_template as render_template
+from pie.render import jinja as render_template
 from pie import metadata
 
 
