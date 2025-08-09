@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
-import shutil
 from typing import Sequence
 
 from jinja2 import Environment
@@ -38,8 +37,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         "docker-compose.yml": "docker-compose.yml.jinja",
         "src/index.md": "index.md.jinja",
         "src/index.yml": "index.yml.jinja",
+        "src/style.css": "style.css.jinja",
+        "src/pandoc-template.html": "pandoc-template.html.jinja",
         "README.md": "README.md.jinja",
         "app/shell/Dockerfile": "shell.Dockerfile.jinja",
+        "redo.mk": "redo.mk.jinja",
     }
 
     for rel_path, template_name in files.items():
@@ -48,14 +50,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         template_text = (template_dir / template_name).read_text(encoding="utf-8")
         content = env.from_string(template_text).render()
         target.write_text(content, encoding="utf-8")
-
-    # Copy redo.mk from repository root
-    for parent in Path(__file__).resolve().parents:
-        source = parent / "redo.mk"
-        if source.exists():
-            shutil.copy(source, root / "redo.mk")
-            break
-
 
     logger.info("Created project scaffolding", path=str(root))
     return 0
