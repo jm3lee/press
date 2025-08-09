@@ -18,8 +18,8 @@ The most commonly used modules are:
 * :mod:`detect_html_dicts` – identify dictionary-like data structures within
   HTML snippets.
 * :mod:`picasso` – bundle assets for diagrams and interactive code examples.
-* :mod:`check_page_title` – ensure HTML files contain non-empty ``<h1>`` tags.
-* :mod:`check_post_build` – verify that expected build artifacts exist.
+* :mod:`check.page_title` – ensure HTML files contain non-empty ``<h1>`` tags.
+* :mod:`check.post_build` – verify that expected build artifacts exist.
 * :mod:`emojify` – convert ``:emoji:`` codes to Unicode characters.
 
 Use ``help(pie.<module>)`` to view documentation for any of the individual
@@ -37,7 +37,7 @@ __all__ = [
     "process_yaml",
     "detect_html_dicts",
     "picasso",
-    "check_page_title",
-    "check_post_build",
+    "check",
+    "update",
     "emojify",
 ]

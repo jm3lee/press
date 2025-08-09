@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from pie import update_pubdate
+from pie.update import pubdate as update_pubdate
 from pie.utils import get_pubdate
 
 
