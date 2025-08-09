@@ -94,7 +94,7 @@ clean: ## Remove everything under build/
 	$(Q)-rm -f $(BUILD_DIR)/.update-index
 
 .PHONY: distclean
-distclean: clean
+distclean: clean ## Remove .init markers and clear Dragonfly index cache
 	$(call status,Remove .init)
 	$(Q)-rm -f `find app/ -name .init`
 	$(call status,Empty Index Cache)
