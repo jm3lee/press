@@ -173,6 +173,22 @@ external URLs in YAML, refer to [docs/reference/link-metadata.md](docs/reference
 - **Inline metadata**
   Embed the YAML block directly at the top of `quickstart.md`.
 
+### Loading metadata in Python
+
+Use the helper :func:`pie.metadata.load_metadata_pair` to merge metadata from
+Markdown and YAML files:
+
+```python
+from pathlib import Path
+from pie.metadata import load_metadata_pair
+
+meta = load_metadata_pair(Path("posts/intro/index.yml"))
+print(meta["id"], meta["path"])
+```
+
+The function reads `index.yml` and `index.md` (if present), preferring values
+from YAML when keys conflict.
+
 ## picasso
 
 `picasso` scans YAML metadata files and generates Makefile rules to render them

@@ -15,19 +15,44 @@ from flatten_dict import unflatten
 from pie import build_index
 from pie.logging import logger
 
+# Global connection reused by helper functions.  It is initialised lazily so
+# unit tests can swap in a fake client.
 redis_conn: redis.Redis | None = None
 
 
-def _get_redis_value(key: str, *, required: bool = False):
-    """Return the decoded value for ``key`` from ``redis_conn``."""
+def _get_conn() -> redis.Redis:
+    """Return a Redis connection using environment configuration.
+
+    Examples
+    --------
+    >>> conn = _get_conn()
+    >>> isinstance(conn, redis.Redis)
+    True
+    """
 
     global redis_conn
     if redis_conn is None:
         host = os.getenv("REDIS_HOST", "dragonfly")
         port = int(os.getenv("REDIS_PORT", "6379"))
         redis_conn = redis.Redis(host=host, port=port, decode_responses=True)
+    return redis_conn
+
+
+def _get_redis_value(key: str, *, required: bool = False):
+    """Return the decoded value for ``key`` from Redis.
+
+    Examples
+    --------
+    >>> conn = _get_conn()
+    >>> conn.set("example", "1")
+    True
+    >>> _get_redis_value("example")
+    1
+    """
+
+    conn = _get_conn()
     try:
-        val = redis_conn.get(key)
+        val = conn.get(key)
     except Exception as exc:
         logger.error("Redis lookup failed", key=key, exception=str(exc))
         raise SystemExit(1)
@@ -45,7 +70,13 @@ def _get_redis_value(key: str, *, required: bool = False):
 
 
 def _convert_lists(obj):
-    """Recursively convert dictionaries with integer keys to lists."""
+    """Recursively convert dictionaries with integer keys to lists.
+
+    Example
+    -------
+    >>> _convert_lists({"0": "a", "2": {"0": "b"}})
+    ['a', None, ['b']]
+    """
 
     if isinstance(obj, dict):
         if obj and all(isinstance(k, str) and k.isdigit() for k in obj):
@@ -60,15 +91,20 @@ def _convert_lists(obj):
 
 
 def build_from_redis(prefix: str) -> dict | list | None:
-    """Return a nested structure for all keys starting with ``prefix``."""
+    """Return a nested structure for all keys starting with ``prefix``.
 
-    global redis_conn
-    if redis_conn is None:
-        host = os.getenv("REDIS_HOST", "dragonfly")
-        port = int(os.getenv("REDIS_PORT", "6379"))
-        redis_conn = redis.Redis(host=host, port=port, decode_responses=True)
+    Example
+    -------
+    >>> conn = _get_conn()
+    >>> conn.mset({"entry.1.title": '"Hi"'})
+    True
+    >>> build_from_redis("entry.")
+    {'1': {'title': 'Hi'}}
+    """
 
-    keys = redis_conn.keys(prefix + "*")
+    conn = _get_conn()
+
+    keys = conn.keys(prefix + "*")
     if not keys:
         return None
 
@@ -86,18 +122,22 @@ def get_metadata_by_path(filepath: str, keypath: str) -> Any | None:
 
     The function first looks up the document ``id`` stored under ``filepath``
     in Redis and then retrieves ``<id>.<keypath>``.
+
+    Example
+    -------
+    >>> conn = _get_conn()
+    >>> conn.mset({"doc.md": "123", "123.title": '"Doc"'})
+    True
+    >>> get_metadata_by_path("doc.md", "title")
+    'Doc'
     """
 
-    global redis_conn
-    if redis_conn is None:
-        host = os.getenv("REDIS_HOST", "dragonfly")
-        port = int(os.getenv("REDIS_PORT", "6379"))
-        redis_conn = redis.Redis(host=host, port=port, decode_responses=True)
+    conn = _get_conn()
 
-    doc_id = redis_conn.get(filepath)
+    doc_id = conn.get(filepath)
     if not doc_id:
         return None
-    return redis_conn.get(f"{doc_id}.{keypath}")
+    return conn.get(f"{doc_id}.{keypath}")
 
 
 def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
@@ -107,6 +147,15 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
     the metadata from each file is combined. Values from YAML override those
     from Markdown when keys conflict and a :class:`UserWarning` is emitted.
     Returns ``None`` if neither file contains metadata.
+
+    Example
+    -------
+    >>> (tmp / 'post.md').write_text('---\nname: Post\n---\n')
+    17
+    >>> (tmp / 'post.yml').write_text('title: Example')
+    17
+    >>> load_metadata_pair(tmp / 'post.yml')
+    {'name': 'Post', 'title': 'Example', 'id': 'post', 'path': ['post.yml', 'post.md']}
     """
 
     base = path.with_suffix("")

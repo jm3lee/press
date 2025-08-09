@@ -7,6 +7,14 @@ or changed. For each path it locates the associated Markdown and YAML
 metadata pair using `load_metadata_pair` and replaces the `pubdate` field in
 Markdown frontmatter or metadata YAML with today's date in the format `%b %d, %Y`.
 
+```python
+from pathlib import Path
+from pie.metadata import load_metadata_pair
+
+# Inspect the metadata for a document pair before it is updated
+load_metadata_pair(Path("docs/post/index.yml"))
+```
+
 ```bash
 update-pubdate [-l LOGFILE]
 ```
