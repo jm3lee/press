@@ -19,7 +19,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import redis
 from pie.logging import logger, add_log_argument, setup_file_logger
-from pie.load_metadata import load_metadata_pair
+from pie.metadata import load_metadata_pair
 
 
 def load_index(path: str | Path) -> Mapping[str, Mapping[str, Any]]:
