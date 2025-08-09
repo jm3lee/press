@@ -4,13 +4,12 @@ import json
 from pathlib import Path
 
 from pie.index_tree import walk, getopt_link, getopt_show
-from pie.metadata import load_metadata_pair
 
 
 def process_dir(directory: Path):
     """Recursively process *directory* to yield structured entries."""
     entries = sorted(
-        walk(directory, loader=load_metadata_pair),
+        walk(directory),
         key=lambda x: x[0]["title"].lower(),
     )
     for meta, path in entries:
