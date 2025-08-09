@@ -18,7 +18,7 @@ setup(
     entry_points={
         'console_scripts': [
             'build-index=pie.build_index:main',
-            'update-index=pie.update_index:main',
+            'update-index=pie.update.index:main',
             'update-pubdate=pie.update.pubdate:main',
             'update-author=pie.update.author:main',
             'picasso=pie.picasso:main',

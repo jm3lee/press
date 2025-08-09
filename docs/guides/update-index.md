@@ -16,4 +16,15 @@ update-index index.json [--host HOST] [--port PORT] [-l LOGFILE]
 `update-index` also reads the `REDIS_HOST` and `REDIS_PORT` environment
 variables when `--host` or `--port` are not specified.
 
+## Python API
+
+The `update-index` CLI is implemented in `pie.update.index`. Invoke it directly
+when integrating with other Python code:
+
+```python
+from pie.update import index
+
+index.main(["index.json"])
+```
+
 When a directory is given, `update-index` scans recursively for `.md`, `.yml`, and `.yaml` files, processing each Markdown/YAML pair only once. The command expects an index produced by [`build-index`](build-index.md). Entries are written to the configured Redis instance using pipelined batch writes, with each value stored under its own key, including `id.path` entries pointing to the original files.

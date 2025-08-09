@@ -3,7 +3,7 @@ import os
 import threading
 import fakeredis
 import pytest
-from pie import update_index
+from pie.update import index as update_index
 
 
 def test_main_inserts_keys(tmp_path, monkeypatch):
