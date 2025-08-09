@@ -317,3 +317,7 @@ dd > p {
 ul.examples {
   list-style: none;
 }
+
+pre {
+    overflow: auto;
+}
