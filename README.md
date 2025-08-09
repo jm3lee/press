@@ -96,6 +96,22 @@ docker compose --profile pdoc up pdoc
 
 Open <http://localhost:8080> to view the documentation.
 
+## Creating projects and posts
+
+Use the `create-site` command to scaffold a new Press project:
+
+```bash
+create-site my-site
+```
+
+To add a new post with Markdown and YAML metadata, run:
+
+```bash
+create-post path/to/post
+```
+
+These utilities live in the `pie.create.site` and `pie.create.post` modules.
+
 ## Redis Configuration
 
 The build tools connect to DragonflyDB/Redis using the `REDIS_HOST` and

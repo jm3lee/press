@@ -4,13 +4,13 @@ from pathlib import Path
 
 import yaml
 
-from pie import create_post
+from pie.create import post
 from pie.utils import get_pubdate
 
 
 def test_create_post_creates_files(tmp_path: Path) -> None:
     target = tmp_path / "blog" / "my-post"
-    create_post.main([str(target)])
+    post.main([str(target)])
 
     md_file = target.with_suffix(".md")
     yml_file = target.with_suffix(".yml")
