@@ -1,6 +1,6 @@
 """Shared helpers for metadata update scripts.
 
-These utilities power :mod:`pie.update_author` and :mod:`pie.update_pubdate` by
+These utilities power :mod:`pie.update.author` and :mod:`pie.update.pubdate` by
 providing common routines for discovering changed files, modifying metadata, and
 configuring log output.
 """

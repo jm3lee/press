@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from pie import update_author
+from pie.update import author as update_author
 
 
 def test_updates_yaml_from_markdown_change(tmp_path: Path, monkeypatch, capsys) -> None:

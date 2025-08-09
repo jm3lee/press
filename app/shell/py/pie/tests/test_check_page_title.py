@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from pie import check_page_title
+from pie.check import page_title as check_page_title
 
 
 def test_main_pass(tmp_path: Path) -> None:
