@@ -1,4 +1,4 @@
-from pie import check_post_build
+from pie.check import post_build as check_post_build
 
 
 def make_cfg(path):
