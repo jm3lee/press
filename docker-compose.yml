@@ -33,6 +33,7 @@ services:
     entrypoint: ["/app/bin/sync"]
     environment:
       S3_BUCKET_PATH: ${S3_BUCKET_PATH:-s3://press}
+      S3CFG_PATH: ${S3CFG_PATH:-/root/.s3cfg}
     volumes:
       - ../s3:/s3
 
@@ -42,6 +43,7 @@ services:
     entrypoint: ["/app/bin/seed"]
     environment:
       S3_BUCKET_PATH: ${S3_BUCKET_PATH:-s3://press}
+      S3CFG_PATH: ${S3CFG_PATH:-/root/.s3cfg}
     volumes:
       - ../s3:/s3
 

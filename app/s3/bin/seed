@@ -2,4 +2,5 @@
 
 SRC="${S3_BUCKET_PATH:-s3://press}"
 SRC="${SRC%/}/"
-s3cmd sync "$SRC" s3/
+CONFIG="${S3CFG_PATH:-/root/.s3cfg}"
+s3cmd --config "$CONFIG" sync "$SRC" s3/

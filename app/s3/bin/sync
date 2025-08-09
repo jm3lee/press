@@ -14,11 +14,12 @@ trap _on_signal SIGINT SIGTERM SIGHUP
 echo "Starting work… (PID $$)"
 
 # Example loop with interruptible sleep
+CONFIG="${S3CFG_PATH:-/root/.s3cfg}"
 while true; do
     echo "Starting sync $(date +'%T')"
     DEST="${S3_BUCKET_PATH:-s3://press}"
     DEST="${DEST%/}/"
-    s3cmd sync \
+    s3cmd --config "$CONFIG" sync \
         --delete-removed \
         --delete-after \
         --acl-public \
