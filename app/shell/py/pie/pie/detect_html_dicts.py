@@ -39,7 +39,7 @@ def main(argv: list[str] | None = None) -> int:
             logger.error("Found Python dictionary in HTML text", line=line)
             return 1
 
-    logger.info("No Python dictionaries found in HTML.")
+    logger.debug("No Python dictionaries found in HTML.")
     return 0
 
 

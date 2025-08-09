@@ -39,7 +39,7 @@ def main(argv: Iterable[str] | None = None) -> None:
 
     write_yaml(metadata, args.output)
 
-    logger.info("Processed YAML written", path=args.output)
+    logger.debug("Processed YAML written", path=args.output)
 
 
 if __name__ == "__main__":
