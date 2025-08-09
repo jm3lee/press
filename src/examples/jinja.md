@@ -5,22 +5,67 @@ id: jinja
 citation: jinja
 ---
 
-## For-loop
+This tutorial introduces the basics of embedding Jinja in Markdown. Each
+snippet shows the template followed by its rendered output.
 
-Markdown files can include Jinja2 templates. This loop generates three list items:
+## Variables
 
+Insert the value of a variable:
+
+```jinja
+{% raw %}{{ "Hello, world!" }}{% endraw %}
 ```
-{% raw %}
-{% for i in range(0, 3): -%}
+
+renders as:
+
+{{ "Hello, world!" }}
+
+## For loop
+
+Generate repeated content with a loop:
+
+```jinja
+{% raw %}{% for i in range(0, 3) -%}
+- Jinja test {{ i }}
+{% endfor %}{% endraw %}
+```
+
+Output:
+
+{% for i in range(0, 3) -%}
 - Jinja test {{ i }}
 {% endfor %}
-{% endraw %}
+
+## Conditional
+
+Only show text when a condition is true:
+
+```jinja
+{% raw %}{% if 2 > 1 %}Two is greater than one{% endif %}{% endraw %}
 ```
 
-When the page is built the loop outputs items numbered 0–2.
+Output:
 
-Example output:
+{% if 2 > 1 %}Two is greater than one{% endif %}
 
-{% for i in range(0, 3): -%}
-- Jinja test {{ i }}
-{% endfor %}
+## Filters
+
+Filters transform values. This uses the built-in `upper` filter:
+
+```jinja
+{% raw %}{{ "press" | upper }}{% endraw %}
+```
+
+Output:
+
+{{ "press" | upper }}
+
+Custom filters work the same way. The `link` filter turns metadata into an anchor tag:
+
+```jinja
+{% raw %}{{ {"citation": "Quickstart", "url": "/quickstart.html"} | link }}{% endraw %}
+```
+
+Output:
+
+{{ {"citation": "Quickstart", "url": "/quickstart.html"} | link }}

@@ -78,3 +78,15 @@ renders as:
 
 Looks up a description object from the build index. If the name is not present,
 `get_desc` returns the name unchanged.
+
+Example:
+
+```jinja
+{{ "hull" | get_desc }}
+```
+
+renders as:
+
+```json
+{{ "hull" | get_desc }}
+```
