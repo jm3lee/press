@@ -45,7 +45,7 @@ Use the `cite` global to insert Chicago‑style parenthetical citations.
 Single source:
 
 ```jinja
-{% raw %}
+{% raw -%}
 {{ cite("hull") }}
 {% endraw %}
 ```
@@ -57,7 +57,7 @@ renders as:
 Multiple sources combine with semicolons:
 
 ```jinja
-{% raw %}
+{% raw -%}
 {{ cite("hull", "doe") }}
 {% endraw %}
 ```
@@ -70,7 +70,7 @@ To override metadata—for example, to cite a different page—you can pass a
 dictionary directly:
 
 ```jinja
-{% raw %}
+{% raw -%}
 {{ cite({"citation": {"author": "Hull", "year": 2016, "page": 350}, "url": "/hull"}) }}
 {% endraw %}
 ```
@@ -84,7 +84,7 @@ The `link` filter turns metadata dictionaries or IDs into HTML anchors.
 Using a dictionary:
 
 ```jinja
-{% raw %}
+{% raw -%}
 {{ {"citation": {"author": "hull", "year": 2016, "page": 307}, "url": "/hull"} | link }}
 {% endraw %}
 ```
@@ -96,7 +96,7 @@ renders as:
 Passing an ID fetches the metadata automatically:
 
 ```jinja
-{% raw %}
+{% raw -%}
 {{ "doe" | link }}
 {% endraw %}
 ```

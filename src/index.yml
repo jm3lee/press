@@ -4,6 +4,7 @@ author: Brian Lee
 description: Example home page
 og_image: /img/home.png
 url: https://example.com/
+toc: false
 meta:
   - property: og:title
     content: Example Home
