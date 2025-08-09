@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from pie import update_common
+from pie.update import common
 
 
 def test_get_changed_files_parses_git_status(monkeypatch: object) -> None:
@@ -11,9 +11,9 @@ def test_get_changed_files_parses_git_status(monkeypatch: object) -> None:
         class Result:
             stdout = " M src/doc.md\n?? src/untracked.txt\nA src/doc.yml\n"
         return Result()
-    monkeypatch.setattr(update_common.subprocess, "run", fake_run)
+    monkeypatch.setattr(common.subprocess, "run", fake_run)
 
-    paths = update_common.get_changed_files()
+    paths = common.get_changed_files()
     assert paths == [
         Path("src/doc.md"),
         Path("src/doc.yml"),
@@ -25,7 +25,7 @@ def test_replace_field_updates_yaml(tmp_path: Path) -> None:
     yml = tmp_path / "doc.yml"
     yml.write_text("title: T\nauthor: Old\n", encoding="utf-8")
 
-    changed, old = update_common.replace_field(yml, "author", "New")
+    changed, old = common.replace_field(yml, "author", "New")
     assert changed is True
     assert old == "Old"
     assert "author: New" in yml.read_text(encoding="utf-8")
@@ -36,7 +36,7 @@ def test_replace_field_updates_markdown_frontmatter(tmp_path: Path) -> None:
     md = tmp_path / "doc.md"
     md.write_text("---\ntitle: T\nauthor: Old\n---\n", encoding="utf-8")
 
-    changed, old = update_common.replace_field(md, "author", "New")
+    changed, old = common.replace_field(md, "author", "New")
     assert changed is True
     assert old == "Old"
     assert "author: New" in md.read_text(encoding="utf-8")
@@ -52,7 +52,7 @@ def test_update_files_updates_all_related(tmp_path: Path, monkeypatch: object) -
     yml.write_text("name: T\ntitle: T\nauthor: Old\n", encoding="utf-8")
 
     monkeypatch.chdir(tmp_path)
-    messages, checked = update_common.update_files([Path("src/doc.md")], "author", "New")
+    messages, checked = common.update_files([Path("src/doc.md")], "author", "New")
     assert checked == 2
     assert set(messages) == {
         "src/doc.md: Old -> New",
