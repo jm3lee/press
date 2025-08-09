@@ -3,18 +3,82 @@
 
 from __future__ import annotations
 
+import json
 import os
 import warnings
 from pathlib import Path
 from typing import Any, Mapping
 
 import redis
+from flatten_dict import unflatten
 
 from pie import build_index
 from pie.logging import logger
-from pie.utils import read_yaml
 
 redis_conn: redis.Redis | None = None
+
+
+def _get_redis_value(key: str, *, required: bool = False):
+    """Return the decoded value for ``key`` from ``redis_conn``."""
+
+    global redis_conn
+    if redis_conn is None:
+        host = os.getenv("REDIS_HOST", "dragonfly")
+        port = int(os.getenv("REDIS_PORT", "6379"))
+        redis_conn = redis.Redis(host=host, port=port, decode_responses=True)
+    try:
+        val = redis_conn.get(key)
+    except Exception as exc:
+        logger.error("Redis lookup failed", key=key, exception=str(exc))
+        raise SystemExit(1)
+
+    if val is None:
+        if required:
+            logger.error("Missing metadata", key=key)
+            raise SystemExit(1)
+        return None
+
+    try:
+        return json.loads(val)
+    except Exception:
+        return val
+
+
+def _convert_lists(obj):
+    """Recursively convert dictionaries with integer keys to lists."""
+
+    if isinstance(obj, dict):
+        if obj and all(isinstance(k, str) and k.isdigit() for k in obj):
+            arr = [None] * (max(int(k) for k in obj) + 1)
+            for k, v in obj.items():
+                arr[int(k)] = _convert_lists(v)
+            return arr
+        return {k: _convert_lists(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_convert_lists(v) for v in obj]
+    return obj
+
+
+def build_from_redis(prefix: str) -> dict | list | None:
+    """Return a nested structure for all keys starting with ``prefix``."""
+
+    global redis_conn
+    if redis_conn is None:
+        host = os.getenv("REDIS_HOST", "dragonfly")
+        port = int(os.getenv("REDIS_PORT", "6379"))
+        redis_conn = redis.Redis(host=host, port=port, decode_responses=True)
+
+    keys = redis_conn.keys(prefix + "*")
+    if not keys:
+        return None
+
+    flat = {}
+    for k in keys:
+        val = _get_redis_value(k, required=True)
+        flat[k[len(prefix) :].lstrip(".")] = val
+
+    data = unflatten(flat, splitter="dot")
+    return _convert_lists(data)
 
 
 def get_metadata_by_path(filepath: str, keypath: str) -> Any | None:
@@ -100,26 +164,3 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
     return combined
 
 
-def load_yaml_metadata(path: Path) -> Mapping[str, Any] | None:
-    """Return metadata loaded from a YAML file.
-
-    Missing fields like ``id`` and ``url`` are generated when possible to
-    provide a consistent shape with :func:`load_metadata_pair`.
-    """
-
-    try:
-        data = read_yaml(str(path)) or {}
-    except Exception as exc:  # pragma: no cover - warning path
-        warnings.warn(f"Invalid YAML: {path} ({exc})")
-        return None
-
-    if "id" not in data:
-        data["id"] = path.with_suffix("").name
-
-    if "url" not in data:
-        try:
-            data["url"] = build_index.get_url(str(path))
-        except Exception:
-            pass
-
-    return data

@@ -1,6 +1,7 @@
 import pytest
 import fakeredis
 from pie import render_jinja_template as render_template
+from pie import metadata
 
 
 def test_default_class():
@@ -49,7 +50,7 @@ def test_linktitle_uses_redis(monkeypatch):
     fake = fakeredis.FakeRedis(decode_responses=True)
     fake.set("item.citation", "Item")
     fake.set("item.url", "/i")
-    monkeypatch.setattr(render_template, "redis_conn", fake)
+    monkeypatch.setattr(metadata, "redis_conn", fake)
     render_template.index_json = {}
 
     html = render_template.render_link("item", style="title")
@@ -60,7 +61,7 @@ def test_linktitle_uses_redis(monkeypatch):
 def test_linktitle_missing_raises(monkeypatch):
     """Unknown key -> SystemExit."""
     fake = fakeredis.FakeRedis(decode_responses=True)
-    monkeypatch.setattr(render_template, "redis_conn", fake)
+    monkeypatch.setattr(metadata, "redis_conn", fake)
     render_template.index_json = {}
 
     with pytest.raises(SystemExit):
@@ -81,7 +82,7 @@ def test_link_uses_redis_tracking_and_ignores_icon(monkeypatch):
     fake.set("entry.url", "/link")
     fake.set("entry.icon", "ICON")
     fake.set("entry.link.tracking", "false")
-    monkeypatch.setattr(render_template, "redis_conn", fake)
+    monkeypatch.setattr(metadata, "redis_conn", fake)
     monkeypatch.setattr(render_template, "_metadata_cache", {})
     render_template.index_json = {}
 
@@ -99,7 +100,7 @@ def test_linkcap_includes_icon_and_capitalizes(monkeypatch):
     fake.set("entry.url", "/link")
     fake.set("entry.icon", "ICON")
     fake.set("entry.link.tracking", "false")
-    monkeypatch.setattr(render_template, "redis_conn", fake)
+    monkeypatch.setattr(metadata, "redis_conn", fake)
     monkeypatch.setattr(render_template, "_metadata_cache", {})
     render_template.index_json = {}
 
@@ -116,7 +117,7 @@ def test_linkicon_includes_icon_without_capitalization(monkeypatch):
     fake.set("entry.url", "/link")
     fake.set("entry.icon", "ICON")
     fake.set("entry.link.tracking", "false")
-    monkeypatch.setattr(render_template, "redis_conn", fake)
+    monkeypatch.setattr(metadata, "redis_conn", fake)
     monkeypatch.setattr(render_template, "_metadata_cache", {})
     render_template.index_json = {}
 
@@ -133,7 +134,7 @@ def test_link_icon_title_capitalizes_each_word_and_includes_icon(monkeypatch):
     fake.set("entry.url", "/link")
     fake.set("entry.icon", "ICON")
     fake.set("entry.link.tracking", "false")
-    monkeypatch.setattr(render_template, "redis_conn", fake)
+    monkeypatch.setattr(metadata, "redis_conn", fake)
     monkeypatch.setattr(render_template, "_metadata_cache", {})
     render_template.index_json = {}
 
@@ -149,7 +150,7 @@ def test_linkshort_uses_short_citation_and_ignores_icon(monkeypatch):
     fake.set("entry.url", "/link")
     fake.set("entry.icon", "ICON")
     fake.set("entry.link.tracking", "false")
-    monkeypatch.setattr(render_template, "redis_conn", fake)
+    monkeypatch.setattr(metadata, "redis_conn", fake)
     render_template.index_json = {}
 
     html = render_template.render_link("entry", citation="short", use_icon=False)
@@ -165,7 +166,7 @@ def test_link_handles_citation_metadata(monkeypatch):
     fake.set("hull.citation.year", "2016")
     fake.set("hull.citation.page", "307")
     fake.set("hull.url", "/hull")
-    monkeypatch.setattr(render_template, "redis_conn", fake)
+    monkeypatch.setattr(metadata, "redis_conn", fake)
     render_template.index_json = {}
 
     html = render_template.link("hull")
@@ -184,7 +185,7 @@ def test_wrapper_accepts_anchor(monkeypatch):
     fake = fakeredis.FakeRedis(decode_responses=True)
     fake.set("entry.citation", "Foo")
     fake.set("entry.url", "/link")
-    monkeypatch.setattr(render_template, "redis_conn", fake)
+    monkeypatch.setattr(metadata, "redis_conn", fake)
     render_template.index_json = {}
 
     html = render_template.link("entry", anchor="top")
@@ -198,7 +199,7 @@ def test_cite_single(monkeypatch):
     fake.set("hull.citation.year", "2016")
     fake.set("hull.citation.page", "307")
     fake.set("hull.url", "/hull")
-    monkeypatch.setattr(render_template, "redis_conn", fake)
+    monkeypatch.setattr(metadata, "redis_conn", fake)
     render_template.index_json = {}
 
     html = render_template.cite("hull")
@@ -217,7 +218,7 @@ def test_cite_combines_pages(monkeypatch):
     fake.set("hull2.citation.year", "2016")
     fake.set("hull2.citation.page", "311")
     fake.set("hull2.url", "/hull")
-    monkeypatch.setattr(render_template, "redis_conn", fake)
+    monkeypatch.setattr(metadata, "redis_conn", fake)
     render_template.index_json = {}
 
     html = render_template.cite("hull1", "hull2")
@@ -236,7 +237,7 @@ def test_cite_multiple_sources(monkeypatch):
     fake.set("x.citation.year", "2016")
     fake.set("x.citation.page", "311")
     fake.set("x.url", "/x")
-    monkeypatch.setattr(render_template, "redis_conn", fake)
+    monkeypatch.setattr(metadata, "redis_conn", fake)
     render_template.index_json = {}
 
     html = render_template.cite("hull", "x")

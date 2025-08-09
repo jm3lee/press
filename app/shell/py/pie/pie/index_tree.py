@@ -4,7 +4,9 @@ import warnings
 from pathlib import Path
 from typing import Iterator, Mapping, Any, Tuple, Callable
 
-from pie.metadata import load_yaml_metadata
+from pie.metadata import get_metadata_by_path
+from pie import metadata
+from pie.logging import logger
 
 
 def getopt_link(meta: Mapping[str, Any]) -> bool:
@@ -19,9 +21,25 @@ def getopt_show(meta: Mapping[str, Any]) -> bool:
     return section.get("show", True)
 
 
+def load_from_redis(path: Path) -> Mapping[str, Any] | None:
+    """Fetch metadata for *path* from Redis."""
+
+    filepath = str(path)
+    doc_id = get_metadata_by_path(filepath, "id")
+    if not doc_id:
+        logger.debug("No doc_id found", path=filepath)
+        return None
+
+    meta = metadata.build_from_redis(f"{doc_id}.") or {}
+    if "id" not in meta:
+        meta["id"] = doc_id
+    logger.debug("Fetched metadata via build_from_redis", path=filepath, id=doc_id)
+    return meta
+
+
 def walk(
     directory: Path,
-    loader: Callable[[Path], Mapping[str, Any] | None] = load_yaml_metadata,
+    loader: Callable[[Path], Mapping[str, Any] | None] = load_from_redis,
 ) -> Iterator[Tuple[Mapping[str, Any], Path]]:
     """Yield metadata and path pairs for entries in *directory*."""
     for path in directory.iterdir():
