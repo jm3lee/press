@@ -5,11 +5,15 @@
 
 :root {
   /* Colors & borders */
-  --color-text: black;
-  --color-light: lightgrey;
-  --border-main: 1px solid var(--color-text);
-  --border-toc: 1px dotted var(--color-text);
-  --border-nav: 1px dashed var(--color-text);
+  --color-text: #2c3e50;
+  --color-background: #fdfdfd;
+  --color-primary: #3498db;
+  --color-secondary: #e74c3c;
+  --color-muted: #bdc3c7;
+  --color-light: #ecf0f1;
+  --border-main: 1px solid var(--color-muted);
+  --border-toc: 1px dotted var(--color-muted);
+  --border-nav: 1px dashed var(--color-muted);
   --border-radius: 10px;
 
   /* Typography */
@@ -52,13 +56,23 @@ body {
   max-width: var(--max-width-desktop);
   margin: auto;
   color: var(--color-text);
+  background: var(--color-background);
+  line-height: 1.6;
+  padding: var(--space-md);
 }
 
 @media (max-width: 1080px) {
   body {
     font-size: var(--font-size-mobile);  /* Larger text on mobile */
     max-width: var(--max-width-mobile);
+    padding: var(--space-sm);
   }
+}
+
+h1,
+h2,
+h3 {
+  color: var(--color-primary);
 }
 
 h1 {
@@ -82,6 +96,9 @@ h3 {
 
 nav.site-nav {
   margin-top: var(--space-lg);
+  background: var(--color-light);
+  padding: var(--space-sm);
+  border-radius: var(--border-radius);
 }
 
 nav.site-nav ul {
@@ -99,6 +116,19 @@ nav.site-nav li:not(:first-child) {
   margin-left: var(--space-sm);        /* Spacing between nav items */
   padding-left: var(--space-sm);
   border-left: var(--border-nav);
+}
+
+nav.site-nav a {
+  color: var(--color-primary);
+}
+
+@media (max-width: 600px) {
+  nav.site-nav li {
+    display: block;
+    margin: var(--space-sm) 0;
+    padding-left: 0;
+    border: none;
+  }
 }
 
 /* ==========================================================================
@@ -132,6 +162,10 @@ th,
 td {
   border: var(--border-main);
   padding: var(--space-md);
+}
+
+th {
+  background: var(--color-light);
 }
 
 .align-center {
@@ -197,20 +231,28 @@ nav:not(#TOC) ul li {
     margin-left: 1.5em; /* optional indentation adjustment */
 }
 
+
 .footer {
     padding-top: 1.5rem;
     padding-bottom: 1.5rem;
     text-align: center;
+    background: var(--color-light);
+    color: var(--color-text);
 }
 
 .pubdate {
   font-size: 0.8em;
-  color: darkgray;
+  color: var(--color-muted);
   margin-top: 0;
 }
 
 a {
   text-decoration: none;
+  color: var(--color-primary);
+}
+
+a:hover {
+  color: var(--color-secondary);
 }
 
 .image-container {
