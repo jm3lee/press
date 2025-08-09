@@ -7,7 +7,7 @@ from typing import Iterable, Sequence
 import yaml
 
 from pie.logging import add_log_argument, setup_file_logger
-from pie.update_common import get_changed_files, update_files as update_common_files
+from .common import get_changed_files, update_files as common_update_files
 
 __all__ = ["main"]
 
@@ -48,7 +48,7 @@ def update_files(paths: Iterable[Path], author: str) -> tuple[list[str], int]:
     entries for each modified file and ``checked`` is the number of files that
     were examined.
     """
-    return update_common_files(paths, "author", author)
+    return common_update_files(paths, "author", author)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
