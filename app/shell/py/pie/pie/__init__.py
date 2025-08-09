@@ -20,7 +20,7 @@ The most commonly used modules are:
 * :mod:`build.picasso` – bundle assets for diagrams and interactive code examples.
 * :mod:`check.page_title` – ensure HTML files contain non-empty ``<h1>`` tags.
 * :mod:`check.post_build` – verify that expected build artifacts exist.
-* :mod:`emojify` – convert ``:emoji:`` codes to Unicode characters.
+* :mod:`filter.emojify` – convert ``:emoji:`` codes to Unicode characters.
 
 Use ``help(pie.<module>)`` to view documentation for any of the individual
 modules.
@@ -37,5 +37,4 @@ __all__ = [
     "build",
     "check",
     "update",
-    "emojify",
 ]
