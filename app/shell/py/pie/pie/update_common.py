@@ -11,7 +11,7 @@ from pathlib import Path
 import subprocess
 from typing import Iterable
 
-from pie.load_metadata import load_metadata_pair
+from pie.metadata import load_metadata_pair
 from pie.logging import logger
 import os
 

@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from pie.index_tree import walk, getopt_link, getopt_show
-from pie.load_metadata import load_metadata_pair
+from pie.metadata import load_metadata_pair
 
 
 def process_dir(directory: Path):
