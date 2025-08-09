@@ -1,0 +1,23 @@
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+
+  nginx-dev:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./build:/usr/share/nginx/html
+
+  dragonfly:
+    image: docker.dragonflydb.io/dragonflydb/dragonfly
+
+  shell:
+    build: app/shell
+    entrypoint: ["bash"]
+
+    volumes:
+      - ./:/data
+      - ./src/dep.mk:/app/mk/dep.mk

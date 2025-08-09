@@ -9,10 +9,32 @@ def test_create_scaffolding(tmp_path: Path) -> None:
     target = tmp_path / "press-project"
     site.main([str(target)])
 
-    assert (target / "docker-compose.yml").exists()
+    compose = target / "docker-compose.yml"
+    assert compose.exists()
+    text = compose.read_text(encoding="utf-8")
+    for svc in ["nginx:", "nginx-dev:", "dragonfly:", "shell:"]:
+        assert svc in text
+    assert "    build: app/shell" in text
+    assert '    entrypoint: ["bash"]' in text
+    assert "      - ./:/data" in text
+    assert "      - ./src/dep.mk:/app/mk/dep.mk" in text
     assert (target / "src").is_dir()
+
+    assert (target / "redo.mk").exists()
+
+    shell_dockerfile = target / "app/shell/Dockerfile"
+    assert shell_dockerfile.exists()
+    assert shell_dockerfile.read_text(encoding="utf-8").startswith("FROM press-release")
+
+    index_md = target / "src/index.md"
+    assert index_md.exists()
+    md_text = index_md.read_text(encoding="utf-8")
+    assert "Welcome" in md_text
+    assert "view it locally" in md_text
+
+    assert (target / "src/index.yml").exists()
 
     readme = target / "README.md"
     assert readme.exists(), "README should be created"
-    text = readme.read_text(encoding="utf-8")
-    assert "docker-compose build" in text
+    readme_text = readme.read_text(encoding="utf-8")
+    assert "docker-compose build" in readme_text
