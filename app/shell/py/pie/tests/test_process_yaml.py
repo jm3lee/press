@@ -8,7 +8,7 @@ def test_main_generates_metadata(tmp_path):
     src = tmp_path / "src"
     src.mkdir()
     inp = src / "item.yml"
-    inp.write_text("{\"name\": \"Foo\"}")
+    inp.write_text("{\"title\": \"Foo\"}")
     out = tmp_path / "out.yml"
     os.chdir(tmp_path)
     try:
@@ -17,7 +17,7 @@ def test_main_generates_metadata(tmp_path):
         os.chdir("/tmp")
 
     data = yaml.safe_load(out.read_text())
-    assert data["name"] == "Foo"
+    assert data["title"] == "Foo"
     assert data["url"] == "/item.html"
     assert data["citation"] == "foo"
     assert data["id"] == "item"
@@ -28,7 +28,7 @@ def test_main_writes_log_file(tmp_path):
     src = tmp_path / "src"
     src.mkdir()
     inp = src / "doc.yml"
-    inp.write_text("{\"name\": \"Foo\"}")
+    inp.write_text("{\"title\": \"Foo\"}")
     out = tmp_path / "out.yml"
     log = tmp_path / "proc.log"
     os.chdir(tmp_path)

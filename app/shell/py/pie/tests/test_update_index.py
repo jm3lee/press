@@ -62,8 +62,8 @@ def test_main_directory_processes_yamls(tmp_path, monkeypatch):
     """Directory of yml -> Redis entries for each."""
     src = tmp_path / "src"
     src.mkdir()
-    (src / "a.yml").write_text('{"name": "Foo"}')
-    (src / "b.yml").write_text('{"name": "Bar"}')
+    (src / "a.yml").write_text('{"title": "Foo"}')
+    (src / "b.yml").write_text('{"title": "Bar"}')
 
     fake = fakeredis.FakeRedis(decode_responses=True)
     monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
@@ -74,9 +74,9 @@ def test_main_directory_processes_yamls(tmp_path, monkeypatch):
     finally:
         os.chdir("/tmp")
 
-    assert fake.get("a.name") == "Foo"
+    assert fake.get("a.title") == "Foo"
     assert fake.get("a.url") == "/a.html"
-    assert fake.get("b.name") == "Bar"
+    assert fake.get("b.title") == "Bar"
     assert fake.get("b.url") == "/b.html"
 
 
@@ -85,7 +85,7 @@ def test_main_single_yaml_file(tmp_path, monkeypatch):
     src = tmp_path / "src"
     src.mkdir()
     yml = src / "item.yml"
-    yml.write_text('{"name": "Foo"}')
+    yml.write_text('{"title": "Foo"}')
 
     fake = fakeredis.FakeRedis(decode_responses=True)
     monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
@@ -96,7 +96,7 @@ def test_main_single_yaml_file(tmp_path, monkeypatch):
     finally:
         os.chdir("/tmp")
 
-    assert fake.get("item.name") == "Foo"
+    assert fake.get("item.title") == "Foo"
     assert fake.get("item.url") == "/item.html"
 
 
@@ -107,7 +107,7 @@ def test_main_combines_md_and_yaml(tmp_path, monkeypatch):
     md = src / "doc.md"
     md.write_text("---\n{\"title\": \"Md\", \"foo\": \"bar\"}\n---\n")
     yml = src / "doc.yml"
-    yml.write_text('{"id": "doc", "title": "Yaml", "baz": "qux", "name": "D"}')
+    yml.write_text('{"id": "doc", "title": "Yaml", "baz": "qux"}')
 
     fake = fakeredis.FakeRedis(decode_responses=True)
     monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
@@ -129,7 +129,7 @@ def test_directory_pair_processed_once(tmp_path, monkeypatch):
     src = tmp_path / "src"
     src.mkdir()
     (src / "doc.md").write_text("---\n{\"title\": \"Md\"}\n---\n")
-    (src / "doc.yml").write_text('{"title": "Yaml", "name": "D"}')
+    (src / "doc.yml").write_text('{"title": "Yaml"}')
 
     fake = fakeredis.FakeRedis(decode_responses=True)
     monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
@@ -152,7 +152,7 @@ def test_main_inserts_path(tmp_path, monkeypatch):
     md = src / "doc.md"
     md.write_text("---\n{\"title\": \"Md\"}\n---\n")
     yml = src / "doc.yml"
-    yml.write_text('{"title": "Yaml", "name": "Y"}')
+    yml.write_text('{"title": "Yaml"}')
 
     fake = fakeredis.FakeRedis(decode_responses=True)
     monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
@@ -173,7 +173,7 @@ def test_main_adds_path_id_mapping(tmp_path, monkeypatch):
     md = src / "doc.md"
     md.write_text("---\n{\"title\": \"Md\"}\n---\n")
     yml = src / "doc.yml"
-    yml.write_text('{"title": "Yaml", "name": "Y"}')
+    yml.write_text('{"title": "Yaml"}')
 
     fake = fakeredis.FakeRedis(decode_responses=True)
     monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
@@ -211,8 +211,8 @@ def test_directory_processed_in_parallel(tmp_path, monkeypatch):
     """Concurrent processing still populates Redis."""
     src = tmp_path / "src"
     src.mkdir()
-    (src / "a.yml").write_text('{"name": "A"}')
-    (src / "b.yml").write_text('{"name": "B"}')
+    (src / "a.yml").write_text('{"title": "A"}')
+    (src / "b.yml").write_text('{"title": "B"}')
 
     fake = fakeredis.FakeRedis(decode_responses=True)
     monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
@@ -222,7 +222,7 @@ def test_directory_processed_in_parallel(tmp_path, monkeypatch):
     def fake_loader(path):
         barrier.wait(timeout=1)
         base = path.with_suffix("")
-        return {"id": base.name, "name": base.name}
+        return {"id": base.name, "title": base.name}
 
     monkeypatch.setattr(update_index, "load_metadata_pair", fake_loader)
 
@@ -232,16 +232,16 @@ def test_directory_processed_in_parallel(tmp_path, monkeypatch):
     finally:
         os.chdir("/tmp")
 
-    assert fake.get("a.name") == "a"
-    assert fake.get("b.name") == "b"
+    assert fake.get("a.title") == "a"
+    assert fake.get("b.title") == "b"
 
 
 def test_logs_execution_time_and_count(tmp_path, monkeypatch):
     """Logging shows file count and elapsed time."""
     src = tmp_path / "src"
     src.mkdir()
-    (src / "a.yml").write_text('{"name": "A"}')
-    (src / "b.yml").write_text('{"name": "B"}')
+    (src / "a.yml").write_text('{"title": "A"}')
+    (src / "b.yml").write_text('{"title": "B"}')
 
     fake = fakeredis.FakeRedis(decode_responses=True)
     monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)

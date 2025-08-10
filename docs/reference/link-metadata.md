@@ -4,12 +4,12 @@ This document explains how to describe external links using YAML files and how t
 
 ## Creating a Metadata File
 
-Place YAML files under `src/links/`. Each file defines at least a `name` and a `url` for the destination. Any additional fields become part of the build index. When the file does not specify an `id`, it is derived from the filename.
+Place YAML files under `src/links/`. Each file defines at least a `citation` and a `url` for the destination. Any additional fields become part of the build index. When the file does not specify an `id`, it is derived from the filename.
 
 Example `src/links/press_io_home.yml`:
 
 ```yaml
-name: press.io home
+citation: press.io home
 url: https://press.io
 link:
   tracking: false

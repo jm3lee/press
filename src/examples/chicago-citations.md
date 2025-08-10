@@ -18,7 +18,7 @@ Example metadata file:
 
 ```yaml
 # hull.yml
-name: Options, Futures, and Other Derivatives
+title: Options, Futures, and Other Derivatives
 citation:
   author: Hull
   year: 2016
@@ -30,7 +30,7 @@ Add as many sources as you need.  A second entry might look like:
 
 ```yaml
 # doe.yml
-name: Example Book
+title: Example Book
 citation:
   author: Doe
   year: 2019

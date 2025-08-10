@@ -52,7 +52,7 @@ def test_show_property(tmp_path, monkeypatch):
 
 def test_missing_id_uses_filename(tmp_path, monkeypatch):
     """Files without an explicit id derive it from the filename."""
-    (tmp_path / "foo.yml").write_text("name: Foo\ntitle: Foo\n")
+    (tmp_path / "foo.yml").write_text("title: Foo\n")
 
     def fake_meta(filepath: str, keypath: str):
         data = yaml.safe_load(Path(filepath).read_text()) or {}

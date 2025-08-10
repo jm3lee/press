@@ -19,6 +19,6 @@ def test_create_post_creates_files(tmp_path: Path) -> None:
     assert yml_file.exists(), "YAML file should be created"
 
     data = yaml.safe_load(yml_file.read_text(encoding="utf-8"))
-    assert set(data) == {"author", "pubdate", "title", "name"}
-    assert data["name"] == "my-post"
+    assert set(data) == {"author", "pubdate", "title"}
+    assert "name" not in data
     assert data["pubdate"] == get_pubdate()

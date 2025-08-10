@@ -108,9 +108,15 @@ def parse_yaml_metadata(filepath: str) -> Optional[Dict[str, Any]]:
         if "url" not in metadata:
             metadata["url"] = get_url(filepath)
         if "citation" not in metadata:
-            # Intentionally use indexing so we get an exception here.
-            # The name field must exist.
-            metadata["citation"] = metadata["name"].lower()
+            title = metadata.get("title")
+            if title:
+                metadata["citation"] = title.lower()
+            elif "name" in metadata:
+                logger.warning(
+                    "'name' field is deprecated; use 'title' instead",
+                    filename=filepath,
+                )
+                metadata["citation"] = metadata["name"].lower()
         if "id" not in metadata:
             base, _ = os.path.splitext(filepath)
             metadata["id"] = base.split(os.sep)[-1]
