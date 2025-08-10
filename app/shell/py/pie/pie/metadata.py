@@ -150,12 +150,12 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
 
     Example
     -------
-    >>> (tmp / 'post.md').write_text('---\nname: Post\n---\n')
+    >>> (tmp / 'post.md').write_text('---\ntitle: Draft\n---\n')
     17
     >>> (tmp / 'post.yml').write_text('title: Example')
     17
     >>> load_metadata_pair(tmp / 'post.yml')
-    {'name': 'Post', 'title': 'Example', 'id': 'post', 'path': ['post.yml', 'post.md']}
+    {'title': 'Example', 'id': 'post', 'path': ['post.yml', 'post.md']}
     """
 
     base = path.with_suffix("")

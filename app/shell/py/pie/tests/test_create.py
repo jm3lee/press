@@ -47,7 +47,7 @@ def test_create_scaffolding(tmp_path: Path) -> None:
     index_yml = target / "src/index.yml"
     assert index_yml.exists()
     yml_text = index_yml.read_text(encoding="utf-8")
-    assert "name:" in yml_text
+    assert "title:" in yml_text
 
     readme = target / "README.md"
     assert readme.exists(), "README should be created"
