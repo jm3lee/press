@@ -1,7 +1,7 @@
-# Jinja Filters for Link Formatting
+# Jinja Globals for Link Formatting
 
-Several build scripts provide custom Jinja filters that convert metadata
-dictionaries into HTML anchors. Each dictionary is pulled from
+Several build scripts provide custom Jinja globals that convert metadata
+descriptions into HTML anchors. Each dictionary is pulled from
 `index.json` and must include a `citation` field which supplies the anchor
 text, along with a `url` field. Optional keys like `icon`,
 `link.tracking`, and `link.class` customize the output.  For an overview of
@@ -9,7 +9,7 @@ these metadata fields, see [Metadata Fields](metadata-fields.md).
 
 ## `link`
 
-The `link` filter formats a metadata dictionary into an HTML anchor.  It
+The `link` global formats a metadata dictionary into an HTML anchor.  It
 accepts a few optional parameters to control the output:
 
 - `style` – controls capitalization of the citation text.  Use `"plain"`
@@ -22,15 +22,15 @@ accepts a few optional parameters to control the output:
   uses the main citation value; pass `"short"` to use `citation.short`.
 
 When the `citation` field is itself a mapping with `author`, `year`, and an
-optional `page`, the filter formats the text using Chicago style
+optional `page`, the helper formats the text using Chicago style
 (`"Author Year, Page"`) and encloses it in parentheses, matching the behaviour
 of the `cite` global.
 
 Example:
 
 ```jinja
-{{ {"citation": "deltoid tuberosity", "url": "/humerus.html"}
-   | link(style="title", anchor="deltoid_tuberosity") }}
+{{ link({"citation": "deltoid tuberosity", "url": "/humerus.html"},
+         style="title", anchor="deltoid_tuberosity") }}
 ```
 
 renders as:
@@ -42,7 +42,7 @@ renders as:
 Bibliographic citations render similarly:
 
 ```jinja
-{{ {"citation": {"author": "hull", "year": 2016, "page": 307}, "url": "/hull"} | link }}
+{{ link({"citation": {"author": "hull", "year": 2016, "page": 307}, "url": "/hull"}) }}
 ```
 
 produces:
@@ -51,21 +51,21 @@ produces:
 <a href="/hull" class="internal-link">(Hull 2016, 307)</a>
 ```
 
-When you pass a string instead of a dictionary, the filter fetches the
+When you pass a string instead of a dictionary, the helper fetches the
 corresponding metadata from Redis. The lookup retries a few times before
 aborting so templates are more resilient when entries are added concurrently.
 
-### Legacy filters
+### Legacy helpers
 
-Older filters such as `linktitle`, `linkcap`, `linkicon`, `link_icon_title`,
+Older globals such as `linktitle`, `linkcap`, `linkicon`, `link_icon_title`,
 and `linkshort` remain available for backward compatibility but are now thin
 wrappers around `link`.  They will be removed in a future release.
 
 Example:
 
 ```jinja
-{{ {"citation": "deltoid tuberosity", "url": "/humerus.html"}
-   | linktitle(anchor="deltoid_tuberosity") }}
+{{ linktitle({"citation": "deltoid tuberosity", "url": "/humerus.html"},
+             anchor="deltoid_tuberosity") }}
 ```
 
 renders as:
@@ -76,8 +76,8 @@ renders as:
 
 ## `get_desc`
 
-Looks up a description object from the build index. If the name is not present,
-`get_desc` returns the name unchanged.
+`get_desc` remains a Jinja filter. It looks up a description object from the
+build index and returns the name unchanged if it is not present.
 
 Example:
 
@@ -90,3 +90,9 @@ renders as:
 ```json
 {{ "hull" | get_desc }}
 ```
+
+## Migration script
+
+The `update-link-filters` console script performs a best-effort rewrite of
+legacy filter syntax into calls to these globals. It only handles simple
+single-line patterns, so review the results and adjust complex cases manually.

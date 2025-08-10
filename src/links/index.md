@@ -1,4 +1,4 @@
 ---
 title: Links
 ---
-{{"citation_1"|linkshort}}
+{{ linkshort("citation_1") }}

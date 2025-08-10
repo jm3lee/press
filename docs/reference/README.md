@@ -7,7 +7,7 @@ documents provide context for the task‑oriented
 ## Contents
 
 - [architecture.md](architecture.md) – overview of the site's architecture.
-- [jinja-filters.md](jinja-filters.md) – custom Jinja filters available to templates.
+- [link-globals.md](link-globals.md) – global Jinja helpers for link formatting.
 - [jinja-globals.md](jinja-globals.md) – global variables exposed to templates.
 - [keyterms.md](keyterms.md) – glossary of important terminology.
 - [link-metadata.md](link-metadata.md) – link metadata format and usage.
@@ -16,6 +16,7 @@ documents provide context for the task‑oriented
 - [update-author.md](update-author.md) – refresh the `author` field for existing documents.
 - [update-index.md](update-index.md) – insert index values into Redis.
 - [update-pubdate.md](update-pubdate.md) – update the `pubdate` field for modified files.
+- [update-link-filters.md](update-link-filters.md) – convert legacy `link*` filters into globals.
 
 For step‑by‑step workflows and tutorials, head back to the
 [guides](../guides/README.md).

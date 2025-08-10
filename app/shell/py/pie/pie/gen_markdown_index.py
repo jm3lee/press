@@ -20,7 +20,7 @@ def generate(directory: Path, level: int = 0) -> Iterator[str]:
         show = getopt_show(meta)
         if show:
             if link:
-                yield "  " * level + f'- {{{{"{entry_id}"|linktitle}}}}'
+                yield "  " * level + f'- {{{{ linktitle("{entry_id}") }}}}'
             else:
                 yield "  " * level + f"- {{{{'{title}'|title}}}}"
         if path.is_dir():

@@ -45,8 +45,8 @@ def test_show_property(tmp_path, monkeypatch):
 
     lines = list(generate(tmp_path))
     assert lines == [
-        '- {{"alpha"|linktitle}}',
-        '- {{"child"|linktitle}}',
+        '- {{ linktitle("alpha") }}',
+        '- {{ linktitle("child") }}',
     ]
 
 
@@ -80,4 +80,4 @@ def test_missing_id_uses_filename(tmp_path, monkeypatch):
 
     lines = list(generate(tmp_path))
 
-    assert lines == ['- {{"foo"|linktitle}}']
+    assert lines == ['- {{ linktitle("foo") }}']

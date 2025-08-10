@@ -60,12 +60,12 @@ Output:
 
 {{ "press" | upper }}
 
-Custom filters work the same way. The `link` filter turns metadata into an anchor tag:
+Custom globals work the same way. The `link` global turns metadata into an anchor tag:
 
 ```jinja
-{% raw %}{{ {"citation": "Quickstart", "url": "/quickstart.html"} | link }}{% endraw %}
+{% raw %}{{ link({"citation": "Quickstart", "url": "/quickstart.html"}) }}{% endraw %}
 ```
 
 Output:
 
-{{ {"citation": "Quickstart", "url": "/quickstart.html"} | link }}
+{{ link({"citation": "Quickstart", "url": "/quickstart.html"}) }}
