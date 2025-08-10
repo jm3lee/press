@@ -2,7 +2,7 @@ Welcome to the demo site for **Press**. Use the links below to explore key featu
 
 - [Quickstart](quickstart.md)
 - [Jinja Examples](examples/jinja.md)
-- [Link Filter Examples](examples/link-filters.md)
+- [Link Global Examples](examples/link-globals.md)
 - [Chicago Citation Examples](examples/chicago-citations.md)
 - [Index Tree Demo](examples/indextree/index.md)
 - [Quiz Demo](quiz/index.md)
@@ -19,9 +19,9 @@ The build pipeline runs `emojify` so colon codes are replaced with real emoji:
 
 For loops and other Jinja tricks see the [Jinja Examples](examples/jinja.md).
 
-## Link Filters
+## Link Globals
 
-The [Link Filter Examples](examples/link-filters.md) page shows how to format links using different filters.
+The [Link Global Examples](examples/link-globals.md) page shows how to format links using different helpers.
 
 ## Quiz Demo
 

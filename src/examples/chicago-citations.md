@@ -5,8 +5,8 @@ id: chicago-citations
 citation: chicago citations
 ---
 
-Demonstrates Chicago-style citations using the `cite` global and the
-`link` filter.
+Demonstrates Chicago-style citations using the `cite` and `link`
+globals.
 
 ## Creating citation metadata
 
@@ -77,29 +77,29 @@ dictionary directly:
 
 {{ cite({"citation": {"author": "Hull", "year": 2016, "page": 350}, "url": "/hull"}) }}
 
-## link filter
+## link global
 
-The `link` filter turns metadata dictionaries or IDs into HTML anchors.
+The `link` global turns metadata dictionaries or IDs into HTML anchors.
 
 Using a dictionary:
 
 ```jinja
 {% raw -%}
-{{ {"citation": {"author": "hull", "year": 2016, "page": 307}, "url": "/hull"} | link }}
+{{ link({"citation": {"author": "hull", "year": 2016, "page": 307}, "url": "/hull"}) }}
 {% endraw %}
 ```
 
 renders as:
 
-{{ {"citation": {"author": "hull", "year": 2016, "page": 307}, "url": "/hull"} | link }}
+{{ link({"citation": {"author": "hull", "year": 2016, "page": 307}, "url": "/hull"}) }}
 
 Passing an ID fetches the metadata automatically:
 
 ```jinja
 {% raw -%}
-{{ "doe" | link }}
+{{ link("doe") }}
 {% endraw %}
 ```
 
-{{ "doe" | link }}
+{{ link("doe") }}
 

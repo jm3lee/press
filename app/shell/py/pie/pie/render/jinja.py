@@ -327,19 +327,18 @@ def create_env():
     """Create and configure the Jinja2 environment."""
 
     env = Environment(loader=FileSystemLoader("/data"), undefined=StrictUndefined)
-    env.filters["link"] = render_link
-    env.filters["linktitle"] = linktitle
-    env.filters["linkcap"] = linkcap
-    env.filters["link_icon_title"] = link_icon_title
-    env.filters["linkicon"] = linkicon
-    env.filters["linkshort"] = linkshort
+    env.globals["link"] = render_link
+    env.globals["linktitle"] = linktitle
+    env.globals["linkcap"] = linkcap
+    env.globals["link_icon_title"] = link_icon_title
+    env.globals["linkicon"] = linkicon
+    env.globals["linkshort"] = linkshort
     env.filters["get_desc"] = get_desc
     env.globals["render_jinja"] = render_jinja
     env.globals["to_alpha_index"] = to_alpha_index
     env.globals["read_json"] = read_json
     env.globals["read_yaml"] = read_yaml
     env.globals["cite"] = cite
-    env.globals["linktitle"] = linktitle
     return env
 
 env = create_env()
