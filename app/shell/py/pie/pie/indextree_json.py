@@ -3,15 +3,18 @@
 import json
 from pathlib import Path
 
+from pie.logging import logger
+
 from pie.index_tree import walk, getopt_link, getopt_show
 
 
 def process_dir(directory: Path):
     """Recursively process *directory* to yield structured entries."""
-    entries = sorted(
-        walk(directory),
-        key=lambda x: x[0]["title"].lower(),
-    )
+    entries = list(walk(directory))
+    for meta, path in entries:
+        if "title" not in meta:
+            raise ValueError(f"Missing 'title' in {path}")
+    entries.sort(key=lambda x: x[0]["title"].lower())
     for meta, path in entries:
         entry_id = meta["id"]
         entry_title = meta["title"]
@@ -39,7 +42,11 @@ def main():
     import sys
 
     root_dir = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(".")
-    data = list(process_dir(root_dir))
+    try:
+        data = list(process_dir(root_dir))
+    except ValueError as exc:
+        logger.error(str(exc))
+        sys.exit(1)
     print(json.dumps(data, indent=2))
 
 
