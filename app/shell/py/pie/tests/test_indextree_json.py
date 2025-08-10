@@ -1,8 +1,12 @@
 import os
 import json
+import sys
 from pathlib import Path
 
 import fakeredis
+import pytest
+from pie.logging import logger
+import io
 
 from pie import indextree_json, metadata
 
@@ -114,3 +118,28 @@ def test_process_dir_honours_show_and_link(tmp_path, monkeypatch):
         },
         {"id": "epsilon", "label": "Epsilon", "url": "/delta/epsilon.html"},
     ]
+
+
+def test_main_reports_missing_title(tmp_path, monkeypatch):
+    """Missing title logs an error and exits."""
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "alpha.yml").touch()
+
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    monkeypatch.setattr(metadata, "redis_conn", fake)
+    save_meta(fake, "src/alpha.yml", "alpha", {"url": "/alpha.html"})
+
+    log_output = io.StringIO()
+    handler_id = logger.add(log_output, level="ERROR")
+
+    os.chdir(tmp_path)
+    monkeypatch.setattr(sys, "argv", ["indextree-json", "src"])
+    try:
+        with pytest.raises(SystemExit):
+            indextree_json.main()
+    finally:
+        os.chdir("/tmp")
+        logger.remove(handler_id)
+
+    assert "Missing 'title' in src/alpha.yml" in log_output.getvalue()
