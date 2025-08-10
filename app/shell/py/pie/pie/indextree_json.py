@@ -39,15 +39,26 @@ def process_dir(directory: Path):
 
 
 def main():
+    import argparse
     import sys
 
-    root_dir = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(".")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("root", nargs="?", default=".", help="Directory to scan")
+    parser.add_argument("output", nargs="?", help="Write JSON to file")
+    args = parser.parse_args()
+
+    root_dir = Path(args.root)
     try:
         data = list(process_dir(root_dir))
     except ValueError as exc:
         logger.error(str(exc))
         sys.exit(1)
-    print(json.dumps(data, indent=2))
+
+    json_data = json.dumps(data, indent=2)
+    if args.output:
+        Path(args.output).write_text(json_data)
+    else:
+        print(json_data)
 
 
 if __name__ == "__main__":
