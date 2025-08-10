@@ -1,6 +1,9 @@
 name: Example Book
+title: Example Book
 citation:
   author: Doe
   year: 2019
   page: 42
 url: https://example.com/doe
+author: Brian Lee
+pubdate: Aug 10, 2025
