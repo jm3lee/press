@@ -120,6 +120,34 @@ def test_process_dir_honours_show_and_link(tmp_path, monkeypatch):
     ]
 
 
+def test_main_writes_output_file(tmp_path, monkeypatch, capsys):
+    """JSON is written to file when an output path is provided."""
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "alpha.yml").touch()
+
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    monkeypatch.setattr(metadata, "redis_conn", fake)
+    save_meta(fake, "src/alpha.yml", "alpha", {"title": "Alpha", "url": "/alpha.html"})
+
+    output_path = tmp_path / "tree.json"
+
+    os.chdir(tmp_path)
+    monkeypatch.setattr(
+        sys, "argv", ["indextree-json", "src", str(output_path)]
+    )
+    try:
+        indextree_json.main()
+    finally:
+        os.chdir("/tmp")
+
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert json.loads(output_path.read_text()) == [
+        {"id": "alpha", "label": "Alpha", "url": "/alpha.html"}
+    ]
+
+
 def test_main_reports_missing_title(tmp_path, monkeypatch):
     """Missing title logs an error and exits."""
     src = tmp_path / "src"
