@@ -49,7 +49,7 @@ def test_update_files_updates_all_related(tmp_path: Path, monkeypatch: object) -
     md = src / "doc.md"
     md.write_text("---\ntitle: T\nauthor: Old\n---\n", encoding="utf-8")
     yml = src / "doc.yml"
-    yml.write_text("name: T\ntitle: T\nauthor: Old\n", encoding="utf-8")
+    yml.write_text("title: T\nauthor: Old\n", encoding="utf-8")
 
     monkeypatch.chdir(tmp_path)
     messages, checked = common.update_files([Path("src/doc.md")], "author", "New")

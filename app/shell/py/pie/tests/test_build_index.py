@@ -44,16 +44,16 @@ def test_process_markdown_parses_frontmatter(tmp_path):
 
 
 def test_parse_yaml_metadata_generates_fields(tmp_path):
-    """YAML {'name': 'Foo'} -> metadata with url/id/citation."""
+    """YAML {'title': 'Foo'} -> metadata with url/id/citation."""
     yml = tmp_path / "src" / "item.yml"
     yml.parent.mkdir(parents=True)
-    yml.write_text('{"name": "Foo"}')
+    yml.write_text('{"title": "Foo"}')
     os.chdir(tmp_path)
     try:
         data = build_index.parse_yaml_metadata("src/item.yml")
     finally:
         os.chdir("/tmp")
-    assert data["name"] == "Foo"
+    assert data["title"] == "Foo"
     assert data["url"] == "/item.html"
     assert data["citation"] == "foo"
     assert data["id"] == "item"
@@ -73,7 +73,7 @@ def test_build_index_handles_multiple_extensions(tmp_path):
     md = src / "doc.md"
     md.write_text("---\n{\"title\": \"T\", \"id\": \"doc\"}\n---\n")
     yml = src / "item.yml"
-    yml.write_text('{"name": "Foo"}')
+    yml.write_text('{"title": "Foo"}')
 
     os.chdir(tmp_path)
     try:
@@ -91,7 +91,7 @@ def test_main_writes_log_file(tmp_path):
     md = src / "doc.md"
     md.write_text("---\n{\"title\": \"T\", \"id\": \"doc\"}\n---\n")
     yml = src / "item.yml"
-    yml.write_text('{"name": "Foo"}')
+    yml.write_text('{"title": "Foo"}')
     out = tmp_path / "index.json"
     log = tmp_path / "build.log"
 

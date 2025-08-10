@@ -13,7 +13,7 @@ def test_updates_yaml_from_markdown_change(tmp_path: Path, monkeypatch, capsys) 
     md.write_text("---\ntitle: Test\n---\n", encoding="utf-8")
     yml = src / "doc.yml"
     yml.write_text(
-        "name: Test\ntitle: Test\nauthor: Jane Doe\n",
+        "title: Test\nauthor: Jane Doe\n",
         encoding="utf-8",
     )
 

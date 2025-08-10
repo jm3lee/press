@@ -22,6 +22,7 @@ setup(
             'update-pubdate=pie.update.pubdate:main',
             'update-author=pie.update.author:main',
             'update-link-filters=pie.update.link_filters:main',
+            'remove-name=pie.update.remove_name:main',
             'picasso=pie.build.picasso:main',
             'render-jinja-template=pie.render.jinja:main',
             'render-study-json=pie.render_study_json:main',

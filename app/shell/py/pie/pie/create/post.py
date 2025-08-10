@@ -38,7 +38,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     yml_path = base.with_suffix(".yml")
 
     md_path.touch()
-    metadata = {"author": "", "pubdate": get_pubdate(), "title": "", "name": base.name}
+    metadata = {
+        "author": "",
+        "pubdate": get_pubdate(),
+        "title": "",
+    }
     write_yaml(metadata, str(yml_path))
     
     logger.info("Created post", md=str(md_path), yml=str(yml_path))

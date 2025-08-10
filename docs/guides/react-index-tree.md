@@ -16,7 +16,7 @@ linking is enabled, the `url` property is copied from the metadata
 without modification:
 
 ```bash
-indextree-json docs > doc-tree.json
+indextree-json docs doc-tree.json
 ```
 
 A runnable demo lives in `app/indextree` and can be started with `npm run dev`.
