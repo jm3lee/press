@@ -19,7 +19,7 @@ import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from pie.logging import logger, add_log_argument, setup_file_logger
 from pie.utils import read_json, read_utf8, write_utf8, read_yaml as load_yaml_file
-from pie import metadata
+from pie.metadata import build_from_redis
 
 DEFAULT_CONFIG = Path("cfg/render-jinja-template.yml")
 
@@ -31,7 +31,7 @@ _whitespace_word_pattern = re.compile(r"(\S+)")
 def _get_metadata(name: str) -> dict | None:
     """Return metadata dictionary for ``name`` from Redis."""
 
-    return metadata.build_from_redis(f"{name}.")
+    return build_from_redis(f"{name}.")
 
 _metadata_cache: dict[str, dict] = {}
 

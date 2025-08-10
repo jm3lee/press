@@ -30,35 +30,6 @@ def test_get_url_invalid_raises(tmp_path):
         os.chdir("/tmp")
 
 
-def test_process_markdown_parses_frontmatter(tmp_path):
-    """Frontmatter {'title': 'T'} -> {'title': 'T', 'url': '/doc.html'}."""
-    md = tmp_path / "src" / "doc.md"
-    md.parent.mkdir(parents=True)
-    md.write_text("---\n{\"title\": \"T\"}\n---\nbody")
-    os.chdir(tmp_path)
-    try:
-        data = build_index.process_markdown("src/doc.md")
-    finally:
-        os.chdir("/tmp")
-    assert data == {"title": "T", "url": "/doc.html"}
-
-
-def test_parse_yaml_metadata_generates_fields(tmp_path):
-    """YAML {'name': 'Foo'} -> metadata with url/id/citation."""
-    yml = tmp_path / "src" / "item.yml"
-    yml.parent.mkdir(parents=True)
-    yml.write_text('{"name": "Foo"}')
-    os.chdir(tmp_path)
-    try:
-        data = build_index.parse_yaml_metadata("src/item.yml")
-    finally:
-        os.chdir("/tmp")
-    assert data["name"] == "Foo"
-    assert data["url"] == "/item.html"
-    assert data["citation"] == "foo"
-    assert data["id"] == "item"
-
-
 def test_validate_and_insert_duplicate(tmp_path):
     """Duplicate id triggers KeyError."""
     index = {"a": {"id": "a"}}

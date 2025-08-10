@@ -8,7 +8,7 @@ from typing import Iterable
 
 from pie.logging import logger, add_log_argument, setup_file_logger
 from pie.utils import write_yaml
-from pie import build_index
+from pie.metadata import read_from_yaml
 
 
 def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
@@ -28,7 +28,7 @@ def main(argv: Iterable[str] | None = None) -> None:
     setup_file_logger(args.log)
 
     try:
-        metadata = build_index.parse_yaml_metadata(args.input)
+        metadata = read_from_yaml(args.input)
     except Exception as exc:  # pragma: no cover - pass through message
         logger.error("Failed to process YAML", filename=args.input)
         raise SystemExit(1) from exc

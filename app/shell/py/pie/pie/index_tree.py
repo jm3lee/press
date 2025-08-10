@@ -4,8 +4,7 @@ import warnings
 from pathlib import Path
 from typing import Iterator, Mapping, Any, Tuple, Callable
 
-from pie.metadata import get_metadata_by_path
-from pie import metadata
+from pie.metadata import build_from_redis, fill_missing_metadata, get_metadata_by_path
 from pie.logging import logger
 
 
@@ -30,9 +29,8 @@ def load_from_redis(path: Path) -> Mapping[str, Any] | None:
         logger.debug("No doc_id found", path=filepath)
         return None
 
-    meta = metadata.build_from_redis(f"{doc_id}.") or {}
-    if "id" not in meta:
-        meta["id"] = doc_id
+    meta = build_from_redis(f"{doc_id}.") or {}
+    fill_missing_metadata(meta, doc_id=doc_id)
     logger.debug("Fetched metadata via build_from_redis", path=filepath, id=doc_id)
     return meta
 

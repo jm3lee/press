@@ -10,10 +10,11 @@ from pathlib import Path
 from typing import Any, Mapping
 
 import redis
+import yaml
 from flatten_dict import unflatten
 
-from pie import build_index
 from pie.logging import logger
+from pie.utils import read_yaml
 
 # Global connection reused by helper functions.  It is initialised lazily so
 # unit tests can swap in a fake client.
@@ -140,6 +141,77 @@ def get_metadata_by_path(filepath: str, keypath: str) -> Any | None:
     return conn.get(f"{doc_id}.{keypath}")
 
 
+def fill_missing_metadata(
+    metadata: dict[str, Any], *, filepath: str | None = None, doc_id: str | None = None
+) -> dict[str, Any]:
+    """Populate ``id``, ``url``, and ``citation`` fields when absent."""
+
+    if filepath and "url" not in metadata:
+        from pie import build_index
+
+        metadata["url"] = build_index.get_url(filepath)
+        logger.debug("Generated 'url'", filename=filepath, url=metadata["url"])
+
+    if "citation" not in metadata and "name" in metadata:
+        metadata["citation"] = metadata["name"].lower()
+        logger.debug("Generated 'citation'", citation=metadata["citation"])
+
+    if "id" not in metadata:
+        if doc_id:
+            metadata["id"] = doc_id
+            logger.debug("Generated 'id'", id=metadata["id"])
+        elif filepath:
+            base, _ = os.path.splitext(filepath)
+            metadata["id"] = base.split(os.sep)[-1]
+            logger.debug("Generated 'id'", filename=filepath, id=metadata["id"])
+
+    return metadata
+
+
+def get_frontmatter(filename: str) -> dict[str, Any] | None:
+    """Extract YAML frontmatter from a Markdown file."""
+
+    with open(filename, encoding="utf-8") as file:
+        lines = file.readlines()
+
+    if not lines or lines[0].strip() != "---":
+        return None
+
+    yaml_lines: list[str] = []
+    for line in lines[1:]:
+        if line.strip() == "---":
+            break
+        yaml_lines.append(line)
+
+    content = "".join(yaml_lines)
+    return yaml.safe_load(content)
+
+
+def read_from_markdown(filepath: str) -> dict[str, Any] | None:
+    """Load and prepare metadata from a Markdown file."""
+
+    metadata = get_frontmatter(filepath)
+    if metadata is None:
+        logger.debug("No frontmatter found in Markdown file", filename=filepath)
+        return None
+
+    from pie import build_index
+
+    metadata["url"] = build_index.get_url(filepath)
+    return metadata
+
+
+def read_from_yaml(filepath: str) -> dict[str, Any] | None:
+    """Load and validate metadata from a YAML file."""
+
+    try:
+        metadata = read_yaml(filepath)
+        return fill_missing_metadata(metadata, filepath=filepath)
+    except yaml.YAMLError:
+        logger.warning("Failed to parse YAML file", filename=filepath)
+        raise
+
+
 def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
     """Load metadata from ``path`` and a sibling Markdown/YAML file.
 
@@ -165,16 +237,16 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
 
     md_data = None
     if md_path.exists():
-        md_data = build_index.process_markdown(str(md_path))
+        md_data = read_from_markdown(str(md_path))
 
     yaml_data = None
     yaml_file: Path | None = None
     if yml_path.exists():
         yaml_file = yml_path
-        yaml_data = build_index.parse_yaml_metadata(str(yml_path))
+        yaml_data = read_from_yaml(str(yml_path))
     elif yaml_path.exists():
         yaml_file = yaml_path
-        yaml_data = build_index.parse_yaml_metadata(str(yaml_path))
+        yaml_data = read_from_yaml(str(yaml_path))
 
     if md_data is None and yaml_data is None:
         return None
@@ -197,14 +269,7 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
     if md_path.exists():
         files.append(md_path)
 
-    if "id" not in combined:
-        base = path.with_suffix("")
-        combined["id"] = base.name
-        logger.debug(
-            "Generated 'id'",
-            filename=str(path.resolve().relative_to(Path.cwd())),
-            id=combined["id"],
-        )
+    fill_missing_metadata(combined, filepath=str(path))
 
     if files:
         combined["path"] = [str(p.resolve().relative_to(Path.cwd())) for p in files]
