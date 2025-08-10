@@ -10,120 +10,11 @@ import json
 import os
 from typing import Any, Dict, Optional
 
-import yaml
 from pie.logging import logger, add_log_argument, setup_file_logger
-from pie.utils import read_yaml
+from pie.metadata import get_url, read_from_markdown, read_from_yaml
 
 
-def get_url(filename: str) -> Optional[str]:
-    """Compute the HTML URL for a given Markdown or YAML source file.
-
-    Source files under `src/` map to HTML paths. For example::
-
-        src/guide/intro.md         -> /guide/intro.html
-        src/config/settings.yaml   -> /config/settings.html
-
-    Args:
-        filename: Path to the source file, expected to start with `src/`.
-
-    Returns:
-        A URL string starting with `/` and ending with `.html`, or `None`
-        if the filename does not start with `src/` or has an unsupported
-        extension.
-    """
-    prefix = "src" + os.sep
-    if filename.startswith(prefix):
-        relative_path = filename[len(prefix) :]
-        base, ext = os.path.splitext(relative_path)
-        if ext.lower() in (".md", ".yml", ".yaml"):
-            html_path = base + ".html"
-            return "/" + html_path
-    logger.warning("Can't create a url.", filename=filename)
-    raise Exception("Can't create a url.")
-
-
-def get_frontmatter(filename: str) -> Optional[Dict[str, Any]]:
-    """Extract YAML frontmatter from a Markdown file.
-
-    Args:
-        filename: Path to the Markdown file.
-
-    Returns:
-        A dict of the frontmatter if present; otherwise `None`.
-    """
-    with open(filename, encoding="utf-8") as file:
-        lines = file.readlines()
-
-    if not lines or lines[0].strip() != "---":
-        return None
-
-    yaml_lines = []
-    # Skip the first '---'
-    for line in lines[1:]:
-        if line.strip() == "---":
-            break
-        yaml_lines.append(line)
-
-    content = "".join(yaml_lines)
-    return yaml.safe_load(content)
-
-
-def process_markdown(filepath: str) -> Optional[Dict[str, Any]]:
-    """Load and prepare metadata from a Markdown file.
-
-    Extracts YAML frontmatter and, if applicable, computes the URL for the
-    Markdown document.
-
-    Args:
-        filepath: Path to the Markdown (`.md`) file.
-
-    Returns:
-        A metadata dict (including `url` if under `src/`) or `None` if
-        frontmatter is missing.
-    """
-    metadata = get_frontmatter(filepath)
-    if metadata is None:
-        logger.debug("No frontmatter found in Markdown file", filename=filepath)
-        return None
-    metadata["url"] = get_url(filepath)
-    return metadata
-
-
-def parse_yaml_metadata(filepath: str) -> Optional[Dict[str, Any]]:
-    """
-    Load and validate metadata from a YAML file.
-
-    Parses the YAML file, auto-generates missing fields (`citation`, `id`),
-    and computes the HTML URL if under `src/`.
-
-    Args:
-        filepath: Path to the YAML (`.yml`/`.yaml`) file.
-
-    Returns:
-        A metadata dict if parsing succeeds and content is a dict; otherwise
-        `None`.
-    """
-    try:
-        metadata = read_yaml(filepath)
-        if "url" not in metadata:
-            metadata["url"] = get_url(filepath)
-        if "citation" not in metadata:
-            title = metadata.get("title")
-            if title:
-                metadata["citation"] = title.lower()
-            elif "name" in metadata:
-                logger.warning(
-                    "'name' field is deprecated; use 'title' instead",
-                    filename=filepath,
-                )
-                metadata["citation"] = metadata["name"].lower()
-        if "id" not in metadata:
-            base, _ = os.path.splitext(filepath)
-            metadata["id"] = base.split(os.sep)[-1]
-        return metadata
-    except yaml.YAMLError:
-        logger.warning("Failed to parse YAML file", filename=filepath)
-        raise
+## Functions for reading metadata are provided by ``pie.metadata``.
 
 
 def validate_and_insert_metadata(
@@ -203,9 +94,9 @@ def build_index(
             metadata: Optional[Dict[str, Any]] = None
 
             if ext_lower == ".md":
-                metadata = process_markdown(filepath)
+                metadata = read_from_markdown(filepath)
             elif ext_lower in (".yml", ".yaml"):
-                metadata = parse_yaml_metadata(filepath)
+                metadata = read_from_yaml(filepath)
 
             if metadata:
                 validate_and_insert_metadata(metadata, filepath, index)
