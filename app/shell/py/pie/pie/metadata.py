@@ -195,10 +195,7 @@ def read_from_markdown(filepath: str) -> dict[str, Any] | None:
         logger.debug("No frontmatter found in Markdown file", filename=filepath)
         return None
 
-    from pie import build_index
-
-    metadata["url"] = build_index.get_url(filepath)
-    return metadata
+    return fill_missing_metadata(metadata, filepath=filepath)
 
 
 def read_from_yaml(filepath: str) -> dict[str, Any] | None:

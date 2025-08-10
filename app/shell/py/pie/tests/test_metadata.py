@@ -12,7 +12,7 @@ from pie.metadata import (
 
 
 def test_read_from_markdown_parses_frontmatter(tmp_path):
-    """Frontmatter {'title': 'T'} -> {'title': 'T', 'url': '/doc.html'}."""
+    """Frontmatter {'title': 'T'} -> {'title': 'T', 'url': '/doc.html', 'id': 'doc'}."""
     md = tmp_path / 'src' / 'doc.md'
     md.parent.mkdir(parents=True)
     md.write_text('---\n{"title": "T"}\n---\nbody')
@@ -21,7 +21,7 @@ def test_read_from_markdown_parses_frontmatter(tmp_path):
         data = read_from_markdown('src/doc.md')
     finally:
         os.chdir('/tmp')
-    assert data == {'title': 'T', 'url': '/doc.html'}
+    assert data == {'title': 'T', 'url': '/doc.html', 'id': 'doc'}
 
 
 def test_read_from_yaml_generates_fields(tmp_path):
