@@ -7,13 +7,111 @@ import json
 import os
 import warnings
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Dict, Mapping, Optional
 
 import redis
 from flatten_dict import unflatten
+import yaml
 
-from pie import build_index
 from pie.logging import logger
+from pie.utils import read_yaml
+
+
+def get_url(filename: str) -> Optional[str]:
+    """Compute the HTML URL for a given Markdown or YAML source file.
+
+    Source files under ``src/`` map to HTML paths. For example::
+
+        src/guide/intro.md         -> /guide/intro.html
+        src/config/settings.yaml   -> /config/settings.html
+
+    Args:
+        filename: Path to the source file, expected to start with ``src/``.
+
+    Returns:
+        A URL string starting with ``/`` and ending with ``.html``, or ``None``
+        if the filename does not start with ``src/`` or has an unsupported
+        extension.
+    """
+    prefix = "src" + os.sep
+    if filename.startswith(prefix):
+        relative_path = filename[len(prefix) :]
+        base, ext = os.path.splitext(relative_path)
+        if ext.lower() in (".md", ".yml", ".yaml"):
+            html_path = base + ".html"
+            return "/" + html_path
+    logger.warning("Can't create a url.", filename=filename)
+    raise Exception("Can't create a url.")
+
+
+def get_frontmatter(filename: str) -> Optional[Dict[str, Any]]:
+    """Extract YAML frontmatter from a Markdown file."""
+
+    with open(filename, encoding="utf-8") as file:
+        lines = file.readlines()
+
+    if not lines or lines[0].strip() != "---":
+        return None
+
+    yaml_lines = []
+    # Skip the first '---'
+    for line in lines[1:]:
+        if line.strip() == "---":
+            break
+        yaml_lines.append(line)
+
+    content = "".join(yaml_lines)
+    return yaml.safe_load(content)
+
+
+def generate_missing_metadata(metadata: dict[str, Any], filepath: str) -> dict[str, Any]:
+    """Populate ``metadata`` with fields derived from ``filepath`` if absent."""
+
+    if "url" not in metadata:
+        metadata["url"] = get_url(filepath)
+
+    if "citation" not in metadata:
+        title = metadata.get("title")
+        if title:
+            metadata["citation"] = title.lower()
+        elif "name" in metadata:
+            logger.warning(
+                "'name' field is deprecated; use 'title' instead",
+                filename=filepath,
+            )
+            metadata["citation"] = metadata["name"].lower()
+
+    if "id" not in metadata:
+        base = Path(filepath).with_suffix("")
+        metadata["id"] = base.name
+        logger.debug(
+            "Generated 'id'",
+            filename=str(Path(filepath).resolve().relative_to(Path.cwd())),
+            id=metadata["id"],
+        )
+
+    return metadata
+
+
+def read_from_markdown(filepath: str) -> Optional[Dict[str, Any]]:
+    """Load and prepare metadata from a Markdown file."""
+
+    metadata = get_frontmatter(filepath)
+    if metadata is None:
+        logger.debug("No frontmatter found in Markdown file", filename=filepath)
+        return None
+    return generate_missing_metadata(metadata, filepath)
+
+
+def read_from_yaml(filepath: str) -> Optional[Dict[str, Any]]:
+    """Load and validate metadata from a YAML file."""
+
+    try:
+        metadata = read_yaml(filepath)
+        return generate_missing_metadata(metadata, filepath)
+    except yaml.YAMLError:
+        logger.warning("Failed to parse YAML file", filename=filepath)
+        raise
 
 # Global connection reused by helper functions.  It is initialised lazily so
 # unit tests can swap in a fake client.
@@ -165,16 +263,16 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
 
     md_data = None
     if md_path.exists():
-        md_data = build_index.process_markdown(str(md_path))
+        md_data = read_from_markdown(str(md_path))
 
     yaml_data = None
     yaml_file: Path | None = None
     if yml_path.exists():
         yaml_file = yml_path
-        yaml_data = build_index.parse_yaml_metadata(str(yml_path))
+        yaml_data = read_from_yaml(str(yml_path))
     elif yaml_path.exists():
         yaml_file = yaml_path
-        yaml_data = build_index.parse_yaml_metadata(str(yaml_path))
+        yaml_data = read_from_yaml(str(yaml_path))
 
     if md_data is None and yaml_data is None:
         return None
@@ -196,15 +294,6 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
         files.append(yaml_file)
     if md_path.exists():
         files.append(md_path)
-
-    if "id" not in combined:
-        base = path.with_suffix("")
-        combined["id"] = base.name
-        logger.debug(
-            "Generated 'id'",
-            filename=str(path.resolve().relative_to(Path.cwd())),
-            id=combined["id"],
-        )
 
     if files:
         combined["path"] = [str(p.resolve().relative_to(Path.cwd())) for p in files]
