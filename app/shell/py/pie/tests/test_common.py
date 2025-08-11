@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import subprocess
 
 from pie.update import common
 
@@ -18,6 +19,44 @@ def test_get_changed_files_parses_git_status(monkeypatch: object) -> None:
         Path("src/doc.md"),
         Path("src/doc.yml"),
     ]
+
+
+def test_get_changed_files_missing_git(monkeypatch: object) -> None:
+    """Missing git executable returns empty list and warns."""
+
+    def fake_run(cmd, check, capture_output, text):
+        raise FileNotFoundError("git not found")
+
+    warned = {"value": False}
+
+    def fake_warning(msg, **kwargs):
+        warned["value"] = True
+
+    monkeypatch.setattr(common.subprocess, "run", fake_run)
+    monkeypatch.setattr(common.logger, "warning", fake_warning)
+
+    paths = common.get_changed_files()
+    assert paths == []
+    assert warned["value"] is True
+
+
+def test_get_changed_files_uninitialized_repo(monkeypatch: object) -> None:
+    """Uninitialized repository returns empty list and warns."""
+
+    def fake_run(cmd, check, capture_output, text):
+        raise subprocess.CalledProcessError(1, cmd)
+
+    warned = {"value": False}
+
+    def fake_warning(msg, **kwargs):
+        warned["value"] = True
+
+    monkeypatch.setattr(common.subprocess, "run", fake_run)
+    monkeypatch.setattr(common.logger, "warning", fake_warning)
+
+    paths = common.get_changed_files()
+    assert paths == []
+    assert warned["value"] is True
 
 
 def test_replace_field_updates_yaml(tmp_path: Path) -> None:

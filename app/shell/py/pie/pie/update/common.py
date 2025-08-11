@@ -25,12 +25,19 @@ __all__ = [
 def get_changed_files() -> list[Path]:
     """Return paths of tracked files changed in git. Skip submodules by checking
     for directories."""
-    result = subprocess.run(
-        ["git", "status", "--short"],
-        check=True,
-        capture_output=True,
-        text=True,
-    )
+    try:
+        result = subprocess.run(
+            ["git", "status", "--short"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except FileNotFoundError as err:
+        logger.warning("git executable not found", error=str(err))
+        return []
+    except subprocess.CalledProcessError as err:
+        logger.warning("git repository not initialised", error=str(err))
+        return []
     paths: list[Path] = []
     for line in result.stdout.splitlines():
         if not line or line.startswith("??"):
