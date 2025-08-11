@@ -21,6 +21,9 @@ VPATH := $(SRC_DIR)
 COMPOSE_FILE := $(if $(wildcard docker-compose.yml),docker-compose.yml,dist/docker-compose.yml)
 DOCKER_COMPOSE := docker compose -f $(COMPOSE_FILE)
 
+COMPOSE_RUN := $(DOCKER_COMPOSE) run --build --rm -T
+PYTEST_CMD  := $(DOCKER_COMPOSE) run --entrypoint pytest --rm shell
+
 MAKE_CMD := $(DOCKER_COMPOSE) run --rm --entrypoint make -u $(shell id -u) -T shell
 
 # Verbosity control
@@ -116,17 +119,17 @@ setup: ## Prepare app/webp directories and build all services
 .PHONY: seed
 seed: ## Run the seed container to populate initial data
 	$(call status,Seed database)
-	$(Q)$(DOCKER_COMPOSE) run --build --rm -T seed
+	$(Q)$(COMPOSE_RUN) seed
 
 .PHONY: sync
 sync: ## Upload site files to S3 using the sync container
 	$(call status,Run sync container)
-	$(Q)$(DOCKER_COMPOSE) run --build --rm -T sync
+	$(Q)$(COMPOSE_RUN) sync
 
 .PHONY: webp
 webp: ## Convert images to webp format
 	$(call status,Convert images to webp)
-	$(Q)$(DOCKER_COMPOSE) run --build --rm -T webp
+	$(Q)$(COMPOSE_RUN) webp
 
 .PHONY: shell
 shell: ## Open an interactive shell container
@@ -153,18 +156,18 @@ buildx: ## Run Docker buildx
 pytest:
 	# Add option -s to see stdout.
 	$(call status,Run pytest)
-	$(Q)$(DOCKER_COMPOSE) run --entrypoint pytest --rm shell /press/py/pie/tests
+	$(Q)$(PYTEST_CMD) /press/py/pie/tests
 
 .PHONY: cov
 cov:
 	$(call status,Run coverage)
 	$(Q)mkdir -p log/cov
-	$(Q)$(DOCKER_COMPOSE) run --entrypoint pytest --rm shell --cov=pie --cov-report=term-missing --cov-report=html:/data/log/cov /press/py/pie/tests
+	$(Q)$(PYTEST_CMD) --cov=pie --cov-report=term-missing --cov-report=html:/data/log/cov /press/py/pie/tests
 .PHONY: t
 t: ## Restart nginx-dev and run tests, ansi colors
 	$(call status,Run tests with colors)
 	$(Q)$(DOCKER_COMPOSE) run --entrypoint make --rm shell -f /app/mk/build.mk VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) test
-	$(Q)$(DOCKER_COMPOSE) run --entrypoint pytest --rm shell /press/py/pie/tests
+	$(Q)$(PYTEST_CMD) /press/py/pie/tests
 
 .PHONY: redis
 redis: ## Open redis-cli on the dragonfly service
