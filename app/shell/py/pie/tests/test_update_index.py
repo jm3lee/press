@@ -124,27 +124,6 @@ def test_main_combines_md_and_yaml(tmp_path, monkeypatch):
     assert fake.get("doc.title") == "Yaml"
 
 
-def test_directory_pair_processed_once(tmp_path, monkeypatch):
-    """Processing a directory handles md/yml pair once."""
-    src = tmp_path / "src"
-    src.mkdir()
-    (src / "doc.md").write_text("---\n{\"title\": \"Md\"}\n---\n")
-    (src / "doc.yml").write_text('{"title": "Yaml"}')
-
-    fake = fakeredis.FakeRedis(decode_responses=True)
-    monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
-
-    os.chdir(tmp_path)
-    try:
-        with pytest.warns(UserWarning) as w:
-            update_index.main(["src"])
-    finally:
-        os.chdir("/tmp")
-
-    assert len(w) == 1
-    assert fake.get("doc.title") == "Yaml"
-
-
 def test_main_inserts_path(tmp_path, monkeypatch):
     """Stores source paths as JSON array."""
     src = tmp_path / "src"

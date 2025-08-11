@@ -71,11 +71,11 @@ dictionary directly:
 
 ```jinja
 {% raw -%}
-{{ cite({"citation": {"author": "Hull", "year": 2016, "page": 350}, "url": "/hull"}) }}
+{{ cite({"citation": {"author": "Hull", "year": 2016, "page": 350}, "url": "/"}) }}
 {% endraw %}
 ```
 
-{{ cite({"citation": {"author": "Hull", "year": 2016, "page": 350}, "url": "/hull"}) }}
+{{ cite({"citation": {"author": "Hull", "year": 2016, "page": 350}, "url": "/"}) }}
 
 ## link global
 
@@ -85,13 +85,13 @@ Using a dictionary:
 
 ```jinja
 {% raw -%}
-{{ link({"citation": {"author": "hull", "year": 2016, "page": 307}, "url": "/hull"}) }}
+{{ link({"citation": {"author": "hull", "year": 2016, "page": 307}, "url": "/"}) }}
 {% endraw %}
 ```
 
 renders as:
 
-{{ link({"citation": {"author": "hull", "year": 2016, "page": 307}, "url": "/hull"}) }}
+{{ link({"citation": {"author": "hull", "year": 2016, "page": 307}, "url": "/"}) }}
 
 Passing an ID fetches the metadata automatically:
 
