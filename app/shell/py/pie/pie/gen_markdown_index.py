@@ -1,13 +1,23 @@
 #!/usr/bin/env python3
-"""Generate a Markdown index from YAML metadata files."""
+"""Generate a Markdown index from YAML metadata files.
+
+This module is deprecated and will be removed in a future release.
+"""
 
 from __future__ import annotations
 
 import argparse
+import warnings
 from pathlib import Path
 from typing import Iterator
 
 from pie.index_tree import walk, getopt_link, getopt_show
+
+warnings.warn(
+    "pie.gen_markdown_index is deprecated and will be removed in a future release",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 
 def generate(directory: Path, level: int = 0) -> Iterator[str]:

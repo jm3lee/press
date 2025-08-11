@@ -2,7 +2,8 @@ from pathlib import Path
 
 import yaml
 
-from pie.gen_markdown_index import generate
+import pie.gen_markdown_index as gen_markdown_index
+from pie.gen_markdown_index import generate, main
 from pie import index_tree, metadata
 
 
@@ -81,3 +82,51 @@ def test_missing_id_uses_filename(tmp_path, monkeypatch):
     lines = list(generate(tmp_path))
 
     assert lines == ['- {{ linktitle("foo") }}']
+
+
+def test_link_false_and_recursion(tmp_path, monkeypatch):
+    """Entries honour the 'link' option and recurse into subdirectories."""
+    group_dir = tmp_path / "group"
+    group_dir.mkdir()
+    child_file = group_dir / "child.yml"
+    child_file.touch()
+
+    meta_alpha = {
+        "id": "alpha",
+        "title": "Alpha",
+        "gen-markdown-index": {"link": False},
+    }
+    meta_group = {"id": "group", "title": "Group"}
+    meta_child = {"id": "child", "title": "Child"}
+
+    def fake_walk(directory):
+        if directory == tmp_path:
+            return [(meta_alpha, tmp_path / "alpha.yml"), (meta_group, group_dir)]
+        if directory == group_dir:
+            return [(meta_child, child_file)]
+        return []
+
+    monkeypatch.setattr(gen_markdown_index, "walk", fake_walk)
+
+    lines = list(generate(tmp_path))
+
+    assert lines == [
+        "- {{'Alpha'|title}}",
+        '- {{ linktitle("group") }}',
+        '  - {{ linktitle("child") }}',
+    ]
+
+
+def test_main_prints_generated_index(tmp_path, monkeypatch, capsys):
+    """The ``main`` function prints generated lines."""
+    path = tmp_path / "foo.yml"
+    meta = {"id": "foo", "title": "Foo"}
+
+    def fake_walk(directory):
+        return [(meta, path)]
+
+    monkeypatch.setattr(gen_markdown_index, "walk", fake_walk)
+
+    main([str(tmp_path)])
+    captured = capsys.readouterr()
+    assert captured.out == '- {{ linktitle("foo") }}\n'
