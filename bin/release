@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+#
+# Description:
+#   Perform a full release build without requiring make.
+#   The script mirrors the `release` target from redo.mk.
+#
+# Usage:
+#   bin/release
+#
+# Environment variables:
+#   VERBOSE   - Passed to make (default: 0)
+#   SRC_DIR   - Source directory (default: src)
+#   BUILD_DIR - Build directory (default: build)
+#
+# Steps:
+#   1. make distclean
+#   2. docker compose build shell
+#   3. make
+#   4. make test
+#   5. docker compose build release
+#
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+
+VERBOSE="${VERBOSE:-0}"
+SRC_DIR="${SRC_DIR:-src}"
+BUILD_DIR="${BUILD_DIR:-build}"
+
+if [ -f docker-compose.yml ]; then
+  COMPOSE_FILE="docker-compose.yml"
+else
+  COMPOSE_FILE="dist/docker-compose.yml"
+fi
+
+DOCKER_COMPOSE=(docker compose -f "$COMPOSE_FILE")
+
+make -f redo.mk distclean VERBOSE="$VERBOSE" SRC_DIR="$SRC_DIR" BUILD_DIR="$BUILD_DIR"
+"${DOCKER_COMPOSE[@]}" build shell
+make -f redo.mk VERBOSE="$VERBOSE" SRC_DIR="$SRC_DIR" BUILD_DIR="$BUILD_DIR"
+make -f redo.mk test VERBOSE="$VERBOSE" SRC_DIR="$SRC_DIR" BUILD_DIR="$BUILD_DIR"
+"${DOCKER_COMPOSE[@]}" build release

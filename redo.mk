@@ -179,8 +179,4 @@ tags:
 
 .PHONY: release
 release:
-	$(Q)make -f redo.mk distclean VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR)
-	$(Q)$(DOCKER_COMPOSE) build shell
-	$(Q)make -f redo.mk VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR)
-	$(Q)make -f redo.mk test VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR)
-	$(Q)$(DOCKER_COMPOSE) build release
+	$(Q)VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) ./bin/release
