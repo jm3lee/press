@@ -175,6 +175,9 @@ tags:
 	$(Q)ctags -R app/shell/py
 
 .PHONY: release
-release: all test
+release:
+	$(Q)make -f redo.mk distclean VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR)
 	$(Q)$(DOCKER_COMPOSE) build shell
+	$(Q)make -f redo.mk VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR)
+	$(Q)make -f redo.mk test VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR)
 	$(Q)$(DOCKER_COMPOSE) build release
