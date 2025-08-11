@@ -5,6 +5,7 @@ concepts and data formats, see the
 [reference documentation](../reference/README.md).
 
 ## Build process
+- [create-site.md](create-site.md) – scaffold a new Press project.
 - [build-process.md](build-process.md) – overview of the build pipeline for new engineers.
 - [build-index.md](build-index.md) – generate a JSON index of document
   metadata. See the [metadata fields reference](../reference/metadata-fields.md).
