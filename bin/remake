@@ -15,6 +15,9 @@
 # delegating to `make` so the build artifacts are regenerated
 # from scratch.
 
-bin=$(dirname "$0")
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+# shellcheck source=app/shell/sh/lib.sh
+source "$ROOT/app/shell/sh/lib.sh"
+
 rm -rf "$@"
-$bin/make "$@"
+press_make "$@"

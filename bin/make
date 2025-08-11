@@ -17,8 +17,8 @@
 # generated files are owned by the invoking user. The container is
 # removed after completion.
 
-MAKE_CMD="docker compose run \
-  --rm --entrypoint make -u $(id -u) \
-  shell"
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+# shellcheck source=app/shell/sh/lib.sh
+source "$ROOT/app/shell/sh/lib.sh"
 
-$MAKE_CMD -f /app/mk/build.mk "$@"
+press_make "$@"
