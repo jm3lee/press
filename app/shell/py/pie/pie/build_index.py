@@ -10,6 +10,7 @@ import json
 import os
 from typing import Any, Dict, Optional
 
+from pie.cli import create_parser
 from pie.logging import logger, add_log_argument, configure_logging
 from pie.metadata import (
     get_url,
@@ -113,9 +114,7 @@ def build_index(
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Build a JSON index from Markdown/YAML files' metadata."
-    )
+    parser = create_parser("Build a JSON index from Markdown/YAML files' metadata.")
     parser.add_argument(
         "source_dir",
         help="Root directory to scan for `.md`, `.yml`, and `.yaml` files",
@@ -124,13 +123,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "-o",
         "--output",
         help="Path to write the JSON index (defaults to stdout)",
-    )
-    add_log_argument(parser)
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="Enable debug logging",
     )
     return parser.parse_args(argv)
 

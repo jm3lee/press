@@ -7,7 +7,8 @@ import argparse
 from pathlib import Path
 from typing import Iterable
 
-from pie.logging import logger, add_log_argument, configure_logging
+from pie.cli import create_parser
+from pie.logging import logger, configure_logging
 from pie.metadata import load_metadata_pair
 
 DEFAULT_LOG = "log/check-author.txt"
@@ -15,21 +16,15 @@ DEFAULT_LOG = "log/check-author.txt"
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Check that metadata files include an author field.",
+    parser = create_parser(
+        "Check that metadata files include an author field.",
+        log_default=DEFAULT_LOG,
     )
     parser.add_argument(
         "directory",
         nargs="?",
         default="src",
         help="Root directory to scan for metadata files",
-    )
-    add_log_argument(parser, default=DEFAULT_LOG)
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="Enable debug logging",
     )
     return parser.parse_args(argv)
 

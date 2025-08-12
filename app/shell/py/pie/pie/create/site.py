@@ -6,7 +6,8 @@ from typing import Sequence
 
 from jinja2 import Environment
 
-from pie.logging import logger, add_log_argument, configure_logging
+from pie.cli import create_parser
+from pie.logging import logger, configure_logging
 
 
 __all__ = ["main"]
@@ -14,17 +15,8 @@ __all__ = ["main"]
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Create scaffolding for a Press project",
-    )
+    parser = create_parser("Create scaffolding for a Press project")
     parser.add_argument("path", help="Target directory for the project")
-    add_log_argument(parser)
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="Enable debug logging",
-    )
     return parser.parse_args(list(argv) if argv is not None else None)
 
 

@@ -18,7 +18,8 @@ import warnings
 from concurrent.futures import ThreadPoolExecutor
 
 import redis
-from pie.logging import add_log_argument, configure_logging, logger
+from pie.cli import create_parser
+from pie.logging import configure_logging, logger
 from pie.metadata import load_metadata_pair
 
 
@@ -61,14 +62,13 @@ def flatten_index(index: Mapping[str, Mapping[str, Any]]) -> Iterable[tuple[str,
 
 def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Insert index values into a DragonflyDB/Redis instance",
+    parser = create_parser(
+        "Insert index values into a DragonflyDB/Redis instance"
     )
     parser.add_argument(
         "path",
         help="Path to index.json, a metadata file, or a directory containing YAML",
     )
-    add_log_argument(parser)
     parser.add_argument(
         "--host",
         default=os.getenv("REDIS_HOST", "dragonfly"),
@@ -79,12 +79,6 @@ def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
         type=int,
         default=int(os.getenv("REDIS_PORT", "6379")),
         help="Redis port (default: env REDIS_PORT or 6379)",
-    )
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="Enable debug logging",
     )
     return parser.parse_args(list(argv) if argv is not None else None)
 

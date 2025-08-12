@@ -13,7 +13,8 @@ import json
 from pathlib import Path
 from typing import Any, Iterable, List
 
-from pie.logging import logger, add_log_argument, configure_logging
+from pie.cli import create_parser
+from pie.logging import logger, configure_logging
 from pie.utils import read_json
 
 from .render.jinja import create_env
@@ -49,8 +50,8 @@ def render_study(index: dict[str, Any], questions: Iterable[dict[str, Any]]) -> 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
 
-    parser = argparse.ArgumentParser(
-        description="Render a study JSON file by expanding Jinja templates",
+    parser = create_parser(
+        "Render a study JSON file by expanding Jinja templates"
     )
     parser.add_argument("index", help="Path to the index JSON providing variables")
     parser.add_argument("study", help="Path to the source study JSON file")
@@ -58,13 +59,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "-o",
         "--output",
         help="Optional file to write the rendered JSON (defaults to stdout)",
-    )
-    add_log_argument(parser)
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="Enable debug logging",
     )
     return parser.parse_args(argv)
 

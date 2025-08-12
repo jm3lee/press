@@ -12,7 +12,8 @@ import argparse
 from pathlib import Path
 from typing import Iterable, Sequence, Tuple
 
-from pie.logging import add_log_argument, configure_logging
+from pie.cli import create_parser
+from pie.logging import configure_logging
 
 __all__ = ["main", "remove_name_fields"]
 
@@ -94,19 +95,10 @@ def walk_files(root: Path) -> Iterable[Path]:
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Remove deprecated 'name' fields from metadata files",
-    )
+    parser = create_parser("Remove deprecated 'name' fields from metadata files")
     parser.add_argument(
         "root",
         help="Root directory to scan",
-    )
-    add_log_argument(parser)
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="Enable debug logging",
     )
     return parser.parse_args(list(argv) if argv is not None else None)
 

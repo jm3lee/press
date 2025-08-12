@@ -6,25 +6,17 @@ import argparse
 import sys
 from typing import Iterable
 
-from pie.logging import logger, add_log_argument, configure_logging
+from pie.cli import create_parser
+from pie.logging import logger, configure_logging
 from pie.utils import write_yaml
 from pie.metadata import generate_missing_metadata, read_from_yaml
 
 
 def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Generate missing metadata fields for a YAML file",
-    )
+    parser = create_parser("Generate missing metadata fields for a YAML file")
     parser.add_argument("input", help="Source YAML file")
     parser.add_argument("output", help="Destination file to write")
-    add_log_argument(parser)
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="Enable debug logging",
-    )
     return parser.parse_args(list(argv) if argv is not None else None)
 
 

@@ -5,7 +5,8 @@ import re
 from pathlib import Path
 from typing import Iterable, Sequence
 
-from pie.logging import add_log_argument, configure_logging, logger
+from pie.cli import create_parser
+from pie.logging import configure_logging, logger
 
 FILTERS = [
     "link",
@@ -81,17 +82,11 @@ def process_file(path: Path) -> bool:
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
 
-    parser = argparse.ArgumentParser(
-        description="Best-effort rewrite of legacy link* filters to globals",
+    parser = create_parser(
+        "Best-effort rewrite of legacy link* filters to globals",
+        log_default="log/update-link-filters.txt",
     )
     parser.add_argument("paths", nargs="+", help="Files or directories to rewrite")
-    add_log_argument(parser, default="log/update-link-filters.txt")
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="Enable debug logging",
-    )
     return parser.parse_args(list(argv) if argv is not None else None)
 
 
