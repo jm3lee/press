@@ -144,6 +144,7 @@ rmi: ## Remove Docker images matching press-*
 .PHONY: help
 help: ## List available tasks
 	@grep -E '^[a-zA-Z0-9_-]+:.*##' $(MAKEFILE_LIST) | \
+	sort | \
 	awk -F ':.*##' '{printf "%-10s %s\n", $$1, $$2}'
 
 .PHONY: buildx
