@@ -27,7 +27,6 @@ setup(
             'render-jinja-template=pie.render.jinja:main',
             'render-study-json=pie.render_study_json:main',
             'include-filter=pie.filter.include:main',
-            'process-yaml=pie.process_yaml:main',
             'check-author=pie.check.author:main',
             'check-bad-jinja-output=pie.check.bad_jinja_output:main',
             'indextree-json=pie.indextree_json:main',
