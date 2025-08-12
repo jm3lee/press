@@ -20,6 +20,16 @@ def test_main_detects_jinja_in_html(tmp_path):
     assert rc == 1
 
 
+def test_main_ignores_jinja_in_pre_and_code(tmp_path):
+    """Jinja within ``pre``/``code`` -> exit 0."""
+    build = tmp_path / "build"
+    build.mkdir()
+    html = build / "page.html"
+    html.write_text("<pre>{{ a }}</pre><code>{{ b }}</code>", encoding="utf-8")
+    rc = unexpanded_jinja.main([str(build)])
+    assert rc == 0
+
+
 def test_main_writes_log_file(tmp_path):
     """Clean HTML -> exit 0 and create log."""
     build = tmp_path / "build"

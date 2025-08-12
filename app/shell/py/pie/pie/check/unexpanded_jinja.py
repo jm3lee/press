@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail if HTML files contain unexpanded Jinja template markers."""
+"""Fail if HTML files contain unexpanded Jinja outside ``pre``/``code`` blocks."""
 
 from __future__ import annotations
 
@@ -39,11 +39,15 @@ def check_file(path: Path) -> bool:
         soup = BeautifulSoup(f, "html.parser")
 
     for text in soup.find_all(string=True):
+        if text.find_parent(["pre", "code"]):
+            continue
         if contains_unexpanded_jinja(text):
             logger.error("Found unexpanded Jinja", path=str(path), snippet=text.strip())
             return False
 
     for tag in soup.find_all(True):
+        if tag.name in {"pre", "code"} or tag.find_parent(["pre", "code"]):
+            continue
         for value in tag.attrs.values():
             values = value if isinstance(value, (list, tuple)) else [value]
             for v in values:
