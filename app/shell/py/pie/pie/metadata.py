@@ -284,7 +284,7 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
         for k, v in yaml_data.items():
             if k in combined and combined[k] != v:
                 warnings.warn(
-                    f"Conflict for '{k}', using value from {yaml_file.name}",
+                    f"Conflict for '{k}', using value from {yaml_file.resolve().relative_to(Path.cwd())}",
                     UserWarning,
                 )
             combined[k] = v
