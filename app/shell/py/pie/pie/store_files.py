@@ -42,6 +42,12 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         help="Limit number of files processed",
     )
     add_log_argument(parser)
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Enable debug logging",
+    )
     return parser.parse_args(list(argv) if argv is not None else None)
 
 
@@ -78,7 +84,7 @@ def process_file(src: Path, dest_dir: Path, meta_dir: Path) -> str:
 def main(argv: Sequence[str] | None = None) -> int:
     """Entry point for the ``store-files`` console script."""
     args = parse_args(argv)
-    configure_logging(False, args.log)
+    configure_logging(args.verbose, args.log)
 
     base_path = Path(args.path)
     dest_dir = Path("s3") / "v2" / "files" / "0"

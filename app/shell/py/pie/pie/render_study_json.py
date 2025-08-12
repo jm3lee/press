@@ -60,6 +60,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Optional file to write the rendered JSON (defaults to stdout)",
     )
     add_log_argument(parser)
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Enable debug logging",
+    )
     return parser.parse_args(argv)
 
 
@@ -67,7 +73,7 @@ def main(argv: list[str] | None = None) -> None:
     """Entry point for the ``pie.render_study_json`` module."""
 
     args = parse_args(argv)
-    configure_logging(False, args.log)
+    configure_logging(args.verbose, args.log)
 
     index_json = read_json(args.index)
     study_json = read_json(args.study)

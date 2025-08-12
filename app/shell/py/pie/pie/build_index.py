@@ -120,6 +120,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Path to write the JSON index (defaults to stdout)",
     )
     add_log_argument(parser)
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Enable debug logging",
+    )
     return parser.parse_args(argv)
 
 
@@ -127,7 +133,7 @@ def main(argv: list[str] | None = None) -> None:
     """Build the index and write JSON output."""
     args = parse_args(argv)
 
-    configure_logging(False, args.log)
+    configure_logging(args.verbose, args.log)
 
     index = build_index(args.source_dir)
 

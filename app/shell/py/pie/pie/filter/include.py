@@ -193,6 +193,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("infile", help="Input Markdown file")
     parser.add_argument("outfile", help="Output Markdown file")
     add_log_argument(parser)
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Enable debug logging",
+    )
     return parser.parse_args(argv)
 
 
@@ -209,7 +215,7 @@ def main(argv: list[str] | None = None) -> None:
 
     args = parse_args(argv)
 
-    configure_logging(False, args.log)
+    configure_logging(args.verbose, args.log)
 
     outdir = args.outdir
     infilename = args.infile

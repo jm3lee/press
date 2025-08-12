@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 from typing import Sequence
 
-from pie.logging import add_file_logger, logger
+from pie.logging import add_log_argument, configure_logging, logger
 from pie.utils import get_pubdate, write_yaml
 
 
@@ -17,10 +17,12 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         description="Create a new post with Markdown and YAML files",
     )
     parser.add_argument("path", help="Base path for the new post without extension")
+    add_log_argument(parser)
     parser.add_argument(
-        "-l",
-        "--log",
-        help="Write logs to the specified file",
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Enable debug logging",
     )
     return parser.parse_args(list(argv) if argv is not None else None)
 
@@ -28,8 +30,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 def main(argv: Sequence[str] | None = None) -> int:
     """Entry point for the ``create-post`` console script."""
     args = parse_args(argv)
-    if args.log:
-        add_file_logger(args.log, level="INFO")
+    configure_logging(args.verbose, args.log)
 
     base = Path(args.path)
     base.parent.mkdir(parents=True, exist_ok=True)

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
+import argparse
 import json
 from pathlib import Path
 
-from pie.logging import logger
+from pie.logging import logger, add_log_argument, configure_logging
 
 from pie.index_tree import walk, getopt_link, getopt_show
 
@@ -38,28 +39,41 @@ def process_dir(directory: Path):
                 yield node
 
 
-def main():
-    import argparse
-    import sys
-
-    parser = argparse.ArgumentParser()
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Generate JSON index from metadata tree",
+    )
     parser.add_argument("root", nargs="?", default=".", help="Directory to scan")
     parser.add_argument("output", nargs="?", help="Write JSON to file")
-    args = parser.parse_args()
+    add_log_argument(parser)
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Enable debug logging",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
+    if args.verbose or args.log:
+        configure_logging(args.verbose, args.log)
 
     root_dir = Path(args.root)
     try:
         data = list(process_dir(root_dir))
     except ValueError as exc:
         logger.error(str(exc))
-        sys.exit(1)
+        raise SystemExit(1)
 
     json_data = json.dumps(data, indent=2)
     if args.output:
-        Path(args.output).write_text(json_data)
+        Path(args.output).write_text(json_data, encoding="utf-8")
     else:
         print(json_data)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

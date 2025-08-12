@@ -363,6 +363,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=str(DEFAULT_CONFIG),
         help="Path to YAML configuration file",
     )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Enable debug logging",
+    )
     return parser.parse_args(argv)
 
 def main(argv: list[str] | None = None) -> None:
@@ -371,7 +377,7 @@ def main(argv: list[str] | None = None) -> None:
     global index_json
     args = parse_args(argv)
 
-    configure_logging(False, args.log)
+    configure_logging(args.verbose, args.log)
 
     global config
     config = load_config(args.config)

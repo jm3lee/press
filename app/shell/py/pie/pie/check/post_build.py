@@ -31,6 +31,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="YAML file listing required paths",
     )
     add_log_argument(parser, default=DEFAULT_LOG)
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Enable debug logging",
+    )
     return parser.parse_args(argv)
 
 
@@ -39,7 +45,7 @@ def main(argv: list[str] | None = None) -> int:
 
     args = parse_args(argv)
     Path(args.log).parent.mkdir(parents=True, exist_ok=True)
-    configure_logging(False, args.log)
+    configure_logging(args.verbose, args.log)
 
     required = read_yaml(args.config) or []
 
