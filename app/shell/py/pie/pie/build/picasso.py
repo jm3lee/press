@@ -16,7 +16,7 @@ import re
 import sys
 from pathlib import Path
 
-from pie.logging import logger, add_log_argument, setup_file_logger
+from pie.logging import logger, add_log_argument, configure_logging
 from pie.metadata import load_metadata_pair
 
 
@@ -231,6 +231,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Directory where build artifacts are written",
     )
     add_log_argument(parser)
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Enable debug logging",
+    )
     return parser.parse_args(argv)
 
 
@@ -238,7 +244,7 @@ def main(argv: list[str] | None = None) -> None:
     """Entry point: print Makefile rules for ``.yml`` files under ``src_root``."""
 
     args = parse_args(argv)
-    setup_file_logger(args.log)
+    configure_logging(args.verbose, args.log)
     src_root = Path(args.src)
     build_root = Path(args.build)
 

@@ -86,12 +86,18 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("paths", nargs="+", help="Files or directories to rewrite")
     add_log_argument(parser, default="log/update-link-filters.txt")
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Enable debug logging",
+    )
     return parser.parse_args(list(argv) if argv is not None else None)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
-    configure_logging(False, args.log)
+    configure_logging(args.verbose, args.log)
     files = list(iter_files(Path(p) for p in args.paths))
     changed = 0
     for fp in files:

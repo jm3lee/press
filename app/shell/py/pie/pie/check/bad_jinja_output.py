@@ -21,6 +21,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("html_file", help="Path to the HTML file to inspect")
     add_log_argument(parser)
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Enable debug logging",
+    )
     return parser.parse_args(argv)
 
 
@@ -29,7 +35,7 @@ def main(argv: list[str] | None = None) -> int:
 
     args = parse_args(argv)
 
-    configure_logging(False, args.log)
+    configure_logging(args.verbose, args.log)
 
     with open(args.html_file, "r", encoding="utf-8") as f:
         soup = BeautifulSoup(f, "html.parser")

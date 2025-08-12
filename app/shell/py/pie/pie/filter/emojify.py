@@ -22,13 +22,19 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Text to emojify. Reads from stdin when omitted.",
     )
     add_log_argument(parser)
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Enable debug logging",
+    )
     return parser.parse_args(list(argv) if argv is not None else None)
 
 
 def main(argv: list[str] | None = None) -> None:
     """Entry point used by the ``emojify`` console script."""
     args = parse_args(argv)
-    configure_logging(False, args.log)
+    configure_logging(args.verbose, args.log)
 
     if args.text:
         text = " ".join(args.text)

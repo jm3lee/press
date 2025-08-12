@@ -18,6 +18,12 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         description="Update the pubdate field in modified metadata files",
     )
     add_log_argument(parser, default="log/update-pubdate.txt")
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Enable debug logging",
+    )
     return parser.parse_args(list(argv) if argv is not None else None)
 
 
@@ -36,7 +42,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
     if args.log:
         Path(args.log).parent.mkdir(parents=True, exist_ok=True)
-    configure_logging(False, args.log)
+    configure_logging(args.verbose, args.log)
     today = get_pubdate()
     changed = get_changed_files()
     messages, checked = update_files(changed, today)

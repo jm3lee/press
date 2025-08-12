@@ -14,6 +14,7 @@ import sys
 from pathlib import Path
 
 from bs4 import BeautifulSoup
+from pie.logging import add_log_argument, configure_logging
 from pie.utils import read_yaml
 
 
@@ -57,12 +58,20 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--exclude",
         help="YAML file listing HTML files to skip",
     )
+    add_log_argument(parser)
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Enable debug logging",
+    )
     return parser.parse_args(argv)
 
 
 def main(argv: list[str] | None = None) -> int:
     """Entry point used by the ``check-page-title`` console script."""
     args = parse_args(argv)
+    configure_logging(args.verbose, args.log)
     directory = Path(args.directory).resolve()
     html_files = list(directory.rglob("*.html"))
     exclude: set[Path] = set()

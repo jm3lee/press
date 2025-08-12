@@ -19,13 +19,19 @@ def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
     parser.add_argument("input", help="Source YAML file")
     parser.add_argument("output", help="Destination file to write")
     add_log_argument(parser)
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Enable debug logging",
+    )
     return parser.parse_args(list(argv) if argv is not None else None)
 
 
 def main(argv: Iterable[str] | None = None) -> None:
     """Entry point used by the ``process-yaml`` console script."""
     args = parse_args(argv)
-    configure_logging(False, args.log)
+    configure_logging(args.verbose, args.log)
 
     try:
         metadata = read_from_yaml(args.input)

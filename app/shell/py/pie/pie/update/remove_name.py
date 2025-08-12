@@ -12,6 +12,8 @@ import argparse
 from pathlib import Path
 from typing import Iterable, Sequence, Tuple
 
+from pie.logging import add_log_argument, configure_logging
+
 __all__ = ["main", "remove_name_fields"]
 
 
@@ -99,11 +101,19 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         "root",
         help="Root directory to scan",
     )
+    add_log_argument(parser)
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Enable debug logging",
+    )
     return parser.parse_args(list(argv) if argv is not None else None)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
+    configure_logging(args.verbose, args.log)
     root = Path(args.root)
     changes, checked = remove_name_fields(walk_files(root))
     for msg in changes:
