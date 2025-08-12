@@ -11,7 +11,12 @@ import os
 from typing import Any, Dict, Optional
 
 from pie.logging import logger, add_log_argument, configure_logging
-from pie.metadata import get_url, read_from_markdown, read_from_yaml
+from pie.metadata import (
+    get_url,
+    read_from_markdown,
+    read_from_yaml,
+    generate_missing_metadata,
+)
 
 
 ## Functions for reading metadata are provided by ``pie.metadata``.
@@ -99,6 +104,7 @@ def build_index(
                 metadata = read_from_yaml(filepath)
 
             if metadata:
+                metadata = generate_missing_metadata(metadata, filepath)
                 validate_and_insert_metadata(metadata, filepath, index)
                 logger.debug("Processed file", filename=filepath)
 

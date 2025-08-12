@@ -19,7 +19,7 @@ This document lists the common metadata keys used by Press and explains how miss
 
 ## Auto‑Generated Values
 
-During indexing, `read_from_yaml` in `pie.metadata` fills in several fields when they are missing:
+During indexing, `generate_missing_metadata` in `pie.metadata` fills in several fields when they are missing:
 
 | Field      | Default value                                  |
 | ---------- | ---------------------------------------------- |
@@ -28,7 +28,7 @@ During indexing, `read_from_yaml` in `pie.metadata` fills in several fields when
 | `url`      | Derived from the source path (e.g. `src/foo.md` → `/foo.html`) |
 
 The `citation` value is used as the anchor text when other pages link to this document using Jinja globals such as `linktitle`.
-The helper that assigns these defaults lives in `read_from_yaml` within `pie.metadata`.
+The helper that assigns these defaults lives in `generate_missing_metadata` within `pie.metadata`.
 
 For bibliographic references the `citation` field may instead be a mapping with
 `author`, `year`, and `page` keys.  This structure is consumed by the `cite`

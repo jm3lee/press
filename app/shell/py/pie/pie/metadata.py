@@ -94,21 +94,28 @@ def generate_missing_metadata(metadata: dict[str, Any], filepath: str) -> dict[s
 
 
 def read_from_markdown(filepath: str) -> Optional[Dict[str, Any]]:
-    """Load and prepare metadata from a Markdown file."""
+    """Load metadata from a Markdown file without adding defaults.
+
+    ``generate_missing_metadata`` should be called by the caller if default
+    fields such as ``url`` or ``id`` are required.
+    """
 
     metadata = get_frontmatter(filepath)
     if metadata is None:
         logger.debug("No frontmatter found in Markdown file", filename=filepath)
         return None
-    return generate_missing_metadata(metadata, filepath)
+    return metadata
 
 
 def read_from_yaml(filepath: str) -> Optional[Dict[str, Any]]:
-    """Load and validate metadata from a YAML file."""
+    """Load and validate metadata from a YAML file without adding defaults.
+
+    ``generate_missing_metadata`` should be called by the caller if additional
+    fields derived from ``filepath`` are needed.
+    """
 
     try:
-        metadata = read_yaml(filepath)
-        return generate_missing_metadata(metadata, filepath)
+        return read_yaml(filepath)
     except yaml.YAMLError:
         logger.warning("Failed to parse YAML file", filename=filepath)
         raise
@@ -297,6 +304,9 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
 
     if files:
         combined["path"] = [str(p.resolve().relative_to(Path.cwd())) for p in files]
+    # Populate any missing metadata fields based on the source path.
+    source = md_path if md_path.exists() else yaml_file or path
+    combined = generate_missing_metadata(combined, str(source))
 
     logger.debug(combined)
     return combined
