@@ -16,7 +16,7 @@ from loguru import logger
 logger.remove()
 
 LOG_FORMAT = (
-    "{time:HH:mm:ss} {module:>25}:{function:<25}:{line:<4} {level:.4s} {message} {extra}"
+    "{time:HH:mm:ss} {module:>10.10}:{function:<15.15}:{line:<4} {level:.1s} {message} {extra}"
 )
 
 # Configure the console sink that all tests and scripts rely on.
