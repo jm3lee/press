@@ -116,3 +116,32 @@ def test_scans_directory(tmp_path: Path, monkeypatch, capsys) -> None:
     log_text = (tmp_path / "log/update-author.txt").read_text(encoding="utf-8")
     assert "src/doc.yml: Jane Doe -> Brian Lee" in log_text
 
+
+def test_overrides_author_argument(tmp_path: Path, monkeypatch, capsys) -> None:
+    """Command line author overrides config value."""
+    src = tmp_path / "src"
+    src.mkdir()
+    md = src / "doc.md"
+    md.write_text("---\ntitle: Test\n---\n", encoding="utf-8")
+    yml = src / "doc.yml"
+    yml.write_text("title: Test\nauthor: Jane Doe\n", encoding="utf-8")
+
+    cfg = tmp_path / "cfg"
+    cfg.mkdir()
+    (cfg / "update-author.yml").write_text("author: Brian Lee\n", encoding="utf-8")
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(update_author, "get_changed_files", lambda: [Path("src/doc.md")])
+
+    update_author.main(["-a", "Chris R."])
+    assert "author: Chris R." in yml.read_text(encoding="utf-8")
+    expected_line = "src/doc.yml: Jane Doe -> Chris R."
+    captured = capsys.readouterr()
+    assert captured.out.strip().splitlines() == [
+        expected_line,
+        "2 files checked",
+        "1 file changed",
+    ]
+    log_text = (tmp_path / "log/update-author.txt").read_text(encoding="utf-8")
+    assert expected_line in log_text
+
