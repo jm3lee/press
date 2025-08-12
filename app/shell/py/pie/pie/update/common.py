@@ -14,6 +14,7 @@ from typing import Iterable
 from pie.metadata import load_metadata_pair
 from pie.logging import logger
 import os
+import yaml
 
 __all__ = [
     "get_changed_files",
@@ -54,48 +55,53 @@ def replace_field(fp: Path, field: str, value: str) -> tuple[bool, str | None]:
     """Replace ``field`` in *fp* and return (changed, old_value)."""
     text = fp.read_text(encoding="utf-8")
     if fp.suffix in {".yml", ".yaml"}:
-        lines = text.splitlines(keepends=True)
-        for i, line in enumerate(lines):
-            if line.startswith(f"{field}:"):
-                old = line.split(":", 1)[1].strip()
-                if old != value:
-                    lines[i] = f"{field}: {value}\n"
-                    fp.write_text("".join(lines), encoding="utf-8")
-                    return True, old
-                else:
-                    return True, None
-        lines.append(f"{field}: {value}\n")
-        fp.write_text("".join(lines), encoding="utf-8")
-        return True, "undefined"
-
+        return _replace_yaml_field(fp, text, field, value)
     if fp.suffix == ".md":
-        lines = text.splitlines(keepends=True)
-        if not lines or not lines[0].startswith("---"):
-            # no frontmatter, add a new block with the field
-            new_lines = ["---\n", f"{field}: {value}\n", "---\n"] + lines
-            fp.write_text("".join(new_lines), encoding="utf-8")
-            return True, "undefined"
-        end = None
-        for i in range(1, len(lines)):
-            if lines[i].startswith("---"):
-                end = i
-                break
-        if end is None:
-            return False, None
-        for i in range(1, end):
-            if lines[i].startswith(f"{field}:"):
-                old = lines[i].split(":", 1)[1].strip()
-                if old != value:
-                    lines[i] = f"{field}: {value}\n"
-                    fp.write_text("".join(lines), encoding="utf-8")
-                    return True, old
-                else:
-                    return True, None
-        lines.insert(end, f"{field}: {value}\n")
-        fp.write_text("".join(lines), encoding="utf-8")
-        return True, "undefined"
-
+        return _replace_markdown_field(fp, text, field, value)
     return False, None
+
+
+def _replace_yaml_field(
+    fp: Path, text: str, field: str, value: str
+) -> tuple[bool, str | None]:
+    data = yaml.safe_load(text) or {}
+    old = data.get(field)
+    if old != value:
+        data[field] = value
+        fp.write_text(
+            yaml.safe_dump(data, sort_keys=False), encoding="utf-8"
+        )
+        return True, old if old is not None else "undefined"
+    return True, None
+
+
+def _replace_markdown_field(
+    fp: Path, text: str, field: str, value: str
+) -> tuple[bool, str | None]:
+    lines = text.splitlines(keepends=True)
+    if not lines or not lines[0].startswith("---"):
+        # no frontmatter, add a new block with the field
+        new_lines = ["---\n", f"{field}: {value}\n", "---\n"] + lines
+        fp.write_text("".join(new_lines), encoding="utf-8")
+        return True, "undefined"
+    end = None
+    for i in range(1, len(lines)):
+        if lines[i].startswith("---"):
+            end = i
+            break
+    if end is None:
+        return False, None
+    for i in range(1, end):
+        if lines[i].startswith(f"{field}:"):
+            old = lines[i].split(":", 1)[1].strip()
+            if old != value:
+                lines[i] = f"{field}: {value}\n"
+                fp.write_text("".join(lines), encoding="utf-8")
+                return True, old
+            return True, None
+    lines.insert(end, f"{field}: {value}\n")
+    fp.write_text("".join(lines), encoding="utf-8")
+    return True, "undefined"
 
 
 def update_files(paths: Iterable[Path], field: str, value: str) -> tuple[list[str], int]:
