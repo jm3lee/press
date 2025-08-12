@@ -13,6 +13,7 @@ def test_generate_rule_basic():
         "build/foo/bar.yml: src/foo/bar.yml\n"
         "\t$(Q)mkdir -p $(dir build/foo/bar.yml)\n"
         "\t$(Q)emojify < $< > $@\n"
+        "\t$(Q)render-jinja-template $@ $@\n"
         "build/foo/bar.html: build/foo/bar.md build/foo/bar.yml\n"
         "\t$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) --metadata-file=build/foo/bar.yml -o $@ $<\n"
         "\t$(Q)check-bad-jinja-output $@"
