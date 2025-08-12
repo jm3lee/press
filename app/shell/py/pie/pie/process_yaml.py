@@ -6,7 +6,7 @@ import argparse
 import sys
 from typing import Iterable
 
-from pie.logging import logger, add_log_argument, setup_file_logger
+from pie.logging import logger, add_log_argument, configure_logging
 from pie.utils import write_yaml
 from pie.metadata import read_from_yaml
 
@@ -25,7 +25,7 @@ def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
 def main(argv: Iterable[str] | None = None) -> None:
     """Entry point used by the ``process-yaml`` console script."""
     args = parse_args(argv)
-    setup_file_logger(args.log)
+    configure_logging(False, args.log)
 
     try:
         metadata = read_from_yaml(args.input)

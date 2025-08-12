@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 from typing import Iterable, Sequence
 
-from pie.logging import add_log_argument, setup_file_logger
+from pie.logging import add_log_argument, configure_logging
 from .common import get_changed_files, update_files as common_update_files
 from pie.utils import get_pubdate
 
@@ -36,7 +36,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
     if args.log:
         Path(args.log).parent.mkdir(parents=True, exist_ok=True)
-    setup_file_logger(args.log, level="INFO")
+    configure_logging(False, args.log)
     today = get_pubdate()
     changed = get_changed_files()
     messages, checked = update_files(changed, today)

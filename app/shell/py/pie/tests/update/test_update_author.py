@@ -243,3 +243,35 @@ def test_verbose_enables_debug_logging(tmp_path: Path, monkeypatch) -> None:
 
     update_author.logger.add(sys.stderr, format=LOG_FORMAT, level="INFO")
 
+
+def test_verbose_enables_debug_logging(tmp_path: Path, monkeypatch) -> None:
+    """-v sets the console log level to DEBUG."""
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "doc.md").write_text("---\ntitle: Test\n---\n", encoding="utf-8")
+    (src / "doc.yml").write_text("title: Test\nauthor: Jane Doe\n", encoding="utf-8")
+
+    cfg = tmp_path / "cfg"
+    cfg.mkdir()
+    (cfg / "update-author.yml").write_text("author: Brian Lee\n", encoding="utf-8")
+
+    monkeypatch.chdir(tmp_path)
+
+    levels: list[str | None] = []
+    original_add = update_author.logger.add
+
+    def fake_add(*args, **kwargs):
+        levels.append(kwargs.get("level"))
+        return original_add(*args, **kwargs)
+
+    monkeypatch.setattr(update_author.logger, "add", fake_add)
+
+    update_author.main(["-v", "src"])
+
+    assert "DEBUG" in levels
+
+    update_author.logger.remove()
+    from pie.logging import LOG_FORMAT
+
+    update_author.logger.add(sys.stderr, format=LOG_FORMAT, level="INFO")
+

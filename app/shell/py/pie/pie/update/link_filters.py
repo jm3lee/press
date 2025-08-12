@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 from typing import Iterable, Sequence
 
-from pie.logging import add_log_argument, setup_file_logger, logger
+from pie.logging import add_log_argument, configure_logging, logger
 
 FILTERS = [
     "link",
@@ -91,7 +91,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
-    setup_file_logger(args.log, level="INFO")
+    configure_logging(False, args.log)
     files = list(iter_files(Path(p) for p in args.paths))
     changed = 0
     for fp in files:

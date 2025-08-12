@@ -7,7 +7,7 @@ import secrets
 from pathlib import Path
 from typing import Iterable, Sequence
 
-from pie.logging import add_log_argument, setup_file_logger, logger
+from pie.logging import add_log_argument, configure_logging, logger
 from pie.utils import write_yaml
 
 __all__ = ["main"]
@@ -78,8 +78,7 @@ def process_file(src: Path, dest_dir: Path, meta_dir: Path) -> str:
 def main(argv: Sequence[str] | None = None) -> int:
     """Entry point for the ``store-files`` console script."""
     args = parse_args(argv)
-    if args.log:
-        setup_file_logger(args.log, level="INFO")
+    configure_logging(False, args.log)
 
     base_path = Path(args.path)
     dest_dir = Path("s3") / "v2" / "files" / "0"

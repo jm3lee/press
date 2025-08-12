@@ -11,7 +11,6 @@ from __future__ import annotations
 import argparse
 import os
 import json
-import sys
 import time
 from pathlib import Path
 from typing import Any, Iterable, Mapping
@@ -19,12 +18,7 @@ import warnings
 from concurrent.futures import ThreadPoolExecutor
 
 import redis
-from pie.logging import (
-    LOG_FORMAT,
-    add_log_argument,
-    logger,
-    setup_file_logger,
-)
+from pie.logging import add_log_argument, configure_logging, logger
 from pie.metadata import load_metadata_pair
 
 
@@ -168,10 +162,7 @@ def load_index_from_path(path: Path) -> tuple[dict[str, dict[str, Any]], int]:
 def main(argv: Iterable[str] | None = None) -> None:
     """Entry point for the ``update-index`` console script."""
     args = parse_args(argv)
-    if args.verbose:
-        logger.remove()
-        logger.add(sys.stderr, format=LOG_FORMAT, level="DEBUG")
-    setup_file_logger(args.log)
+    configure_logging(args.verbose, args.log)
 
     start = time.perf_counter()
     path = Path(args.path)

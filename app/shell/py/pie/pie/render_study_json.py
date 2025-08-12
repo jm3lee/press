@@ -13,7 +13,7 @@ import json
 from pathlib import Path
 from typing import Any, Iterable, List
 
-from pie.logging import logger, add_log_argument, setup_file_logger
+from pie.logging import logger, add_log_argument, configure_logging
 from pie.utils import read_json
 
 from .render.jinja import create_env
@@ -67,7 +67,7 @@ def main(argv: list[str] | None = None) -> None:
     """Entry point for the ``pie.render_study_json`` module."""
 
     args = parse_args(argv)
-    setup_file_logger(args.log)
+    configure_logging(False, args.log)
 
     index_json = read_json(args.index)
     study_json = read_json(args.study)
