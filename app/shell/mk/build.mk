@@ -126,6 +126,8 @@ test: $(BUILD_DIR)/.minify | $(LOG_DIR)
 	$(Q)check-page-title -x $(CFG_DIR)/check-page-title-exclude.yml $(BUILD_DIR)
 	$(call status,Check post-build artifacts)
 	$(Q)check-post-build -c $(CFG_DIR)/check-post-build.yml
+	$(call status,Check for unexpanded Jinja)
+	$(Q)check-unexpanded-jinja $(BUILD_DIR)
 
 # Create necessary build directories
 $(BUILD_DIR): | $(BUILD_SUBDIRS)
