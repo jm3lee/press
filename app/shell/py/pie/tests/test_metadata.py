@@ -59,3 +59,19 @@ def test_read_from_yaml_generates_fields(tmp_path):
     assert data["citation"] == "foo"
     assert data["id"] == "item"
 
+
+def test_load_metadata_pair_conflict_shows_path(tmp_path):
+    """Conflicting values include path in warning."""
+    md = tmp_path / "dir" / "post.md"
+    md.parent.mkdir(parents=True)
+    md.write_text("---\nurl: /md\n---\n")
+    yml = md.with_suffix(".yml")
+    yml.write_text("url: /yml\n")
+    os.chdir(tmp_path)
+    try:
+        with pytest.warns(UserWarning) as record:
+            metadata.load_metadata_pair(yml)
+        assert "dir/post.yml" in str(record[0].message)
+    finally:
+        os.chdir("/tmp")
+
