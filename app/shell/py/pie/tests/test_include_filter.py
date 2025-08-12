@@ -3,6 +3,9 @@ from __future__ import annotations
 from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
+import runpy
+import sys
+import importlib
 
 import pie.filter.include as include_filter
 
@@ -133,3 +136,65 @@ def test_parse_args_parses_positions():
     """parse_args returns expected positional arguments."""
     args = include_filter.parse_args(["out", "in.md", "out.md"])
     assert (args.outdir, args.infile, args.outfile) == ("out", "in.md", "out.md")
+
+
+def test_include_deflist_entry_from_directory_and_custom_sort(tmp_path, monkeypatch):
+    """Directories and custom sorting are handled in include_deflist_entry."""
+    (tmp_path / "a.md").write_text("A\n", encoding="utf-8")
+    (tmp_path / "b.md").write_text("B\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    include_filter.outfile = StringIO()
+
+    def fake_meta(path: str, key: str):
+        data = {"a.md": {"title": "Title A"}, "b.md": {"title": "Title B"}}
+        return data.get(path, {}).get(key)
+
+    with patch("pie.filter.include.get_metadata_by_path", side_effect=fake_meta):
+        include_filter.include_deflist_entry(
+            tmp_path.as_posix(),
+            sort_fn=lambda files: sorted(files, key=lambda p: p.name, reverse=True),
+        )
+    try:
+        assert include_filter.outfile.getvalue().startswith("<dt>Title B")
+    finally:
+        include_filter.outfile = None
+
+
+def test_mermaid_writes_image_reference(tmp_path, monkeypatch):
+    """mermaid() exports diagram and writes a reference."""
+    src = tmp_path / "src.mmd"
+    src.write_text("```mermaid\nA-->B\n```\n", encoding="utf-8")
+    include_filter.outfile = StringIO()
+    include_filter.outdir = tmp_path.as_posix()
+    include_filter.figcount = 0
+
+    monkeypatch.setattr(include_filter, "new_filestem", lambda stem: str(tmp_path / "diagram"))
+    with patch("pie.filter.include.os.system") as system:
+        system.return_value = 0
+        include_filter.mermaid(src.as_posix(), "Alt", "#id")
+    try:
+        assert include_filter.outfile.getvalue() == "![Alt](./diagram.png){ #id }\n"
+        assert include_filter.figcount == 1
+        assert (tmp_path / "diagram.mmd").read_text() == "A-->B\n"
+    finally:
+        include_filter.outfile = None
+
+
+def test_main_processes_markdown(tmp_path):
+    """Running the module as a script processes Markdown input."""
+    in_md = tmp_path / "in.md"
+    out_md = tmp_path / "out.md"
+    in_md.write_text(
+        "# Heading\n```python\nprint('py', file=outfile)\n```\n[link](doc.md)\n",
+        encoding="utf-8",
+    )
+    argv = ["include.py", tmp_path.as_posix(), in_md.as_posix(), out_md.as_posix()]
+    old_argv = sys.argv
+    sys.argv = argv
+    try:
+        sys.modules.pop("pie.filter.include", None)
+        runpy.run_module("pie.filter.include", run_name="__main__")
+    finally:
+        sys.argv = old_argv
+        globals()["include_filter"] = importlib.import_module("pie.filter.include")
+    assert out_md.read_text() == "# Heading\npy\n[link](doc.html)\n"
