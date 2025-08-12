@@ -6,7 +6,7 @@ from typing import Sequence
 
 from jinja2 import Environment
 
-from pie.logging import logger, add_log_argument, setup_file_logger
+from pie.logging import logger, add_log_argument, configure_logging
 
 
 __all__ = ["main"]
@@ -25,7 +25,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 def main(argv: Sequence[str] | None = None) -> int:
     """Entry point for the ``create`` console script."""
     args = parse_args(argv)
-    setup_file_logger(args.log)
+    configure_logging(False, args.log)
 
     root = Path(args.path)
     root.mkdir(parents=True, exist_ok=True)

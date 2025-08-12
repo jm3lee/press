@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
-from pie.logging import logger, add_log_argument, setup_file_logger
+from pie.logging import logger, add_log_argument, configure_logging
 from pie.utils import read_yaml
 
 DEFAULT_LOG = "log/check-post-build.txt"
@@ -39,7 +39,7 @@ def main(argv: list[str] | None = None) -> int:
 
     args = parse_args(argv)
     Path(args.log).parent.mkdir(parents=True, exist_ok=True)
-    setup_file_logger(args.log)
+    configure_logging(False, args.log)
 
     required = read_yaml(args.config) or []
 

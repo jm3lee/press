@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import IO, Iterable, Callable
 
 import yaml
-from pie.logging import logger, add_log_argument, setup_file_logger
+from pie.logging import logger, add_log_argument, configure_logging
 from pie.metadata import get_metadata_by_path
 
 MD_LINK_PATTERN = re.compile(r"\[([^\]]+)\]\(([^)]+)\.md\)")
@@ -209,7 +209,7 @@ def main(argv: list[str] | None = None) -> None:
 
     args = parse_args(argv)
 
-    setup_file_logger(args.log)
+    configure_logging(False, args.log)
 
     outdir = args.outdir
     infilename = args.infile

@@ -4,7 +4,7 @@ import argparse
 import sys
 
 import emoji
-from pie.logging import logger, add_log_argument, setup_file_logger
+from pie.logging import logger, add_log_argument, configure_logging
 
 def emojify_text(text: str) -> str:
     """Return *text* with ``:emoji:`` codes replaced by Unicode characters."""
@@ -28,7 +28,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def main(argv: list[str] | None = None) -> None:
     """Entry point used by the ``emojify`` console script."""
     args = parse_args(argv)
-    setup_file_logger(args.log)
+    configure_logging(False, args.log)
 
     if args.text:
         text = " ".join(args.text)

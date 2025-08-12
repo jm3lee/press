@@ -17,7 +17,7 @@ from pathlib import Path
 
 import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
-from pie.logging import logger, add_log_argument, setup_file_logger
+from pie.logging import logger, add_log_argument, configure_logging
 from pie.utils import read_json, read_utf8, write_utf8, read_yaml as load_yaml_file
 from pie import metadata
 
@@ -371,7 +371,7 @@ def main(argv: list[str] | None = None) -> None:
     global index_json
     args = parse_args(argv)
 
-    setup_file_logger(args.log)
+    configure_logging(False, args.log)
 
     global config
     config = load_config(args.config)

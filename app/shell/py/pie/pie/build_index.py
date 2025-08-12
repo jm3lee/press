@@ -10,7 +10,7 @@ import json
 import os
 from typing import Any, Dict, Optional
 
-from pie.logging import logger, add_log_argument, setup_file_logger
+from pie.logging import logger, add_log_argument, configure_logging
 from pie.metadata import get_url, read_from_markdown, read_from_yaml
 
 
@@ -127,7 +127,7 @@ def main(argv: list[str] | None = None) -> None:
     """Build the index and write JSON output."""
     args = parse_args(argv)
 
-    setup_file_logger(args.log)
+    configure_logging(False, args.log)
 
     index = build_index(args.source_dir)
 

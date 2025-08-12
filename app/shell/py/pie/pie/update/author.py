@@ -6,7 +6,7 @@ from typing import Iterable, Sequence
 
 import yaml
 
-from pie.logging import add_log_argument, setup_file_logger
+from pie.logging import add_log_argument, configure_logging, logger
 from .common import get_changed_files, update_files as common_update_files
 
 __all__ = ["main"]
@@ -45,6 +45,12 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         help="Directory or file to scan; if omitted, changed files are read from git",
     )
     add_log_argument(parser, default="log/update-author.txt")
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Enable debug logging",
+    )
     return parser.parse_args(list(argv) if argv is not None else None)
 
 
@@ -63,7 +69,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
     if args.log:
         Path(args.log).parent.mkdir(parents=True, exist_ok=True)
-    setup_file_logger(args.log, level="INFO")
+    configure_logging(args.verbose, args.log)
+    logger.debug("Parsed arguments", args=vars(args))
     if args.path:
         cwd = Path.cwd()
         if args.path.is_dir():
@@ -78,7 +85,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             ] if args.path.suffix in {".md", ".yml", ".yaml"} else []
     else:
         changed = get_changed_files()
+    logger.debug("Files to check", files=[str(p) for p in changed])
     messages, checked = update_files(changed, args.author)
+    logger.debug("Update complete", messages=messages, checked=checked)
     for msg in messages:
         print(msg)
     print(f"{checked} {'file' if checked == 1 else 'files'} checked")

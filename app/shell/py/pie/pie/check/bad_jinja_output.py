@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 import re
 from bs4 import BeautifulSoup
-from pie.logging import logger, add_log_argument, setup_file_logger
+from pie.logging import logger, add_log_argument, configure_logging
 
 def contains_python_dict(text: str) -> bool:
     """Return ``True`` if *text* looks like a Python dictionary literal."""
@@ -29,7 +29,7 @@ def main(argv: list[str] | None = None) -> int:
 
     args = parse_args(argv)
 
-    setup_file_logger(args.log)
+    configure_logging(False, args.log)
 
     with open(args.html_file, "r", encoding="utf-8") as f:
         soup = BeautifulSoup(f, "html.parser")

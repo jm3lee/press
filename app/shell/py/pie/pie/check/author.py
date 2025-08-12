@@ -7,7 +7,7 @@ import argparse
 from pathlib import Path
 from typing import Iterable
 
-from pie.logging import logger, add_log_argument, setup_file_logger
+from pie.logging import logger, add_log_argument, configure_logging
 from pie.metadata import load_metadata_pair
 
 DEFAULT_LOG = "log/check-author.txt"
@@ -57,7 +57,7 @@ def main(argv: list[str] | None = None) -> int:
     """Entry point for the ``check-author`` console script."""
     args = parse_args(argv)
     Path(args.log).parent.mkdir(parents=True, exist_ok=True)
-    setup_file_logger(args.log)
+    configure_logging(False, args.log)
 
     root = Path(args.directory)
     ok = True
