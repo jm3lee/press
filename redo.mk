@@ -134,7 +134,7 @@ webp: ## Convert images to webp format
 .PHONY: shell
 shell: ## Open an interactive shell container
 	$(call status,Open shell)
-	$(Q)$(DOCKER_COMPOSE) run --rm --build shell
+	$(Q)./bin/shell
 
 .PHONY: rmi
 rmi: ## Remove Docker images matching press-*

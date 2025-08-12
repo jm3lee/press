@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+#
+# Description:
+#   Run the project's shell service via docker compose.
+#   Supports an optional `-u` flag to set the UID inside the container.
+#
+# Usage:
+#   bin/shell [-u [UID]] [-- COMMAND...]
+#
+# Options:
+#   -u [UID]  Run as the specified user ID. When UID is omitted,
+#             the current user's UID is used.
+
+set -euo pipefail
+
+usage() {
+  echo "Usage: $0 [-u [UID]] [-- COMMAND...]" >&2
+  exit 1
+}
+
+uid_flag=()
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -u)
+      if [[ $# -gt 1 && "$2" != -* ]]; then
+        uid_flag=(-u "$2")
+        shift 2
+      else
+        uid_flag=(-u "$(id -u)")
+        shift 1
+      fi
+      ;;
+    -u*)
+      arg="${1#-u}"
+      if [[ -n "$arg" ]]; then
+        uid_flag=(-u "$arg")
+      else
+        uid_flag=(-u "$(id -u)")
+      fi
+      shift 1
+      ;;
+    --)
+      shift
+      break
+      ;;
+    -* )
+      usage
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+COMPOSE_FILE="docker-compose.yml"
+if [[ ! -f "$COMPOSE_FILE" ]]; then
+  COMPOSE_FILE="dist/docker-compose.yml"
+fi
+
+exec docker compose -f "$COMPOSE_FILE" run --rm --build "${uid_flag[@]}" shell "$@"
