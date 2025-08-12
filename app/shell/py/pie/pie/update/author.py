@@ -7,7 +7,8 @@ from typing import Iterable, Sequence
 
 import yaml
 
-from pie.logging import add_log_argument, configure_logging, logger
+from pie.cli import create_parser
+from pie.logging import configure_logging, logger
 from .common import get_changed_files, update_files as common_update_files
 
 __all__ = ["main"]
@@ -30,8 +31,9 @@ def load_default_author(cfg_path: Path | None = None) -> str:
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
     default_author = load_default_author()
-    parser = argparse.ArgumentParser(
-        description="Update the author field in modified metadata files",
+    parser = create_parser(
+        "Update the author field in modified metadata files",
+        log_default="log/update-author.txt",
     )
     parser.add_argument(
         "-a",
@@ -46,13 +48,6 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
             "Directories, files, or glob patterns to scan; if omitted, changed files"
             " are read from git"
         ),
-    )
-    add_log_argument(parser, default="log/update-author.txt")
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="Enable debug logging",
     )
     return parser.parse_args(list(argv) if argv is not None else None)
 

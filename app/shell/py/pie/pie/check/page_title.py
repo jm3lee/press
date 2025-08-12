@@ -14,7 +14,8 @@ import sys
 from pathlib import Path
 
 from bs4 import BeautifulSoup
-from pie.logging import add_log_argument, configure_logging
+from pie.cli import create_parser
+from pie.logging import configure_logging
 from pie.utils import read_yaml
 
 
@@ -44,8 +45,8 @@ def check_file(path: Path) -> bool:
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Verify that HTML files contain non-empty <h1> tags.",
+    parser = create_parser(
+        "Verify that HTML files contain non-empty <h1> tags."
     )
     parser.add_argument(
         "directory",
@@ -57,13 +58,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "-x",
         "--exclude",
         help="YAML file listing HTML files to skip",
-    )
-    add_log_argument(parser)
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="Enable debug logging",
     )
     return parser.parse_args(argv)
 

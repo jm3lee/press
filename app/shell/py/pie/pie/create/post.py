@@ -4,7 +4,8 @@ import argparse
 from pathlib import Path
 from typing import Sequence
 
-from pie.logging import add_log_argument, configure_logging, logger
+from pie.cli import create_parser
+from pie.logging import configure_logging, logger
 from pie.utils import get_pubdate, write_yaml
 
 
@@ -13,17 +14,8 @@ __all__ = ["main"]
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Create a new post with Markdown and YAML files",
-    )
+    parser = create_parser("Create a new post with Markdown and YAML files")
     parser.add_argument("path", help="Base path for the new post without extension")
-    add_log_argument(parser)
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="Enable debug logging",
-    )
     return parser.parse_args(list(argv) if argv is not None else None)
 
 

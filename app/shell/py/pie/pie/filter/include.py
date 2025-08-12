@@ -21,7 +21,8 @@ from pathlib import Path
 from typing import IO, Iterable, Callable
 
 import yaml
-from pie.logging import logger, add_log_argument, configure_logging
+from pie.cli import create_parser
+from pie.logging import logger, configure_logging
 from pie.metadata import get_metadata_by_path
 
 MD_LINK_PATTERN = re.compile(r"\[([^\]]+)\]\(([^)]+)\.md\)")
@@ -186,19 +187,10 @@ def md_to_html_links(line: str) -> str:
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
 
-    parser = argparse.ArgumentParser(
-        description="Expand Python directives inside a Markdown file",
-    )
+    parser = create_parser("Expand Python directives inside a Markdown file")
     parser.add_argument("outdir", help="Output directory for diagrams")
     parser.add_argument("infile", help="Input Markdown file")
     parser.add_argument("outfile", help="Output Markdown file")
-    add_log_argument(parser)
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="Enable debug logging",
-    )
     return parser.parse_args(argv)
 
 

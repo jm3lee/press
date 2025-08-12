@@ -11,7 +11,8 @@ import warnings
 from pathlib import Path
 from typing import Iterator
 
-from pie.logging import add_log_argument, configure_logging
+from pie.cli import create_parser
+from pie.logging import configure_logging
 from pie.index_tree import walk, getopt_link, getopt_show
 
 warnings.warn(
@@ -42,15 +43,8 @@ def generate(directory: Path, level: int = 0) -> Iterator[str]:
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Generate a Markdown index")
+    parser = create_parser("Generate a Markdown index")
     parser.add_argument("root_dir", nargs="?", default=".", help="Root directory to scan")
-    add_log_argument(parser)
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="Enable debug logging",
-    )
     return parser.parse_args(argv)
 
 

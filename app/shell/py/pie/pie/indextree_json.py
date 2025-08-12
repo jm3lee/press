@@ -4,7 +4,8 @@ import argparse
 import json
 from pathlib import Path
 
-from pie.logging import logger, add_log_argument, configure_logging
+from pie.cli import create_parser
+from pie.logging import logger, configure_logging
 
 from pie.index_tree import walk, getopt_link, getopt_show
 
@@ -40,18 +41,9 @@ def process_dir(directory: Path):
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Generate JSON index from metadata tree",
-    )
+    parser = create_parser("Generate JSON index from metadata tree")
     parser.add_argument("root", nargs="?", default=".", help="Directory to scan")
     parser.add_argument("output", nargs="?", help="Write JSON to file")
-    add_log_argument(parser)
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="Enable debug logging",
-    )
     return parser.parse_args(argv)
 
 

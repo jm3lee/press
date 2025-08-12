@@ -5,7 +5,8 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
-from pie.logging import logger, add_log_argument, configure_logging
+from pie.cli import create_parser
+from pie.logging import logger, configure_logging
 from pie.utils import read_yaml
 
 DEFAULT_LOG = "log/check-post-build.txt"
@@ -15,8 +16,9 @@ DEFAULT_CFG = "cfg/check-post-build.yml"
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Return parsed command line arguments."""
 
-    parser = argparse.ArgumentParser(
-        description="Verify that expected build artifacts exist.",
+    parser = create_parser(
+        "Verify that expected build artifacts exist.",
+        log_default=DEFAULT_LOG,
     )
     parser.add_argument(
         "directory",
@@ -29,13 +31,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--config",
         default=DEFAULT_CFG,
         help="YAML file listing required paths",
-    )
-    add_log_argument(parser, default=DEFAULT_LOG)
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="Enable debug logging",
     )
     return parser.parse_args(argv)
 

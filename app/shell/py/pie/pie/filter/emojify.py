@@ -4,7 +4,8 @@ import argparse
 import sys
 
 import emoji
-from pie.logging import logger, add_log_argument, configure_logging
+from pie.cli import create_parser
+from pie.logging import logger, configure_logging
 
 def emojify_text(text: str) -> str:
     """Return *text* with ``:emoji:`` codes replaced by Unicode characters."""
@@ -13,20 +14,11 @@ def emojify_text(text: str) -> str:
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Replace :emoji: codes with Unicode characters",
-    )
+    parser = create_parser("Replace :emoji: codes with Unicode characters")
     parser.add_argument(
         "text",
         nargs="*",
         help="Text to emojify. Reads from stdin when omitted.",
-    )
-    add_log_argument(parser)
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="Enable debug logging",
     )
     return parser.parse_args(list(argv) if argv is not None else None)
 

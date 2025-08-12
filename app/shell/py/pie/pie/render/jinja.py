@@ -17,7 +17,8 @@ from pathlib import Path
 
 import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
-from pie.logging import logger, add_log_argument, configure_logging
+from pie.cli import create_parser
+from pie.logging import logger, configure_logging
 from pie.utils import read_json, read_utf8, write_utf8, read_yaml as load_yaml_file
 from pie import metadata
 
@@ -346,8 +347,8 @@ env = create_env()
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
 
-    parser = argparse.ArgumentParser(
-        description="Render a template using metadata from Redis and an optional index file",
+    parser = create_parser(
+        "Render a template using metadata from Redis and an optional index file"
     )
     parser.add_argument("template", help="Template file to render")
     parser.add_argument("output", help="File to write rendered template to")
@@ -356,18 +357,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--index",
         help="Optional path to index.json",
     )
-    add_log_argument(parser)
     parser.add_argument(
         "-c",
         "--config",
         default=str(DEFAULT_CONFIG),
         help="Path to YAML configuration file",
-    )
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="Enable debug logging",
     )
     return parser.parse_args(argv)
 

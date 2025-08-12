@@ -4,7 +4,8 @@ import argparse
 from pathlib import Path
 from typing import Iterable, Sequence
 
-from pie.logging import add_log_argument, configure_logging
+from pie.cli import create_parser
+from pie.logging import configure_logging
 from .common import get_changed_files, update_files as common_update_files
 from pie.utils import get_pubdate
 
@@ -14,15 +15,9 @@ __all__ = ["main"]
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Update the pubdate field in modified metadata files",
-    )
-    add_log_argument(parser, default="log/update-pubdate.txt")
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="Enable debug logging",
+    parser = create_parser(
+        "Update the pubdate field in modified metadata files",
+        log_default="log/update-pubdate.txt",
     )
     return parser.parse_args(list(argv) if argv is not None else None)
 
