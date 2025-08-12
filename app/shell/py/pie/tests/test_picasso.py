@@ -114,6 +114,20 @@ def test_collect_ids_invalid_yaml(tmp_path):
     assert "bad" in ids
 
 
+def test_collect_ids_uses_metadata_and_skips_duplicates(tmp_path, monkeypatch):
+    """Metadata ``id`` is used and `.md`/`.yml` pairs are deduplicated."""
+    src = tmp_path / "src"
+    src.mkdir()
+    monkeypatch.chdir(tmp_path)
+    (src / "doc.yml").write_text("id: spam\nurl: /doc.html\n")
+    (src / "doc.md").write_text("content")
+
+    ids = picasso.collect_ids(src)
+
+    assert len(ids) == 1
+    assert "spam" in ids
+
+
 def test_has_path_seen_returns_false():
     """_has_path({}, 'a','b',{'a'}) -> False."""
     assert picasso._has_path({}, "a", "b", {"a"}) is False
