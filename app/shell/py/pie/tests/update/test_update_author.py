@@ -89,3 +89,30 @@ def test_ignores_author_in_body(tmp_path: Path, monkeypatch, capsys) -> None:
         "0 files changed",
     ]
 
+
+def test_scans_directory(tmp_path: Path, monkeypatch, capsys) -> None:
+    """Specifying a directory scans files without git."""
+    src = tmp_path / "src"
+    src.mkdir()
+    md = src / "doc.md"
+    md.write_text("---\ntitle: Test\n---\n", encoding="utf-8")
+    yml = src / "doc.yml"
+    yml.write_text("title: Test\nauthor: Jane Doe\n", encoding="utf-8")
+
+    cfg = tmp_path / "cfg"
+    cfg.mkdir()
+    (cfg / "update-author.yml").write_text("author: Brian Lee\n", encoding="utf-8")
+
+    monkeypatch.chdir(tmp_path)
+
+    update_author.main(["src"])
+    assert "author: Brian Lee" in yml.read_text(encoding="utf-8")
+    captured = capsys.readouterr()
+    assert captured.out.strip().splitlines() == [
+        "src/doc.yml: Jane Doe -> Brian Lee",
+        "2 files checked",
+        "1 file changed",
+    ]
+    log_text = (tmp_path / "log/update-author.txt").read_text(encoding="utf-8")
+    assert "src/doc.yml: Jane Doe -> Brian Lee" in log_text
+

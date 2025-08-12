@@ -37,6 +37,12 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         default=default_author,
         help="Author name to set (default: value from cfg/update-author.yml)",
     )
+    parser.add_argument(
+        "path",
+        nargs="?",
+        type=Path,
+        help="Directory to scan for files; if omitted, changed files are read from git",
+    )
     add_log_argument(parser, default="log/update-author.txt")
     return parser.parse_args(list(argv) if argv is not None else None)
 
@@ -57,7 +63,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.log:
         Path(args.log).parent.mkdir(parents=True, exist_ok=True)
     setup_file_logger(args.log, level="INFO")
-    changed = get_changed_files()
+    if args.path:
+        cwd = Path.cwd()
+        changed = [
+            (p.relative_to(cwd) if p.is_absolute() else p)
+            for p in args.path.rglob("*")
+            if p.suffix in {".md", ".yml", ".yaml"}
+        ]
+    else:
+        changed = get_changed_files()
     messages, checked = update_files(changed, args.author)
     for msg in messages:
         print(msg)
