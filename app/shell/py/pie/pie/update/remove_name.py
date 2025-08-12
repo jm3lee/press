@@ -97,9 +97,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "root",
-        nargs="?",
-        default="src",
-        help="Root directory to scan (default: src)",
+        help="Root directory to scan",
     )
     return parser.parse_args(list(argv) if argv is not None else None)
 
