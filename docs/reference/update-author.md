@@ -1,11 +1,11 @@
 # update-author
 
 Update the `author` field in metadata files for documents modified in git or
-within a specified path.
+within specified paths or glob patterns.
 
 By default the console script scans `git status --short` for tracked files that
-have been added or changed. When a directory or file is provided, Markdown and
-YAML files under that path—or the specified file itself—are examined instead.
+have been added or changed. When directories, files, or glob patterns are
+provided, Markdown and YAML files matching those paths are examined instead.
 For each file it locates the associated Markdown and YAML metadata pair using
 `load_metadata_pair` and ensures the `author` field is present in Markdown
 frontmatter or metadata YAML. The field is added when missing and metadata is
@@ -14,7 +14,7 @@ can be overridden with the `--author` or `-a` option when batch updating book
 excerpts, quotes, or other content.
 
 ```bash
-update-author [-a AUTHOR] [-l LOGFILE] [-v] [PATH]
+update-author [-a AUTHOR] [-l LOGFILE] [-v] [PATH ...]
 ```
 
 Each updated file is printed as `<path>: <old> -> <new>` and logged to

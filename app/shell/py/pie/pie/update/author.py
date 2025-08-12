@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import glob
 from pathlib import Path
 from typing import Iterable, Sequence
 
@@ -39,10 +40,12 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         help="Author name to set; overrides value from cfg/update-author.yml",
     )
     parser.add_argument(
-        "path",
-        nargs="?",
-        type=Path,
-        help="Directory or file to scan; if omitted, changed files are read from git",
+        "paths",
+        nargs="*",
+        help=(
+            "Directories, files, or glob patterns to scan; if omitted, changed files"
+            " are read from git"
+        ),
     )
     add_log_argument(parser, default="log/update-author.txt")
     parser.add_argument(
@@ -71,18 +74,34 @@ def main(argv: Sequence[str] | None = None) -> int:
         Path(args.log).parent.mkdir(parents=True, exist_ok=True)
     configure_logging(args.verbose, args.log)
     logger.debug("Parsed arguments", args=vars(args))
-    if args.path:
+    if args.paths:
         cwd = Path.cwd()
-        if args.path.is_dir():
-            changed = [
-                (p.relative_to(cwd) if p.is_absolute() else p)
-                for p in args.path.rglob("*")
-                if p.suffix in {".md", ".yml", ".yaml"}
-            ]
-        else:
-            changed = [
-                args.path.relative_to(cwd) if args.path.is_absolute() else args.path
-            ] if args.path.suffix in {".md", ".yml", ".yaml"} else []
+        changed: list[Path] = []
+        for pattern in args.paths:
+            matches = glob.glob(pattern, recursive=True) or [pattern]
+            for match in matches:
+                p = Path(match)
+                if not p.exists():
+                    continue
+                if p.is_dir():
+                    for child in p.rglob("*"):
+                        if child.suffix in {".md", ".yml", ".yaml"}:
+                            changed.append(
+                                child.relative_to(cwd) if child.is_absolute() else child
+                            )
+                else:
+                    if p.suffix in {".md", ".yml", ".yaml"}:
+                        changed.append(
+                            p.relative_to(cwd) if p.is_absolute() else p
+                        )
+        # Remove duplicates while preserving order
+        seen: set[Path] = set()
+        unique_changed: list[Path] = []
+        for p in changed:
+            if p not in seen:
+                unique_changed.append(p)
+                seen.add(p)
+        changed = unique_changed
     else:
         changed = get_changed_files()
     logger.debug("Files to check", files=[str(p) for p in changed])
