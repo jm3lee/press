@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import sys
 
 from pie.update import author as update_author
 
@@ -209,4 +210,36 @@ def test_overrides_author_argument(tmp_path: Path, monkeypatch, capsys) -> None:
     log_text = (tmp_path / "log/update-author.txt").read_text(encoding="utf-8")
     assert "src/doc.md: undefined -> Chris R." in log_text
     assert "src/doc.yml: Jane Doe -> Chris R." in log_text
+
+
+def test_verbose_enables_debug_logging(tmp_path: Path, monkeypatch) -> None:
+    """-v sets the console log level to DEBUG."""
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "doc.md").write_text("---\ntitle: Test\n---\n", encoding="utf-8")
+    (src / "doc.yml").write_text("title: Test\nauthor: Jane Doe\n", encoding="utf-8")
+
+    cfg = tmp_path / "cfg"
+    cfg.mkdir()
+    (cfg / "update-author.yml").write_text("author: Brian Lee\n", encoding="utf-8")
+
+    monkeypatch.chdir(tmp_path)
+
+    levels: list[str | None] = []
+    original_add = update_author.logger.add
+
+    def fake_add(*args, **kwargs):
+        levels.append(kwargs.get("level"))
+        return original_add(*args, **kwargs)
+
+    monkeypatch.setattr(update_author.logger, "add", fake_add)
+
+    update_author.main(["-v", "src"])
+
+    assert "DEBUG" in levels
+
+    update_author.logger.remove()
+    from pie.logging import LOG_FORMAT
+
+    update_author.logger.add(sys.stderr, format=LOG_FORMAT, level="INFO")
 

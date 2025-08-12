@@ -14,12 +14,12 @@ can be overridden with the `--author` or `-a` option when batch updating book
 excerpts, quotes, or other content.
 
 ```bash
-update-author [-a AUTHOR] [-l LOGFILE] [PATH]
+update-author [-a AUTHOR] [-l LOGFILE] [-v] [PATH]
 ```
 
 Each updated file is printed as `<path>: <old> -> <new>` and logged to
 `LOGFILE`.  When not specified, log output is written to
-`log/update-author.txt`.
+`log/update-author.txt`. Pass `-v` to enable debug logging.
 
 After processing, a summary of the number of files checked and modified is
 printed to the console.
