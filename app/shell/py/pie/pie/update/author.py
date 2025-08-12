@@ -42,7 +42,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         "path",
         nargs="?",
         type=Path,
-        help="Directory to scan for files; if omitted, changed files are read from git",
+        help="Directory or file to scan; if omitted, changed files are read from git",
     )
     add_log_argument(parser, default="log/update-author.txt")
     return parser.parse_args(list(argv) if argv is not None else None)
@@ -66,11 +66,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     setup_file_logger(args.log, level="INFO")
     if args.path:
         cwd = Path.cwd()
-        changed = [
-            (p.relative_to(cwd) if p.is_absolute() else p)
-            for p in args.path.rglob("*")
-            if p.suffix in {".md", ".yml", ".yaml"}
-        ]
+        if args.path.is_dir():
+            changed = [
+                (p.relative_to(cwd) if p.is_absolute() else p)
+                for p in args.path.rglob("*")
+                if p.suffix in {".md", ".yml", ".yaml"}
+            ]
+        else:
+            changed = [
+                args.path.relative_to(cwd) if args.path.is_absolute() else args.path
+            ] if args.path.suffix in {".md", ".yml", ".yaml"} else []
     else:
         changed = get_changed_files()
     messages, checked = update_files(changed, args.author)
