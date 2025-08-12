@@ -54,3 +54,18 @@ def setup_file_logger(log_path: str | None, *, level: str = "DEBUG") -> None:
 
     if log_path:
         add_file_logger(log_path, level=level)
+
+
+def configure_logging(verbose: bool, log_path: str | None) -> None:
+    """Configure console and file logging based on ``verbose`` flag.
+
+    The existing logger configuration is cleared and a console sink is added
+    at ``DEBUG`` level when ``verbose`` is :data:`True` and ``INFO`` otherwise.
+    File logging is configured via :func:`setup_file_logger` using the same
+    level.
+    """
+
+    level = "DEBUG" if verbose else "INFO"
+    logger.remove()
+    logger.add(sys.stderr, format=LOG_FORMAT, level=level)
+    setup_file_logger(log_path, level=level)
