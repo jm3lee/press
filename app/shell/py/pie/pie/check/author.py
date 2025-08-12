@@ -65,7 +65,7 @@ def main(argv: list[str] | None = None) -> int:
         author = meta.get("author") if meta else None
         for path in paths:
             if author:
-                logger.info("Found author", path=str(path), author=author)
+                logger.debug("Found author", path=str(path), author=author)
             else:
                 logger.error("Missing author", path=str(path))
                 ok = False
