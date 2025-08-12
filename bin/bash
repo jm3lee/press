@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-# shellcheck source=app/shell/sh/lib.sh
-source "$ROOT/app/shell/sh/lib.sh"
-
-press_bash "$@"
+docker compose run \
+  --rm --entrypoint bash -u "$(id -u)" \
+  shell "$@"

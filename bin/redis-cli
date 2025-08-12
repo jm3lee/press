@@ -3,8 +3,4 @@
 # Run redis-cli inside the dragonfly service.
 # Any arguments provided are forwarded to redis-cli.
 
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-# shellcheck source=app/shell/sh/lib.sh
-source "$ROOT/app/shell/sh/lib.sh"
-
-press_redis_cli "$@"
+docker compose exec dragonfly redis-cli "$@"

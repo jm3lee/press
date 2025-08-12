@@ -15,9 +15,7 @@
 # delegating to `make` so the build artifacts are regenerated
 # from scratch.
 
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-# shellcheck source=app/shell/sh/lib.sh
-source "$ROOT/app/shell/sh/lib.sh"
-
 rm -rf "$@"
-press_make "$@"
+docker compose run \
+  --rm --entrypoint make -u "$(id -u)" \
+  shell -f /app/mk/build.mk "$@"
