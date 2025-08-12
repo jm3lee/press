@@ -33,9 +33,10 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         description="Update the author field in modified metadata files",
     )
     parser.add_argument(
+        "-a",
         "--author",
         default=default_author,
-        help="Author name to set (default: value from cfg/update-author.yml)",
+        help="Author name to set; overrides value from cfg/update-author.yml",
     )
     parser.add_argument(
         "path",
