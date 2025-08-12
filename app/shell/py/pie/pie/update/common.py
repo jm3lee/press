@@ -71,7 +71,10 @@ def replace_field(fp: Path, field: str, value: str) -> tuple[bool, str | None]:
     if fp.suffix == ".md":
         lines = text.splitlines(keepends=True)
         if not lines or not lines[0].startswith("---"):
-            return False, None
+            # no frontmatter, add a new block with the field
+            new_lines = ["---\n", f"{field}: {value}\n", "---\n"] + lines
+            fp.write_text("".join(new_lines), encoding="utf-8")
+            return True, "undefined"
         end = None
         for i in range(1, len(lines)):
             if lines[i].startswith("---"):
@@ -82,10 +85,15 @@ def replace_field(fp: Path, field: str, value: str) -> tuple[bool, str | None]:
         for i in range(1, end):
             if lines[i].startswith(f"{field}:"):
                 old = lines[i].split(":", 1)[1].strip()
-                lines[i] = f"{field}: {value}\n"
-                fp.write_text("".join(lines), encoding="utf-8")
-                return True, old
-        return False, None
+                if old != value:
+                    lines[i] = f"{field}: {value}\n"
+                    fp.write_text("".join(lines), encoding="utf-8")
+                    return True, old
+                else:
+                    return True, None
+        lines.insert(end, f"{field}: {value}\n")
+        fp.write_text("".join(lines), encoding="utf-8")
+        return True, "undefined"
 
     return False, None
 
