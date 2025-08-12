@@ -36,6 +36,8 @@ def test_read_from_markdown_generates_fields(tmp_path):
     os.chdir(tmp_path)
     try:
         data = metadata.read_from_markdown("src/doc.md")
+        assert data is not None
+        data = metadata.generate_missing_metadata(data, "src/doc.md")
     finally:
         os.chdir("/tmp")
     assert data["title"] == "T"
@@ -52,6 +54,8 @@ def test_read_from_yaml_generates_fields(tmp_path):
     os.chdir(tmp_path)
     try:
         data = metadata.read_from_yaml("src/item.yml")
+        assert data is not None
+        data = metadata.generate_missing_metadata(data, "src/item.yml")
     finally:
         os.chdir("/tmp")
     assert data["title"] == "Foo"
