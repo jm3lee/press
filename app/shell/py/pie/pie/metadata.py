@@ -64,11 +64,15 @@ def get_frontmatter(filename: str) -> Optional[Dict[str, Any]]:
     return yaml.safe_load(content)
 
 
-def generate_missing_metadata(metadata: dict[str, Any], filepath: str) -> dict[str, Any]:
-    """Populate ``metadata`` with fields derived from ``filepath`` if absent."""
+def _add_url_if_missing(metadata: dict[str, Any], filepath: str) -> None:
+    """Assign a ``url`` derived from ``filepath`` if absent."""
 
     if "url" not in metadata:
         metadata["url"] = get_url(filepath)
+
+
+def _add_citation_if_missing(metadata: dict[str, Any], filepath: str) -> None:
+    """Derive ``citation`` from ``title`` or deprecated ``name``."""
 
     if "citation" not in metadata:
         title = metadata.get("title")
@@ -81,6 +85,10 @@ def generate_missing_metadata(metadata: dict[str, Any], filepath: str) -> dict[s
             )
             metadata["citation"] = metadata["name"].lower()
 
+
+def _add_id_if_missing(metadata: dict[str, Any], filepath: str) -> None:
+    """Generate an ``id`` based on ``filepath`` if absent."""
+
     if "id" not in metadata:
         base = Path(filepath).with_suffix("")
         metadata["id"] = base.name
@@ -90,6 +98,13 @@ def generate_missing_metadata(metadata: dict[str, Any], filepath: str) -> dict[s
             id=metadata["id"],
         )
 
+
+def generate_missing_metadata(metadata: dict[str, Any], filepath: str) -> dict[str, Any]:
+    """Populate ``metadata`` with fields derived from ``filepath`` if absent."""
+
+    _add_url_if_missing(metadata, filepath)
+    _add_citation_if_missing(metadata, filepath)
+    _add_id_if_missing(metadata, filepath)
     return metadata
 
 
