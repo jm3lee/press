@@ -30,6 +30,7 @@ setup(
             'process-yaml=pie.process_yaml:main',
             'check-author=pie.check.author:main',
             'check-bad-jinja-output=pie.check.bad_jinja_output:main',
+            'check-unexpanded-jinja=pie.check.unexpanded_jinja:main',
             'indextree-json=pie.indextree_json:main',
             'gen-markdown-index=pie.gen_markdown_index:main',
             'check-page-title=pie.check.page_title:main',
