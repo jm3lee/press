@@ -117,6 +117,33 @@ def test_scans_directory(tmp_path: Path, monkeypatch, capsys) -> None:
     assert "src/doc.yml: Jane Doe -> Brian Lee" in log_text
 
 
+def test_scans_file(tmp_path: Path, monkeypatch, capsys) -> None:
+    """Specifying a file scans only that file without git."""
+    src = tmp_path / "src"
+    src.mkdir()
+    md = src / "doc.md"
+    md.write_text("---\ntitle: Test\n---\n", encoding="utf-8")
+    yml = src / "doc.yml"
+    yml.write_text("title: Test\nauthor: Jane Doe\n", encoding="utf-8")
+
+    cfg = tmp_path / "cfg"
+    cfg.mkdir()
+    (cfg / "update-author.yml").write_text("author: Brian Lee\n", encoding="utf-8")
+
+    monkeypatch.chdir(tmp_path)
+
+    update_author.main(["src/doc.md"])
+    assert "author: Brian Lee" in yml.read_text(encoding="utf-8")
+    captured = capsys.readouterr()
+    assert captured.out.strip().splitlines() == [
+        "src/doc.yml: Jane Doe -> Brian Lee",
+        "2 files checked",
+        "1 file changed",
+    ]
+    log_text = (tmp_path / "log/update-author.txt").read_text(encoding="utf-8")
+    assert "src/doc.yml: Jane Doe -> Brian Lee" in log_text
+
+
 def test_overrides_author_argument(tmp_path: Path, monkeypatch, capsys) -> None:
     """Command line author overrides config value."""
     src = tmp_path / "src"
