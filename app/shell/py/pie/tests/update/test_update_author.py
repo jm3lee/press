@@ -244,6 +244,61 @@ def test_verbose_enables_debug_logging(tmp_path: Path, monkeypatch) -> None:
     update_author.logger.add(sys.stderr, format=LOG_FORMAT, level="INFO")
 
 
+def test_scans_multiple_paths(tmp_path: Path, monkeypatch, capsys) -> None:
+    """Multiple paths can be files or directories."""
+    src = tmp_path / "src"
+    (src / "a").mkdir(parents=True)
+    (src / "b").mkdir(parents=True)
+    (src / "a" / "doc.md").write_text("---\ntitle: A\n---\n", encoding="utf-8")
+    (src / "a" / "doc.yml").write_text("title: A\nauthor: Jane Doe\n", encoding="utf-8")
+    (src / "b" / "doc.md").write_text("---\ntitle: B\n---\n", encoding="utf-8")
+    (src / "b" / "doc.yml").write_text("title: B\nauthor: Jane Doe\n", encoding="utf-8")
+
+    cfg = tmp_path / "cfg"
+    cfg.mkdir()
+    (cfg / "update-author.yml").write_text("author: Brian Lee\n", encoding="utf-8")
+
+    monkeypatch.chdir(tmp_path)
+
+    update_author.main(["src/a", "src/b/doc.md"])
+
+    for part in ["a", "b"]:
+        assert "author: Brian Lee" in (src / part / "doc.md").read_text(encoding="utf-8")
+        assert "author: Brian Lee" in (src / part / "doc.yml").read_text(encoding="utf-8")
+
+    lines = capsys.readouterr().out.strip().splitlines()
+    assert "4 files checked" in lines
+    assert "4 files changed" in lines
+
+
+def test_accepts_glob_patterns(tmp_path: Path, monkeypatch, capsys) -> None:
+    """Glob patterns are expanded before scanning."""
+    src = tmp_path / "src"
+    (src / "a1").mkdir(parents=True)
+    (src / "a2").mkdir(parents=True)
+    for part in ["a1", "a2"]:
+        (src / part / "doc.md").write_text("---\ntitle: Test\n---\n", encoding="utf-8")
+        (src / part / "doc.yml").write_text(
+            "title: Test\nauthor: Jane Doe\n", encoding="utf-8"
+        )
+
+    cfg = tmp_path / "cfg"
+    cfg.mkdir()
+    (cfg / "update-author.yml").write_text("author: Brian Lee\n", encoding="utf-8")
+
+    monkeypatch.chdir(tmp_path)
+
+    update_author.main(["src/a*/doc.md"])
+
+    for part in ["a1", "a2"]:
+        assert "author: Brian Lee" in (src / part / "doc.md").read_text(encoding="utf-8")
+        assert "author: Brian Lee" in (src / part / "doc.yml").read_text(encoding="utf-8")
+
+    lines = capsys.readouterr().out.strip().splitlines()
+    assert "4 files checked" in lines
+    assert "4 files changed" in lines
+
+
 def test_verbose_enables_debug_logging(tmp_path: Path, monkeypatch) -> None:
     """-v sets the console log level to DEBUG."""
     src = tmp_path / "src"
