@@ -7,11 +7,11 @@ By default the console script scans `git status --short` for tracked files that
 have been added or changed. When a directory or file is provided, Markdown and
 YAML files under that path—or the specified file itself—are examined instead.
 For each file it locates the associated Markdown and YAML metadata pair using
-`load_metadata_pair` and replaces the `author` field in Markdown frontmatter or
-metadata YAML with the author configured in `cfg/update-author.yml`. Pass
-`--author` or `-a` to
-override this value, which is useful when batch updating book excerpts, quotes,
-or other content.
+`load_metadata_pair` and ensures the `author` field is present in Markdown
+frontmatter or metadata YAML. The field is added when missing and metadata is
+created if none exists. The value is taken from `cfg/update-author.yml`, but
+can be overridden with the `--author` or `-a` option when batch updating book
+excerpts, quotes, or other content.
 
 ```bash
 update-author [-a AUTHOR] [-l LOGFILE] [PATH]

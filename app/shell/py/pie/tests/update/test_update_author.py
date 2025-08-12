@@ -26,15 +26,17 @@ def test_updates_yaml_from_markdown_change(tmp_path: Path, monkeypatch, capsys) 
 
     update_author.main([])
     assert "author: Brian Lee" in yml.read_text(encoding="utf-8")
-    expected_line = "src/doc.yml: Jane Doe -> Brian Lee"
+    assert "author: Brian Lee" in md.read_text(encoding="utf-8")
     captured = capsys.readouterr()
-    assert captured.out.strip().splitlines() == [
-        expected_line,
-        "2 files checked",
-        "1 file changed",
-    ]
+    lines = captured.out.strip().splitlines()
+    assert "src/doc.md: undefined -> Brian Lee" in lines
+    assert "src/doc.yml: Jane Doe -> Brian Lee" in lines
+    assert "2 files checked" in lines
+    assert "2 files changed" in lines
+    assert len(lines) == 4
     log_text = (tmp_path / "log/update-author.txt").read_text(encoding="utf-8")
-    assert expected_line in log_text
+    assert "src/doc.md: undefined -> Brian Lee" in log_text
+    assert "src/doc.yml: Jane Doe -> Brian Lee" in log_text
 
 
 def test_updates_markdown_frontmatter(tmp_path: Path, monkeypatch, capsys) -> None:
@@ -67,8 +69,8 @@ def test_updates_markdown_frontmatter(tmp_path: Path, monkeypatch, capsys) -> No
     assert expected_line in log_text
 
 
-def test_ignores_author_in_body(tmp_path: Path, monkeypatch, capsys) -> None:
-    """Author outside frontmatter is ignored."""
+def test_adds_frontmatter_when_author_in_body(tmp_path: Path, monkeypatch, capsys) -> None:
+    """Author outside frontmatter is ignored and field added to frontmatter."""
     src = tmp_path / "src"
     src.mkdir()
     md = src / "doc.md"
@@ -82,11 +84,39 @@ def test_ignores_author_in_body(tmp_path: Path, monkeypatch, capsys) -> None:
     monkeypatch.setattr(update_author, "get_changed_files", lambda: [Path("src/doc.md")])
 
     update_author.main([])
-    assert "Jane Doe" in md.read_text(encoding="utf-8")
+    text = md.read_text(encoding="utf-8")
+    assert "author: Brian Lee" in text
+    assert "author: Jane Doe" in text
+    captured = capsys.readouterr()
+    lines = captured.out.strip().splitlines()
+    assert lines == [
+        "src/doc.md: undefined -> Brian Lee",
+        "1 file checked",
+        "1 file changed",
+    ]
+
+
+def test_adds_metadata_when_missing(tmp_path: Path, monkeypatch, capsys) -> None:
+    """Frontmatter with author is created when metadata is absent."""
+    src = tmp_path / "src"
+    src.mkdir()
+    md = src / "doc.md"
+    md.write_text("body\n", encoding="utf-8")
+
+    cfg = tmp_path / "cfg"
+    cfg.mkdir()
+    (cfg / "update-author.yml").write_text("author: Brian Lee\n", encoding="utf-8")
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(update_author, "get_changed_files", lambda: [Path("src/doc.md")])
+
+    update_author.main([])
+    assert md.read_text(encoding="utf-8").startswith("---\nauthor: Brian Lee\n---\n")
     captured = capsys.readouterr()
     assert captured.out.strip().splitlines() == [
+        "src/doc.md: undefined -> Brian Lee",
         "1 file checked",
-        "0 files changed",
+        "1 file changed",
     ]
 
 
@@ -107,13 +137,16 @@ def test_scans_directory(tmp_path: Path, monkeypatch, capsys) -> None:
 
     update_author.main(["src"])
     assert "author: Brian Lee" in yml.read_text(encoding="utf-8")
+    assert "author: Brian Lee" in md.read_text(encoding="utf-8")
     captured = capsys.readouterr()
-    assert captured.out.strip().splitlines() == [
-        "src/doc.yml: Jane Doe -> Brian Lee",
-        "2 files checked",
-        "1 file changed",
-    ]
+    lines = captured.out.strip().splitlines()
+    assert "src/doc.md: undefined -> Brian Lee" in lines
+    assert "src/doc.yml: Jane Doe -> Brian Lee" in lines
+    assert "2 files checked" in lines
+    assert "2 files changed" in lines
+    assert len(lines) == 4
     log_text = (tmp_path / "log/update-author.txt").read_text(encoding="utf-8")
+    assert "src/doc.md: undefined -> Brian Lee" in log_text
     assert "src/doc.yml: Jane Doe -> Brian Lee" in log_text
 
 
@@ -134,13 +167,16 @@ def test_scans_file(tmp_path: Path, monkeypatch, capsys) -> None:
 
     update_author.main(["src/doc.md"])
     assert "author: Brian Lee" in yml.read_text(encoding="utf-8")
+    assert "author: Brian Lee" in md.read_text(encoding="utf-8")
     captured = capsys.readouterr()
-    assert captured.out.strip().splitlines() == [
-        "src/doc.yml: Jane Doe -> Brian Lee",
-        "2 files checked",
-        "1 file changed",
-    ]
+    lines = captured.out.strip().splitlines()
+    assert "src/doc.md: undefined -> Brian Lee" in lines
+    assert "src/doc.yml: Jane Doe -> Brian Lee" in lines
+    assert "2 files checked" in lines
+    assert "2 files changed" in lines
+    assert len(lines) == 4
     log_text = (tmp_path / "log/update-author.txt").read_text(encoding="utf-8")
+    assert "src/doc.md: undefined -> Brian Lee" in log_text
     assert "src/doc.yml: Jane Doe -> Brian Lee" in log_text
 
 
@@ -162,13 +198,15 @@ def test_overrides_author_argument(tmp_path: Path, monkeypatch, capsys) -> None:
 
     update_author.main(["-a", "Chris R."])
     assert "author: Chris R." in yml.read_text(encoding="utf-8")
-    expected_line = "src/doc.yml: Jane Doe -> Chris R."
+    assert "author: Chris R." in md.read_text(encoding="utf-8")
     captured = capsys.readouterr()
-    assert captured.out.strip().splitlines() == [
-        expected_line,
-        "2 files checked",
-        "1 file changed",
-    ]
+    lines = captured.out.strip().splitlines()
+    assert "src/doc.md: undefined -> Chris R." in lines
+    assert "src/doc.yml: Jane Doe -> Chris R." in lines
+    assert "2 files checked" in lines
+    assert "2 files changed" in lines
+    assert len(lines) == 4
     log_text = (tmp_path / "log/update-author.txt").read_text(encoding="utf-8")
-    assert expected_line in log_text
+    assert "src/doc.md: undefined -> Chris R." in log_text
+    assert "src/doc.yml: Jane Doe -> Chris R." in log_text
 
