@@ -27,20 +27,16 @@ def test_updates_yaml_from_markdown_change(tmp_path: Path, monkeypatch, capsys) 
 
     update_author.main([])
     assert "author: Brian Lee" in yml.read_text(encoding="utf-8")
-    assert "author: Brian Lee" in md.read_text(encoding="utf-8")
+    assert "author:" not in md.read_text(encoding="utf-8")
     captured = capsys.readouterr()
     lines = captured.out.strip().splitlines()
-    assert "src/doc.md: undefined -> Brian Lee" in lines
     assert "src/doc.yml: Jane Doe -> Brian Lee" in lines
-    assert "2 files checked" in lines
-    assert "2 files changed" in lines
-    assert len(lines) == 4
+    assert "1 file checked" in lines
+    assert "1 file changed" in lines
+    assert len(lines) == 3
+    assert len(lines) == 3
     log_text = (tmp_path / "log/update-author.txt").read_text(encoding="utf-8")
-    assert "src/doc.md: undefined -> Brian Lee" in log_text
     assert "src/doc.yml: Jane Doe -> Brian Lee" in log_text
-    assert "src/other.yaml: Jane Doe -> Brian Lee" in log_text
-    assert "src/other.yaml: Jane Doe -> Brian Lee" in log_text
-    assert "src/other.yaml: Jane Doe -> Brian Lee" in log_text
 
 
 def test_updates_markdown_frontmatter(tmp_path: Path, monkeypatch, capsys) -> None:
@@ -143,18 +139,16 @@ def test_scans_directory(tmp_path: Path, monkeypatch, capsys) -> None:
 
     update_author.main(["src"])
     assert "author: Brian Lee" in yml.read_text(encoding="utf-8")
-    assert "author: Brian Lee" in md.read_text(encoding="utf-8")
     assert "author: Brian Lee" in yaml_file.read_text(encoding="utf-8")
+    assert "author:" not in md.read_text(encoding="utf-8")
     captured = capsys.readouterr()
     lines = captured.out.strip().splitlines()
-    assert "src/doc.md: undefined -> Brian Lee" in lines
     assert "src/doc.yml: Jane Doe -> Brian Lee" in lines
     assert "src/other.yaml: Jane Doe -> Brian Lee" in lines
-    assert "3 files checked" in lines
-    assert "3 files changed" in lines
-    assert len(lines) == 5
+    assert "2 files checked" in lines
+    assert "2 files changed" in lines
+    assert len(lines) == 4
     log_text = (tmp_path / "log/update-author.txt").read_text(encoding="utf-8")
-    assert "src/doc.md: undefined -> Brian Lee" in log_text
     assert "src/doc.yml: Jane Doe -> Brian Lee" in log_text
     assert "src/other.yaml: Jane Doe -> Brian Lee" in log_text
 
@@ -176,16 +170,14 @@ def test_scans_file(tmp_path: Path, monkeypatch, capsys) -> None:
 
     update_author.main(["src/doc.md"])
     assert "author: Brian Lee" in yml.read_text(encoding="utf-8")
-    assert "author: Brian Lee" in md.read_text(encoding="utf-8")
+    assert "author:" not in md.read_text(encoding="utf-8")
     captured = capsys.readouterr()
     lines = captured.out.strip().splitlines()
-    assert "src/doc.md: undefined -> Brian Lee" in lines
     assert "src/doc.yml: Jane Doe -> Brian Lee" in lines
-    assert "2 files checked" in lines
-    assert "2 files changed" in lines
-    assert len(lines) == 4
+    assert "1 file checked" in lines
+    assert "1 file changed" in lines
+    assert len(lines) == 3
     log_text = (tmp_path / "log/update-author.txt").read_text(encoding="utf-8")
-    assert "src/doc.md: undefined -> Brian Lee" in log_text
     assert "src/doc.yml: Jane Doe -> Brian Lee" in log_text
 
 
@@ -207,16 +199,14 @@ def test_overrides_author_argument(tmp_path: Path, monkeypatch, capsys) -> None:
 
     update_author.main(["-a", "Chris R."])
     assert "author: Chris R." in yml.read_text(encoding="utf-8")
-    assert "author: Chris R." in md.read_text(encoding="utf-8")
+    assert "author:" not in md.read_text(encoding="utf-8")
     captured = capsys.readouterr()
     lines = captured.out.strip().splitlines()
-    assert "src/doc.md: undefined -> Chris R." in lines
     assert "src/doc.yml: Jane Doe -> Chris R." in lines
-    assert "2 files checked" in lines
-    assert "2 files changed" in lines
-    assert len(lines) == 4
+    assert "1 file checked" in lines
+    assert "1 file changed" in lines
+    assert len(lines) == 3
     log_text = (tmp_path / "log/update-author.txt").read_text(encoding="utf-8")
-    assert "src/doc.md: undefined -> Chris R." in log_text
     assert "src/doc.yml: Jane Doe -> Chris R." in log_text
 
 
@@ -271,12 +261,15 @@ def test_scans_multiple_paths(tmp_path: Path, monkeypatch, capsys) -> None:
     update_author.main(["src/a", "src/b/doc.md"])
 
     for part in ["a", "b"]:
-        assert "author: Brian Lee" in (src / part / "doc.md").read_text(encoding="utf-8")
         assert "author: Brian Lee" in (src / part / "doc.yml").read_text(encoding="utf-8")
+        assert "author:" not in (src / part / "doc.md").read_text(encoding="utf-8")
 
     lines = capsys.readouterr().out.strip().splitlines()
-    assert "4 files checked" in lines
-    assert "4 files changed" in lines
+    assert f"src/a/doc.yml: Jane Doe -> Brian Lee" in lines
+    assert f"src/b/doc.yml: Jane Doe -> Brian Lee" in lines
+    assert "2 files checked" in lines
+    assert "2 files changed" in lines
+    assert len(lines) == 4
 
 
 def test_accepts_glob_patterns(tmp_path: Path, monkeypatch, capsys) -> None:
@@ -299,12 +292,15 @@ def test_accepts_glob_patterns(tmp_path: Path, monkeypatch, capsys) -> None:
     update_author.main(["src/a*/doc.md"])
 
     for part in ["a1", "a2"]:
-        assert "author: Brian Lee" in (src / part / "doc.md").read_text(encoding="utf-8")
         assert "author: Brian Lee" in (src / part / "doc.yml").read_text(encoding="utf-8")
+        assert "author:" not in (src / part / "doc.md").read_text(encoding="utf-8")
 
     lines = capsys.readouterr().out.strip().splitlines()
-    assert "4 files checked" in lines
-    assert "4 files changed" in lines
+    assert f"src/a1/doc.yml: Jane Doe -> Brian Lee" in lines
+    assert f"src/a2/doc.yml: Jane Doe -> Brian Lee" in lines
+    assert "2 files checked" in lines
+    assert "2 files changed" in lines
+    assert len(lines) == 4
 
 
 def test_verbose_enables_debug_logging(tmp_path: Path, monkeypatch) -> None:

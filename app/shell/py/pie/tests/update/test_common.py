@@ -81,8 +81,8 @@ def test_replace_field_updates_markdown_frontmatter(tmp_path: Path) -> None:
     assert "author: New" in md.read_text(encoding="utf-8")
 
 
-def test_update_files_updates_all_related(tmp_path: Path, monkeypatch: object) -> None:
-    """Both Markdown and YAML files are updated for a changed path."""
+def test_update_files_prefers_yaml(tmp_path: Path, monkeypatch: object) -> None:
+    """Only YAML is updated when both Markdown and YAML exist."""
     src = tmp_path / "src"
     src.mkdir()
     md = src / "doc.md"
@@ -92,10 +92,7 @@ def test_update_files_updates_all_related(tmp_path: Path, monkeypatch: object) -
 
     monkeypatch.chdir(tmp_path)
     messages, checked = common.update_files([Path("src/doc.md")], "author", "New")
-    assert checked == 2
-    assert set(messages) == {
-        "src/doc.md: Old -> New",
-        "src/doc.yml: Old -> New",
-    }
-    assert "author: New" in md.read_text(encoding="utf-8")
+    assert checked == 1
+    assert set(messages) == {"src/doc.yml: Old -> New"}
+    assert "author: Old" in md.read_text(encoding="utf-8")
     assert "author: New" in yml.read_text(encoding="utf-8")
