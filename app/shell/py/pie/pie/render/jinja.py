@@ -198,6 +198,33 @@ def linkshort(desc, anchor: str | None = None, citation: str | None = None):
         return render_link(desc, use_icon=False, citation="short", anchor=anchor)
     return render_link(desc, use_icon=False, citation=citation, anchor=anchor)
 
+
+def figure(desc):
+    """Return an HTML ``<figure>`` block for ``desc``.
+
+    ``desc`` may be either a metadata dictionary or a string key which will be
+    resolved via :func:`get_cached_metadata`.  The figure uses the ``url`` field
+    for the image ``src`` attribute and the ``title`` as the ``alt`` text.
+    The caption is taken from ``desc['figure']['caption']`` when provided and
+    otherwise falls back to ``title``.  Images are marked with
+    ``loading="lazy"``.
+    """
+
+    if isinstance(desc, str):
+        desc = get_cached_metadata(desc)
+    elif not isinstance(desc, dict):
+        logger.error("Invalid descriptor type", type=str(type(desc)))
+        raise SystemExit(1)
+
+    title = desc.get("title", "")
+    caption = desc.get("figure", {}).get("caption", title)
+    url = desc.get("url")
+
+    return (
+        f'<figure><img src="{url}" alt="{title}" '
+        f'loading="lazy"/><figcaption>{caption}</figcaption></figure>'
+    )
+
 def cite(*names: str) -> str:
     """Return Chicago style citation links for ``names``.
 
@@ -359,6 +386,7 @@ def create_env():
     env.globals["link_icon_title"] = link_icon_title
     env.globals["linkicon"] = linkicon
     env.globals["linkshort"] = linkshort
+    env.globals["figure"] = figure
     env.filters["get_desc"] = get_desc
     env.globals["render_jinja"] = render_jinja
     env.globals["to_alpha_index"] = to_alpha_index
