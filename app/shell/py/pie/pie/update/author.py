@@ -4,6 +4,7 @@ import argparse
 import glob
 from pathlib import Path
 from typing import Iterable, Sequence
+from itertools import chain
 
 import yaml
 
@@ -79,8 +80,10 @@ def main(argv: Sequence[str] | None = None) -> int:
                 if not p.exists():
                     continue
                 if p.is_dir():
-                    for child in p.rglob("*"):
-                        if child.suffix in {".md", ".yml", ".yaml"}:
+                    for child in chain(
+                        p.rglob("*.md"), p.rglob("*.yml"), p.rglob("*.yaml")
+                    ):
+                        if child.is_file():
                             changed.append(
                                 child.relative_to(cwd) if child.is_absolute() else child
                             )

@@ -38,6 +38,9 @@ def test_updates_yaml_from_markdown_change(tmp_path: Path, monkeypatch, capsys) 
     log_text = (tmp_path / "log/update-author.txt").read_text(encoding="utf-8")
     assert "src/doc.md: undefined -> Brian Lee" in log_text
     assert "src/doc.yml: Jane Doe -> Brian Lee" in log_text
+    assert "src/other.yaml: Jane Doe -> Brian Lee" in log_text
+    assert "src/other.yaml: Jane Doe -> Brian Lee" in log_text
+    assert "src/other.yaml: Jane Doe -> Brian Lee" in log_text
 
 
 def test_updates_markdown_frontmatter(tmp_path: Path, monkeypatch, capsys) -> None:
@@ -129,6 +132,8 @@ def test_scans_directory(tmp_path: Path, monkeypatch, capsys) -> None:
     md.write_text("---\ntitle: Test\n---\n", encoding="utf-8")
     yml = src / "doc.yml"
     yml.write_text("title: Test\nauthor: Jane Doe\n", encoding="utf-8")
+    yaml_file = src / "other.yaml"
+    yaml_file.write_text("title: Test\nauthor: Jane Doe\n", encoding="utf-8")
 
     cfg = tmp_path / "cfg"
     cfg.mkdir()
@@ -139,16 +144,19 @@ def test_scans_directory(tmp_path: Path, monkeypatch, capsys) -> None:
     update_author.main(["src"])
     assert "author: Brian Lee" in yml.read_text(encoding="utf-8")
     assert "author: Brian Lee" in md.read_text(encoding="utf-8")
+    assert "author: Brian Lee" in yaml_file.read_text(encoding="utf-8")
     captured = capsys.readouterr()
     lines = captured.out.strip().splitlines()
     assert "src/doc.md: undefined -> Brian Lee" in lines
     assert "src/doc.yml: Jane Doe -> Brian Lee" in lines
-    assert "2 files checked" in lines
-    assert "2 files changed" in lines
-    assert len(lines) == 4
+    assert "src/other.yaml: Jane Doe -> Brian Lee" in lines
+    assert "3 files checked" in lines
+    assert "3 files changed" in lines
+    assert len(lines) == 5
     log_text = (tmp_path / "log/update-author.txt").read_text(encoding="utf-8")
     assert "src/doc.md: undefined -> Brian Lee" in log_text
     assert "src/doc.yml: Jane Doe -> Brian Lee" in log_text
+    assert "src/other.yaml: Jane Doe -> Brian Lee" in log_text
 
 
 def test_scans_file(tmp_path: Path, monkeypatch, capsys) -> None:
