@@ -23,6 +23,7 @@ concepts and data formats, see the
 - [pdoc-service.md](pdoc-service.md) – generate API documentation.
 - [react-index-tree.md](react-index-tree.md) – browse index data interactively.
 - [store-files.md](store-files.md) – move files into S3 staging and create metadata.
+- [sync-service.md](sync-service.md) – upload site files to S3 using the sync container.
 - [webp-service.md](webp-service.md) – convert images to WebP using the helper
   container.
 
