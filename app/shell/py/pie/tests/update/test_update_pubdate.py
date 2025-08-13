@@ -6,6 +6,38 @@ from pie.update import pubdate as update_pubdate
 from pie.utils import get_pubdate
 
 
+def test_skips_files_outside_src(tmp_path: Path, monkeypatch, capsys) -> None:
+    """Files outside src are ignored when no paths are provided."""
+    src = tmp_path / "src"
+    src.mkdir()
+    md = src / "doc.md"
+    md.write_text("---\ntitle: Test\n---\n", encoding="utf-8")
+    yml = src / "doc.yml"
+    yml.write_text("title: Test\npubdate: Jan 01, 2000\n", encoding="utf-8")
+    other = tmp_path / "docs"
+    other.mkdir()
+    other_md = other / "doc.md"
+    other_md.write_text("---\ntitle: Other\npubdate: Jan 01, 2000\n---\n", encoding="utf-8")
+    other_yml = other / "doc.yml"
+    other_yml.write_text("title: Other\npubdate: Jan 01, 2000\n", encoding="utf-8")
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        update_pubdate,
+        "get_changed_files",
+        lambda: [Path("src/doc.md"), Path("docs/doc.md")],
+    )
+
+    update_pubdate.main([])
+    expected = get_pubdate()
+    assert f"pubdate: {expected}" in md.read_text(encoding="utf-8")
+    assert f"pubdate: {expected}" in yml.read_text(encoding="utf-8")
+    assert f"pubdate: {expected}" not in other_md.read_text(encoding="utf-8")
+    assert f"pubdate: {expected}" not in other_yml.read_text(encoding="utf-8")
+    lines = capsys.readouterr().out.strip().splitlines()
+    assert "docs/doc.md" not in "".join(lines)
+
+
 def test_updates_yaml_from_markdown_change(tmp_path: Path, monkeypatch, capsys) -> None:
     """Changing Markdown updates pubdate in paired YAML."""
     src = tmp_path / "src"

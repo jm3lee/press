@@ -39,7 +39,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         Path(args.log).parent.mkdir(parents=True, exist_ok=True)
     configure_logging(args.verbose, args.log)
     today = get_pubdate()
-    changed = get_changed_files()
+    changed = [p for p in get_changed_files() if p.parts and p.parts[0] == "src"]
     messages, checked = update_files(changed, today)
     for msg in messages:
         print(msg)

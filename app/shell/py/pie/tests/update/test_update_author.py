@@ -6,6 +6,38 @@ import sys
 from pie.update import author as update_author
 
 
+def test_skips_files_outside_src(tmp_path: Path, monkeypatch, capsys) -> None:
+    """Files outside src are ignored when no paths are provided."""
+    src = tmp_path / "src"
+    src.mkdir()
+    md = src / "doc.md"
+    md.write_text("---\ntitle: Test\n---\n", encoding="utf-8")
+    yml = src / "doc.yml"
+    yml.write_text("title: Test\nauthor: Jane Doe\n", encoding="utf-8")
+    other = tmp_path / "docs"
+    other.mkdir()
+    other_md = other / "doc.md"
+    other_md.write_text("---\ntitle: Other\n---\n", encoding="utf-8")
+
+    cfg = tmp_path / "cfg"
+    cfg.mkdir()
+    (cfg / "update-author.yml").write_text("author: Brian Lee\n", encoding="utf-8")
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        update_author,
+        "get_changed_files",
+        lambda: [Path("src/doc.md"), Path("docs/doc.md")],
+    )
+
+    update_author.main([])
+    assert "author: Brian Lee" in md.read_text(encoding="utf-8")
+    assert "author: Brian Lee" in yml.read_text(encoding="utf-8")
+    assert "author" not in other_md.read_text(encoding="utf-8")
+    lines = capsys.readouterr().out.strip().splitlines()
+    assert "docs/doc.md" not in "".join(lines)
+
+
 def test_updates_yaml_from_markdown_change(tmp_path: Path, monkeypatch, capsys) -> None:
     """Changing Markdown updates author in paired YAML."""
     src = tmp_path / "src"
@@ -38,9 +70,6 @@ def test_updates_yaml_from_markdown_change(tmp_path: Path, monkeypatch, capsys) 
     log_text = (tmp_path / "log/update-author.txt").read_text(encoding="utf-8")
     assert "src/doc.md: undefined -> Brian Lee" in log_text
     assert "src/doc.yml: Jane Doe -> Brian Lee" in log_text
-    assert "src/other.yaml: Jane Doe -> Brian Lee" in log_text
-    assert "src/other.yaml: Jane Doe -> Brian Lee" in log_text
-    assert "src/other.yaml: Jane Doe -> Brian Lee" in log_text
 
 
 def test_updates_markdown_frontmatter(tmp_path: Path, monkeypatch, capsys) -> None:

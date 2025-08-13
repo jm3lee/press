@@ -101,7 +101,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 seen.add(p)
         changed = unique_changed
     else:
-        changed = get_changed_files()
+        changed = [p for p in get_changed_files() if p.parts and p.parts[0] == "src"]
     logger.debug("Files to check", files=[str(p) for p in changed])
     messages, checked = update_files(changed, args.author)
     logger.debug("Update complete", messages=messages, checked=checked)
