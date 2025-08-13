@@ -10,7 +10,7 @@ your project.
 
 The `indextree-json` console script can generate the required JSON by
 scanning a directory of YAML metadata files and producing nodes for each
-file and subdirectory. Entries honour the same `gen-markdown-index`
+file and subdirectory. Entries honour the same `indextree`
 options (`show` and `link`) used by the Markdown index generator. When
 linking is enabled, the `url` property is copied from the metadata
 without modification:

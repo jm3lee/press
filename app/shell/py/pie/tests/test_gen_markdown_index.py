@@ -11,12 +11,12 @@ def test_show_property(tmp_path, monkeypatch):
     """Nodes with 'show: false' are skipped."""
     (tmp_path / "alpha.yml").write_text("id: alpha\ntitle: Alpha\n")
     (tmp_path / "beta.yml").write_text(
-        "id: beta\ntitle: Beta\n" "gen-markdown-index:\n  show: false\n",
+        "id: beta\ntitle: Beta\n" "indextree:\n  show: false\n",
     )
     hidden = tmp_path / "hidden"
     hidden.mkdir()
     (hidden / "index.yml").write_text(
-        "id: hidden\ntitle: Hidden\n" "gen-markdown-index:\n  show: false\n",
+        "id: hidden\ntitle: Hidden\n" "indextree:\n  show: false\n",
     )
     (hidden / "child.yml").write_text("id: child\ntitle: Child\n")
 
@@ -94,7 +94,7 @@ def test_link_false_and_recursion(tmp_path, monkeypatch):
     meta_alpha = {
         "id": "alpha",
         "title": "Alpha",
-        "gen-markdown-index": {"link": False},
+        "indextree": {"link": False},
     }
     meta_group = {"id": "group", "title": "Group"}
     meta_child = {"id": "child", "title": "Child"}

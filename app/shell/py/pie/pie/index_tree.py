@@ -11,13 +11,13 @@ from pie.logging import logger
 
 def getopt_link(meta: Mapping[str, Any]) -> bool:
     """Return whether the item should be linked."""
-    section = meta.get("gen-markdown-index") or {}
+    section = meta.get("indextree") or {}
     return section.get("link", True)
 
 
 def getopt_show(meta: Mapping[str, Any]) -> bool:
     """Return whether the item should be shown."""
-    section = meta.get("gen-markdown-index") or {}
+    section = meta.get("indextree") or {}
     return section.get("show", True)
 
 

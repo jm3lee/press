@@ -6,4 +6,4 @@
 usage: gen-markdown-index [ROOT_DIR]
 ```
 
-`ROOT_DIR` defaults to the current directory. To exclude an item from the output, set `gen-markdown-index.show` to `false` in its metadata. To omit a link, set `gen-markdown-index.link` to `false`. When a directory is hidden this way, its children are still processed at the same indentation level.
+`ROOT_DIR` defaults to the current directory. To exclude an item from the output, set `indextree.show` to `false` in its metadata. To omit a link, set `indextree.link` to `false`. When a directory is hidden this way, its children are still processed at the same indentation level.
