@@ -202,6 +202,111 @@ def test_generate_dependencies_handles_syntax_error(tmp_path):
     assert deps == []
 
 
+def test_resolve_include_paths_directory(tmp_path):
+    """_resolve_include_paths handles directory arguments."""
+    src = tmp_path / "src"
+    build = tmp_path / "build"
+    src.mkdir()
+
+    defs = src / "defs"
+    defs.mkdir()
+    (defs / "a.md").write_text("a")
+    (defs / "b.md").write_text("b")
+
+    index = src / "index.md"
+    index.write_text("body")
+
+    def build_path(p: Path) -> str:
+        rel = p.relative_to(src)
+        out = build / rel
+        if build.is_absolute():
+            out = Path(build.name) / rel
+        return out.as_posix()
+
+    src_build = Path(build_path(index)).with_suffix(index.suffix)
+    rules = picasso._resolve_include_paths(
+        "include",
+        "'defs'",
+        src_build=src_build,
+        src_root=src,
+        build_root=build,
+        build_path=build_path,
+    )
+
+    assert sorted(rules) == [
+        "build/index.md: build/defs/a.md",
+        "build/index.md: build/defs/b.md",
+    ]
+
+
+def test_resolve_include_paths_glob(tmp_path):
+    """_resolve_include_paths applies glob patterns."""
+    src = tmp_path / "src"
+    build = tmp_path / "build"
+    src.mkdir()
+
+    defs = src / "defs"
+    defs.mkdir()
+    (defs / "a.md").write_text("a")
+    (defs / "b.txt").write_text("b")
+
+    index = src / "index.md"
+    index.write_text("body")
+
+    def build_path(p: Path) -> str:
+        rel = p.relative_to(src)
+        out = build / rel
+        if build.is_absolute():
+            out = Path(build.name) / rel
+        return out.as_posix()
+
+    src_build = Path(build_path(index)).with_suffix(index.suffix)
+    rules = picasso._resolve_include_paths(
+        "include_deflist_entry",
+        "'defs', glob='*.md'",
+        src_build=src_build,
+        src_root=src,
+        build_root=build,
+        build_path=build_path,
+    )
+
+    assert rules == ["build/index.md: build/defs/a.md"]
+
+
+def test_resolve_include_paths_absolute(tmp_path):
+    """Absolute paths are returned unchanged."""
+    src = tmp_path / "src"
+    build = tmp_path / "build"
+    src.mkdir()
+
+    ext = tmp_path / "ext"
+    ext.mkdir()
+    (ext / "x.md").write_text("x")
+
+    index = src / "index.md"
+    index.write_text("body")
+
+    def build_path(p: Path) -> str:
+        rel = p.relative_to(src)
+        out = build / rel
+        if build.is_absolute():
+            out = Path(build.name) / rel
+        return out.as_posix()
+
+    src_build = Path(build_path(index)).with_suffix(index.suffix)
+    rules = picasso._resolve_include_paths(
+        "include",
+        f"'{ext.as_posix()}'",
+        src_build=src_build,
+        src_root=src,
+        build_root=build,
+        build_path=build_path,
+    )
+
+    expected = f"build/index.md: {(ext / 'x.md').as_posix()}"
+    assert rules == [expected]
+
+
 def test_include_deflist_entry_with_glob_and_directory(tmp_path):
     """include_deflist_entry('defs', glob='*.md') -> deps for each file."""
     src = tmp_path / "src"

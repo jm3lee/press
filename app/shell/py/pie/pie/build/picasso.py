@@ -15,6 +15,7 @@ from collections import defaultdict
 import re
 import sys
 from pathlib import Path
+from typing import Callable, Iterable
 
 from pie.logging import logger, add_log_argument, configure_logging
 from pie.metadata import load_metadata_pair
@@ -131,6 +132,80 @@ def _remove_circular_dependencies(rules: set[str]) -> list[str]:
     return result
 
 
+def _resolve_include_paths(
+    func: str,
+    arglist: str,
+    *,
+    src_build: Path,
+    src_root: Path,
+    build_root: Path,
+    build_path: Callable[[Path], str],
+) -> list[str]:
+    """Return dependency rules for an ``include``/``include_deflist_entry`` call.
+
+    ``generate_dependencies`` previously inlined this logic; extracting it makes
+    the path handling easier to reason about and unit test.  ``func`` is the
+    function name (``include`` or ``include_deflist_entry``) and ``arglist`` is
+    the raw argument string captured by ``INCLUDE_RE``.
+    """
+
+    try:
+        call = ast.parse(f"f({arglist})", mode="eval").body
+    except SyntaxError:
+        # Ignore malformed Python blocks such as ``include('a', bad=)``.
+        return []
+
+    # Positional string arguments become include targets.  ``glob`` is only
+    # meaningful for ``include_deflist_entry``.
+    paths: list[str] = [
+        arg.value
+        for arg in call.args
+        if isinstance(arg, ast.Constant) and isinstance(arg.value, str)
+    ]
+    glob = "*"
+    if func == "include_deflist_entry":
+        for kw in call.keywords:
+            if (
+                kw.arg == "glob"
+                and isinstance(kw.value, ast.Constant)
+                and isinstance(kw.value.value, str)
+            ):
+                glob = kw.value.value
+                break
+
+    def iter_targets(path: Path) -> Iterable[Path]:
+        """Yield files referenced by ``path`` (directory or single file)."""
+
+        if path.is_dir():
+            pattern = glob if func == "include_deflist_entry" else "*"
+            yield from (p for p in path.rglob(pattern) if p.is_file())
+        else:
+            yield path
+
+    rules: list[str] = []
+    for dep in paths:
+        dep_path = Path(dep)
+        dep_str = dep_path.as_posix()
+        is_build_path = dep_path.is_absolute() or dep_str.startswith(build_root.as_posix())
+
+        if not is_build_path:
+            # Resolve relative paths against ``src_root``.  ``include('src/foo')``
+            # is treated the same as ``include('foo')``.
+            if dep_path.parts and dep_path.parts[0] == src_root.name:
+                dep_path = src_root / Path(*dep_path.parts[1:])
+            else:
+                dep_path = src_root / dep_path
+
+            for target in iter_targets(dep_path):
+                dep_build = Path(build_path(target)).with_suffix(target.suffix).as_posix()
+                rules.append(f"{src_build.as_posix()}: {dep_build}")
+        else:
+            for target in iter_targets(dep_path):
+                rules.append(f"{src_build.as_posix()}: {target.as_posix()}")
+
+    return rules
+
+
 def generate_dependencies(src_root: Path, build_root: Path) -> list[str]:
     """Return Makefile dependency rules based on Jinja links and include blocks."""
 
@@ -167,49 +242,16 @@ def generate_dependencies(src_root: Path, build_root: Path) -> list[str]:
         # ``include-filter`` blocks such as include("file.md")
         for block in PY_BLOCK_RE.findall(text):
             for func, arglist in INCLUDE_RE.findall(block):
-                try:
-                    call = ast.parse(f"f({arglist})", mode="eval").body
-                except SyntaxError:
-                    continue
-
-                paths: list[str] = []
-                glob = "*"
-                for arg in call.args:
-                    if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
-                        paths.append(arg.value)
-                for kw in call.keywords:
-                    if (
-                        func == "include_deflist_entry"
-                        and kw.arg == "glob"
-                        and isinstance(kw.value, ast.Constant)
-                        and isinstance(kw.value.value, str)
-                    ):
-                        glob = kw.value.value
-
-                for dep in paths:
-                    dep_path = Path(dep)
-                    dep_str = dep_path.as_posix()
-                    if not dep_path.is_absolute() and not dep_str.startswith(build_root.as_posix()):
-                        if dep_path.parts and dep_path.parts[0] == src_root.name:
-                            dep_full = src_root / Path(*dep_path.parts[1:])
-                        else:
-                            dep_full = src_root / dep_path
-                        targets = [dep_full]
-                        if dep_full.is_dir():
-                            pattern = glob if func == "include_deflist_entry" else "*"
-                            targets = [f for f in dep_full.rglob(pattern) if f.is_file()]
-                        for t in targets:
-                            dep_build = Path(build_path(t)).with_suffix(t.suffix).as_posix()
-                            rules.add(f"{src_build.as_posix()}: {dep_build}")
-                    else:
-                        dep_full = dep_path
-                        targets = [dep_full]
-                        if dep_full.is_dir():
-                            pattern = glob if func == "include_deflist_entry" else "*"
-                            targets = [f for f in dep_full.rglob(pattern) if f.is_file()]
-                        for t in targets:
-                            dep_build = t.as_posix()
-                            rules.add(f"{src_build.as_posix()}: {dep_build}")
+                rules.update(
+                    _resolve_include_paths(
+                        func,
+                        arglist,
+                        src_build=src_build,
+                        src_root=src_root,
+                        build_root=build_root,
+                        build_path=build_path,
+                    )
+                )
 
     return _remove_circular_dependencies(rules)
 
