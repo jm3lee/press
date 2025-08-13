@@ -1,6 +1,6 @@
 title: gen-markdown-index
 id: dist_gen_markdown_index
-gen-markdown-index:
+indextree:
   link: false
   show: true
 author: Brian Lee

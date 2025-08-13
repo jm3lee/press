@@ -87,19 +87,19 @@ def test_process_dir_honours_show_and_link(tmp_path, monkeypatch):
         fake,
         "src/alpha/beta.yml",
         "beta",
-        {"title": "Beta", "url": "/alpha/beta.html", "gen-markdown-index": {"link": False}},
+        {"title": "Beta", "url": "/alpha/beta.html", "indextree": {"link": False}},
     )
     save_meta(
         fake,
         "src/gamma.yml",
         "gamma",
-        {"title": "Gamma", "url": "/gamma.html", "gen-markdown-index": {"show": False}},
+        {"title": "Gamma", "url": "/gamma.html", "indextree": {"show": False}},
     )
     save_meta(
         fake,
         "src/delta/index.yml",
         "delta",
-        {"title": "Delta", "url": "/delta/index.html", "gen-markdown-index": {"show": False}},
+        {"title": "Delta", "url": "/delta/index.html", "indextree": {"show": False}},
     )
     save_meta(fake, "src/delta/epsilon.yml", "epsilon", {"title": "Epsilon", "url": "/delta/epsilon.html"})
 

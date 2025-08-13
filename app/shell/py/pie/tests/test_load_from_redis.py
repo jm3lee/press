@@ -19,7 +19,7 @@ def test_build_from_redis_used(monkeypatch):
             "id": "doc1",
             "title": "Title",
             "url": "URL",
-            "gen-markdown-index": {"link": "1", "show": "0"},
+            "indextree": {"link": "1", "show": "0"},
         }
 
     monkeypatch.setattr(index_tree, "get_metadata_by_path", fake_get_metadata_by_path)
@@ -31,7 +31,7 @@ def test_build_from_redis_used(monkeypatch):
         "id": "doc1",
         "title": "Title",
         "url": "URL",
-        "gen-markdown-index": {"link": "1", "show": "0"},
+        "indextree": {"link": "1", "show": "0"},
     }
     assert calls == ["doc1."]
 
