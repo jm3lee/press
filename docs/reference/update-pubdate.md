@@ -1,13 +1,14 @@
 # update-pubdate
 
-Update the `pubdate` field in metadata files for documents modified in git.
+Update the `pubdate` field in metadata files for `src/` documents modified in
+git.
 
-The console script scans `git status --short` for tracked files that have been
-added or changed. For each path it locates the associated Markdown and YAML
-metadata pair using `load_metadata_pair` and ensures the `pubdate` field is
-present in Markdown frontmatter or metadata YAML. When the field is missing it
-is added, and metadata is created if none exists, using today's date in the
-format `%b %d, %Y`.
+The console script scans `git status --short` for tracked files under `src/`
+that have been added or changed. For each path it locates the associated
+Markdown and YAML metadata pair using `load_metadata_pair` and ensures the
+`pubdate` field is present in Markdown frontmatter or metadata YAML. When the
+field is missing it is added, and metadata is created if none exists, using
+today's date in the format `%b %d, %Y`.
 
 ```python
 from pathlib import Path

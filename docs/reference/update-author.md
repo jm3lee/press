@@ -1,11 +1,12 @@
 # update-author
 
-Update the `author` field in metadata files for documents modified in git or
-within specified paths or glob patterns.
+Update the `author` field in metadata files for `src/` documents modified in
+git or within specified paths or glob patterns.
 
-By default the console script scans `git status --short` for tracked files that
-have been added or changed. When directories, files, or glob patterns are
-provided, Markdown and YAML files matching those paths are examined instead.
+By default the console script scans `git status --short` for tracked files under
+`src/` that have been added or changed. When directories, files, or glob
+patterns are provided, Markdown and YAML files matching those paths are examined
+instead.
 For each file it locates the associated Markdown and YAML metadata pair using
 `load_metadata_pair` and ensures the `author` field is present in Markdown
 frontmatter or metadata YAML. The field is added when missing and metadata is
