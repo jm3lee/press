@@ -18,8 +18,9 @@ accepts a few optional parameters to control the output:
 - `use_icon` – when `True` (default) any `icon` field in the metadata is
   prefixed to the link text.  Set to `False` to suppress icons.
 - `anchor` – appends a fragment identifier (`#anchor`) to the URL when provided.
-- `citation` – selects which citation field to render.  The default `"citation"`
-  uses the main citation value; pass `"short"` to use `citation.short`.
+- `citation` – selects which citation field to render or overrides the link text.
+  The default `"citation"` uses the main citation value; pass `"short"` to use
+  `citation.short` or provide a custom string to replace the citation entirely.
 
 When the `citation` field is itself a mapping with `author`, `year`, and an
 optional `page`, the helper formats the text using Chicago style
@@ -37,6 +38,12 @@ renders as:
 
 ```html
 <a href="/humerus.html#deltoid_tuberosity" class="internal-link">Deltoid Tuberosity</a>
+```
+
+You can also override the citation text:
+
+```jinja
+{{ linktitle("opcalc", citation="the calculator") }}
 ```
 
 Bibliographic citations render similarly:

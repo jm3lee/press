@@ -81,6 +81,39 @@ def get_link_class(desc):
             return link_options["class"]
     return "internal-link"
 
+def _resolve_citation(desc: dict, selector: str) -> tuple[str, bool]:
+    """Return citation text and whether it requires parentheses."""
+
+    citation_val = desc["citation"]
+    needs_parens = False
+
+    if (
+        selector not in {"citation", "short"}
+        and not (isinstance(citation_val, dict) and selector in citation_val)
+    ):
+        return selector, needs_parens
+
+    if selector == "short":
+        return citation_val["short"], needs_parens
+
+    if isinstance(citation_val, dict):
+        if {"author", "year"}.issubset(citation_val):
+            author = str(citation_val.get("author", "")).title()
+            year = citation_val.get("year")
+            pages = citation_val.get("page")
+            citation_text = author
+            if year is not None:
+                citation_text += f" {year}"
+            if pages:
+                if isinstance(pages, (list, tuple)):
+                    pages = ", ".join(str(p) for p in pages)
+                citation_text += f", {pages}"
+            return citation_text, True
+        return citation_val.get(selector), needs_parens
+
+    return citation_val, needs_parens
+
+
 def render_link(
     desc,
     *,
@@ -96,8 +129,8 @@ def render_link(
     citation text is capitalised: ``"plain"`` leaves it untouched, ``"title"``
     applies title‑case, and ``"cap"`` capitalises only the first character.
     When ``use_icon`` is ``True`` any ``icon`` field is prefixed to the
-    citation. ``citation`` selects which citation field to use; pass
-    ``"short"`` to use ``citation["short"]``.
+    citation. ``citation`` selects which citation field to use or overrides the
+    citation text entirely; pass ``"short"`` to use ``citation["short"]``.
     """
 
     if isinstance(desc, str):
@@ -106,29 +139,7 @@ def render_link(
         logger.error("Invalid descriptor type", type=str(type(desc)))
         raise SystemExit(1)
 
-    # Determine citation text
-    citation_val = desc["citation"]
-    needs_parens = False
-    if citation == "short":
-        citation_text = citation_val["short"]
-    else:
-        if isinstance(citation_val, dict):
-            if {"author", "year"}.issubset(citation_val):
-                author = str(citation_val.get("author", "")).title()
-                year = citation_val.get("year")
-                pages = citation_val.get("page")
-                citation_text = author
-                if year is not None:
-                    citation_text += f" {year}"
-                if pages:
-                    if isinstance(pages, (list, tuple)):
-                        pages = ", ".join(str(p) for p in pages)
-                    citation_text += f", {pages}"
-                needs_parens = True
-            else:
-                citation_text = citation_val.get(citation)
-        else:
-            citation_text = citation_val
+    citation_text, needs_parens = _resolve_citation(desc, citation)
 
     # Apply requested capitalisation style
     if style == "title":
@@ -155,23 +166,37 @@ def render_link(
         return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{icon} {citation_text}</a>"""
     return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{citation_text}</a>"""
 
-def linktitle(desc, anchor: str | None = None):
-    return render_link(desc, style="title", anchor=anchor)
+def linktitle(desc, anchor: str | None = None, citation: str | None = None):
+    if citation is None:
+        return render_link(desc, style="title", anchor=anchor)
+    return render_link(desc, style="title", anchor=anchor, citation=citation)
 
-def link_icon_title(desc, anchor: str | None = None):
-    return render_link(desc, style="title", use_icon=True, anchor=anchor)
+def link_icon_title(desc, anchor: str | None = None, citation: str | None = None):
+    if citation is None:
+        return render_link(desc, style="title", use_icon=True, anchor=anchor)
+    return render_link(
+        desc, style="title", use_icon=True, anchor=anchor, citation=citation
+    )
 
-def linkcap(desc, anchor: str | None = None):
-    return render_link(desc, style="cap", anchor=anchor)
+def linkcap(desc, anchor: str | None = None, citation: str | None = None):
+    if citation is None:
+        return render_link(desc, style="cap", anchor=anchor)
+    return render_link(desc, style="cap", anchor=anchor, citation=citation)
 
-def linkicon(desc, anchor: str | None = None):
-    return render_link(desc, use_icon=True, anchor=anchor)
+def linkicon(desc, anchor: str | None = None, citation: str | None = None):
+    if citation is None:
+        return render_link(desc, use_icon=True, anchor=anchor)
+    return render_link(desc, use_icon=True, anchor=anchor, citation=citation)
 
-def link(desc, anchor: str | None = None):
-    return render_link(desc, use_icon=False, anchor=anchor)
+def link(desc, anchor: str | None = None, citation: str | None = None):
+    if citation is None:
+        return render_link(desc, use_icon=False, anchor=anchor)
+    return render_link(desc, use_icon=False, anchor=anchor, citation=citation)
 
-def linkshort(desc, anchor: str | None = None):
-    return render_link(desc, use_icon=False, citation="short", anchor=anchor)
+def linkshort(desc, anchor: str | None = None, citation: str | None = None):
+    if citation is None:
+        return render_link(desc, use_icon=False, citation="short", anchor=anchor)
+    return render_link(desc, use_icon=False, citation=citation, anchor=anchor)
 
 def cite(*names: str) -> str:
     """Return Chicago style citation links for ``names``.

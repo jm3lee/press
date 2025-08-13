@@ -29,6 +29,16 @@ Output:
 
 {{ linktitle({"citation": "home", "url": "/"}, anchor="#example") }}
 
+## linktitle with custom citation
+
+```jinja
+{% raw %}{{ linktitle("quickstart", citation="custom citation") }}{% endraw %}
+```
+
+Output:
+
+{{ linktitle("quickstart", citation="custom citation") }}
+
 ## linkcap
 
 ```jinja
