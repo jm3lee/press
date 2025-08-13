@@ -125,7 +125,12 @@ def update_files(paths: Iterable[Path], field: str, value: str) -> tuple[list[st
         if metadata and "path" in metadata:
             file_paths.update(Path(p) for p in metadata["path"])
 
-        for fp in file_paths:
+        yaml_files = sorted(
+            [fp for fp in file_paths if fp.suffix in {".yml", ".yaml"}]
+        )
+        target_files = yaml_files or sorted(file_paths)
+
+        for fp in target_files:
             if not fp.exists():
                 continue
             checked += 1
