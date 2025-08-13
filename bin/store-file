@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#
+# Description:
+#   Run the project's `store-file` command inside the Docker Compose
+#   `shell` service. This executes the command in the container using
+#   the current user's UID so generated files are owned by the invoking
+#   user.
+#
+# Usage:
+#   bin/store-file [ARGS...]
+#
+# Any arguments provided are forwarded directly to the `store-file`
+# command inside the container.
+
+set -euo pipefail
+
+COMPOSE_FILE="docker-compose.yml"
+if [[ ! -f "$COMPOSE_FILE" ]]; then
+  COMPOSE_FILE="dist/docker-compose.yml"
+fi
+
+exec docker compose -f "$COMPOSE_FILE" run --rm -u "$(id -u)" --entrypoint store-file shell "$@"
