@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 from typing import Iterable
+from itertools import chain
 
 from pie.cli import create_parser
 from pie.logging import logger, configure_logging
@@ -36,11 +37,10 @@ def _iter_metadata(root: Path) -> Iterable[tuple[list[Path], dict | None]]:
     companion Markdown/YAML files are merged.
     """
 
-    exts = {".md", ".yml", ".yaml"}
     processed: set[Path] = set()
 
-    for path in root.rglob("*"):
-        if not path.is_file() or path.suffix.lower() not in exts:
+    for path in chain(root.rglob("*.md"), root.rglob("*.yml"), root.rglob("*.yaml")):
+        if not path.is_file():
             continue
         base = path.with_suffix("")
         if base in processed:

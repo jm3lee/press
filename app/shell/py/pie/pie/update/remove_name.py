@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 from typing import Iterable, Sequence, Tuple
+from itertools import chain
 
 from pie.cli import create_parser
 from pie.logging import configure_logging
@@ -89,8 +90,8 @@ def remove_name_fields(paths: Iterable[Path]) -> tuple[list[str], int]:
 def walk_files(root: Path) -> Iterable[Path]:
     """Yield metadata files under *root*."""
 
-    for path in root.rglob("*"):
-        if path.suffix.lower() in {".md", ".yml", ".yaml"} and path.is_file():
+    for path in chain(root.rglob("*.md"), root.rglob("*.yml"), root.rglob("*.yaml")):
+        if path.is_file():
             yield path
 
 
