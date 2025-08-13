@@ -73,6 +73,11 @@ test: ## Restart nginx-dev and run tests
 	$(call status,Run tests)
 	$(Q)$(MAKE_CMD) -f /app/mk/build.mk VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) test
 
+.PHONY: check
+check:
+	$(call status,Run checks)
+	$(Q)$(MAKE_CMD) -f /app/mk/build.mk VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) check
+
 # Target to bring up the development Nginx container
 .PHONY: up
 up: ## Start development containers defined in SERVICES

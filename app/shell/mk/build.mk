@@ -120,6 +120,9 @@ $(BUILD_DIR)/.minify:
 test: $(BUILD_DIR)/.minify | $(LOG_DIR)
 	$(call status,Run link check)
 	$(Q)$(CHECKLINKS_CMD) http://nginx-dev
+
+.PHONY: check
+check:
 	$(call status,Check metadata authors)
 	$(Q)check-author $(SRC_DIR)
 	$(call status,Check page titles)
