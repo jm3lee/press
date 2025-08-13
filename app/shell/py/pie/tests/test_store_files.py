@@ -41,12 +41,28 @@ def test_process_file_moves_and_creates_metadata(tmp_path: Path, monkeypatch) ->
     dest_file = dest / "fixedid"
     meta_file = meta / "fixedid.yml"
     assert dest_file.read_text() == "data"
-    meta_data = yaml.safe_load(meta_file.read_text())
+    expected_yaml = store_files.METADATA_TEMPLATE.render(baseurl="", file_id="fixedid")
+    assert meta_file.read_text() == expected_yaml
+    meta_data = yaml.safe_load(expected_yaml)
     assert meta_data["id"] == "fixedid"
     assert meta_data["url"] == "/v2/files/0/fixedid"
     assert meta_data["author"] == ""
     assert meta_data["pubdate"] == ""
     assert not src.exists()
+
+
+def test_process_file_uses_baseurl(tmp_path: Path, monkeypatch) -> None:
+    src = tmp_path / "file.txt"
+    src.write_text("data")
+    dest = tmp_path / "dest"
+    meta = tmp_path / "meta"
+
+    monkeypatch.setattr(store_files, "generate_id", lambda size=8: "fixedid")
+
+    store_files.process_file(src, dest, meta, baseurl="https://example.com")
+    meta_file = meta / "fixedid.yml"
+    meta_data = yaml.safe_load(meta_file.read_text())
+    assert meta_data["url"] == "https://example.com/v2/files/0/fixedid"
 
 
 def test_main_processes_files_with_limit(tmp_path: Path, monkeypatch) -> None:
@@ -67,3 +83,33 @@ def test_main_processes_files_with_limit(tmp_path: Path, monkeypatch) -> None:
     assert (dest_dir / "id1").exists()
     assert (meta_dir / "id1.yml").exists()
     assert len(list(base.iterdir())) == 1
+
+
+def test_main_uses_config_file(tmp_path: Path, monkeypatch) -> None:
+    base = tmp_path / "input"
+    base.mkdir()
+    (base / "file.txt").write_text("data")
+
+    cfg = tmp_path / "cfg.yml"
+    cfg.write_text("baseurl: https://files.example")
+
+    monkeypatch.setattr(store_files, "generate_id", lambda size=8: "id1")
+    monkeypatch.chdir(tmp_path)
+
+    store_files.main([str(base), "--config", str(cfg)])
+
+    meta_file = Path("src") / "static" / "files" / "id1.yml"
+    meta_data = yaml.safe_load(meta_file.read_text())
+    assert meta_data["url"] == "https://files.example/v2/files/0/id1"
+
+
+def test_main_errors_on_missing_config(tmp_path: Path, monkeypatch) -> None:
+    base = tmp_path / "input"
+    base.mkdir()
+    (base / "file.txt").write_text("data")
+
+    missing = tmp_path / "missing.yml"
+    monkeypatch.chdir(tmp_path)
+
+    rc = store_files.main([str(base), "--config", str(missing)])
+    assert rc == 1
