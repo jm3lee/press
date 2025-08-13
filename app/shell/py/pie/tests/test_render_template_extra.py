@@ -102,6 +102,24 @@ def test_wrapper_functions():
     assert ">S<" in html and "I" not in html
 
 
+@pytest.mark.parametrize(
+    "func, expected",
+    [
+        (render_template.linktitle, "Custom Citation"),
+        (render_template.link_icon_title, "Custom Citation"),
+        (render_template.linkcap, "Custom citation"),
+        (render_template.linkicon, "custom citation"),
+        (render_template.link, "custom citation"),
+        (render_template.linkshort, "custom citation"),
+    ],
+)
+def test_wrapper_functions_override_citation(func, expected):
+    desc = {"citation": "ignored", "url": "/f", "icon": "I"}
+    html = func(desc, citation="custom citation")
+    assert expected in html
+    assert "ignored" not in html
+
+
 def test_extract_front_matter_invalid_yaml(tmp_path):
     """Bad YAML front matter -> None."""
     md = tmp_path / "f.md"
