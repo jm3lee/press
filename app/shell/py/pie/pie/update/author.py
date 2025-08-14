@@ -110,6 +110,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         changed = unique_changed
     else:
         changed = get_changed_files()
+        changed = list(filter(lambda p: str(p).startswith("src/"), changed))
     logger.debug("Files to check", files=[str(p) for p in changed])
     messages, checked = update_files(changed, args.author, args.sort_keys)
     logger.debug("Update complete", messages=messages, checked=checked)

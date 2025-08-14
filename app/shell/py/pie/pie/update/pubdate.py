@@ -48,6 +48,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     configure_logging(args.verbose, args.log)
     today = get_pubdate()
     changed = get_changed_files()
+    changed = list(filter(lambda p: str(p).startswith("src/"), changed))
     messages, checked = update_files(changed, today, args.sort_keys)
     for msg in messages:
         print(msg)

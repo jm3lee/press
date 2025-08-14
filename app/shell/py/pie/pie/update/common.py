@@ -129,6 +129,7 @@ def update_files(
     changes: list[str] = []
     processed: set[Path] = set()
     checked = 0
+    logger.debug("", paths=paths, field=field, value=value, sort_keys=sort_keys)
     for path in paths:
         base = path.with_suffix("")
         if base in processed:
@@ -144,6 +145,7 @@ def update_files(
             [fp for fp in file_paths if fp.suffix in {".yml", ".yaml"}]
         )
         target_files = yaml_files or sorted(file_paths)
+        logger.debug("", target_files=target_files)
 
         for fp in target_files:
             if not fp.exists():
