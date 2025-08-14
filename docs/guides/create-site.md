@@ -25,3 +25,23 @@ r up
 ```
 
 The first `r` builds the site, while `r up` launches the development containers. Once complete, visit [http://localhost](http://localhost) to view the site.
+
+## Explore built-in examples
+
+Press ships with sample content in `src/examples` that demonstrates features like templating and metadata.
+Build the repository and start the server to browse them:
+
+```bash
+# From the Press repository
+r
+r up
+```
+
+Then visit [http://localhost/examples](http://localhost/examples) to read the built-in examples.
+
+## Next steps
+
+- **Developing content** – Learn more about the build pipeline and adding assets in [build-process.md](build-process.md) and [store-files.md](store-files.md).
+- **Contributing** – Before submitting changes to Press, review [tests.md](tests.md) and [checklinks.md](checklinks.md) to run tests and link checks.
+
+For additional topics, see the [guides index](README.md).
