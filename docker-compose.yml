@@ -81,6 +81,7 @@ services:
       OPENAI_API_KEY: "${OPENAI_API_KEY}"
       REDIS_HOST: dragonfly
       REDIS_PORT: 6379
+      TEST_HOST_URL: ${TEST_HOST_URL:-https://nginx-test}
     volumes:
       - ./:/data
       - ./app/shell/mk:/app/mk
