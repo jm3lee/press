@@ -90,9 +90,9 @@ CSS := $(patsubst $(SRC_DIR)/%.css,$(BUILD_DIR)/%.css, $(CSS))
 .PHONY: everything
 everything: | $(BUILD_DIR) $(BUILD_SUBDIRS)
 	$(call status,Updating author)
-	$(Q)update-author
+	$(Q)update-author --sort-keys
 	$(call status,Updating pubdate)
-	$(Q)update-pubdate
+	$(Q)update-pubdate --sort-keys
 	$(Q)make -s -f /app/mk/build.mk $(BUILD_DIR)/.update-index VERBOSE=$(VERBOSE)
 	$(Q)make -s -f /app/mk/build.mk all VERBOSE=$(VERBOSE)
 
