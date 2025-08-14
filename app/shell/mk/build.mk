@@ -69,6 +69,7 @@ PANDOC_OPTS_PDF := \
 MINIFY_CMD := minify
 
 CHECKLINKS_CMD := checklinks
+TEST_HOST_URL ?= https://nginx-test
 
 VPATH := $(SRC_DIR)
 
@@ -119,7 +120,7 @@ $(BUILD_DIR)/.minify:
 # Triggered by the test target in redo.mk; see docs/guides/redo-mk.md.
 test: $(BUILD_DIR)/.minify check | $(LOG_DIR)
 	$(call status,Run link check)
-	$(Q)$(CHECKLINKS_CMD) http://nginx-test
+	$(Q)$(CHECKLINKS_CMD) $(TEST_HOST_URL)
 
 .PHONY: check
 check:
