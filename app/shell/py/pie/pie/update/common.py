@@ -51,37 +51,50 @@ def get_changed_files() -> list[Path]:
     return paths
 
 
-def replace_field(fp: Path, field: str, value: str) -> tuple[bool, str | None]:
-    """Replace ``field`` in *fp* and return (changed, old_value)."""
+def replace_field(
+    fp: Path, field: str, value: str, sort_keys: bool = False
+) -> tuple[bool, str | None]:
+    """Replace ``field`` in *fp* and return (changed, old_value).
+
+    When ``sort_keys`` is true YAML mappings are written with keys in
+    sorted order.
+    """
     text = fp.read_text(encoding="utf-8")
     if fp.suffix in {".yml", ".yaml"}:
-        return _replace_yaml_field(fp, text, field, value)
+        return _replace_yaml_field(fp, text, field, value, sort_keys)
     if fp.suffix == ".md":
-        return _replace_markdown_field(fp, text, field, value)
+        return _replace_markdown_field(fp, text, field, value, sort_keys)
     return False, None
 
 
 def _replace_yaml_field(
-    fp: Path, text: str, field: str, value: str
+    fp: Path, text: str, field: str, value: str, sort_keys: bool
 ) -> tuple[bool, str | None]:
+    """Update ``field`` in YAML *fp*, optionally sorting keys."""
     data = yaml.safe_load(text) or {}
     old = data.get(field)
     if old != value:
         data[field] = value
         fp.write_text(
-            yaml.safe_dump(data, sort_keys=False), encoding="utf-8"
+            yaml.safe_dump(data, sort_keys=sort_keys), encoding="utf-8"
         )
         return True, old if old is not None else "undefined"
     return True, None
 
 
 def _replace_markdown_field(
-    fp: Path, text: str, field: str, value: str
+    fp: Path, text: str, field: str, value: str, sort_keys: bool
 ) -> tuple[bool, str | None]:
+    """Update ``field`` in Markdown frontmatter of *fp*.
+
+    When ``sort_keys`` is true the frontmatter mapping is written with
+    keys in sorted order.
+    """
     lines = text.splitlines(keepends=True)
     if not lines or not lines[0].startswith("---"):
         # no frontmatter, add a new block with the field
-        new_lines = ["---\n", f"{field}: {value}\n", "---\n"] + lines
+        dumped = yaml.safe_dump({field: value}, sort_keys=sort_keys)
+        new_lines = ["---\n", dumped, "---\n"] + lines
         fp.write_text("".join(new_lines), encoding="utf-8")
         return True, "undefined"
     end = None
@@ -91,25 +104,27 @@ def _replace_markdown_field(
             break
     if end is None:
         return False, None
-    for i in range(1, end):
-        if lines[i].startswith(f"{field}:"):
-            old = lines[i].split(":", 1)[1].strip()
-            if old != value:
-                lines[i] = f"{field}: {value}\n"
-                fp.write_text("".join(lines), encoding="utf-8")
-                return True, old
-            return True, None
-    lines.insert(end, f"{field}: {value}\n")
-    fp.write_text("".join(lines), encoding="utf-8")
-    return True, "undefined"
+    frontmatter = "".join(lines[1:end])
+    data = yaml.safe_load(frontmatter) or {}
+    old = data.get(field)
+    if old != value:
+        data[field] = value
+        dumped = yaml.safe_dump(data, sort_keys=sort_keys)
+        lines[1:end] = [dumped]
+        fp.write_text("".join(lines), encoding="utf-8")
+        return True, old if old is not None else "undefined"
+    return True, None
 
 
-def update_files(paths: Iterable[Path], field: str, value: str) -> tuple[list[str], int]:
+def update_files(
+    paths: Iterable[Path], field: str, value: str, sort_keys: bool = False
+) -> tuple[list[str], int]:
     """Update ``field`` in files related to *paths*.
 
     Returns a tuple ``(messages, checked)`` where ``messages`` contains log
     entries for each modified file and ``checked`` is the number of files that
-    were examined.
+    were examined. When ``sort_keys`` is true YAML mappings are serialized with
+    keys in sorted order.
     """
     changes: list[str] = []
     processed: set[Path] = set()
@@ -134,7 +149,7 @@ def update_files(paths: Iterable[Path], field: str, value: str) -> tuple[list[st
             if not fp.exists():
                 continue
             checked += 1
-            changed, old = replace_field(fp, field, value)
+            changed, old = replace_field(fp, field, value, sort_keys)
             if changed and old is not None:
                 msg = f"{fp}: {old} -> {value}"
                 logger.info(msg)

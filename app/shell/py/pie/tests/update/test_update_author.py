@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import sys
+import yaml
 
 from pie.update import author as update_author
 
@@ -118,6 +119,34 @@ def test_adds_metadata_when_missing(tmp_path: Path, monkeypatch, capsys) -> None
         "1 file checked",
         "1 file changed",
     ]
+
+
+def test_author_with_special_characters_is_escaped(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """Author values with special characters are quoted in frontmatter."""
+    src = tmp_path / "src"
+    src.mkdir()
+    md = src / "doc.md"
+    md.write_text("---\n---\n", encoding="utf-8")
+
+    cfg = tmp_path / "cfg"
+    cfg.mkdir()
+    special = "Jane: Doe #1"
+    (cfg / "update-author.yml").write_text(
+        yaml.safe_dump({"author": special}, sort_keys=False), encoding="utf-8"
+    )
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        update_author, "get_changed_files", lambda: [Path("src/doc.md")]
+    )
+
+    update_author.main([])
+
+    front = md.read_text(encoding="utf-8").split("---\n")[1]
+    data = yaml.safe_load(front)
+    assert data["author"] == special
 
 
 def test_scans_directory(tmp_path: Path, monkeypatch, capsys) -> None:
@@ -240,6 +269,31 @@ def test_verbose_enables_debug_logging(tmp_path: Path, monkeypatch) -> None:
     from pie.logging import LOG_FORMAT
 
     update_author.logger.add(sys.stderr, format=LOG_FORMAT, level="INFO")
+
+
+def test_sort_keys_option_sorts_yaml(tmp_path: Path, monkeypatch, capsys) -> None:
+    """--sort-keys writes YAML with alphabetically ordered keys."""
+    src = tmp_path / "src"
+    src.mkdir()
+    yml = src / "doc.yml"
+    yml.write_text("z: 1\nauthor: Jane Doe\na: 2\n", encoding="utf-8")
+
+    cfg = tmp_path / "cfg"
+    cfg.mkdir()
+    (cfg / "update-author.yml").write_text("author: Brian Lee\n", encoding="utf-8")
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(update_author, "get_changed_files", lambda: [Path("src/doc.yml")])
+
+    update_author.main(["--sort-keys"])
+
+    assert yml.read_text(encoding="utf-8") == "a: 2\nauthor: Brian Lee\nz: 1\n"
+    captured = capsys.readouterr()
+    assert captured.out.strip().splitlines() == [
+        "src/doc.yml: Jane Doe -> Brian Lee",
+        "1 file checked",
+        "1 file changed",
+    ]
 
 
 def test_scans_multiple_paths(tmp_path: Path, monkeypatch, capsys) -> None:
