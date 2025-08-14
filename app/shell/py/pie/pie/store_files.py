@@ -32,9 +32,14 @@ def generate_id(size: int = 8) -> str:
 
 
 def iter_files(path: Path) -> Iterable[Path]:
-    """Yield files under *path* recursively."""
+    """Yield files under *path* recursively.
+
+    All returned paths are fully resolved so that relative components and
+    symlinks are normalised before being processed by callers.
+    """
+    path = path.resolve()
     if path.is_dir():
-        yield from (p for p in path.rglob("*") if p.is_file())
+        yield from (p.resolve() for p in path.rglob("*") if p.is_file())
     elif path.is_file():
         yield path
 
@@ -108,7 +113,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     meta_dir = Path("src") / "static" / "files"
 
     count = 0
-    for base in (Path(p) for p in args.paths):
+    for base in (Path(p).resolve() for p in args.paths):
         for src in iter_files(base):
             process_file(src, dest_dir, meta_dir, baseurl=baseurl)
             count += 1

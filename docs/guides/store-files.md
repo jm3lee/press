@@ -9,6 +9,7 @@ store-files [-n LIMIT] [-c CONFIG] <path>...
 ```
 
 - Each `path` may point to a single file or a directory; directories are processed recursively. Multiple paths may be supplied.
+- All paths are resolved to their absolute locations before any files are processed.
 - `-n LIMIT` optionally restricts how many files are handled in one run.
 - `-c CONFIG` path to a configuration file. Defaults to `cfg/store-files.yml` and is ignored if missing. When a path is explicitly supplied the command exits with an error if the file does not exist.
 

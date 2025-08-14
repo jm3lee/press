@@ -27,6 +27,18 @@ def test_iter_files_returns_all_files(tmp_path: Path) -> None:
     assert list(store_files.iter_files(single)) == [single]
 
 
+def test_iter_files_resolves_paths(tmp_path: Path, monkeypatch) -> None:
+    base = tmp_path / "base"
+    base.mkdir()
+    target = base / "file.txt"
+    target.write_text("data")
+
+    monkeypatch.chdir(tmp_path)
+    rel = Path("base/../base")
+    files = list(store_files.iter_files(rel))
+    assert files == [target]
+
+
 def test_process_file_moves_and_creates_metadata(tmp_path: Path, monkeypatch) -> None:
     src = tmp_path / "file.txt"
     src.write_text("data")
