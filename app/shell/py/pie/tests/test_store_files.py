@@ -66,23 +66,23 @@ def test_process_file_uses_baseurl(tmp_path: Path, monkeypatch) -> None:
 
 
 def test_main_processes_files_with_limit(tmp_path: Path, monkeypatch) -> None:
-    base = tmp_path / "input"
-    base.mkdir()
-    (base / "one.txt").write_text("1")
-    (base / "two.txt").write_text("2")
+    one = tmp_path / "one.txt"
+    one.write_text("1")
+    two = tmp_path / "two.txt"
+    two.write_text("2")
 
     ids = iter(["id1", "id2"])
     monkeypatch.setattr(store_files, "generate_id", lambda size=8: next(ids))
     monkeypatch.chdir(tmp_path)
 
-    store_files.main([str(base), "-n", "1"])
+    store_files.main([str(one), str(two), "-n", "1"])
 
     dest_dir = Path("s3") / "v2" / "files" / "0"
     meta_dir = Path("src") / "static" / "files"
 
     assert (dest_dir / "id1").exists()
     assert (meta_dir / "id1.yml").exists()
-    assert len(list(base.iterdir())) == 1
+    assert two.exists()
 
 
 def test_main_uses_config_file(tmp_path: Path, monkeypatch) -> None:
