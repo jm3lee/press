@@ -36,14 +36,24 @@ fi
 
 DOCKER_COMPOSE=(docker compose -f "$COMPOSE_FILE")
 
-"${DOCKER_COMPOSE[@]}" down
+MAKE_ARGS=(-f redo.mk VERBOSE="$VERBOSE" SRC_DIR="$SRC_DIR" BUILD_DIR="$BUILD_DIR")
+
+run_make() {
+  make "${MAKE_ARGS[@]}" "$@"
+}
+
+cleanup() {
+  "${DOCKER_COMPOSE[@]}" down
+}
+trap cleanup EXIT
+
+"${DOCKER_COMPOSE[@]}" down >/dev/null 2>&1 || true
 "${DOCKER_COMPOSE[@]}" up -d dragonfly nginx-test
-make -f redo.mk distclean VERBOSE="$VERBOSE" SRC_DIR="$SRC_DIR" BUILD_DIR="$BUILD_DIR"
+run_make distclean
 "${DOCKER_COMPOSE[@]}" build shell
-make -f redo.mk VERBOSE="$VERBOSE" SRC_DIR="$SRC_DIR" BUILD_DIR="$BUILD_DIR"
-make -f redo.mk test VERBOSE="$VERBOSE" SRC_DIR="$SRC_DIR" BUILD_DIR="$BUILD_DIR"
-make -f redo.mk pytest  VERBOSE="$VERBOSE" SRC_DIR="$SRC_DIR" BUILD_DIR="$BUILD_DIR"
+run_make
+run_make test
+run_make pytest
 "${DOCKER_COMPOSE[@]}" build release
-"${DOCKER_COMPOSE[@]}" down
 
 echo "Release Build Successful"
