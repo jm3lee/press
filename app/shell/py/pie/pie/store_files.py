@@ -42,7 +42,11 @@ def iter_files(path: Path) -> Iterable[Path]:
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
     parser = create_parser("Move files to s3/v2 and create metadata entries")
-    parser.add_argument("path", help="Path to file or directory to process")
+    parser.add_argument(
+        "paths",
+        nargs="+",
+        help="Paths to files or directories to process",
+    )
     parser.add_argument(
         "-n",
         dest="limit",
@@ -100,14 +104,16 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     baseurl = config.get("baseurl", "")
 
-    base_path = Path(args.path)
     dest_dir = Path("s3") / "v2" / "files" / "0"
     meta_dir = Path("src") / "static" / "files"
 
     count = 0
-    for src in iter_files(base_path):
-        process_file(src, dest_dir, meta_dir, baseurl=baseurl)
-        count += 1
+    for base in (Path(p) for p in args.paths):
+        for src in iter_files(base):
+            process_file(src, dest_dir, meta_dir, baseurl=baseurl)
+            count += 1
+            if args.limit and count >= args.limit:
+                break
         if args.limit and count >= args.limit:
             break
     logger.info("completed", processed=count)
