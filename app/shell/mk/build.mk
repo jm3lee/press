@@ -117,9 +117,9 @@ $(BUILD_DIR)/.minify:
 
 .PHONY: test
 # Triggered by the test target in redo.mk; see docs/guides/redo-mk.md.
-test: $(BUILD_DIR)/.minify | $(LOG_DIR)
+test: $(BUILD_DIR)/.minify check | $(LOG_DIR)
 	$(call status,Run link check)
-	$(Q)$(CHECKLINKS_CMD) http://nginx-dev
+	$(Q)$(CHECKLINKS_CMD) http://nginx-test
 
 .PHONY: check
 check:

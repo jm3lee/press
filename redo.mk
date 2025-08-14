@@ -169,6 +169,7 @@ cov:
 	$(call status,Run coverage)
 	$(Q)mkdir -p log/cov
 	$(Q)$(PYTEST_CMD) --cov=pie --cov-report=term-missing --cov-report=html:/data/log/cov /press/py/pie/tests
+
 .PHONY: t
 t: ## Restart nginx-dev and run tests, ansi colors
 	$(call status,Run tests with colors)

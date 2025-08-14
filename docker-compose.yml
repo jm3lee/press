@@ -9,6 +9,14 @@ services:
       - "443:443"
     restart: unless-stopped
 
+  # No ports are exposed so we can use a private instance to check for broken
+  # links. All scripts are executed within a container.
+  nginx-test:
+    build:
+      context: .
+      dockerfile: ./app/nginx/Dockerfile
+    container_name: press-nginx-test
+
   nginx-dev:
     build:
       context: .
