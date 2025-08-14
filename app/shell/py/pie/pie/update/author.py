@@ -43,6 +43,11 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         help="Author name to set; overrides value from cfg/update-author.yml",
     )
     parser.add_argument(
+        "--sort-keys",
+        action="store_true",
+        help="Sort keys when writing YAML output",
+    )
+    parser.add_argument(
         "paths",
         nargs="*",
         help=(
@@ -53,14 +58,17 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(list(argv) if argv is not None else None)
 
 
-def update_files(paths: Iterable[Path], author: str) -> tuple[list[str], int]:
+def update_files(
+    paths: Iterable[Path], author: str, sort_keys: bool = False
+) -> tuple[list[str], int]:
     """Update ``author`` in files related to *paths*.
 
     Returns a tuple ``(messages, checked)`` where ``messages`` contains log
     entries for each modified file and ``checked`` is the number of files that
-    were examined.
+    were examined. When ``sort_keys`` is true YAML mappings are serialized with
+    keys in sorted order.
     """
-    return common_update_files(paths, "author", author)
+    return common_update_files(paths, "author", author, sort_keys=sort_keys)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -103,7 +111,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     else:
         changed = get_changed_files()
     logger.debug("Files to check", files=[str(p) for p in changed])
-    messages, checked = update_files(changed, args.author)
+    messages, checked = update_files(changed, args.author, args.sort_keys)
     logger.debug("Update complete", messages=messages, checked=checked)
     for msg in messages:
         print(msg)

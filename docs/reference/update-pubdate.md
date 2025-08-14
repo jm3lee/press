@@ -19,12 +19,13 @@ load_metadata_pair(Path("docs/post/index.yml"))
 ```
 
 ```bash
-update-pubdate [-l LOGFILE]
+update-pubdate [--sort-keys] [-l LOGFILE]
 ```
 
 Each updated file is printed as `<path>: <old> -> <new>` and the same
 information is logged to `LOGFILE`. When omitted, log output is written to
-`log/update-pubdate.txt`.
+`log/update-pubdate.txt`. Pass `--sort-keys` to serialize YAML mappings with
+keys in alphabetical order.
 
 When finished, the script reports how many files were checked and how many were
 updated.

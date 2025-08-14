@@ -19,17 +19,25 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         "Update the pubdate field in modified metadata files",
         log_default="log/update-pubdate.txt",
     )
+    parser.add_argument(
+        "--sort-keys",
+        action="store_true",
+        help="Sort keys when writing YAML output",
+    )
     return parser.parse_args(list(argv) if argv is not None else None)
 
 
-def update_files(paths: Iterable[Path], pubdate: str) -> tuple[list[str], int]:
+def update_files(
+    paths: Iterable[Path], pubdate: str, sort_keys: bool = False
+) -> tuple[list[str], int]:
     """Update ``pubdate`` in files related to *paths*.
 
     Returns a tuple ``(messages, checked)`` where ``messages`` contains log
     entries for each modified file and ``checked`` is the number of files that
-    were examined.
+    were examined. When ``sort_keys`` is true YAML mappings are serialized with
+    keys in sorted order.
     """
-    return common_update_files(paths, "pubdate", pubdate)
+    return common_update_files(paths, "pubdate", pubdate, sort_keys=sort_keys)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -40,7 +48,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     configure_logging(args.verbose, args.log)
     today = get_pubdate()
     changed = get_changed_files()
-    messages, checked = update_files(changed, today)
+    messages, checked = update_files(changed, today, args.sort_keys)
     for msg in messages:
         print(msg)
     print(f"{checked} {'file' if checked == 1 else 'files'} checked")

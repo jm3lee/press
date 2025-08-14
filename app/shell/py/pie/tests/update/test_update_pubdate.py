@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import yaml
 
 from pie.update import pubdate as update_pubdate
 from pie.utils import get_pubdate
@@ -80,6 +81,51 @@ def test_adds_frontmatter_when_pubdate_in_body(tmp_path: Path, monkeypatch, caps
     captured = capsys.readouterr()
     assert captured.out.strip().splitlines() == [
         f"src/doc.md: undefined -> {expected}",
+        "1 file checked",
+        "1 file changed",
+    ]
+
+
+def test_pubdate_with_special_characters_is_escaped(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """Pubdate values with special characters are quoted in frontmatter."""
+    src = tmp_path / "src"
+    src.mkdir()
+    md = src / "doc.md"
+    md.write_text("---\n---\n", encoding="utf-8")
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        update_pubdate, "get_changed_files", lambda: [Path("src/doc.md")]
+    )
+    special = "2024-07-15T12:34:56+00:00"
+    monkeypatch.setattr(update_pubdate, "get_pubdate", lambda: special)
+
+    update_pubdate.main([])
+
+    front = md.read_text(encoding="utf-8").split("---\n")[1]
+    data = yaml.safe_load(front)
+    assert data["pubdate"] == special
+
+
+def test_sort_keys_option_sorts_yaml(tmp_path: Path, monkeypatch, capsys) -> None:
+    """--sort-keys writes YAML with alphabetically ordered keys."""
+    src = tmp_path / "src"
+    src.mkdir()
+    yml = src / "doc.yml"
+    yml.write_text("z: 1\npubdate: Jan 01, 2000\na: 2\n", encoding="utf-8")
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(update_pubdate, "get_changed_files", lambda: [Path("src/doc.yml")])
+    monkeypatch.setattr(update_pubdate, "get_pubdate", lambda: "Jan 02, 2000")
+
+    update_pubdate.main(["--sort-keys"])
+
+    assert yml.read_text(encoding="utf-8") == "a: 2\npubdate: Jan 02, 2000\nz: 1\n"
+    captured = capsys.readouterr()
+    assert captured.out.strip().splitlines() == [
+        "src/doc.yml: Jan 01, 2000 -> Jan 02, 2000",
         "1 file checked",
         "1 file changed",
     ]
