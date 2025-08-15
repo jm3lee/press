@@ -28,3 +28,6 @@ concepts and data formats, see the
   container.
 
 Refer to the individual files for additional guides not listed here.
+
+## Content features
+- [responsive-images.md](responsive-images.md) – render responsive images with the figure helper.

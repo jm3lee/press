@@ -3,6 +3,7 @@ Welcome to the demo site for **Press**. Use the links below to explore key featu
 - [Quickstart](quickstart.md)
 - [Jinja Examples](examples/jinja.md)
 - [Link Global Examples](examples/link-globals.md)
+- [Responsive Image Examples](examples/responsive-images.md)
 - [Chicago Citation Examples](examples/chicago-citations.md)
 - [Index Tree Demo](examples/indextree/index.md)
 - [Quiz Demo](quiz/index.md)
