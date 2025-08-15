@@ -34,6 +34,7 @@ setup(
             'indextree-json=pie.indextree_json:main',
             'gen-markdown-index=pie.gen_markdown_index:main',
             'check-page-title=pie.check.page_title:main',
+            'check-permalinks=pie.check.permalinks:main',
             'check-post-build=pie.check.post_build:main',
             'create-post=pie.create.post:main',
             'create-site=pie.create.site:main',

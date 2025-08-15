@@ -16,6 +16,7 @@ concepts and data formats, see the
 ## Validation and testing
 - [check-page-title.md](check-page-title.md) – verify page titles.
 - [checklinks.md](checklinks.md) – scan rendered HTML for broken links.
+- [check-permalinks.md](check-permalinks.md) – ensure `permalink` values are unique.
 - [tests.md](tests.md) – run the automated test suite.
 
 ## Services and utilities
