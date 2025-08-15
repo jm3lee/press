@@ -145,7 +145,7 @@ def render_link(
     if style == "title":
         def cap_match(m):
             word = m.group(1)
-            if word.lower() in {"of", "in", "a", "an"}:
+            if word.lower() in {"of", "in", "a", "an", "to"}:
                 return word
             return word[0].upper() + word[1:]
 
