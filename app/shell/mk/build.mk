@@ -106,11 +106,11 @@ all: $(BUILD_DIR)/robots.txt
 all: $(PERMALINKS_CONF)
 
 $(BUILD_DIR)/robots.txt: $(SRC_DIR)/robots.txt
-        cp $< $@
+	cp $< $@
 
 $(PERMALINKS_CONF): $(MARKDOWNS) $(YAMLS) | $(BUILD_DIR) $(LOG_DIR)
 	$(call status,Generate permalink redirects)
-	$(Q)nginx-permalinks $(SRC_DIR) -o $@ -v --log $(LOG_DIR)/nginx-permalinks.txt
+	$(Q)nginx-permalinks $(SRC_DIR) -o $@ --log $(LOG_DIR)/nginx-permalinks.txt
 
 $(BUILD_DIR)/.update-index: $(MARKDOWNS) $(YAMLS)
 	$(call status,Updating Redis Index)
