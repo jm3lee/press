@@ -124,16 +124,16 @@ test: $(BUILD_DIR)/.minify check | $(LOG_DIR)
 
 .PHONY: check
 check:
-        $(call status,Check metadata authors)
-        $(Q)check-author $(SRC_DIR)
-        $(call status,Check metadata permalinks)
-        $(Q)check-permalinks $(SRC_DIR)
-        $(call status,Check page titles)
-        $(Q)check-page-title -x $(CFG_DIR)/check-page-title-exclude.yml $(BUILD_DIR)
+	$(call status,Check metadata authors)
+	$(Q)check-author $(SRC_DIR)
+	$(call status,Check page titles)
+	$(Q)check-page-title -x $(CFG_DIR)/check-page-title-exclude.yml $(BUILD_DIR)
 	$(call status,Check post-build artifacts)
 	$(Q)check-post-build -c $(CFG_DIR)/check-post-build.yml
 	$(call status,Check for unexpanded Jinja)
 	$(Q)check-unexpanded-jinja $(BUILD_DIR)
+	$(call status,Check metadata permalinks)
+	$(Q)check-permalinks $(SRC_DIR)
 
 # Create necessary build directories
 $(BUILD_DIR): | $(BUILD_SUBDIRS)
