@@ -7,7 +7,9 @@ import Paper from '@mui/material/Paper';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
+import Fab from '@mui/material/Fab';
 import CloseIcon from '@mui/icons-material/Close';
+import SearchIcon from '@mui/icons-material/Search';
 
 export default function MagicBar({ pages = [] }) {
   const [open, setOpen] = useState(false);
@@ -41,61 +43,78 @@ export default function MagicBar({ pages = [] }) {
   }, []);
 
   useEffect(() => {
-    if (!open) {
+    if (open) {
+      setMatches(pages);
+    } else {
       setQuery('');
       setMatches([]);
     }
-  }, [open]);
+  }, [open, pages]);
 
   const handleSelect = (url) => {
     window.location.href = url;
   };
 
   return (
-    open && (
-      <>
-        <AppBar position="fixed" sx={{ top: 0 }}>
-          <Toolbar sx={{ p: 1, gap: 1 }}>
-            <TextField
-              fullWidth
-              size="small"
-              placeholder="Search pages"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              inputProps={{ 'aria-label': 'search pages' }}
-            />
-            <IconButton
-              edge="end"
-              color="inherit"
-              aria-label="close"
-              onClick={() => setOpen(false)}
+    <>
+      {open && (
+        <>
+          <AppBar position="fixed" sx={{ top: 0 }}>
+            <Toolbar sx={{ p: 1, gap: 1 }}>
+              <TextField
+                fullWidth
+                size="small"
+                placeholder="Search pages"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                inputProps={{ 'aria-label': 'search pages' }}
+              />
+              <IconButton
+                edge="end"
+                color="inherit"
+                aria-label="close"
+                onClick={() => setOpen(false)}
+              >
+                <CloseIcon />
+              </IconButton>
+            </Toolbar>
+          </AppBar>
+          {matches.length > 0 && (
+            <Paper
+              sx={{
+                position: 'fixed',
+                top: 56,
+                left: 0,
+                right: 0,
+                maxHeight:
+                  query === ''
+                    ? (theme) => theme.spacing(12)
+                    : '50vh',
+                overflowY: 'auto',
+                zIndex: (theme) => theme.zIndex.appBar - 1,
+              }}
             >
-              <CloseIcon />
-            </IconButton>
-          </Toolbar>
-        </AppBar>
-        {matches.length > 0 && (
-          <Paper
-            sx={{
-              position: 'fixed',
-              top: 56,
-              left: 0,
-              right: 0,
-              maxHeight: '50vh',
-              overflowY: 'auto',
-              zIndex: (theme) => theme.zIndex.appBar - 1,
-            }}
-          >
-            <List dense>
-              {matches.map((p, idx) => (
-                <ListItemButton key={idx} onClick={() => handleSelect(p.url)}>
-                  <ListItemText primary={p.title} />
-                </ListItemButton>
-              ))}
-            </List>
-          </Paper>
-        )}
-      </>
-    )
+              <List dense>
+                {matches.map((p, idx) => (
+                  <ListItemButton key={idx} onClick={() => handleSelect(p.url)}>
+                    <ListItemText primary={p.title} />
+                  </ListItemButton>
+                ))}
+              </List>
+            </Paper>
+          )}
+        </>
+      )}
+      {!open && (
+        <Fab
+          color="primary"
+          aria-label="open search"
+          onClick={() => setOpen(true)}
+          sx={{ position: 'fixed', bottom: 16, right: 16 }}
+        >
+          <SearchIcon />
+        </Fab>
+      )}
+    </>
   );
 }

@@ -4,7 +4,8 @@
 allows users to enter a regular expression and quickly navigate to matching
 pages. Suggestions appear as you type and selecting an entry loads the
 associated URL. Press **Ctrl+K** (or **⌘K** on macOS) to toggle the bar and
-use **Esc** or the close button to dismiss it.
+use **Esc** or the close button to dismiss it. On touch devices, a floating
+search button toggles the bar.
 
 The component is built with [Material UI](https://mui.com/) and optimised for
 mobile use. Include the script on any page and supply a JSON file describing
@@ -47,6 +48,9 @@ expression.
 Typing a regular expression filters the list by testing the pattern against
 each page's `title` and `shortcut`. When the user selects a result, the
 browser navigates to the page's `url`.
+
+When the search field is empty the component shows all pages in a scrollable
+panel capped to three visible items so it never covers the full screen.
 
 ## Demo
 
