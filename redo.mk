@@ -106,7 +106,9 @@ distclean: clean ## Remove .init markers and clear Dragonfly index cache
 	$(call status,Remove .init)
 	$(Q)-rm -f `find app/ -name .init`
 	$(call status,Empty Index Cache)
-	$(Q)./bin/redis-cli flushall
+	$(Q)-./bin/redis-cli flushall
+	$(call status,Clearing log/)
+	$(Q)-rm -f log/*
 
 .PHONY: prune
 prune: ## Run docker system prune -f to clean unused resources

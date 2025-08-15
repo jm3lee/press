@@ -323,7 +323,7 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
     source = md_path if md_path.exists() else yaml_file or path
     combined = generate_missing_metadata(combined, str(source))
 
-    logger.debug(combined)
+    logger.debug('returning', combined=combined)
     return combined
 
 
