@@ -3,10 +3,8 @@ services:
     build:
       context: .
       dockerfile: ./app/nginx/Dockerfile
-    container_name: press-nginx
-    ports:
-      - "80:80"
-      - "443:443"
+      args:
+        NGINX_CONF: app/nginx/prod.conf
     restart: unless-stopped
 
   # No ports are exposed so we can use a private instance to check for broken
@@ -21,18 +19,10 @@ services:
     build:
       context: .
       dockerfile: ./app/nginx/Dockerfile
-    container_name: press-nginx-dev
     ports:
       - "80:80"
     volumes:
-      # Mount your HTML files. Adjust path to match how your config is set up.
       - ./build:/usr/share/nginx/html
-
-      # Mount your custom NGINX config as /etc/nginx/conf.d/default.conf
-      # - ../nginx/default.conf:/etc/nginx/conf.d/default.conf
-
-      # If you're using certbot or any Let's Encrypt management inside/outside the container
-      # - /etc/letsencrypt:/etc/letsencrypt
     restart: unless-stopped
 
   sync:
