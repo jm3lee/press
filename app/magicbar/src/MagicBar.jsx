@@ -88,7 +88,7 @@ export default function MagicBar({ pages = [] }) {
                 right: 0,
                 maxHeight:
                   query === ''
-                    ? (theme) => theme.spacing(12)
+                    ? (theme) => theme.spacing(15)
                     : '50vh',
                 overflowY: 'auto',
                 zIndex: (theme) => theme.zIndex.appBar - 1,
