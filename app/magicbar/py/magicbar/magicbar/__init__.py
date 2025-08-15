@@ -1,0 +1,1 @@
+"""MagicBar utilities."""

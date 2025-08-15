@@ -48,18 +48,21 @@ ENV LANG=en_US.UTF-8 \
 # Copy Press Python libraries into the image. Users can override by mounting
 # /press/py
 # -------------------------------------------------------------------
-# Install library under development.
-COPY ./py/pie /press/py/pie
+# Install libraries under development.
+COPY ./app/shell/py/pie /press/py/pie
+COPY ./app/magicbar/py/magicbar /press/py/magicbar
 RUN pip install --break-system-packages \
         -e /press/py/pie \
-        -r /press/py/pie/requirements.txt
+        -r /press/py/pie/requirements.txt \
+        -e /press/py/magicbar \
+        -r /press/py/magicbar/requirements.txt
 
 # -------------------------------------------------------------------
 # Custom helper scripts and makefiles
 # -------------------------------------------------------------------
 # Add helper scripts to PATH
-COPY ./bin/ /app/bin
+COPY ./app/shell/bin/ /app/bin
 ENV PATH="/app/bin:${PATH}"
 
 # Copy additional Makefile fragments
-COPY ./mk/ /app/mk
+COPY ./app/shell/mk/ /app/mk

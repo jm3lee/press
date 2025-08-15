@@ -64,7 +64,9 @@ services:
 
   shell:
     image: press-shell
-    build: ./app/shell
+    build:
+      context: .
+      dockerfile: ./app/shell/Dockerfile
     container_name: press-shell
     entrypoint: ["bash"]
     environment:
@@ -78,6 +80,8 @@ services:
       - ./app/shell/bin:/app/bin
       - ./app/shell/py/pie/pie:/press/py/pie/pie
       - ./app/shell/py/pie/tests:/press/py/pie/tests
+      - ./app/magicbar/py/magicbar/magicbar:/press/py/magicbar/magicbar
+      - ./app/magicbar/py/magicbar/tests:/press/py/magicbar/tests
       - ./src/dep.mk:/app/mk/dep.mk
 
   release:

@@ -58,3 +58,7 @@ An example dataset and page live in `src/magicbar`. After building the
 `app/magicbar` project, the component script is available at
 `/static/js/magicbar.js` and the demo page loads the data from
 `/magicbar/demo.json`.
+
+For details on generating the JSON dataset, see the
+[MagicBar indexing documentation](../../app/magicbar/docs/magicbar-index.md).
+
