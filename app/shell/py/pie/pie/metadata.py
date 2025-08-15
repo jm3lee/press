@@ -108,7 +108,7 @@ def generate_missing_metadata(metadata: dict[str, Any], filepath: str) -> dict[s
     return metadata
 
 
-def read_from_markdown(filepath: str) -> Optional[Dict[str, Any]]:
+def _read_from_markdown(filepath: str) -> Optional[Dict[str, Any]]:
     """Load metadata from a Markdown file without adding defaults.
 
     ``generate_missing_metadata`` should be called by the caller if default
@@ -285,7 +285,7 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
 
     md_data = None
     if md_path.exists():
-        md_data = read_from_markdown(str(md_path))
+        md_data = _read_from_markdown(str(md_path))
 
     yaml_data = None
     yaml_file: Path | None = None

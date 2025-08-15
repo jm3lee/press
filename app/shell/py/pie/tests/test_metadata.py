@@ -28,14 +28,14 @@ def test_get_url_invalid_raises(tmp_path):
         os.chdir("/tmp")
 
 
-def test_read_from_markdown_generates_fields(tmp_path):
+def test__read_from_markdown_generates_fields(tmp_path):
     """Frontmatter {'title': 'T'} -> url/id/citation added."""
     md = tmp_path / "src" / "doc.md"
     md.parent.mkdir(parents=True)
     md.write_text("---\n{\"title\": \"T\"}\n---\nbody")
     os.chdir(tmp_path)
     try:
-        data = metadata.read_from_markdown("src/doc.md")
+        data = metadata._read_from_markdown("src/doc.md")
         assert data is not None
         data = metadata.generate_missing_metadata(data, "src/doc.md")
     finally:

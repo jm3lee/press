@@ -8,43 +8,43 @@ document's `id` to its metadata (including generated URLs).
 import argparse
 import json
 import os
-from typing import Any, Dict, Optional
+from pathlib import Path
+from typing import Any, Dict
 
 from pie.cli import create_parser
 from pie.logging import logger, add_log_argument, configure_logging
-from pie.metadata import (
-    get_url,
-    read_from_markdown,
-    read_from_yaml,
-    generate_missing_metadata,
-)
+from pie.metadata import load_metadata_pair
 
 
 ## Functions for reading metadata are provided by ``pie.metadata``.
 
 
-def validate_and_insert_metadata(
-    metadata: Dict[str, Any],
-    filepath: str,
-    index: Dict[str, Any],
-) -> None:
-    """Validate and register a document's metadata into the index.
+def validate_and_insert_metadata(filepath: str, index: Dict[str, Any]) -> None:
+    """Load metadata from ``filepath`` and register it into the index.
 
-    Ensures the metadata contains a unique `id` field, logs warnings if missing,
-    and raises on duplicates.
+    The metadata for ``filepath`` and any sibling Markdown/YAML file is loaded
+    via :func:`load_metadata_pair`. A document's ``id`` must be unique within
+    ``index``. If the same ``id`` is encountered again from the same pair of
+    files, the duplicate is ignored. A ``KeyError`` is raised for conflicting
+    ``id`` values originating from different paths.
 
     Args:
-        metadata: The document metadata to validate.
-        filepath: The source file path (for logging).
-        index: The global index mapping `id` to metadata.
+        filepath: The source file path.
+        index: The global index mapping ``id`` to metadata.
 
     Raises:
-        KeyError: If a duplicate `id` is detected.
+        KeyError: If a duplicate ``id`` is detected from a different file.
     """
+    metadata = load_metadata_pair(Path(filepath))
+    if not metadata:
+        return
+
     doc_id = metadata.get("id")
     if doc_id:
-        if doc_id in index:
-            existing = index[doc_id]
+        existing = index.get(doc_id)
+        if existing:
+            if existing.get("path") == metadata.get("path"):
+                return
             raise KeyError(
                 f"Duplicate id found: '{doc_id}'. "
                 f"Existing: {existing}, New: {metadata}"
@@ -65,10 +65,8 @@ def build_index(
     """Build an index of document metadata from Markdown and YAML files.
 
     Scans ``source_dir`` recursively and processes any files whose extension is
-    in ``extensions``. Markdown files (``.md``) have their YAML frontmatter
-    extracted and URLs generated for those under ``src/``. YAML files
-    (``.yml``/``.yaml``) are loaded entirely as metadata. Each document's
-    ``id`` must be unique.
+    in ``extensions``. Metadata is loaded using :func:`load_metadata_pair` and
+    inserted into ``index`` if the document ``id`` is unique.
 
     Args:
         source_dir: Root directory to scan for files.
@@ -76,8 +74,7 @@ def build_index(
             ``[".md", ".yml", ".yaml"]``.
 
     Returns:
-        A dict mapping each document ``id`` to its metadata (with added ``url``
-        for Markdown sources).
+        A dict mapping each document ``id`` to its metadata.
 
     Raises:
         KeyError: If duplicate ``id`` values are encountered.
@@ -90,24 +87,14 @@ def build_index(
     for root, _, files in os.walk(source_dir):
         for name in files:
             _, ext = os.path.splitext(name)
-            ext_lower = ext.lower()
-            if ext_lower not in extensions:
+            if ext.lower() not in extensions:
                 continue
 
             filepath = os.path.join(root, name)
             logger.debug("Processing file", filename=filepath)
 
-            metadata: Optional[Dict[str, Any]] = None
-
-            if ext_lower == ".md":
-                metadata = read_from_markdown(filepath)
-            elif ext_lower in (".yml", ".yaml"):
-                metadata = read_from_yaml(filepath)
-
-            if metadata:
-                metadata = generate_missing_metadata(metadata, filepath)
-                validate_and_insert_metadata(metadata, filepath, index)
-                logger.debug("Processed file", filename=filepath)
+            validate_and_insert_metadata(filepath, index)
+            logger.debug("Processed file", filename=filepath)
 
     return index
 

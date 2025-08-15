@@ -1,15 +1,28 @@
-import os
 import json
+import os
 from pathlib import Path
+
 import pytest
+
 from pie import build_index
 
 
 def test_validate_and_insert_duplicate(tmp_path):
     """Duplicate id triggers KeyError."""
-    index = {"a": {"id": "a"}}
-    with pytest.raises(KeyError):
-        build_index.validate_and_insert_metadata({"id": "a"}, "file", index)
+    src = tmp_path / "src"
+    src.mkdir()
+    first = src / "first.yml"
+    first.write_text("id: a")
+    second = src / "second.yml"
+    second.write_text("id: a")
+    index: dict[str, dict[str, str]] = {}
+    os.chdir(tmp_path)
+    try:
+        build_index.validate_and_insert_metadata("src/first.yml", index)
+        with pytest.raises(KeyError):
+            build_index.validate_and_insert_metadata("src/second.yml", index)
+    finally:
+        os.chdir("/tmp")
 
 
 def test_build_index_handles_multiple_extensions(tmp_path):
