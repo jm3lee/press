@@ -64,8 +64,8 @@ supported keys and defaults.
    - Computes URL if the file lives under `src/`.
 
 4. **Indexing**
- - Validates that each metadata entry has a unique `id`.
-  - Aggregates all entries into a single JSON object.
+   - Validates that each metadata entry has a unique `id`.
+   - Aggregates all entries into a single JSON object.
 
 Once the index is generated you can insert it into Redis with
 [`update-index`](update-index.md).
