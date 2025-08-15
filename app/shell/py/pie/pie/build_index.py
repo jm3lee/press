@@ -13,11 +13,11 @@ from typing import Any, Dict, Optional
 from pie.cli import create_parser
 from pie.logging import logger, add_log_argument, configure_logging
 from pie.metadata import (
-    get_url,
     read_from_markdown,
     read_from_yaml,
     generate_missing_metadata,
 )
+from pie.index.redirects import record_redirect, write_redirects
 
 
 ## Functions for reading metadata are provided by ``pie.metadata``.
@@ -86,6 +86,7 @@ def build_index(
         extensions = (".md", ".yml", ".yaml")
 
     index: Dict[str, Any] = {}
+    redirects: list[tuple[str, str]] = []
 
     for root, _, files in os.walk(source_dir):
         for name in files:
@@ -106,10 +107,12 @@ def build_index(
 
             if metadata:
                 metadata = generate_missing_metadata(metadata, filepath)
+
+                record_redirect(filepath, metadata, redirects)
+
                 validate_and_insert_metadata(metadata, filepath, index)
                 logger.debug("Processed file", filename=filepath)
-
-    return index
+    return index, redirects
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -133,7 +136,7 @@ def main(argv: list[str] | None = None) -> None:
 
     configure_logging(args.verbose, args.log)
 
-    index = build_index(args.source_dir)
+    index, redirects = build_index(args.source_dir)
 
     output_json = json.dumps(index, ensure_ascii=False, indent=2)
 
@@ -143,6 +146,8 @@ def main(argv: list[str] | None = None) -> None:
         logger.info("Index written to file", path=args.output)
     else:
         print(output_json)
+
+    write_redirects(redirects)
 
 
 if __name__ == "__main__":

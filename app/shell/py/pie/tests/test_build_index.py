@@ -1,6 +1,5 @@
 import os
 import json
-from pathlib import Path
 import pytest
 from pie import build_index
 
@@ -23,11 +22,12 @@ def test_build_index_handles_multiple_extensions(tmp_path):
 
     os.chdir(tmp_path)
     try:
-        index = build_index.build_index("src")
+        index, redirects = build_index.build_index("src")
     finally:
         os.chdir("/tmp")
 
     assert set(index) == {"doc", "item"}
+    assert redirects == []
 
 
 def test_main_writes_log_file(tmp_path):
@@ -51,3 +51,23 @@ def test_main_writes_log_file(tmp_path):
     data = json.loads(out.read_text())
     assert set(data) == {"doc", "item"}
     assert log.exists()
+
+
+def test_main_writes_redirects_conf(tmp_path):
+    src = tmp_path / "src"
+    src.mkdir()
+    md = src / "doc.md"
+    md.write_text("---\ntitle: T\nid: doc\nurl: /custom.html\n---\n")
+
+    os.chdir(tmp_path)
+    try:
+        build_index.main(["src"])
+    finally:
+        os.chdir("/tmp")
+
+    redirect_file = tmp_path / "build" / "redirects.conf"
+    assert redirect_file.exists()
+    assert (
+        redirect_file.read_text().strip()
+        == "rewrite ^/doc.html$ /custom.html permanent;"
+    )

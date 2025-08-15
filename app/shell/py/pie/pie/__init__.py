@@ -34,5 +34,6 @@ __all__ = [
     "gen_markdown_index",
     "build",
     "check",
+    "index",
     "update",
 ]

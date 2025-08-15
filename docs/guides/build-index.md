@@ -64,8 +64,13 @@ supported keys and defaults.
    - Computes URL if the file lives under `src/`.
 
 4. **Indexing**
-   - Validates that each metadata entry has a unique `id`.
-   - Aggregates all entries into a single JSON object.
+ - Validates that each metadata entry has a unique `id`.
+  - Aggregates all entries into a single JSON object.
 
 Once the index is generated you can insert it into Redis with
 [`update-index`](update-index.md).
+
+If a file's declared `url` doesn't match the path derived from its location,
+the builder writes a `build/redirects.conf` file containing `rewrite` rules.
+Include this file in your Nginx configuration to serve 301 redirects from legacy
+paths to the canonical `url`.
