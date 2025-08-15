@@ -17,9 +17,11 @@ for details on the structure of this metadata.
 - `link(desc, anchor=None)` and related helpers `linktitle`, `linkcap`,
   `link_icon_title`, `linkicon`, and `linkshort` – format metadata into HTML
   anchors. See [link-globals.md](link-globals.md) for details.
-- `figure(desc)` – generate a `<figure>` with a lazy-loaded `<img>` and a
-  caption taken from `desc['figure']['caption']` when present, otherwise the
-  entry's `title`.
+- `figure(desc)` – generate a `<figure>` with a lazy-loaded `<img>`. The image
+  uses `desc['url']` as a fallback `src` while optional responsive sources may
+  be supplied via `desc['figure']['urls']` or a `widths`/`pattern` pair to
+  populate `srcset` and `sizes`. The caption defaults to
+  `desc['figure']['caption']` when present, otherwise the entry's `title`.
 
 Example:
 
