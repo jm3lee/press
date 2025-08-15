@@ -1,10 +1,3 @@
----
-title: Quickstart
-author: Brian Lee
-id: quickstart
-citation: quickstart
----
-
 ## Start Server
 
 Build pages and run a development nginx server, run this on `bash` and alike.
