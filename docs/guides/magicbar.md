@@ -3,7 +3,8 @@
 `MagicBar` provides a floating search bar fixed to the top of the page. It
 allows users to enter a regular expression and quickly navigate to matching
 pages. Suggestions appear as you type and selecting an entry loads the
-associated URL.
+associated URL. Press **Ctrl+K** (or **⌘K** on macOS) to toggle the bar and
+use **Esc** or the close button to dismiss it.
 
 The component is built with [Material UI](https://mui.com/) and optimised for
 mobile use. Include the script on any page and supply a JSON file describing
