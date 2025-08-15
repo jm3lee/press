@@ -5,10 +5,6 @@
 # Ensure built JS is available under build/static/
 all: build/static/js/magicbar.js
 
-# Directory for built assets
-build/static/js:
-	mkdir -p $@
-
 # Copy the generated bundle from the app directory into the build tree
 build/static/js/magicbar.js: app/build/static/js/magicbar.js | build/static/js
 	cp $< $@

@@ -7,9 +7,6 @@
 # accompanying JSON files are present under `build/quiz/`.
 all: build/static/js/quiz.js
 
-# Directory for built quiz assets
-build/static/js:
-	mkdir -p $@
 
 # Copy the generated bundle from the app directory into the build tree
 build/static/js/quiz.js: app/build/static/js/quiz.js | build/static/js
