@@ -87,6 +87,9 @@ BUILD_SUBDIRS := $(sort $(dir $(HTMLS))) $(LOG_DIR) $(BUILD_DIR)/static
 CSS := $(wildcard $(SRC_DIR)/*.css)
 CSS := $(patsubst $(SRC_DIR)/%.css,$(BUILD_DIR)/%.css, $(CSS))
 
+# Nginx permalink redirect configuration
+PERMALINKS_CONF := $(BUILD_DIR)/permalinks.conf
+
 # Define the default target to build everything
 .PHONY: everything
 everything: | $(BUILD_DIR) $(BUILD_SUBDIRS)
@@ -100,9 +103,14 @@ everything: | $(BUILD_DIR) $(BUILD_SUBDIRS)
 all: $(HTMLS)
 all: $(CSS)
 all: $(BUILD_DIR)/robots.txt
+all: $(PERMALINKS_CONF)
 
 $(BUILD_DIR)/robots.txt: $(SRC_DIR)/robots.txt
-	cp $< $@
+        cp $< $@
+
+$(PERMALINKS_CONF): $(MARKDOWNS) $(YAMLS) | $(BUILD_DIR) $(LOG_DIR)
+	$(call status,Generate permalink redirects)
+	$(Q)nginx-permalinks $(SRC_DIR) -o $@ -v --log $(LOG_DIR)/nginx-permalinks.txt
 
 $(BUILD_DIR)/.update-index: $(MARKDOWNS) $(YAMLS)
 	$(call status,Updating Redis Index)

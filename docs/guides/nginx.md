@@ -5,6 +5,11 @@ It starts from `nginx:alpine-slim` and copies the generated `build/` directory
 into Nginx's default web root. Both the `nginx` and `nginx-dev` services in
 `docker-compose.yml` use this image.
 
+The build process also creates a `permalinks.conf` file in the `build/` directory.
+Nginx includes this file to redirect legacy URLs specified by a page's
+`permalink` metadata to its canonical `url`. Debug logs from this step are
+written to `log/nginx-permalinks.txt`.
+
 ```Dockerfile
 FROM nginx:alpine-slim
 COPY ./build /usr/share/nginx/html

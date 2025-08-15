@@ -39,6 +39,7 @@ setup(
             'create-site=pie.create.site:main',
             'emojify=pie.filter.emojify:main',
             'store-files=pie.store_files:main',
+            'nginx-permalinks=pie.nginx_permalinks:main',
         ],
     },
 )
