@@ -61,8 +61,8 @@ RUN pip install --break-system-packages \
 # Custom helper scripts and makefiles
 # -------------------------------------------------------------------
 # Add helper scripts to PATH
-COPY ./app/shell/bin/ /app/bin
+COPY ./app/bin/ /app/bin
 ENV PATH="/app/bin:${PATH}"
 
 # Copy additional Makefile fragments
-COPY ./app/shell/mk/ /app/mk
+COPY ./app/mk/ /app/mk
