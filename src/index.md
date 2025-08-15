@@ -6,6 +6,7 @@ Welcome to the demo site for **Press**. Use the links below to explore key featu
 - [Chicago Citation Examples](examples/chicago-citations.md)
 - [Index Tree Demo](examples/indextree/index.md)
 - [Quiz Demo](quiz/index.md)
+- [MagicBar Demo](magicbar/index.md)
 
 ## Emoji Replacement
 

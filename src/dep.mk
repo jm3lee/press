@@ -3,3 +3,4 @@
 ## See docs/guides/dep-mk.md for details on dependency makefiles.
 include app/quiz/dep.mk
 include app/indextree/dep.mk
+include app/magicbar/dep.mk
