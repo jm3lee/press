@@ -20,26 +20,42 @@ from pie.utils import read_yaml
 def get_url(filename: str) -> Optional[str]:
     """Compute the HTML URL for a given Markdown or YAML source file.
 
+    The previous implementation only accepted *relative* paths starting with
+    ``src/``.  Some callers – notably unit tests that execute modules via
+    :mod:`runpy` – provide absolute paths (e.g. ``/tmp/.../src/doc.yml``),
+    which caused :func:`get_url` to raise an exception even though the file
+    lives under a ``src`` directory.  To make the function more robust we now
+    locate the ``src`` component anywhere in the path and derive the relative
+    portion from there.  Paths that do not contain a ``src`` segment still
+    trigger the warning and exception.
+
     Source files under ``src/`` map to HTML paths. For example::
 
         src/guide/intro.md         -> /guide/intro.html
         src/config/settings.yaml   -> /config/settings.html
 
     Args:
-        filename: Path to the source file, expected to start with ``src/``.
+        filename: Path to the source file.
 
     Returns:
-        A URL string starting with ``/`` and ending with ``.html``, or ``None``
-        if the filename does not start with ``src/`` or has an unsupported
-        extension.
+        A URL string starting with ``/`` and ending with ``.html``.
     """
-    prefix = "src" + os.sep
-    if filename.startswith(prefix):
-        relative_path = filename[len(prefix) :]
-        base, ext = os.path.splitext(relative_path)
-        if ext.lower() in (".md", ".yml", ".yaml"):
-            html_path = base + ".html"
-            return "/" + html_path
+
+    path = Path(filename)
+    try:
+        # Locate the ``src`` component to compute a relative path.  This works
+        # for both relative and absolute filenames.
+        idx = path.parts.index("src")
+    except ValueError:
+        logger.warning("Can't create a url.", filename=filename)
+        raise Exception("Can't create a url.")
+
+    relative_path = Path(*path.parts[idx + 1:]).as_posix()
+    base, ext = os.path.splitext(relative_path)
+    if ext.lower() in (".md", ".yml", ".yaml"):
+        html_path = base + ".html"
+        return "/" + html_path
+
     logger.warning("Can't create a url.", filename=filename)
     raise Exception("Can't create a url.")
 
@@ -92,9 +108,14 @@ def _add_id_if_missing(metadata: dict[str, Any], filepath: str) -> None:
     if "id" not in metadata:
         base = Path(filepath).with_suffix("")
         metadata["id"] = base.name
+        resolved = Path(filepath).resolve()
+        try:
+            rel = resolved.relative_to(Path.cwd())
+        except ValueError:
+            rel = resolved
         logger.debug(
             "Generated 'id'",
-            filename=str(Path(filepath).resolve().relative_to(Path.cwd())),
+            filename=str(rel),
             id=metadata["id"],
         )
 
@@ -318,7 +339,19 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
         files.append(md_path)
 
     if files:
-        combined["path"] = [str(p.resolve().relative_to(Path.cwd())) for p in files]
+        resolved_paths: list[str] = []
+        for p in files:
+            resolved = p.resolve()
+            try:
+                resolved_paths.append(str(resolved.relative_to(Path.cwd())))
+            except ValueError:
+                # ``p`` might live outside of the current working directory
+                # (e.g. when tests create temporary files).  Falling back to
+                # the absolute path prevents ``relative_to`` from raising and
+                # mirrors the behaviour of earlier versions which simply
+                # returned whatever path was provided.
+                resolved_paths.append(str(resolved))
+        combined["path"] = resolved_paths
     # Populate any missing metadata fields based on the source path.
     source = md_path if md_path.exists() else yaml_file or path
     combined = generate_missing_metadata(combined, str(source))
