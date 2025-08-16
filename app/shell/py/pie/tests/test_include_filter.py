@@ -82,7 +82,7 @@ def test_include_deflist_entry_writes_entries(tmp_path, monkeypatch):
     try:
         assert (
             include_filter.outfile.getvalue()
-            == '<dt>Title A <a href="http://a">↗</a></dt>\n<dd>\nA\n</dd>\n'
+            == '<dt><a href="http://a">Title A</a></dt>\n<dd>\nA\n</dd>\n'
             + '<dt>Title B</dt>\n<dd>\nB\n</dd>\n'
         )
     finally:
