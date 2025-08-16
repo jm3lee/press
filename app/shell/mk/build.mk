@@ -45,13 +45,12 @@ PANDOC_TEMPLATE := $(SRC_DIR)/pandoc-template.html
 # Options for generating HTML output with Pandoc
 PANDOC_OPTS := \
                 --css '/css/style.css' \
-		--standalone \
-		-t html \
-		--toc \
-		--toc-depth=2 \
-		--filter pandoc-crossref \
-		--mathjax \
-		--template=$(PANDOC_TEMPLATE) \
+                --standalone \
+                -t html \
+                --toc \
+                --toc-depth=2 \
+                --filter pandoc-crossref \
+                --mathjax \
 
 # Options for generating PDF output with Pandoc
 PANDOC_OPTS_PDF := \
@@ -162,8 +161,8 @@ $(BUILD_DIR)/%.md: %.md | $(BUILD_DIR)
 
 # Generate HTML from processed Markdown using Pandoc
 $(BUILD_DIR)/%.html: $(BUILD_DIR)/%.md $(PANDOC_TEMPLATE) | $(BUILD_DIR)
-	$(call status,Generate HTML $@)
-	$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) -o $@ $<
+    $(call status,Generate HTML $@)
+    $(Q)$(PANDOC_CMD) $(PANDOC_OPTS) --template=$(PANDOC_TEMPLATE) -o $@ $<
 
 # Generate PDF from processed Markdown using Pandoc
 # include-filter usage is documented in docs/guides/include-filter.md

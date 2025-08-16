@@ -37,6 +37,20 @@ build/index.html: build/index.md build/index.yml
 Each `.yml` file produces similar targets for preprocessing the metadata and
 rendering the final HTML.
 
+## Custom Pandoc Templates
+
+`picasso` retrieves per-document metadata from Redis. If a document defines
+`pandoc.template`, that template path is added as a dependency and passed to
+Pandoc's `--template` option when rendering. For example:
+
+```yaml
+pandoc:
+  template: src/blog/pandoc-template.html
+```
+
+This allows different pages to use specialized templates while falling back to
+`$(PANDOC_TEMPLATE)` when no custom template is provided.
+
 The command also inspects Markdown files for cross-document links and any
 `include-filter` Python blocks.  Dependencies discovered this way are emitted as
 additional Makefile rules so that updates to referenced files trigger a rebuild

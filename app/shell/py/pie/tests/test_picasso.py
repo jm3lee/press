@@ -6,35 +6,68 @@ import pytest
 from pie.build import picasso
 
 
-def test_generate_rule_basic():
+def test_generate_rule_basic(tmp_path, monkeypatch):
     """generate_rule('src/foo/bar.yml') -> build/foo/bar.{yml,html} rule."""
+    src = tmp_path / "src" / "foo"
+    src.mkdir(parents=True)
+    (src / "bar.yml").write_text("{}")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(picasso, "get_metadata_by_path", lambda path, key: None)
     rule = picasso.generate_rule(Path("src/foo/bar.yml")).strip()
     expected = (
         "build/foo/bar.yml: src/foo/bar.yml\n"
         "\t$(Q)mkdir -p $(dir build/foo/bar.yml)\n"
         "\t$(Q)emojify < $< > $@\n"
         "\t$(Q)render-jinja-template $@ $@\n"
-        "build/foo/bar.html: build/foo/bar.md build/foo/bar.yml\n"
-        "\t$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) --metadata-file=build/foo/bar.yml -o $@ $<\n"
+        "build/foo/bar.html: build/foo/bar.md build/foo/bar.yml $(PANDOC_TEMPLATE)\n"
+        "\t$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) --template=$(PANDOC_TEMPLATE) --metadata-file=build/foo/bar.yml -o $@ $<\n"
         "\t$(Q)check-bad-jinja-output $@"
     )
     assert rule == expected
 
 
-def test_main_prints_rules(tmp_path, capsys):
+def test_generate_rule_with_template(tmp_path, monkeypatch):
+    """Custom pandoc.template -> rule includes specific template."""
+    src = tmp_path / "src" / "foo"
+    src.mkdir(parents=True)
+    template = tmp_path / "src" / "blog" / "pandoc-template.html"
+    template.parent.mkdir(parents=True, exist_ok=True)
+    template.write_text("tmpl")
+    (src / "bar.yml").write_text("{}")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        picasso,
+        "get_metadata_by_path",
+        lambda path, key: "src/blog/pandoc-template.html",
+    )
+    rule = picasso.generate_rule(Path("src/foo/bar.yml")).strip()
+    expected = (
+        "build/foo/bar.yml: src/foo/bar.yml\n"
+        "\t$(Q)mkdir -p $(dir build/foo/bar.yml)\n"
+        "\t$(Q)emojify < $< > $@\n"
+        "\t$(Q)render-jinja-template $@ $@\n"
+        "build/foo/bar.html: build/foo/bar.md build/foo/bar.yml src/blog/pandoc-template.html\n"
+        "\t$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) --template=src/blog/pandoc-template.html --metadata-file=build/foo/bar.yml -o $@ $<\n"
+        "\t$(Q)check-bad-jinja-output $@"
+    )
+    assert rule == expected
+
+
+def test_main_prints_rules(tmp_path, capsys, monkeypatch):
     """CLI prints rule for doc.yml."""
     src = tmp_path / "src"
     build = tmp_path / "build"
     src.mkdir()
     (src / "doc.yml").write_text("{}")
 
+    monkeypatch.setattr(picasso, "get_metadata_by_path", lambda path, key: None)
     picasso.main(["--src", str(src), "--build", str(build)])
     out = capsys.readouterr().out.strip()
     expected = picasso.generate_rule(src / "doc.yml", src_root=src, build_root=build).strip()
     assert out == expected
 
 
-def test_main_writes_log_file(tmp_path):
+def test_main_writes_log_file(tmp_path, monkeypatch):
     """--log writes picasso.log."""
     src = tmp_path / "src"
     build = tmp_path / "build"
@@ -42,6 +75,7 @@ def test_main_writes_log_file(tmp_path):
     (src / "doc.yml").write_text("{}")
     log = tmp_path / "picasso.log"
 
+    monkeypatch.setattr(picasso, "get_metadata_by_path", lambda path, key: None)
     picasso.main(["--src", str(src), "--build", str(build), "--log", str(log)])
 
     assert log.exists()
@@ -348,15 +382,16 @@ def test_include_with_absolute_directory(tmp_path):
     assert deps == [expected]
 
 
-def test_main_errors_on_missing_directory(tmp_path):
+def test_main_errors_on_missing_directory(tmp_path, monkeypatch):
     """Missing src dir -> SystemExit 1."""
     build = tmp_path / "build"
+    monkeypatch.setattr(picasso, "get_metadata_by_path", lambda path, key: None)
     with pytest.raises(SystemExit) as exc:
         picasso.main(["--src", str(tmp_path / "missing"), "--build", str(build)])
     assert exc.value.code == 1
 
 
-def test_main_prints_dependencies(tmp_path, capsys):
+def test_main_prints_dependencies(tmp_path, capsys, monkeypatch):
     """main prints build/index.md: build/quickstart.md."""
     src = tmp_path / "src"
     build = tmp_path / "build"
@@ -367,6 +402,7 @@ def test_main_prints_dependencies(tmp_path, capsys):
     index = src / "index.md"
     index.write_text('{{"quickstart"|link}}')
 
+    monkeypatch.setattr(picasso, "get_metadata_by_path", lambda path, key: None)
     picasso.main(["--src", str(src), "--build", str(build)])
     out = capsys.readouterr().out
     assert "build/index.md: build/quickstart.md" in out
@@ -379,6 +415,7 @@ def test_run_as_module_executes_main(tmp_path, monkeypatch, capsys):
     src.mkdir()
     (src / "doc.yml").write_text("{}")
 
+    monkeypatch.setattr(picasso, "get_metadata_by_path", lambda path, key: None)
     argv = [str(picasso.__file__), "--src", str(src), "--build", str(build)]
     monkeypatch.setattr(sys, "argv", argv)
     runpy.run_path(picasso.__file__, run_name="__main__")
