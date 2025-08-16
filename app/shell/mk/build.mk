@@ -46,14 +46,14 @@ PANDOC_TEMPLATE := $(SRC_DIR)/pandoc-template.html
 
 # Options for generating HTML output with Pandoc
 PANDOC_OPTS := \
-                --css '/css/style.css' \
-                --standalone \
-		-t html \
-		--toc \
-		--toc-depth=2 \
-		--filter pandoc-crossref \
-		--mathjax \
-		--template=$(PANDOC_TEMPLATE) \
+			   --css '/css/style.css' \
+			   --standalone \
+			   -t html \
+			   --toc \
+			   --toc-depth=2 \
+			   --filter pandoc-crossref \
+			   --mathjax \
+			   --template=$(PANDOC_TEMPLATE) \
 
 # Options for generating PDF output with Pandoc
 PANDOC_OPTS_PDF := \
@@ -153,13 +153,13 @@ $(BUILD_SUBDIRS):
 
 # Build the main stylesheet with Tailwind CSS
 $(CSS_BUILD_DIR)/style.css: $(CSS_SRCS) | $(CSS_BUILD_DIR)
-        $(call status,Build Tailwind CSS)
-        $(Q)tailwindcss -i $(CSS_SRC_DIR)/style.css -o $@
+	$(call status,Build Tailwind CSS)
+	$(Q)tailwindcss -i $(CSS_SRC_DIR)/style.css -o $@
 
 # Copy CSS files to the build directory
 $(BUILD_DIR)/%.css: %.css | $(BUILD_DIR)
-        $(call status,Copy CSS $<)
-        $(Q)cp $< $@
+	$(call status,Copy CSS $<)
+	$(Q)cp $< $@
 
 # Include and preprocess Markdown files up to three levels deep
 # See docs/guides/preprocess.md for preprocessing details
@@ -180,7 +180,7 @@ $(BUILD_DIR)/%.pdf: %.md | $(BUILD_DIR)
 	$(Q)include-filter $(BUILD_DIR) $(BUILD_DIR)/$*.1.md $(BUILD_DIR)/$*.2.md
 	$(Q)include-filter $(BUILD_DIR) $(BUILD_DIR)/$*.2.md $(BUILD_DIR)/$*.3.md
 	$(Q)$(PANDOC_CMD) \
-$(PANDOC_OPTS_PDF) \
+		$(PANDOC_OPTS_PDF) \
         -o $@ \
         $(BUILD_DIR)/$*.3.md
 

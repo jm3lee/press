@@ -30,7 +30,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 RUN apt install -y --no-install-recommends git
 
 # Install Tailwind CSS
-RUN npm install -g tailwindcss
+RUN npm install -g tailwindcss @tailwindcss/cli
 
 RUN rm -rf /var/lib/apt/lists/*
 
