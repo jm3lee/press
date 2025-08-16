@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Callable, Iterable
 
 from pie.logging import logger, add_log_argument, configure_logging
-from pie.metadata import load_metadata_pair
+from pie.metadata import get_metadata_by_path, load_metadata_pair
 
 
 def generate_rule(
@@ -49,6 +49,11 @@ def generate_rule(
     output_html = (build_root / relative.with_suffix(".html")).as_posix()
     preprocessed_md = (build_root / relative.with_suffix(".md")).as_posix()
     preprocessed_yml = (build_root / relative.with_suffix(".yml")).as_posix()
+    tmpl = get_metadata_by_path(input_path.as_posix(), "pandoc.template")
+    template = Path(tmpl).as_posix() if tmpl else None
+
+    template_dep = template or "$(PANDOC_TEMPLATE)"
+    template_arg = f"--template={template_dep}" if template else "--template=$(PANDOC_TEMPLATE)"
 
     return (
         f"\n"
@@ -56,8 +61,8 @@ def generate_rule(
         f"\t$(Q)mkdir -p $(dir {preprocessed_yml})\n"
         f"\t$(Q)emojify < $< > $@\n"
         f"\t$(Q)render-jinja-template $@ $@\n"
-        f"{output_html}: {preprocessed_md} {preprocessed_yml}\n"
-        f"\t$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) --metadata-file={preprocessed_yml} -o $@ $<\n"
+        f"{output_html}: {preprocessed_md} {preprocessed_yml} {template_dep}\n"
+        f"\t$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) {template_arg} --metadata-file={preprocessed_yml} -o $@ $<\n"
         f"\t$(Q)check-bad-jinja-output $@"
     )
 
