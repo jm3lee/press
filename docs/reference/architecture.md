@@ -21,7 +21,11 @@ The top-level Makefile (`redo.mk`) drives all host-side automation. It launches 
 - `nginx` and `nginx-dev` serve generated content.
 - `shell` provides the build environment and exposes tools and tests.
 - `dragonfly` supplies a Redis-compatible store used for tracking document metadata.
-- Auxiliary services `sync`, `seed`, and `webp` handle S3 uploads, database seeding, and WebP image conversion. The `sync` and `seed` containers read the S3 bucket from the `S3_BUCKET_PATH` environment variable (default: `s3://press`) and the S3 configuration file from `S3CFG_PATH` (default: `/root/.s3cfg`).
+- Auxiliary services `sync`, `seed`, and `webp` handle S3 uploads,
+  database seeding, and WebP image conversion. The `sync` and `seed`
+  containers read the S3 bucket from `S3_BUCKET_PATH` (default `s3://press`)
+  and the S3 configuration file from `S3CFG_PATH` (default `/root/.s3cfg`),
+  which are set in the project's `.env` file.
 
 ## Build Pipeline
 The shell container executes `app/shell/mk/build.mk` to transform sources into deliverables:

@@ -14,6 +14,9 @@ Use `redo.mk` to build and start the container:
 r sync
 ```
 
-The service mirrors the host `s3/` directory to the bucket specified by `S3_BUCKET_PATH` (default `s3://press`). Credentials come from the file at `S3CFG_PATH` (default `/root/.s3cfg`).
+The service mirrors the host `s3/` directory to the bucket specified by
+`S3_BUCKET_PATH` (default `s3://press`). Credentials come from the file at
+`S3CFG_PATH` (default `/root/.s3cfg`). Configure these values in the
+project's `.env` file.
 
 Files removed locally are deleted from the bucket via `s3cmd --delete-removed --delete-after --acl-public`.

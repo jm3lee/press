@@ -6,6 +6,9 @@ is meant to be invoked with `make -f redo.mk` (often aliased to `r`). By default
 it prints only brief status messages; set `VERBOSE=1` to also show the
 underlying commands.
 
+When invoked, `redo.mk` ensures a `.env` file exists by copying
+`.env.example` if needed.
+
 This repository actually uses three Makefiles that work together:
 
 - **`redo.mk`** – run from the host to start Docker containers and delegate

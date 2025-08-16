@@ -28,9 +28,7 @@ services:
     build: ./app/s3
     container_name: press-sync
     entrypoint: ["/app/bin/sync"]
-    environment:
-      S3_BUCKET_PATH: ${S3_BUCKET_PATH:-s3://press}
-      S3CFG_PATH: ${S3CFG_PATH:-/root/.s3cfg}
+    env_file: .env
     volumes:
       - ../s3:/s3
 
@@ -38,9 +36,7 @@ services:
     build: ./app/s3
     container_name: press-seed
     entrypoint: ["/app/bin/seed"]
-    environment:
-      S3_BUCKET_PATH: ${S3_BUCKET_PATH:-s3://press}
-      S3CFG_PATH: ${S3CFG_PATH:-/root/.s3cfg}
+    env_file: .env
     volumes:
       - ../s3:/s3
 
@@ -66,11 +62,7 @@ services:
     build: ./app/shell
     container_name: press-shell
     entrypoint: ["bash"]
-    environment:
-      OPENAI_API_KEY: "${OPENAI_API_KEY}"
-      REDIS_HOST: dragonfly
-      REDIS_PORT: 6379
-      TEST_HOST_URL: ${TEST_HOST_URL:-http://nginx-test}
+    env_file: .env
     volumes:
       - ./:/data
       - ./app/shell/mk:/app/mk

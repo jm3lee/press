@@ -8,6 +8,9 @@ override MAKEFLAGS += --warn-undefined-variables  \
 # Export it so sub-makes see the same flags
 export MAKEFLAGS
 
+# Load environment variables from .env if present; create it from .env.example if missing
+-include .env
+
 # Containers started when running `up`/`upd`.
 # See docs/guides/redo-mk.md for details on targets and variables and
 # docs/guides/dep-mk.md for dependency file conventions.
@@ -189,3 +192,8 @@ tags:
 .PHONY: release
 release:
 	$(Q)VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) ./bin/release
+
+.env: .env.example
+	$(call status,Create .env from example)
+	$(Q)cp $< $@
+	$(call status,Review .env and edit to suit your needs)
