@@ -48,10 +48,11 @@ cleanup() {
 trap cleanup EXIT
 
 "${DOCKER_COMPOSE[@]}" down >/dev/null 2>&1 || true
-"${DOCKER_COMPOSE[@]}" up -d dragonfly nginx-test
+"${DOCKER_COMPOSE[@]}" up -d dragonfly
 run_make distclean
 "${DOCKER_COMPOSE[@]}" build shell
 run_make
+"${DOCKER_COMPOSE[@]}" up -d --build nginx-test
 run_make test
 run_make pytest
 "${DOCKER_COMPOSE[@]}" build release

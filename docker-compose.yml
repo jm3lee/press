@@ -13,7 +13,6 @@ services:
     build:
       context: .
       dockerfile: ./app/nginx/Dockerfile
-    container_name: press-nginx-test
 
   nginx-dev:
     build:
