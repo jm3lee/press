@@ -29,6 +29,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 
 RUN apt install -y --no-install-recommends git
 
+
 RUN rm -rf /var/lib/apt/lists/*
 
 # -------------------------------------------------------------------
@@ -50,7 +51,9 @@ ENV LANG=en_US.UTF-8 \
 # -------------------------------------------------------------------
 # Install library under development.
 COPY ./py/pie /press/py/pie
+# Install libsass for SCSS compilation
 RUN pip install --break-system-packages \
+        libsass \
         -e /press/py/pie \
         -r /press/py/pie/requirements.txt
 

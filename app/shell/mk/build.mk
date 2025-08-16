@@ -44,7 +44,7 @@ PANDOC_TEMPLATE := $(SRC_DIR)/pandoc-template.html
 
 # Options for generating HTML output with Pandoc
 PANDOC_OPTS := \
-		--css '/style.css' \
+                --css '/css/style.css' \
 		--standalone \
 		-t html \
 		--toc \
@@ -55,7 +55,7 @@ PANDOC_OPTS := \
 
 # Options for generating PDF output with Pandoc
 PANDOC_OPTS_PDF := \
-                --css "/style.css" \
+                --css "/css/style.css" \
                 --standalone \
                 -t pdf \
                 --toc \
@@ -82,10 +82,10 @@ HTMLS := $(patsubst $(SRC_DIR)/%.md, $(BUILD_DIR)/%.html, $(MARKDOWNS))
 PDFS := $(patsubst $(SRC_DIR)/%.md, $(BUILD_DIR)/%.pdf, $(MARKDOWNS))
 
 # Sort and define build subdirectories based on HTML files
-BUILD_SUBDIRS := $(sort $(dir $(HTMLS))) $(LOG_DIR) $(BUILD_DIR)/static
+BUILD_SUBDIRS := $(sort $(dir $(HTMLS))) $(LOG_DIR) $(BUILD_DIR)/static $(BUILD_DIR)/css
 
-CSS := $(wildcard $(SRC_DIR)/*.css)
-CSS := $(patsubst $(SRC_DIR)/%.css,$(BUILD_DIR)/%.css, $(CSS))
+CSS_SRC := $(wildcard $(SRC_DIR)/css/*.css)
+CSS := $(patsubst $(SRC_DIR)/css/%.css,$(BUILD_DIR)/css/%.css, $(CSS_SRC))
 
 # Nginx permalink redirect configuration
 PERMALINKS_CONF := $(BUILD_DIR)/permalinks.conf
@@ -149,10 +149,10 @@ $(BUILD_SUBDIRS):
 	$(call status,Create directory $@)
 	$(Q)mkdir -p $@
 
-# Copy CSS files to the build directory
-$(BUILD_DIR)/%.css: %.css | $(BUILD_DIR)
-	$(call status,Copy CSS $<)
-	$(Q)cp $< $@
+# Compile SCSS files to the build directory
+$(BUILD_DIR)/css/%.css: $(SRC_DIR)/css/%.css | $(BUILD_DIR)/css
+	$(call status,Compile SCSS $<)
+	$(Q)python -m sass $< $@
 
 # Include and preprocess Markdown files up to three levels deep
 # See docs/guides/preprocess.md for preprocessing details
