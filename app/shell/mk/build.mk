@@ -152,7 +152,7 @@ $(BUILD_SUBDIRS):
 # Compile SCSS files to the build directory
 $(BUILD_DIR)/css/%.css: $(SRC_DIR)/css/%.css | $(BUILD_DIR)/css
 	$(call status,Compile SCSS $<)
-	$(Q)python -m sass $< $@
+	$(Q)pysassc $< $@
 
 # Include and preprocess Markdown files up to three levels deep
 # See docs/guides/preprocess.md for preprocessing details
