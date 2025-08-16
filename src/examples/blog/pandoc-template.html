@@ -12,9 +12,11 @@
     $endfor$
     <style>
       :root {
-        --accent: #ff6f91;
-        --bg: #faf6f6;
-        --text: #333;
+        --accent: #d17b0f;
+        --bg: #fff7ed;
+        --text: #332f2c;
+        --section-bg-1: #fff7ed;
+        --section-bg-2: #f4e3d7;
       }
       body {
         background: var(--bg);
@@ -23,8 +25,9 @@
       }
       .blog-post {
         max-width: 70ch;
-        margin: 0 auto;
-        padding: 2rem 1rem;
+        margin-left: auto;
+        margin-right: auto;
+        padding: 2rem;
         font-family: system-ui, sans-serif;
         line-height: 1.7;
       }
@@ -57,6 +60,19 @@
         font-size: 0.85rem;
         color: #777;
       }
+      .content > section {
+        padding: 1rem;
+        margin: 0;
+      }
+      .content > section + section {
+        margin-top: 1.5rem;
+      }
+      .content > section:nth-of-type(odd) {
+        background: var(--section-bg-1);
+      }
+      .content > section:nth-of-type(even) {
+        background: var(--section-bg-2);
+      }
       .fade-in {
         opacity: 0;
         transform: translateY(1.5rem);
@@ -68,8 +84,9 @@
       }
       @media (max-width: 600px) {
         .blog-post {
-          padding: 1.5rem 1rem;
-          margin: 0 auto;
+          padding: 1.5rem;
+          margin-left: auto;
+          margin-right: auto;
         }
       }
     </style>
@@ -100,7 +117,7 @@
     $endfor$
     <script>
       document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.content > *').forEach(el => el.classList.add('fade-in'));
+        document.querySelectorAll('.content > section').forEach(el => el.classList.add('fade-in'));
         const observer = new IntersectionObserver((entries) => {
           entries.forEach(entry => {
             if (entry.isIntersecting) {
