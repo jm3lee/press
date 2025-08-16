@@ -12,7 +12,7 @@ def test_generate_rule_basic(tmp_path, monkeypatch):
     src.mkdir(parents=True)
     (src / "bar.yml").write_text("{}")
     monkeypatch.chdir(tmp_path)
-    monkeypatch.setattr(picasso, "get_metadata_by_path", lambda path, key: None)
+    monkeypatch.setattr(picasso, "load_metadata_pair", lambda path: None)
     rule = picasso.generate_rule(Path("src/foo/bar.yml")).strip()
     expected = (
         "build/foo/bar.yml: src/foo/bar.yml\n"
@@ -37,8 +37,8 @@ def test_generate_rule_with_template(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(
         picasso,
-        "get_metadata_by_path",
-        lambda path, key: "src/blog/pandoc-template.html",
+        "load_metadata_pair",
+        lambda path: {"pandoc": {"template": "src/blog/pandoc-template.html"}},
     )
     rule = picasso.generate_rule(Path("src/foo/bar.yml")).strip()
     expected = (
@@ -60,7 +60,7 @@ def test_main_prints_rules(tmp_path, capsys, monkeypatch):
     src.mkdir()
     (src / "doc.yml").write_text("{}")
 
-    monkeypatch.setattr(picasso, "get_metadata_by_path", lambda path, key: None)
+    monkeypatch.setattr(picasso, "load_metadata_pair", lambda path: None)
     picasso.main(["--src", str(src), "--build", str(build)])
     out = capsys.readouterr().out.strip()
     expected = picasso.generate_rule(src / "doc.yml", src_root=src, build_root=build).strip()
@@ -75,7 +75,7 @@ def test_main_writes_log_file(tmp_path, monkeypatch):
     (src / "doc.yml").write_text("{}")
     log = tmp_path / "picasso.log"
 
-    monkeypatch.setattr(picasso, "get_metadata_by_path", lambda path, key: None)
+    monkeypatch.setattr(picasso, "load_metadata_pair", lambda path: None)
     picasso.main(["--src", str(src), "--build", str(build), "--log", str(log)])
 
     assert log.exists()
@@ -385,7 +385,7 @@ def test_include_with_absolute_directory(tmp_path):
 def test_main_errors_on_missing_directory(tmp_path, monkeypatch):
     """Missing src dir -> SystemExit 1."""
     build = tmp_path / "build"
-    monkeypatch.setattr(picasso, "get_metadata_by_path", lambda path, key: None)
+    monkeypatch.setattr(picasso, "load_metadata_pair", lambda path: None)
     with pytest.raises(SystemExit) as exc:
         picasso.main(["--src", str(tmp_path / "missing"), "--build", str(build)])
     assert exc.value.code == 1
@@ -402,7 +402,7 @@ def test_main_prints_dependencies(tmp_path, capsys, monkeypatch):
     index = src / "index.md"
     index.write_text('{{"quickstart"|link}}')
 
-    monkeypatch.setattr(picasso, "get_metadata_by_path", lambda path, key: None)
+    monkeypatch.setattr(picasso, "load_metadata_pair", lambda path: None)
     picasso.main(["--src", str(src), "--build", str(build)])
     out = capsys.readouterr().out
     assert "build/index.md: build/quickstart.md" in out
@@ -415,7 +415,7 @@ def test_run_as_module_executes_main(tmp_path, monkeypatch, capsys):
     src.mkdir()
     (src / "doc.yml").write_text("{}")
 
-    monkeypatch.setattr(picasso, "get_metadata_by_path", lambda path, key: None)
+    monkeypatch.setattr(picasso, "load_metadata_pair", lambda path: None)
     argv = [str(picasso.__file__), "--src", str(src), "--build", str(build)]
     monkeypatch.setattr(sys, "argv", argv)
     runpy.run_path(picasso.__file__, run_name="__main__")
