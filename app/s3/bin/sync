@@ -19,9 +19,9 @@ while true; do
     echo "Starting sync $(date +'%T')"
     DEST="${S3_BUCKET_PATH:-s3://press}"
     DEST="${DEST%/}/"
+    # Do not auto-delete files. Need to resolve handling out-of-date sync data;
+    # don't want to delete files accidentally.
     s3cmd --config "$CONFIG" sync \
-        --delete-removed \
-        --delete-after \
         --acl-public \
         /s3/ \
         "$DEST"
