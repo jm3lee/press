@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photo Bundle – Coming Soon</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+  <style>
+    :root {
+      --coffee: #6f4e37;
+      --cream: #f6f5f3;
+      --accent: #ff8c42;
+    }
+
+    body {
+      background-color: var(--cream);
+      color: var(--coffee);
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      margin-bottom: 0.5rem;
+      color: var(--coffee);
+      font-size: 2.5rem;
+    }
+
+    .cta {
+      max-width: 500px;
+      margin: 0 auto 2rem;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    button {
+      background-color: var(--accent);
+      border: none;
+      color: #fff;
+    }
+
+    footer {
+      margin-top: 3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .social-links a {
+      margin: 0 0.5rem;
+      color: var(--coffee);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Photo Bundle</h1>
+    <p>Your next collection of stunning images is on the way.</p>
+  </header>
+
+  <section class="cta">
+    <h2>Get notified when we launch</h2>
+    <p><a href="#learn-more">Learn more</a></p>
+    <form>
+      <label for="name">Name</label>
+      <input type="text" id="name" placeholder="Your name" required>
+
+      <label for="email">Email</label>
+      <input type="email" id="email" placeholder="you@example.com" required>
+
+      <button type="submit">Join the Waitlist</button>
+    </form>
+  </section>
+
+  <section id="learn-more">
+    <h2>Learn more</h2>
+    <p>Our curated photo bundle offers high-resolution images perfect for creatives and professionals alike. Stay tuned for exclusive early access.</p>
+  </section>
+
+  <footer>
+    <div class="social-links">
+      <a href="#" aria-label="Follow on Twitter">Twitter</a>
+      <a href="#" aria-label="Follow on Instagram">Instagram</a>
+      <a href="#" aria-label="Follow on Facebook">Facebook</a>
+    </div>
+    <small>&copy; 2024 Photo Bundle. All rights reserved.</small>
+  </footer>
+</body>
+</html>
