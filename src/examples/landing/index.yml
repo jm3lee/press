@@ -1,0 +1,5 @@
+title: Photo Reference Bundle – Coming Soon
+pandoc:
+  template: src/examples/landing/pandoc-template.html
+css:
+  - https://cdn.jsdelivr.net/npm/water.css@2/out/water.css
