@@ -1,0 +1,9 @@
+{preprocessed_yml}: {input_path}
+	$(call status,Preprocess $<)
+	$(Q)mkdir -p $(dir {preprocessed_yml})
+	$(Q)emojify < $< > $@
+	$(Q)render-jinja-template $@ $@
+{output_html}: {preprocessed_md} {preprocessed_yml} {template_dep}
+	$(call status,Generate HTML $@)
+	$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) {template_arg} --metadata-file={preprocessed_yml} -o $@ $<
+	$(Q)check-bad-jinja-output $@
