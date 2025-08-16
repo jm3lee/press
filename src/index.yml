@@ -4,6 +4,8 @@ description: Example home page
 og_image: /img/home.png
 url: https://example.com/
 toc: false
+css:
+  - https://cdn.jsdelivr.net/npm/water.css@2/out/water.css
 meta:
   - property: og:title
     content: Example Home

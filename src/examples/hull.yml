@@ -6,3 +6,5 @@ citation:
 url: /
 author: Brian Lee
 pubdate: Aug 11, 2025
+css:
+  - https://cdn.jsdelivr.net/npm/water.css@2/out/water.css

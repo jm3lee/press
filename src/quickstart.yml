@@ -4,3 +4,5 @@ id: quickstart
 permalink: /q
 pubdate: Aug 15, 2025
 title: Quickstart
+css:
+  - https://cdn.jsdelivr.net/npm/water.css@2/out/water.css

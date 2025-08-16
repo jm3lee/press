@@ -6,3 +6,5 @@ citation:
 url: https://example.com/doe
 author: Brian Lee
 pubdate: Aug 10, 2025
+css:
+  - https://cdn.jsdelivr.net/npm/water.css@2/out/water.css

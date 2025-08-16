@@ -3,3 +3,5 @@ citation:
   short: short
 author: Brian Lee
 pubdate: Aug 12, 2025
+css:
+  - https://cdn.jsdelivr.net/npm/water.css@2/out/water.css
