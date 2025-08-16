@@ -2,5 +2,7 @@ title: Quiz
 id: quiz
 author: Brian Lee
 pubdate: Aug 12, 2025
+pandoc:
+  template: src/examples/blog/pandoc-template.html
 css:
   - https://cdn.jsdelivr.net/npm/water.css@2/out/water.css

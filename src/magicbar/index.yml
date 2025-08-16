@@ -2,5 +2,7 @@ title: MagicBar Demo
 id: magicbar
 author: Brian Lee
 pubdate: Jan 1, 2025
+pandoc:
+  template: src/examples/blog/pandoc-template.html
 css:
   - https://cdn.jsdelivr.net/npm/water.css@2/out/water.css
