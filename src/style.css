@@ -62,7 +62,7 @@ body {
 }
 
 h1 {
-  margin-bottom: 0.1em; /* Keeps pubdate close */
+  margin-bottom: 0.1em; /* Keeps metablock close */
 }
 
 h2 {
@@ -207,7 +207,7 @@ nav:not(#TOC) ul li {
     text-align: center;
 }
 
-.pubdate {
+.metablock {
   font-size: 0.8em;
   color: darkgray;
   margin-top: 0;
