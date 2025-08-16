@@ -29,6 +29,8 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 
 RUN apt install -y --no-install-recommends git
 
+RUN apt install -y --no-install-recommends pysassc
+
 RUN rm -rf /var/lib/apt/lists/*
 
 # -------------------------------------------------------------------
@@ -50,6 +52,7 @@ ENV LANG=en_US.UTF-8 \
 # -------------------------------------------------------------------
 # Install library under development.
 COPY ./py/pie /press/py/pie
+
 RUN pip install --break-system-packages \
         -e /press/py/pie \
         -r /press/py/pie/requirements.txt

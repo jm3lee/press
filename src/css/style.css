@@ -79,26 +79,30 @@ h3 {
 /* ==========================================================================
    NAVIGATION
    ========================================================================== */
+nav:not(#TOC) {
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    li {
+      display: inline-block;
+      padding-right: 0.5rem;
+      text-transform: uppercase;
+    }
+  }
+}
 
 nav.site-nav {
   margin-top: var(--space-lg);
-}
 
-nav.site-nav ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-nav.site-nav li {
-  display: inline-block;
-  text-transform: uppercase;
-}
-
-nav.site-nav li:not(:first-child) {
-  margin-left: var(--space-sm);        /* Spacing between nav items */
-  padding-left: var(--space-sm);
-  border-left: var(--border-nav);
+  li {
+    &:not(:first-child) {
+      margin-left: var(--space-sm);        /* Spacing between nav items */
+      padding-left: var(--space-sm);
+      border-left: var(--border-nav);
+    }
+  }
 }
 
 /* ==========================================================================
@@ -106,8 +110,7 @@ nav.site-nav li:not(:first-child) {
    ========================================================================== */
 
 ol,
-ul,
-#TOC > ul {
+ul {
   margin-left: var(--space-lg);
   padding-left: 0;
 }
@@ -116,10 +119,18 @@ ul,
   padding: 0 var(--space-md);
   border: var(--border-toc);
   border-radius: var(--border-radius);
-}
 
-#TOC summary {
-  cursor: pointer;
+  summary {
+    cursor: pointer;
+  }
+
+  /* Direct children of #TOC as decimal; adjust selectors for deeper nesting if needed */
+  > ul,
+  ul {
+    list-style-type: decimal;
+    margin-left: 1.5em; /* optional indentation adjustment */
+    padding-left: 0;
+  }
 }
 
 /* ==========================================================================
@@ -183,24 +194,6 @@ img.thumbnail {
     }
 }
 
-nav:not(#TOC) ul {
-    list-style-type: none;
-    padding-left: 0;
-}
-
-nav:not(#TOC) ul li {
-    display: inline-block;
-    padding-right: 0.5rem;
-    text-transform: uppercase;
-}
-
-/* Direct children of #TOC as decimal; adjust selectors for deeper nesting
-* if needed */
-#TOC > ul, #TOC ul {
-    list-style-type: decimal;
-    margin-left: 1.5em; /* optional indentation adjustment */
-}
-
 .footer {
     padding-top: 1.5rem;
     padding-bottom: 1.5rem;
@@ -220,17 +213,17 @@ a {
 .image-container {
   position: relative;
   display: inline-block;
-}
-
-.magnify-icon {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  background-color: rgba(255, 255, 255, 0.8);
-  border-radius: 50%;
-  padding: 6px;
-  font-size: 20px;
-  cursor: pointer;
+  
+  .magnify-icon {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    padding: 6px;
+    font-size: 20px;
+    cursor: pointer;
+  }
 }
 
 .citation {
@@ -250,78 +243,83 @@ ol + details.answer {
 .quiz-container {
   max-width: 600px;
   margin: 2rem auto;
-}
 
-.question-block {
-  margin-bottom: 2rem;
-}
+  .question-block {
+    margin-bottom: 2rem;
+  }
 
-.question {
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-}
+  .question {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
 
-.choices {
-  list-style-type: none;
-  padding: 0;
-}
+  .choices {
+    list-style-type: none;
+    padding: 0;
 
-.choice {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  margin-bottom: 0.3rem;
-  cursor: pointer;
-  border-radius: 4px;
-  user-select: none;
-}
+    .choice {
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      margin-bottom: 0.3rem;
+      cursor: pointer;
+      border-radius: 4px;
+      user-select: none;
 
-.choice:hover {
-  background-color: #f5f5f5;
-}
+      &:hover {
+        background-color: #f5f5f5;
+      }
 
-.choice.selected {
-  background-color: #e0f7fa;
-}
+      &.selected {
+        background-color: #e0f7fa;
+      }
 
-.choice.correct {
-  background-color: #c8f7c5;
-  border-color: #27ae60;
-}
+      &.correct {
+        background-color: #c8f7c5;
+        border-color: #27ae60;
+      }
 
-.choice.incorrect {
-  background-color: #f7c5c5;
-  border-color: #e74c3c;
-}
+      &.incorrect {
+        background-color: #f7c5c5;
+        border-color: #e74c3c;
+      }
+    }
+  }
 
-.explanation {
-  background: #f9f9f9;
-  padding: 0.5rem;
-  margin-top: 0.5rem;
-  border-left: 3px solid #ccc;
-}
+  .explanation {
+    background: #f9f9f9;
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    border-left: 3px solid #ccc;
+  }
 
-.submit-btn {
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  cursor: pointer;
+  .submit-btn {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+  }
 }
 
 dt {
   font-weight: bold;
 }
-dd + dt {
-  margin-top: 1em;
-}
-dd + dd {
-  margin-top: 0.5em;
-}
-dd > p {
-  margin-top: 0;
+
+dd {
+  & + dt {
+    margin-top: 1em;
+  }
+
+  & + dd {
+    margin-top: 0.5em;
+  }
+
+  > p {
+    margin-top: 0;
+  }
 }
 ul.examples {
   list-style: none;
 }
 
 pre {
-    overflow: auto;
+  overflow: auto;
 }

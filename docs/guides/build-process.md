@@ -38,6 +38,17 @@ HTML and assets to `build/`. Logs are stored in `log/`.
 
 If you only need the build step without starting services, run `r all` directly.
 
+## Styling with SCSS
+
+Site styles live under `src/css/` and are compiled with the Python `libsass` library into
+`build/css/`. The default stylesheet is `src/css/style.css` which supports
+full SCSS syntax. Any changes to files in this directory are automatically
+processed during the `r all` build and the output CSS is written to
+`build/css/style.css`.
+
+To add additional stylesheets, create new files in `src/css/` and reference the
+resulting `/css/*.css` paths from your pages or templates.
+
 ## Cleaning up
 
 Use the provided targets to tidy generated files:
