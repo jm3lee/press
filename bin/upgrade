@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Run after git pull to rebuild everything required for development.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+
+VERBOSE="${VERBOSE:-0}"
+SRC_DIR="${SRC_DIR:-src}"
+BUILD_DIR="${BUILD_DIR:-build}"
+
+if [ -f docker-compose.yml ]; then
+  COMPOSE_FILE="docker-compose.yml"
+else
+  COMPOSE_FILE="dist/docker-compose.yml"
+fi
+
+DOCKER_COMPOSE=(docker compose -f "$COMPOSE_FILE")
+
+MAKE_ARGS=(-f redo.mk VERBOSE="$VERBOSE" SRC_DIR="$SRC_DIR" BUILD_DIR="$BUILD_DIR")
+
+run_make() {
+  make "${MAKE_ARGS[@]}" "$@"
+}
+
+cleanup() {
+  "${DOCKER_COMPOSE[@]}" down
+}
+trap cleanup EXIT
+
+"${DOCKER_COMPOSE[@]}" down >/dev/null 2>&1 || true
+"${DOCKER_COMPOSE[@]}" up -d dragonfly
+run_make distclean
+"${DOCKER_COMPOSE[@]}" build shell
+run_make
+"${DOCKER_COMPOSE[@]}" up -d --build nginx-test
+run_make test
+run_make pytest
+
+echo "Upgrade Build Successful"
