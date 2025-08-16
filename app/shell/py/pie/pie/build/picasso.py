@@ -20,6 +20,9 @@ from typing import Callable, Iterable
 from pie.logging import logger, add_log_argument, configure_logging
 from pie.metadata import get_metadata_by_path, load_metadata_pair
 
+_TEMPLATE_PATH = Path(__file__).parent.parent / "templates" / "picasso.rule.mk.jinja"
+_RULE_TEMPLATE = _TEMPLATE_PATH.read_text()
+
 
 def generate_rule(
     input_path: Path,
@@ -39,8 +42,15 @@ def generate_rule(
     Example:
         >>> from pathlib import Path
         >>> print(generate_rule(Path("src/foo/bar.yml")))
-        build/foo/bar.html: build/foo/bar.md src/foo/bar.yml
-            $(PANDOC_CMD) $(PANDOC_OPTS) --metadata-file=build/foo/bar.yml -o $@ $<
+        build/foo/bar.yml: src/foo/bar.yml
+            $(call status,Preprocess $<)
+            $(Q)mkdir -p $(dir build/foo/bar.yml)
+            $(Q)emojify < $< > $@
+            $(Q)render-jinja-template $@ $@
+        build/foo/bar.html: build/foo/bar.md build/foo/bar.yml $(PANDOC_TEMPLATE)
+            $(call status,Generate HTML $@)
+            $(Q)$(PANDOC_CMD) $(PANDOC_OPTS) --template=$(PANDOC_TEMPLATE) --metadata-file=build/foo/bar.yml -o $@ $<
+            $(Q)check-bad-jinja-output $@
     """
     # Compute the path of ``input_path`` relative to the source root
     relative = input_path.relative_to(src_root)
@@ -55,16 +65,15 @@ def generate_rule(
     template_dep = template or "$(PANDOC_TEMPLATE)"
     template_arg = f"--template={template_dep}" if template else "--template=$(PANDOC_TEMPLATE)"
 
-    return (
-        f"\n"
-        f"{preprocessed_yml}: {input_path}\n"
-        f"\t$(Q)mkdir -p $(dir {preprocessed_yml})\n"
-        f"\t$(Q)emojify < $< > $@\n"
-        f"\t$(Q)render-jinja-template $@ $@\n"
-        f"{output_html}: {preprocessed_md} {preprocessed_yml} {template_dep}\n"
-        f"\t$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) {template_arg} --metadata-file={preprocessed_yml} -o $@ $<\n"
-        f"\t$(Q)check-bad-jinja-output $@"
+    rule = _RULE_TEMPLATE.format(
+        input_path=input_path.as_posix(),
+        preprocessed_yml=preprocessed_yml,
+        output_html=output_html,
+        preprocessed_md=preprocessed_md,
+        template_dep=template_dep,
+        template_arg=template_arg,
     )
+    return f"\n{rule}"
 
 
 LINK_RE = re.compile(r"\{\{\s*[\"']([^\"']+)[\"']\s*\|\s*link[\w]*")

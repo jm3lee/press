@@ -16,10 +16,12 @@ def test_generate_rule_basic(tmp_path, monkeypatch):
     rule = picasso.generate_rule(Path("src/foo/bar.yml")).strip()
     expected = (
         "build/foo/bar.yml: src/foo/bar.yml\n"
+        "\t$(call status,Preprocess $<)\n"
         "\t$(Q)mkdir -p $(dir build/foo/bar.yml)\n"
         "\t$(Q)emojify < $< > $@\n"
         "\t$(Q)render-jinja-template $@ $@\n"
         "build/foo/bar.html: build/foo/bar.md build/foo/bar.yml $(PANDOC_TEMPLATE)\n"
+        "\t$(call status,Generate HTML $@)\n"
         "\t$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) --template=$(PANDOC_TEMPLATE) --metadata-file=build/foo/bar.yml -o $@ $<\n"
         "\t$(Q)check-bad-jinja-output $@"
     )
@@ -43,10 +45,12 @@ def test_generate_rule_with_template(tmp_path, monkeypatch):
     rule = picasso.generate_rule(Path("src/foo/bar.yml")).strip()
     expected = (
         "build/foo/bar.yml: src/foo/bar.yml\n"
+        "\t$(call status,Preprocess $<)\n"
         "\t$(Q)mkdir -p $(dir build/foo/bar.yml)\n"
         "\t$(Q)emojify < $< > $@\n"
         "\t$(Q)render-jinja-template $@ $@\n"
         "build/foo/bar.html: build/foo/bar.md build/foo/bar.yml src/blog/pandoc-template.html\n"
+        "\t$(call status,Generate HTML $@)\n"
         "\t$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) --template=src/blog/pandoc-template.html --metadata-file=build/foo/bar.yml -o $@ $<\n"
         "\t$(Q)check-bad-jinja-output $@"
     )
