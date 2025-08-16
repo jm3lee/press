@@ -161,8 +161,8 @@ $(BUILD_DIR)/%.md: %.md | $(BUILD_DIR)
 
 # Generate HTML from processed Markdown using Pandoc
 $(BUILD_DIR)/%.html: $(BUILD_DIR)/%.md $(PANDOC_TEMPLATE) | $(BUILD_DIR)
-    $(call status,Generate HTML $@)
-    $(Q)$(PANDOC_CMD) $(PANDOC_OPTS) --template=$(PANDOC_TEMPLATE) -o $@ $<
+	$(call status,Generate HTML $@)
+	$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) --template=$(PANDOC_TEMPLATE) -o $@ $<
 
 # Generate PDF from processed Markdown using Pandoc
 # include-filter usage is documented in docs/guides/include-filter.md
