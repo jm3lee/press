@@ -117,7 +117,7 @@ def include_deflist_entry(
             url = get_metadata_by_path(rel, "url")
             if title:
                 if url:
-                    print(f"<dt>{title} <a href=\"{url}\">↗</a></dt>", file=outfile)
+                    print(f"<dt><a href=\"{url}\">{title}</a></dt>", file=outfile)
                 else:
                     print(f"<dt>{title}</dt>", file=outfile)
             print("<dd>", file=outfile)
