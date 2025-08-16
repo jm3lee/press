@@ -1,327 +1,218 @@
 /*!
  * Main Stylesheet
- * A vanilla CSS setup with responsive typography, layout, and common element styles.
+ * Tailwind CSS-based setup with responsive typography and layout.
  */
 
-:root {
-  /* Colors & borders */
-  --color-text: black;
-  --color-light: lightgrey;
-  --border-main: 1px solid var(--color-text);
-  --border-toc: 1px dotted var(--color-text);
-  --border-nav: 1px dashed var(--color-text);
-  --border-radius: 10px;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-  /* Typography */
-  --font-base: "minion-pro", serif;
-  --font-weight-normal: 400;
-  --font-weight-bold: 600;
-  --font-size-desktop: 1.5rem;
-  --font-size-mobile: 1.5rem;
-
-  /* Layout */
-  --max-width-desktop: 50%;
-  --max-width-mobile: 90%;
-  --min-width: 300px;
-
-  /* Images & figures */
-  --max-img-dim: 300px;
-  --max-figure-width: 600px;
-
-  /* Spacing */
-  --space-sm: 0.5em;
-  --space-md: 1em;
-  --space-lg: 1.5em;
-}
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-/* ==========================================================================
-   TYPOGRAPHY
-   ========================================================================== */
-
-body {
-  font-family: var(--font-base);
-  font-weight: var(--font-weight-normal);
-  font-size: var(--font-size-desktop);
-  min-width: var(--min-width);
-  max-width: var(--max-width-desktop);
-  margin: auto;
-  color: var(--color-text);
-}
-
-@media (max-width: 1080px) {
+@layer base {
   body {
-    font-size: var(--font-size-mobile);  /* Larger text on mobile */
-    max-width: var(--max-width-mobile);
+    @apply font-serif font-normal text-black min-w-[300px] max-w-[50%] mx-auto text-[1.5rem];
+  }
+
+  @media (max-width: 1080px) {
+    body {
+      @apply text-[1.5rem] max-w-[90%];
+    }
+  }
+
+  h1 {
+    @apply mb-[0.1em];
+  }
+
+  h2 {
+    @apply text-center mt-6 uppercase font-semibold;
+  }
+
+  h3 {
+    @apply underline;
   }
 }
 
-h1 {
-  margin-bottom: 0.1em; /* Keeps metablock close */
-}
+@layer components {
+  nav.site-nav {
+    @apply mt-6;
+  }
 
-h2 {
-  text-align: center;
-  margin-top: var(--space-lg);
-  text-transform: uppercase;
-  font-weight: var(--font-weight-bold);
-}
+  nav.site-nav ul {
+    @apply list-none m-0 p-0;
+  }
 
-h3 {
-  text-decoration: underline;
-}
+  nav.site-nav li {
+    @apply inline-block uppercase;
+  }
 
-/* ==========================================================================
-   NAVIGATION
-   ========================================================================== */
+  nav.site-nav li:not(:first-child) {
+    @apply ml-2 pl-2 border-l border-black border-dashed;
+  }
 
-nav.site-nav {
-  margin-top: var(--space-lg);
-}
+  ol,
+  ul,
+  #TOC > ul {
+    @apply ml-6 pl-0;
+  }
 
-nav.site-nav ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
+  #TOC {
+    @apply px-4 border border-black border-dotted rounded-[10px];
+  }
 
-nav.site-nav li {
-  display: inline-block;
-  text-transform: uppercase;
-}
+  #TOC summary {
+    @apply cursor-pointer;
+  }
 
-nav.site-nav li:not(:first-child) {
-  margin-left: var(--space-sm);        /* Spacing between nav items */
-  padding-left: var(--space-sm);
-  border-left: var(--border-nav);
-}
+  table {
+    @apply w-full border-collapse border-spacing-0;
+  }
 
-/* ==========================================================================
-   LISTS & TOC
-   ========================================================================== */
+  th,
+  td {
+    @apply border border-black p-4;
+  }
 
-ol,
-ul,
-#TOC > ul {
-  margin-left: var(--space-lg);
-  padding-left: 0;
-}
+  .align-center {
+    @apply text-center;
+  }
 
-#TOC {
-  padding: 0 var(--space-md);
-  border: var(--border-toc);
-  border-radius: var(--border-radius);
-}
+  table.align-only td {
+    @apply !border-0;
+  }
 
-#TOC summary {
-  cursor: pointer;
-}
+  td ol,
+  td ul {
+    @apply m-0 ml-4;
+  }
 
-/* ==========================================================================
-   TABLES
-   ========================================================================== */
+  img {
+    @apply max-w-full h-auto mx-auto block;
+  }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  border-spacing: 0;
-}
+  img.diagram,
+  img.bookcover {
+    @apply max-w-[300px] max-h-[300px];
+  }
 
-th,
-td {
-  border: var(--border-main);
-  padding: var(--space-md);
-}
+  img.thumbnail {
+    @apply max-w-[300px] h-auto;
+  }
 
-.align-center {
-  text-align: center;
-}
-
-/* Remove all borders in "align-only" tables */
-table.align-only td {
-  border: none !important;
-}
-
-/* Compact lists inside table cells */
-td ol,
-td ul {
-  margin: 0;
-  margin-left: var(--space-md);
-}
-
-/* ==========================================================================
-   IMAGES & FIGURES
-   ========================================================================== */
-
-img {
-  max-width: 100%;
-  height: auto;
-  margin: auto;
-  display: block;
-}
-
-img.diagram,
-img.bookcover {
-  max-width: var(--max-img-dim);
-  max-height: var(--max-img-dim);
-}
-
-img.thumbnail {
-    max-width: 300px;
-    height: auto;
-}
-
-@media (max-width: 1080px) {
+  @media (max-width: 1080px) {
     img.thumbnail {
-        max-width: 100%;
-        height: auto;
+      @apply max-w-full h-auto;
     }
-}
+  }
 
-nav:not(#TOC) ul {
-    list-style-type: none;
-    padding-left: 0;
-}
+  nav:not(#TOC) ul {
+    @apply list-none pl-0;
+  }
 
-nav:not(#TOC) ul li {
-    display: inline-block;
-    padding-right: 0.5rem;
-    text-transform: uppercase;
-}
+  nav:not(#TOC) ul li {
+    @apply inline-block pr-2 uppercase;
+  }
 
-/* Direct children of #TOC as decimal; adjust selectors for deeper nesting
-* if needed */
-#TOC > ul, #TOC ul {
-    list-style-type: decimal;
-    margin-left: 1.5em; /* optional indentation adjustment */
-}
+  #TOC > ul,
+  #TOC ul {
+    @apply list-decimal ml-6;
+  }
 
-.footer {
-    padding-top: 1.5rem;
-    padding-bottom: 1.5rem;
-    text-align: center;
-}
+  .footer {
+    @apply pt-6 pb-6 text-center;
+  }
 
-.metablock {
-  font-size: 0.8em;
-  color: darkgray;
-  margin-top: 0;
-}
+  .metablock {
+    @apply text-[0.8em] text-gray-500 mt-0;
+  }
 
-a {
-  text-decoration: none;
-}
+  a {
+    @apply no-underline;
+  }
 
-.image-container {
-  position: relative;
-  display: inline-block;
-}
+  .image-container {
+    @apply relative inline-block;
+  }
 
-.magnify-icon {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  background-color: rgba(255, 255, 255, 0.8);
-  border-radius: 50%;
-  padding: 6px;
-  font-size: 20px;
-  cursor: pointer;
-}
+  .magnify-icon {
+    @apply absolute bottom-[10px] right-[10px] bg-white/80 rounded-full p-[6px] text-[20px] cursor-pointer;
+  }
 
-.citation {
-  border: solid thin black;
-  border-radius: 3px;
-  padding: 2px;
-}
+  .citation {
+    @apply border border-black rounded-[3px] p-[2px];
+  }
 
-.emoji {
-  font-size: 1.1em;
-  line-height: 1;
-}
-ol + details.answer {
-  margin-top: 15px;
-}
+  .emoji {
+    @apply text-[1.1em] leading-none;
+  }
 
-.quiz-container {
-  max-width: 600px;
-  margin: 2rem auto;
-}
+  ol + details.answer {
+    @apply mt-[15px];
+  }
 
-.question-block {
-  margin-bottom: 2rem;
-}
+  .quiz-container {
+    @apply max-w-[600px] my-8 mx-auto;
+  }
 
-.question {
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-}
+  .question-block {
+    @apply mb-8;
+  }
 
-.choices {
-  list-style-type: none;
-  padding: 0;
-}
+  .question {
+    @apply font-bold mb-2;
+  }
 
-.choice {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  margin-bottom: 0.3rem;
-  cursor: pointer;
-  border-radius: 4px;
-  user-select: none;
-}
+  .choices {
+    @apply list-none p-0;
+  }
 
-.choice:hover {
-  background-color: #f5f5f5;
-}
+  .choice {
+    @apply p-2 border border-gray-300 mb-1 cursor-pointer rounded select-none;
+  }
 
-.choice.selected {
-  background-color: #e0f7fa;
-}
+  .choice:hover {
+    @apply bg-gray-100;
+  }
 
-.choice.correct {
-  background-color: #c8f7c5;
-  border-color: #27ae60;
-}
+  .choice.selected {
+    @apply bg-cyan-100;
+  }
 
-.choice.incorrect {
-  background-color: #f7c5c5;
-  border-color: #e74c3c;
-}
+  .choice.correct {
+    @apply bg-green-100 border-green-600;
+  }
 
-.explanation {
-  background: #f9f9f9;
-  padding: 0.5rem;
-  margin-top: 0.5rem;
-  border-left: 3px solid #ccc;
-}
+  .choice.incorrect {
+    @apply bg-red-200 border-red-600;
+  }
 
-.submit-btn {
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  cursor: pointer;
-}
+  .explanation {
+    @apply bg-gray-100 p-2 mt-2 border-l-4 border-gray-300;
+  }
 
-dt {
-  font-weight: bold;
-}
-dd + dt {
-  margin-top: 1em;
-}
-dd + dd {
-  margin-top: 0.5em;
-}
-dd > p {
-  margin-top: 0;
-}
-ul.examples {
-  list-style: none;
-}
+  .submit-btn {
+    @apply py-2 px-4 text-base cursor-pointer;
+  }
 
-pre {
-    overflow: auto;
+  dt {
+    @apply font-bold;
+  }
+
+  dd + dt {
+    @apply mt-4;
+  }
+
+  dd + dd {
+    @apply mt-2;
+  }
+
+  dd > p {
+    @apply mt-0;
+  }
+
+  ul.examples {
+    @apply list-none;
+  }
+
+  pre {
+    @apply overflow-auto;
+  }
 }
