@@ -11,6 +11,16 @@ r pytest
 This command invokes `pytest` within the container so the tests run in the same
 environment used for development and CI.
 
+The suite relies on the `nginx-test` service defined in `docker-compose.yml`.
+This container runs a private Nginx instance without exposing port 80, allowing
+HTTP checks to run without disturbing other services that might need the default
+web port.
+
+Link checks use the `TEST_HOST_URL` environment variable to decide which host to
+scan. `docker-compose` sets it to `http://nginx-test` so the tests talk to the
+private Nginx container, but you can override it to point at another server
+(for example, `TEST_HOST_URL=http://localhost:8080 r pytest`).
+
 To check test coverage for the `pie` package and generate an HTML report, run:
 
 ```bash

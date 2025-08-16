@@ -29,3 +29,15 @@ For production, build the image and run the `nginx` service.
 
 You can also run `r docker` to build and push the image to your configured
 registry. See [DigitalOcean Setup](digitalocean.md) for an example.
+
+### `nginx-test` for isolated testing
+
+`docker-compose.yml` also defines an `nginx-test` service that uses the same
+image without publishing any ports to the host. The test suite reaches this
+container at `http://nginx-test`, providing a private Nginx instance for link
+checks and other HTTP tests. Running a dedicated server prevents conflicts with
+other applications that might need port&nbsp;80, making testing easier and more
+robust.
+The base URL comes from the `TEST_HOST_URL` environment variable, which defaults
+to `http://nginx-test` but can be overridden to target a different host during
+tests.
