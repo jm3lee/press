@@ -47,14 +47,25 @@ cleanup() {
 }
 trap cleanup EXIT
 
+echo "Starting release build..."
+
+echo "Stopping existing containers..."
 "${DOCKER_COMPOSE[@]}" down >/dev/null 2>&1 || true
+echo "Starting dragonfly..."
 "${DOCKER_COMPOSE[@]}" up -d dragonfly
+echo "Running distclean..."
 run_make distclean
+echo "Building shell image..."
 "${DOCKER_COMPOSE[@]}" build shell
+echo "Running make..."
 run_make
+echo "Starting nginx-test..."
 "${DOCKER_COMPOSE[@]}" up -d --build nginx-test
+echo "Running make test..."
 run_make test
+echo "Running pytest..."
 run_make pytest
+echo "Building release image..."
 "${DOCKER_COMPOSE[@]}" build release
 
 echo "Release Build Successful"
