@@ -18,7 +18,10 @@ from pathlib import Path
 from typing import Callable, Iterable
 
 from pie.logging import logger, add_log_argument, configure_logging
-from pie.metadata import get_metadata_by_path, load_metadata_pair
+from pie.metadata import load_metadata_pair
+
+# WARNING: picasso generates build rules; cannot rely on redis updates because
+# redis updates rely on the build infrastructure to work
 
 _TEMPLATE_PATH = Path(__file__).parent.parent / "templates" / "picasso.rule.mk.jinja"
 _RULE_TEMPLATE = _TEMPLATE_PATH.read_text()
@@ -59,7 +62,12 @@ def generate_rule(
     output_html = (build_root / relative.with_suffix(".html")).as_posix()
     preprocessed_md = (build_root / relative.with_suffix(".md")).as_posix()
     preprocessed_yml = (build_root / relative.with_suffix(".yml")).as_posix()
-    tmpl = get_metadata_by_path(input_path.as_posix(), "pandoc.template")
+    metadata = load_metadata_pair(input_path)
+    tmpl = None
+    if metadata:
+        pandoc_meta = metadata.get("pandoc")
+        if isinstance(pandoc_meta, dict):
+            tmpl = pandoc_meta.get("template")
     template = Path(tmpl).as_posix() if tmpl else None
 
     template_dep = template or "$(PANDOC_TEMPLATE)"
