@@ -12,26 +12,20 @@ FROM pandoc/extra:latest-ubuntu
 # -------------------------------------------------------------------
 # System preparation
 # -------------------------------------------------------------------
-# Update package index and install required packages
-RUN apt update -qq \
- && apt install -y --no-install-recommends \
+# Install core utilities, Node.js and clean up afterwards
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends \
+        curl \
+        git \
+        linkchecker \
         locales \
         make \
         minify \
-        linkchecker
-
-# Install curl to install nodejs
-RUN apt install -y --no-install-recommends curl
-
-# Install Node.js and npm
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
- && apt install -y --no-install-recommends nodejs
-
-RUN apt install -y --no-install-recommends git
-
-RUN apt install -y --no-install-recommends pysassc
-
-RUN rm -rf /var/lib/apt/lists/*
+        pysassc && \
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y --no-install-recommends nodejs && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # -------------------------------------------------------------------
 # Locale configuration
@@ -53,7 +47,7 @@ ENV LANG=en_US.UTF-8 \
 # Install library under development.
 COPY ./py/pie /press/py/pie
 
-RUN pip install --break-system-packages \
+RUN pip install --no-cache-dir --break-system-packages \
         -e /press/py/pie \
         -r /press/py/pie/requirements.txt
 
