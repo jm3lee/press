@@ -35,6 +35,8 @@ SRC_DIR   := src
 BUILD_DIR := build
 LOG_DIR   := log
 CFG_DIR   := cfg
+CSS_SRC_DIR := $(SRC_DIR)/css
+CSS_BUILD_DIR := $(BUILD_DIR)/css
 
 # Define the Pandoc command used inside the container
 #       -T: Don't allocate pseudo-tty. Makes parallel builds work.
@@ -44,8 +46,8 @@ PANDOC_TEMPLATE := $(SRC_DIR)/pandoc-template.html
 
 # Options for generating HTML output with Pandoc
 PANDOC_OPTS := \
-		--css '/style.css' \
-		--standalone \
+                --css '/css/style.css' \
+                --standalone \
 		-t html \
 		--toc \
 		--toc-depth=2 \
@@ -55,7 +57,7 @@ PANDOC_OPTS := \
 
 # Options for generating PDF output with Pandoc
 PANDOC_OPTS_PDF := \
-                --css "/style.css" \
+                --css "/css/style.css" \
                 --standalone \
                 -t pdf \
                 --toc \
@@ -82,10 +84,10 @@ HTMLS := $(patsubst $(SRC_DIR)/%.md, $(BUILD_DIR)/%.html, $(MARKDOWNS))
 PDFS := $(patsubst $(SRC_DIR)/%.md, $(BUILD_DIR)/%.pdf, $(MARKDOWNS))
 
 # Sort and define build subdirectories based on HTML files
-BUILD_SUBDIRS := $(sort $(dir $(HTMLS))) $(LOG_DIR) $(BUILD_DIR)/static
+BUILD_SUBDIRS := $(sort $(dir $(HTMLS))) $(LOG_DIR) $(BUILD_DIR)/static $(CSS_BUILD_DIR)
 
-CSS := $(wildcard $(SRC_DIR)/*.css)
-CSS := $(patsubst $(SRC_DIR)/%.css,$(BUILD_DIR)/%.css, $(CSS))
+CSS_SRCS := $(wildcard $(CSS_SRC_DIR)/*.css)
+CSS := $(CSS_BUILD_DIR)/style.css
 
 # Nginx permalink redirect configuration
 PERMALINKS_CONF := $(BUILD_DIR)/permalinks.conf
@@ -149,10 +151,15 @@ $(BUILD_SUBDIRS):
 	$(call status,Create directory $@)
 	$(Q)mkdir -p $@
 
+# Build the main stylesheet with Tailwind CSS
+$(CSS_BUILD_DIR)/style.css: $(CSS_SRCS) | $(CSS_BUILD_DIR)
+        $(call status,Build Tailwind CSS)
+        $(Q)tailwindcss -i $(CSS_SRC_DIR)/style.css -o $@
+
 # Copy CSS files to the build directory
 $(BUILD_DIR)/%.css: %.css | $(BUILD_DIR)
-	$(call status,Copy CSS $<)
-	$(Q)cp $< $@
+        $(call status,Copy CSS $<)
+        $(Q)cp $< $@
 
 # Include and preprocess Markdown files up to three levels deep
 # See docs/guides/preprocess.md for preprocessing details

@@ -35,7 +35,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "docker-compose.yml": "docker-compose.yml.jinja",
         "src/index.md": "index.md.jinja",
         "src/index.yml": "index.yml.jinja",
-        "src/style.css": "style.css.jinja",
+        "src/css/style.css": "style.css.jinja",
         "src/pandoc-template.html": "pandoc-template.html.jinja",
         "src/dep.mk": "dep.mk.jinja",
         "src/robots.txt": "robots.txt.jinja",

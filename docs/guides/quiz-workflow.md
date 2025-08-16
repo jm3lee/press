@@ -86,7 +86,7 @@ A page can embed the quiz with:
 
 ## 4. Styling
 
-Both the site CSS (`src/style.css`) and the React bundle’s stylesheet (`app/quiz/src/index.css`) define classes like `.quiz-container`, `.question`, `.choice`, and `.answer` to style quizzes consistently.
+Both the site CSS (`src/css/style.css`) and the React bundle’s stylesheet (`app/quiz/src/index.css`) define classes like `.quiz-container`, `.question`, `.choice`, and `.answer` to style quizzes consistently.
 
 ## Summary
 
