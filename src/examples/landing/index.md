@@ -1,17 +1,34 @@
-<header class="fade-in">
-  <img id="logo" src="#" alt="Logo placeholder">
-  <h1>Coming Soon: Photo Reference Bundle for Artists</h1>
-  <div class="hero-image">Image Placeholder</div>
+<header class="hero fade-in">
+  <div class="hero-text">
+    <img id="logo" src="#" alt="Logo placeholder">
+    <h1>Photo Reference Bundle for Artists</h1>
+    <p><strong>Affordable, high-quality references made by artists, for artists.</strong></p>
+    <a class="button" href="#early-access">Join the Waitlist</a>
+    <p><a href="#learn-more">Learn more</a></p>
+  </div>
+  <div class="hero-image">Phone Mockup Placeholder</div>
 </header>
 
-<main class="fade-in">
-  <p><strong>Affordable, High-Quality References Made by Artists, for Artists</strong></p>
-  <p>We’re launching a new photo bundle designed to fuel your studies and spark creativity. Perfect for fine artists who want fresh, inspiring references at a price that won’t break the bank.</p>
-  <p>This project is born from collaboration within the art community — and every purchase helps support a dear friend facing recent challenges. By joining, you’re not only investing in your art, but also uplifting the community that inspires it.</p>
+<main>
+  <section id="features" class="fade-in">
+    <h2>What Do You Get?</h2>
+    <ul>
+      <li>Curated poses and compositions for figure drawing, anatomy, and creativity</li>
+      <li>High-resolution photos at a fraction of typical costs</li>
+      <li>Created with and for artists, by members of the community</li>
+    </ul>
+  </section>
 
-  <hr>
+  <section class="highlight fade-in">
+    <div class="feature-image">Image Placeholder</div>
+    <div class="feature-text">
+      <h2>Fuel Your Creativity</h2>
+      <p>We’re launching a new photo bundle designed to fuel your studies and spark creativity. Perfect for fine artists who want fresh, inspiring references at a price that won’t break the bank.</p>
+      <p>This project is born from collaboration within the art community — and every purchase helps support a dear friend facing recent challenges. By joining, you’re not only investing in your art, but also uplifting the community that inspires it.</p>
+    </div>
+  </section>
 
-  <section id="early-access">
+  <section id="early-access" class="fade-in">
     <h2>Get Early Access</h2>
     <p>Be the first to know when we launch. Join our list to unlock <strong>exclusive early-bird pricing</strong> and bonus reference images.</p>
     <form>
@@ -23,27 +40,18 @@
     </form>
   </section>
 
-  <hr>
-
-  <section>
-    <h2>Why Artists Love It</h2>
-    <ul>
-      <li>Curated poses and compositions for figure drawing, anatomy, and creativity</li>
-      <li>High-resolution photos at a fraction of typical costs</li>
-      <li>Created with and for artists, by members of the community</li>
-    </ul>
-    <p><em>“Affordable references, endless creativity.”</em></p>
+  <section id="testimonials" class="fade-in">
+    <h2>What Others Say</h2>
+    <div class="logos">
+      <div class="logo">Logo</div>
+      <div class="logo">Logo</div>
+      <div class="logo">Logo</div>
+    </div>
   </section>
 
-  <section>
-    <h2>Learn More</h2>
-    <p>Discover how this bundle can enhance your craft and sign up for updates as we get closer to launch.</p>
-    <p><a href="#early-access">Learn more</a></p>
-  </section>
-
-  <section>
+  <section id="learn-more" class="fade-in">
     <h2>Your Artistic Journey</h2>
-    <p>Every artist’s journey is a path of curiosity and courage. Each sketch becomes a stepping stone toward a vision only you can see, turning challenges into opportunities to grow.</p>
+    <p>Every artist’s journey winds through exploration and persistence. Each study unlocks a new perspective, turning patience into progress and curiosity into craft.</p>
   </section>
 </main>
 
