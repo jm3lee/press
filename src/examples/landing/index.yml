@@ -1,5 +1,7 @@
-title: Photo Reference Bundle – Coming Soon
+author: Brian Lee
+css:
+- https://cdn.jsdelivr.net/npm/water.css@2/out/water.css
 pandoc:
   template: src/examples/landing/pandoc-template.html
-css:
-  - https://cdn.jsdelivr.net/npm/water.css@2/out/water.css
+pubdate: Aug 17, 2025
+title: "Photo Reference Bundle \u2013 Coming Soon"
