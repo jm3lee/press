@@ -56,7 +56,9 @@ This allows different pages to use specialized templates while falling back to
 `$(PANDOC_TEMPLATE)` when no custom template is provided.
 
 The command also inspects Markdown files for cross-document links and any
-`include-filter` Python blocks.  Dependencies discovered this way are emitted as
+`include-filter` Python blocks.  Links added via Jinja globals such as
+`{{link("target-id")}}` are treated the same as filter expressions like
+`{{"target-id"|link}}`. Dependencies discovered this way are emitted as
 additional Makefile rules so that updates to referenced files trigger a rebuild
 of the including document.
 
