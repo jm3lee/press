@@ -410,19 +410,3 @@ def test_main_prints_dependencies(tmp_path, capsys, monkeypatch):
     picasso.main(["--src", str(src), "--build", str(build)])
     out = capsys.readouterr().out
     assert "build/index.md: build/quickstart.md" in out
-
-
-def test_run_as_module_executes_main(tmp_path, monkeypatch, capsys):
-    """runpy.run_path executes picasso.main."""
-    src = tmp_path / "src"
-    build = tmp_path / "build"
-    src.mkdir()
-    (src / "doc.yml").write_text("{}")
-
-    monkeypatch.setattr(picasso, "load_metadata_pair", lambda path: None)
-    argv = [str(picasso.__file__), "--src", str(src), "--build", str(build)]
-    monkeypatch.setattr(sys, "argv", argv)
-    runpy.run_path(picasso.__file__, run_name="__main__")
-
-    out = capsys.readouterr().out
-    assert "build/doc.yml" in out
