@@ -102,6 +102,23 @@ def test_generate_dependencies(tmp_path):
     assert deps == ["build/index.md: build/quickstart.md"]
 
 
+def test_generate_dependencies_link_global(tmp_path):
+    """{{link("quickstart")}} -> build/index.md: build/quickstart.md."""
+    src = tmp_path / "src"
+    build = tmp_path / "build"
+    src.mkdir()
+
+    quick = src / "quickstart.md"
+    quick.write_text("---\nid: quickstart\n---\nbody")
+
+    index = src / "index.md"
+    index.write_text('{{link("quickstart")}}')
+
+    deps = picasso.generate_dependencies(src, build)
+
+    assert deps == ["build/index.md: build/quickstart.md"]
+
+
 def test_dependencies_from_include_filter(tmp_path):
     """include('src/inc.md') -> build/index.md: build/inc.md."""
     src = tmp_path / "src"

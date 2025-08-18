@@ -85,6 +85,7 @@ def generate_rule(
 
 
 LINK_RE = re.compile(r"\{\{\s*[\"']([^\"']+)[\"']\s*\|\s*link[\w]*")
+LINK_GLOBAL_RE = re.compile(r"\{\{\s*link[\w]*\(\s*[\"']([^\"']+)[\"']")
 PY_BLOCK_RE = re.compile(r"```python\n(.*?)```", re.DOTALL)
 INCLUDE_RE = re.compile(r"(include(?:_deflist_entry)?)\(\s*([^)]*)\)")
 
@@ -228,18 +229,61 @@ def _resolve_include_paths(
     return rules
 
 
+def _build_path(p: Path, *, src_root: Path, build_root: Path) -> str:
+    """Return the build path for *p* relative to *src_root* and *build_root*."""
+
+    rel = p.relative_to(src_root)
+    out = build_root / rel
+    if build_root.is_absolute():
+        out = Path(build_root.name) / rel
+    return out.as_posix()
+
+
+def _file_dependencies(
+    path: Path,
+    text: str,
+    id_map: dict[str, Path],
+    *,
+    src_root: Path,
+    build_root: Path,
+) -> set[str]:
+    """Return dependency rules for a single source file."""
+
+    build = lambda p: _build_path(p, src_root=src_root, build_root=build_root)
+    src_build = Path(build(path)).with_suffix(path.suffix)
+    rules: set[str] = set()
+
+    # Jinja link references like {{"id"|link}} or {{link("id")}}
+    ref_ids = LINK_RE.findall(text) + LINK_GLOBAL_RE.findall(text)
+    for ref_id in ref_ids:
+        ref_path = id_map.get(ref_id)
+        if ref_path is None:
+            continue
+        dep_build = Path(build(ref_path)).with_suffix(ref_path.suffix)
+        rules.add(f"{src_build.as_posix()}: {dep_build.as_posix()}")
+
+    # ``include-filter`` blocks such as include("file.md")
+    for block in PY_BLOCK_RE.findall(text):
+        for func, arglist in INCLUDE_RE.findall(block):
+            rules.update(
+                _resolve_include_paths(
+                    func,
+                    arglist,
+                    src_build=src_build,
+                    src_root=src_root,
+                    build_root=build_root,
+                    build_path=build,
+                )
+            )
+
+    return rules
+
+
 def generate_dependencies(src_root: Path, build_root: Path) -> list[str]:
     """Return Makefile dependency rules based on Jinja links and include blocks."""
 
     id_map = collect_ids(src_root)
     rules: set[str] = set()
-
-    def build_path(p: Path) -> str:
-        rel = p.relative_to(src_root)
-        out = build_root / rel
-        if build_root.is_absolute():
-            out = Path(build_root.name) / rel
-        return out.as_posix()
 
     for path in src_root.rglob("*"):
         if path.suffix.lower() not in {".md", ".yml", ".yaml"}:
@@ -251,29 +295,15 @@ def generate_dependencies(src_root: Path, build_root: Path) -> list[str]:
             logger.warning("Failed to read file", file=str(path))
             continue
 
-        src_build = Path(build_path(path)).with_suffix(path.suffix)
-
-        # Jinja link references like {{"id"|link}}
-        for ref_id in LINK_RE.findall(text):
-            ref_path = id_map.get(ref_id)
-            if ref_path is None:
-                continue
-            dep_build = Path(build_path(ref_path)).with_suffix(ref_path.suffix)
-            rules.add(f"{src_build.as_posix()}: {dep_build.as_posix()}")
-
-        # ``include-filter`` blocks such as include("file.md")
-        for block in PY_BLOCK_RE.findall(text):
-            for func, arglist in INCLUDE_RE.findall(block):
-                rules.update(
-                    _resolve_include_paths(
-                        func,
-                        arglist,
-                        src_build=src_build,
-                        src_root=src_root,
-                        build_root=build_root,
-                        build_path=build_path,
-                    )
-                )
+        rules.update(
+            _file_dependencies(
+                path,
+                text,
+                id_map,
+                src_root=src_root,
+                build_root=build_root,
+            )
+        )
 
     return _remove_circular_dependencies(rules)
 
