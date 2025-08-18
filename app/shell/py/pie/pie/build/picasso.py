@@ -259,8 +259,19 @@ def _file_dependencies(
         ref_path = id_map.get(ref_id)
         if ref_path is None:
             continue
-        dep_build = Path(build(ref_path)).with_suffix(ref_path.suffix)
-        rules.add(f"{src_build.as_posix()}: {dep_build.as_posix()}")
+
+        # ``collect_ids`` stores a single path for each id.  If both the
+        # Markdown and YAML sources exist we need to add dependencies for each
+        # existing file so updates to either trigger a rebuild.
+        base = ref_path.with_suffix("")
+        build_base = Path(build(base))
+        for ext in (".md", ".yml", ".yaml"):
+            candidate = base.with_suffix(ext)
+            if not candidate.is_file():
+                continue
+            dep_ext = ".md" if ext == ".md" else ".yml"
+            dep_build = build_base.with_suffix(dep_ext)
+            rules.add(f"{src_build.as_posix()}: {dep_build.as_posix()}")
 
     # ``include-filter`` blocks such as include("file.md")
     for block in PY_BLOCK_RE.findall(text):

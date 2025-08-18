@@ -60,7 +60,8 @@ The command also inspects Markdown files for cross-document links and any
 `{{link("target-id")}}` are treated the same as filter expressions like
 `{{"target-id"|link}}`. Dependencies discovered this way are emitted as
 additional Makefile rules so that updates to referenced files trigger a rebuild
-of the including document.
+of the including document.  If a referenced document has both Markdown and YAML
+sources, dependencies are added for each existing file.
 
 If these dependencies form a cycle, `picasso` logs a warning and drops the
 minimum number of rules required to break the loop. The build continues with the

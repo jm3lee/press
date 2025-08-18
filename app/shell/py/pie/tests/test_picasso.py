@@ -119,6 +119,28 @@ def test_generate_dependencies_link_global(tmp_path):
     assert deps == ["build/index.md: build/quickstart.md"]
 
 
+def test_generate_dependencies_adds_all_referenced_files(tmp_path):
+    """link to id with .md and .yml -> deps include both files."""
+    src = tmp_path / "src"
+    build = tmp_path / "build"
+    src.mkdir()
+
+    quick_md = src / "quickstart.md"
+    quick_md.write_text("---\nid: quickstart\n---\nbody")
+    quick_yml = src / "quickstart.yml"
+    quick_yml.write_text("id: quickstart\n")
+
+    index = src / "index.md"
+    index.write_text('{{"quickstart"|link}}')
+
+    deps = picasso.generate_dependencies(src, build)
+
+    assert sorted(deps) == [
+        "build/index.md: build/quickstart.md",
+        "build/index.md: build/quickstart.yml",
+    ]
+
+
 def test_dependencies_from_include_filter(tmp_path):
     """include('src/inc.md') -> build/index.md: build/inc.md."""
     src = tmp_path / "src"
