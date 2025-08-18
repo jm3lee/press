@@ -1,4 +1,3 @@
 # Codex
 
-pytest dependencis:
-- install beautifulsoup for bs4
+- pytest dependencies: see `app/shell/py/pie/requirements.txt`
