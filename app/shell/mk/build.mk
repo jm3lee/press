@@ -139,6 +139,8 @@ check:
 	$(Q)check-post-build -c $(CFG_DIR)/check-post-build.yml
 	$(call status,Check for unexpanded Jinja)
 	$(Q)check-unexpanded-jinja $(BUILD_DIR)
+	$(call status,Check for URL underscores)
+	$(Q)check-underscores $(BUILD_DIR)
 
 # Create necessary build directories
 $(BUILD_DIR): | $(BUILD_SUBDIRS)
