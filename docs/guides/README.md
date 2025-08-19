@@ -16,7 +16,7 @@ concepts and data formats, see the
 ## Validation and testing
 - [checklinks.md](checklinks.md) – scan rendered HTML for broken links.
 - [check-page-title.md](check-page-title.md) – verify page titles.
-- [check-underscores.md](check-underscores.md) – report URLs that contain underscores.
+- [check-underscores.md](check-underscores.md) – report internal URLs that contain underscores.
 - [tests.md](tests.md) – run the automated test suite.
 
 ## Services and utilities

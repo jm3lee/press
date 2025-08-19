@@ -31,6 +31,17 @@ def test_warn_src(tmp_path: Path, capsys) -> None:
     assert "foo_bar.png" in captured.err
 
 
+def test_ignore_external(tmp_path: Path, capsys) -> None:
+    """External links with underscores are ignored."""
+    html = tmp_path / "index.html"
+    html.write_text(
+        '<a href="https://example.com/foo_bar.html">link</a>', encoding="utf-8"
+    )
+    assert check_underscores.main([str(tmp_path)]) == 0
+    captured = capsys.readouterr()
+    assert "foo_bar.html" not in captured.err
+
+
 def test_error_flag(tmp_path: Path) -> None:
     """`--error` exits with status 1 when underscores are present."""
     html = tmp_path / "index.html"
