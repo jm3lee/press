@@ -118,10 +118,10 @@ $(BUILD_DIR)/.update-index: $(MARKDOWNS) $(YAMLS)
 
 # Target to minify HTML and CSS files
 # Modifies file timestamps. The preserve option doesn't seem to work.
+# No touch at the end. Minify should always execute.
 $(BUILD_DIR)/.minify:
 	$(call status,Minify HTML and CSS)
 	$(Q)cd $(BUILD_DIR); $(MINIFY_CMD) -a -v -r -o . .
-	$(Q)touch $@
 
 .PHONY: test
 # Triggered by the test target in redo.mk; see docs/guides/redo-mk.md.
