@@ -26,6 +26,8 @@ concepts and data formats, see the
 - [sync-service.md](sync-service.md) – upload site files to S3 using the sync container.
 - [webp-service.md](webp-service.md) – convert images to WebP using the helper
   container.
+- [upgrade.md](upgrade.md) – rebuild containers and run tests
+  after pulling changes.
 
 Refer to the individual files for additional guides not listed here.
 
