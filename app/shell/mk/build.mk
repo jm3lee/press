@@ -102,10 +102,15 @@ everything: | $(BUILD_DIR) $(BUILD_SUBDIRS)
 all: $(HTMLS)
 all: $(CSS)
 all: $(BUILD_DIR)/robots.txt
+all: $(BUILD_DIR)/sitemap.xml
 all: $(PERMALINKS_CONF)
 
 $(BUILD_DIR)/robots.txt: $(SRC_DIR)/robots.txt
 	cp $< $@
+
+$(BUILD_DIR)/sitemap.xml: $(HTMLS)
+	$(call status,Generate sitemap)
+	$(Q)sitemap $(BUILD_DIR)
 
 $(PERMALINKS_CONF): $(MARKDOWNS) $(YAMLS) | $(BUILD_DIR) $(LOG_DIR)
 	$(call status,Generate permalink redirects)
