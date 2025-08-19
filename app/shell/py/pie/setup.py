@@ -23,6 +23,7 @@ setup(
             'check-page-title=pie.check.page_title:main',
             'check-post-build=pie.check.post_build:main',
             'check-unexpanded-jinja=pie.check.unexpanded_jinja:main',
+            'check-underscores=pie.check.underscores:main',
             'create-post=pie.create.post:main',
             'create-site=pie.create.site:main',
             'emojify=pie.filter.emojify:main',

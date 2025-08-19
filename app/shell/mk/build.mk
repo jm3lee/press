@@ -139,6 +139,8 @@ check:
 	$(Q)check-post-build -c $(CFG_DIR)/check-post-build.yml
 	$(call status,Check for unexpanded Jinja)
 	$(Q)check-unexpanded-jinja $(BUILD_DIR)
+	$(call status,Check for URL underscores)
+	$(Q)check-underscores $(BUILD_DIR)
 
 # Create necessary build directories
 $(BUILD_DIR): | $(BUILD_SUBDIRS)
@@ -174,7 +176,7 @@ $(BUILD_DIR)/%.pdf: %.md | $(BUILD_DIR)
 	$(Q)$(PANDOC_CMD) \
 $(PANDOC_OPTS_PDF) \
         -o $@ \
-        $(BUILD_DIR)/$*.3.md
+	$(BUILD_DIR)/$*.3.md
 
 # Clean the build directory by removing all build artifacts
 .PHONY: clean
