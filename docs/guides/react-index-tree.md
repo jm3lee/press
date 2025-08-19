@@ -11,12 +11,17 @@ your project.
 The `indextree-json` console script can generate the required JSON by
 scanning a directory of YAML metadata files and producing nodes for each
 file and subdirectory. Entries honour the same `indextree`
-options (`show` and `link`) used by the Markdown index generator. When
-linking is enabled, the `url` property is copied from the metadata
-without modification:
+options (`show` and `link`) used by the Markdown index generator.
+
+To keep files compact, node identifiers are shortened to the minimal
+unique prefixes of their document IDs. A companion mapping file is
+written alongside the tree so applications can recover the original
+identifiers if needed. When linking is enabled, the `url` property is
+copied from the metadata without modification:
 
 ```bash
 indextree-json docs doc-tree.json
+# writes doc-tree.json and doc-tree.json.map.json
 ```
 
 A runnable demo lives in `app/indextree` and can be started with `npm run dev`.
@@ -37,14 +42,23 @@ The expected JSON file contains an array of nodes:
 ```json
 [
   {
-    "id": "alpha",
+    "id": "a",
     "label": "Alpha",
     "url": "/alpha/index.html",
     "children": [
-      { "id": "beta", "label": "Beta", "url": "/alpha/beta.html" }
+      { "id": "b", "label": "Beta", "url": "/alpha/beta.html" }
     ]
   }
 ]
+
+The accompanying `doc-tree.json.map.json` records the original
+identifiers:
+
+```json
+{
+  "alpha": "a",
+  "beta": "b"
+}
 ```
 
 Nodes are expandable when they contain a `children` array. Typing in the
