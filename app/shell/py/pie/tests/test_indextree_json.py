@@ -54,14 +54,14 @@ def test_process_dir_builds_tree(tmp_path, monkeypatch):
 
     assert data == [
         {
-            "id": "alpha",
+            "id": "a",
             "label": "Alpha",
             "children": [
-                {"id": "beta", "label": "Beta", "url": "/alpha/beta.html"}
+                {"id": "b", "label": "Beta", "url": "/alpha/beta.html"}
             ],
             "url": "/alpha/index.html",
         },
-        {"id": "gamma", "label": "Gamma", "url": "/gamma.html"},
+        {"id": "g", "label": "Gamma", "url": "/gamma.html"},
     ]
 
 
@@ -111,13 +111,53 @@ def test_process_dir_honours_show_and_link(tmp_path, monkeypatch):
 
     assert data == [
         {
-            "id": "alpha",
+            "id": "a",
             "label": "Alpha",
-            "children": [{"id": "beta", "label": "Beta"}],
+            "children": [{"id": "b", "label": "Beta"}],
             "url": "/alpha/index.html",
         },
-        {"id": "epsilon", "label": "Epsilon", "url": "/delta/epsilon.html"},
+        {"id": "e", "label": "Epsilon", "url": "/delta/epsilon.html"},
     ]
+
+
+def test_process_dir_generates_short_unique_ids(tmp_path, monkeypatch):
+    """Identifiers are shortened to minimal unique prefixes and labels stay intact."""
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "one.yml").touch()
+    (src / "two.yml").touch()
+    (src / "three.yml").touch()
+
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    monkeypatch.setattr(metadata, "redis_conn", fake)
+
+    ids = ["abcdef", "abcxyz", "abcpqr"]
+    labels = [
+        "First Node With An Extremely Long Label",
+        "Second Node With An Extremely Long Label",
+        "Third Node With An Extremely Long Label",
+    ]
+    for file, doc_id, label in zip(["one.yml", "two.yml", "three.yml"], ids, labels):
+        save_meta(fake, f"src/{file}", doc_id, {"title": label})
+
+    os.chdir(tmp_path)
+    try:
+        data = list(indextree_json.process_dir(Path("src")))
+    finally:
+        os.chdir("/tmp")
+
+    assert data == [
+        {"id": "abcd", "label": labels[0]},
+        {"id": "abcx", "label": labels[1]},
+        {"id": "abcp", "label": labels[2]},
+    ]
+
+    log_path = tmp_path / "short_ids.map.json"
+    assert json.loads(log_path.read_text()) == {
+        "abcdef": "abcd",
+        "abcxyz": "abcx",
+        "abcpqr": "abcp",
+    }
 
 
 def test_main_writes_output_file(tmp_path, monkeypatch, capsys):
@@ -144,8 +184,9 @@ def test_main_writes_output_file(tmp_path, monkeypatch, capsys):
     captured = capsys.readouterr()
     assert captured.out == ""
     assert json.loads(output_path.read_text()) == [
-        {"id": "alpha", "label": "Alpha", "url": "/alpha.html"}
+        {"id": "a", "label": "Alpha", "url": "/alpha.html"}
     ]
+    assert json.loads(Path(f"{output_path}.map.json").read_text()) == {"alpha": "a"}
 
 
 def test_main_reports_missing_title(tmp_path, monkeypatch):
