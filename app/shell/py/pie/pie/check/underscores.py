@@ -2,7 +2,9 @@
 """Report URLs containing underscores.
 
 The ``check-underscores`` console script scans HTML files for URLs that
-contain underscores and exits with a non-zero status when any are found.
+contain underscores. Some third-party links legitimately use underscores,
+so the command only emits warnings by default. Pass ``--error`` to exit
+with a non-zero status when any underscores are discovered.
 """
 
 from __future__ import annotations
@@ -30,6 +32,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         nargs="?",
         default="build",
         help="Root directory to scan for HTML files",
+    )
+    parser.add_argument(
+        "--error",
+        action="store_true",
+        help="Exit with status 1 if URLs with underscores are found",
     )
     return parser.parse_args(argv)
 
@@ -60,7 +67,7 @@ def main(argv: list[str] | None = None) -> int:
         logger.warning("Using dashes instead of underscores in URLs is recommended.")
         for url in sorted(bad_urls):
             logger.warning("Fix URL", url=url)
-        return 1
+        return 1 if args.error else 0
     logger.info("No URLs with underscores found.")
     return 0
 
