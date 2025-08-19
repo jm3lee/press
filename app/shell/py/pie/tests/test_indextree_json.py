@@ -186,7 +186,9 @@ def test_main_writes_output_file(tmp_path, monkeypatch, capsys):
     assert json.loads(output_path.read_text()) == [
         {"id": "a", "label": "Alpha", "url": "/alpha.html"}
     ]
-    assert json.loads(Path(f"{output_path}.map.json").read_text()) == {"alpha": "a"}
+    assert json.loads(output_path.with_suffix(".map.json").read_text()) == {
+        "alpha": "a"
+    }
 
 
 def test_main_reports_missing_title(tmp_path, monkeypatch):

@@ -36,9 +36,15 @@ def _build_id_map(ids: list[str]) -> dict[str, str]:
 
 
 def _log_id_map(id_map: dict[str, str], output_file: Path | str | None = None) -> None:
-    """Write *id_map* to ``<output_file>.map.json`` or ``short_ids.map.json``."""
+    """Write *id_map* next to *output_file* as ``<output>.map.json``.
+
+    When *output_file* is ``None``, the map is written to ``short_ids.map.json`` in
+    the current directory.
+    """
     log_path = (
-        Path(f"{output_file}.map.json") if output_file else Path("short_ids.map.json")
+        Path(output_file).with_suffix(".map.json")
+        if output_file
+        else Path("short_ids.map.json")
     )
     log_path.write_text(json.dumps(id_map, indent=2), encoding="utf-8")
     logger.info("Short id map written to {}", log_path)
@@ -52,8 +58,8 @@ def process_dir(
     """Recursively process *directory* to yield structured entries.
 
     If *id_map* is ``None``, a map of full ids to their shortest unique prefixes is
-    built and written to ``<map_target>.map.json`` (or ``short_ids.map.json`` when
-    *map_target* is ``None``).
+    built and written next to *map_target* as ``<map_target>.map.json`` (or
+    ``short_ids.map.json`` when *map_target* is ``None``).
     """
     if id_map is None:
         id_map = _build_id_map(_collect_ids(directory))

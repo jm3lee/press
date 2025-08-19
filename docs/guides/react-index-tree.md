@@ -21,7 +21,7 @@ copied from the metadata without modification:
 
 ```bash
 indextree-json docs doc-tree.json
-# writes doc-tree.json and doc-tree.json.map.json
+# writes doc-tree.json and doc-tree.map.json
 ```
 
 A runnable demo lives in `app/indextree` and can be started with `npm run dev`.
@@ -51,7 +51,7 @@ The expected JSON file contains an array of nodes:
   }
 ]
 
-The accompanying `doc-tree.json.map.json` records the original
+The accompanying `doc-tree.map.json` records the original
 identifiers:
 
 ```json
