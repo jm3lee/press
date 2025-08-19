@@ -114,7 +114,13 @@ export default function IndexTree({ src }) {
             const node = idMap.get(itemId);
             return {
               label: node?.url ? (
-                <a href={node.url} onClick={(e) => e.stopPropagation()}>{label}</a>
+                <a
+                  href={node.url}
+                  className="internal-link"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {label}
+                </a>
               ) : (
                 label
               ),

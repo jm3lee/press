@@ -89,6 +89,30 @@ def test_include_deflist_entry_writes_entries(tmp_path, monkeypatch):
         include_filter.outfile = None
 
 
+def test_include_deflist_entry_adds_internal_class(tmp_path, monkeypatch):
+    """Internal links receive the internal-link class."""
+    c = tmp_path / "c.md"
+    c.write_text("C\n", encoding="utf-8")
+
+    monkeypatch.chdir(tmp_path)
+
+    include_filter.outfile = StringIO()
+
+    def fake_meta(path: str, key: str):
+        data = {"c.md": {"title": "Title C", "url": "/c"}}
+        return data.get(path, {}).get(key)
+
+    with patch("pie.filter.include.get_metadata_by_path", side_effect=fake_meta):
+        include_filter.include_deflist_entry("c.md")
+    try:
+        assert (
+            include_filter.outfile.getvalue()
+            == '<dt><a href="/c" class="internal-link">Title C</a></dt>\n<dd>\nC\n</dd>\n'
+        )
+    finally:
+        include_filter.outfile = None
+
+
 def test_yield_lines_stops_at_code_fence():
     """yield_lines stops when encountering a closing fence."""
     f = StringIO("a\nb\n```\nrest\n")

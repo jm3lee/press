@@ -117,7 +117,15 @@ def include_deflist_entry(
             url = get_metadata_by_path(rel, "url")
             if title:
                 if url:
-                    print(f"<dt><a href=\"{url}\">{title}</a></dt>", file=outfile)
+                    cls = (
+                        ""
+                        if url.startswith(("http://", "https://"))
+                        else ' class="internal-link"'
+                    )
+                    print(
+                        f"<dt><a href=\"{url}\"{cls}>{title}</a></dt>",
+                        file=outfile,
+                    )
                 else:
                     print(f"<dt>{title}</dt>", file=outfile)
             print("<dd>", file=outfile)
