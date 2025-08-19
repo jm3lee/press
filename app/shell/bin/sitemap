@@ -4,10 +4,10 @@
 # If DIRECTORY is not provided, defaults to build/.
 set -euo pipefail
 
-SRC_DIR="${1:-build}"
+BUILD_DIR="${1:-build}"
 
-# Find all HTML files relative to SRC_DIR.
-mapfile -t files < <(find "$SRC_DIR" -type f -name '*.html' | sed "s|^$SRC_DIR/||" | sort)
+# Find all HTML files relative to BUILD_DIR.
+mapfile -t files < <(find "$BUILD_DIR" -type f -name '*.html' | sed "s|^$BUILD_DIR/||" | sort)
 
 {
   echo '<?xml version="1.0" encoding="UTF-8"?>'
