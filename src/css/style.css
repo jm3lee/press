@@ -202,7 +202,7 @@ img.thumbnail {
 
 .metablock {
   font-size: 0.8em;
-  color: darkgray;
+  color: var(--color-text);
   margin-top: 0;
 }
 
