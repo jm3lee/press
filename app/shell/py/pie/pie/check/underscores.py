@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Report URLs containing underscores.
+"""Report internal URLs containing underscores.
 
-The ``check-underscores`` console script scans HTML files for URLs that
+The ``check-underscores`` console script scans HTML files for internal URLs that
 contain underscores. Some third-party links legitimately use underscores,
 so the command only emits warnings by default. Pass ``--error`` to exit
 with a non-zero status when any underscores are discovered.
@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 from typing import Iterable
+from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
 
@@ -60,7 +61,8 @@ def main(argv: list[str] | None = None) -> int:
     bad_urls: set[str] = set()
     for html in root.rglob("*.html"):
         for url in _iter_urls(html):
-            if "_" in url:
+            parsed = urlparse(url)
+            if not parsed.scheme and not parsed.netloc and "_" in url:
                 logger.error("Underscore in URL", path=str(html), url=url)
                 bad_urls.add(url)
     if bad_urls:
