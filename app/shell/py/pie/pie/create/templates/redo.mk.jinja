@@ -18,7 +18,7 @@ BUILD_DIR := build
 
 VPATH := $(SRC_DIR)
 
-COMPOSE_FILE := $(if $(wildcard docker-compose.yml),docker-compose.yml,dist/docker-compose.yml)
+COMPOSE_FILE := docker-compose.yml
 DOCKER_COMPOSE := docker compose -f $(COMPOSE_FILE)
 
 MAKE_CMD := $(DOCKER_COMPOSE) run --rm --entrypoint make -u $(shell id -u) -T shell

@@ -15,8 +15,5 @@
 set -euo pipefail
 
 COMPOSE_FILE="docker-compose.yml"
-if [[ ! -f "$COMPOSE_FILE" ]]; then
-  COMPOSE_FILE="dist/docker-compose.yml"
-fi
 
 exec docker compose -f "$COMPOSE_FILE" run --rm -u "$(id -u)" --entrypoint store-files shell "$@"
