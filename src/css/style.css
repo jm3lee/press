@@ -7,6 +7,8 @@
   /* Colors & borders */
   --color-text: black;
   --color-light: lightgrey;
+  --color-link: #0645ad;
+  --color-link-visited: #0b0080;
   --border-main: 1px solid var(--color-text);
   --border-toc: 1px dotted var(--color-text);
   --border-nav: 1px dashed var(--color-text);
@@ -208,6 +210,15 @@ img.thumbnail {
 
 a {
   text-decoration: none;
+}
+
+a.internal-link {
+  text-decoration: underline;
+  color: var(--color-link);
+}
+
+a.internal-link:visited {
+  color: var(--color-link-visited);
 }
 
 .image-container {
