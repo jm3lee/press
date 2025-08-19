@@ -178,13 +178,13 @@ def _resolve_include_paths(
         # Ignore malformed Python blocks such as ``include('a', bad=)``.
         return []
 
-    # Positional string arguments become include targets.  ``glob`` is only
-    # meaningful for ``include_deflist_entry``.
-    paths: list[str] = [
+    # Extract positional string arguments and optional ``glob`` keyword.
+    paths = [
         arg.value
         for arg in call.args
         if isinstance(arg, ast.Constant) and isinstance(arg.value, str)
     ]
+
     glob = "*"
     if func == "include_deflist_entry":
         for kw in call.keywords:
@@ -196,6 +196,9 @@ def _resolve_include_paths(
                 glob = kw.value.value
                 break
 
+    src_build_str = src_build.as_posix()
+    build_root_str = build_root.as_posix()
+
     def iter_targets(path: Path) -> Iterable[Path]:
         """Yield files referenced by ``path`` (directory or single file)."""
 
@@ -205,26 +208,28 @@ def _resolve_include_paths(
         else:
             yield path
 
-    rules: list[str] = []
-    for dep in paths:
-        dep_path = Path(dep)
-        dep_str = dep_path.as_posix()
-        is_build_path = dep_path.is_absolute() or dep_str.startswith(build_root.as_posix())
-
-        if not is_build_path:
-            # Resolve relative paths against ``src_root``.  ``include('src/foo')``
+    def resolve(dep: Path) -> tuple[Iterable[Path], bool]:
+        dep_str = dep.as_posix()
+        is_build = dep.is_absolute() or dep_str.startswith(build_root_str)
+        if not is_build:
+            # Resolve relative paths against ``src_root``. ``include('src/foo')``
             # is treated the same as ``include('foo')``.
-            if dep_path.parts and dep_path.parts[0] == src_root.name:
-                dep_path = src_root / Path(*dep_path.parts[1:])
+            if dep.parts and dep.parts[0] == src_root.name:
+                dep = src_root / Path(*dep.parts[1:])
             else:
-                dep_path = src_root / dep_path
+                dep = src_root / dep
+        return iter_targets(dep), is_build
 
-            for target in iter_targets(dep_path):
-                dep_build = Path(build_path(target)).with_suffix(target.suffix).as_posix()
-                rules.append(f"{src_build.as_posix()}: {dep_build}")
-        else:
-            for target in iter_targets(dep_path):
-                rules.append(f"{src_build.as_posix()}: {target.as_posix()}")
+    rules: list[str] = []
+    for dep in map(Path, paths):
+        targets, is_build = resolve(dep)
+        for target in targets:
+            target_str = target.as_posix()
+            if not is_build:
+                target_str = (
+                    Path(build_path(target)).with_suffix(target.suffix).as_posix()
+                )
+            rules.append(f"{src_build_str}: {target_str}")
 
     return rules
 
