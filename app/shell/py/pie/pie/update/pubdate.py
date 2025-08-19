@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Iterable, Sequence
 
 from pie.cli import create_parser
-from pie.logging import configure_logging
+from pie.logging import configure_logging, logger
 from .common import get_changed_files, update_files as common_update_files
 from pie.utils import get_pubdate
 
@@ -50,11 +50,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     changed = get_changed_files()
     changed = list(filter(lambda p: str(p).startswith("src/"), changed))
     messages, checked = update_files(changed, today, args.sort_keys)
-    for msg in messages:
-        print(msg)
-    print(f"{checked} {'file' if checked == 1 else 'files'} checked")
     changed_count = len(messages)
-    print(f"{changed_count} {'file' if changed_count == 1 else 'files'} changed")
+    logger.info(f"Summary", checked=checked, changed_count=changed_count)
     return 0
 
 
