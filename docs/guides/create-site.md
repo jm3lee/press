@@ -7,7 +7,7 @@ This tutorial shows how to scaffold and run a new Press site.
 Run the helper script with the desired project name:
 
 ```bash
-./bin/bash -c "create-site newsite"
+./bin/create-site newsite
 cd newsite
 git init
 ```
