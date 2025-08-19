@@ -174,7 +174,7 @@ $(BUILD_DIR)/%.pdf: %.md | $(BUILD_DIR)
 	$(Q)include-filter $(BUILD_DIR) $(BUILD_DIR)/$*.1.md $(BUILD_DIR)/$*.2.md
 	$(Q)include-filter $(BUILD_DIR) $(BUILD_DIR)/$*.2.md $(BUILD_DIR)/$*.3.md
 	$(Q)$(PANDOC_CMD) \
-	$(PANDOC_OPTS_PDF) \
+$(PANDOC_OPTS_PDF) \
         -o $@ \
         $(BUILD_DIR)/$*.3.md
 
