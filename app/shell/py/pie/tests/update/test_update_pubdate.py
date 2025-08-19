@@ -27,13 +27,10 @@ def test_updates_yaml_from_markdown_change(tmp_path: Path, monkeypatch, capsys) 
     assert f"pubdate: {expected}" in yml.read_text(encoding="utf-8")
     assert "pubdate:" not in md.read_text(encoding="utf-8")
     captured = capsys.readouterr()
-    lines = captured.out.strip().splitlines()
-    assert f"src/doc.yml: Jan 01, 2000 -> {expected}" in lines
-    assert "1 file checked" in lines
-    assert "1 file changed" in lines
-    assert len(lines) == 3
+    assert captured.out == ""
     log_text = (tmp_path / "log/update-pubdate.txt").read_text(encoding="utf-8")
     assert f"src/doc.yml: Jan 01, 2000 -> {expected}" in log_text
+    assert "Summary {'checked': 1, 'changed_count': 1}" in log_text
 
 
 def test_updates_markdown_frontmatter(tmp_path: Path, monkeypatch, capsys) -> None:
@@ -52,15 +49,12 @@ def test_updates_markdown_frontmatter(tmp_path: Path, monkeypatch, capsys) -> No
     update_pubdate.main([])
     expected = get_pubdate()
     assert f"pubdate: {expected}" in md.read_text(encoding="utf-8")
-    expected_line = f"src/doc.md: Jan 01, 2000 -> {expected}"
     captured = capsys.readouterr()
-    assert captured.out.strip().splitlines() == [
-        expected_line,
-        "1 file checked",
-        "1 file changed",
-    ]
+    assert captured.out == ""
+    expected_line = f"src/doc.md: Jan 01, 2000 -> {expected}"
     log_text = (tmp_path / "log/update-pubdate.txt").read_text(encoding="utf-8")
     assert expected_line in log_text
+    assert "Summary {'checked': 1, 'changed_count': 1}" in log_text
 
 
 def test_adds_frontmatter_when_pubdate_in_body(tmp_path: Path, monkeypatch, capsys) -> None:
@@ -79,11 +73,10 @@ def test_adds_frontmatter_when_pubdate_in_body(tmp_path: Path, monkeypatch, caps
     assert f"pubdate: {expected}" in text
     assert "pubdate: Jan 01, 2000" in text
     captured = capsys.readouterr()
-    assert captured.out.strip().splitlines() == [
-        f"src/doc.md: undefined -> {expected}",
-        "1 file checked",
-        "1 file changed",
-    ]
+    assert captured.out == ""
+    log_text = (tmp_path / "log/update-pubdate.txt").read_text(encoding="utf-8")
+    assert f"src/doc.md: undefined -> {expected}" in log_text
+    assert "Summary {'checked': 1, 'changed_count': 1}" in log_text
 
 
 def test_pubdate_with_special_characters_is_escaped(
@@ -124,8 +117,7 @@ def test_sort_keys_option_sorts_yaml(tmp_path: Path, monkeypatch, capsys) -> Non
 
     assert yml.read_text(encoding="utf-8") == "a: 2\npubdate: Jan 02, 2000\nz: 1\n"
     captured = capsys.readouterr()
-    assert captured.out.strip().splitlines() == [
-        "src/doc.yml: Jan 01, 2000 -> Jan 02, 2000",
-        "1 file checked",
-        "1 file changed",
-    ]
+    assert captured.out == ""
+    log_text = (tmp_path / "log/update-pubdate.txt").read_text(encoding="utf-8")
+    assert "src/doc.yml: Jan 01, 2000 -> Jan 02, 2000" in log_text
+    assert "Summary {'checked': 1, 'changed_count': 1}" in log_text
