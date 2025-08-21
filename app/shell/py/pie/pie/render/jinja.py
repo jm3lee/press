@@ -283,6 +283,28 @@ def figure(desc):
         f'loading="lazy"/><figcaption>{caption}</figcaption></figure>'
     )
 
+
+def description(desc):
+    """Return the rendered ``description`` for ``desc``.
+
+    ``desc`` may be either a metadata dictionary or a string key which will be
+    resolved via :func:`get_cached_metadata`. The ``description`` field may
+    contain Markdown with embedded Jinja code. This helper expands any Jinja
+    expressions using :func:`render_jinja` and returns the resulting text.
+    """
+
+    if isinstance(desc, str):
+        desc = get_cached_metadata(desc)
+    elif not isinstance(desc, dict):
+        logger.error("Invalid descriptor type", type=str(type(desc)))
+        raise SystemExit(1)
+
+    snippet = desc.get("description")
+    if not snippet:
+        return ""
+
+    return render_jinja(snippet)
+
 def cite(*names: str) -> str:
     """Return Chicago style citation links for ``names``.
 
@@ -445,6 +467,7 @@ def create_env():
     env.globals["linkicon"] = linkicon
     env.globals["linkshort"] = linkshort
     env.globals["figure"] = figure
+    env.globals["description"] = description
     env.filters["get_desc"] = get_desc
     env.globals["render_jinja"] = render_jinja
     env.globals["to_alpha_index"] = to_alpha_index

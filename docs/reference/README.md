@@ -9,6 +9,7 @@ documents provide context for the task‑oriented
 - [architecture.md](architecture.md) – overview of the site's architecture.
 - [link-globals.md](link-globals.md) – global Jinja helpers for link formatting.
 - [jinja-globals.md](jinja-globals.md) – global variables exposed to templates.
+- [description.md](description.md) – render snippets from the `description` field.
 - [keyterms.md](keyterms.md) – glossary of important terminology.
 - [link-metadata.md](link-metadata.md) – link metadata format and usage.
 - [metadata-fields.md](metadata-fields.md) – description of common metadata fields referenced in

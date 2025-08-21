@@ -9,7 +9,8 @@ This document lists the common metadata keys used by Press and explains how miss
 ## Optional Fields
 
 - `author` – Author string passed to Pandoc.
-- `description` – Short summary used for meta tags.
+- `description` – Markdown snippet rendered through the `description` global
+  and used for meta tags.
 - `og_image` – OpenGraph image path.
 - `meta` – Array of additional `<meta>` tag definitions for Pandoc.
 - `icon` – Emoji or icon displayed by link globals.
