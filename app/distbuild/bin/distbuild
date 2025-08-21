@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
-set -x
 # Run this wrapper via `docker compose exec build-master ./bin/distbuild`.
 ssh -o StrictHostKeyChecking=no root@localhost "cd /data && distbuild \"$@\""
