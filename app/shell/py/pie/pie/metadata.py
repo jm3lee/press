@@ -8,6 +8,7 @@ import os
 import warnings
 from pathlib import Path
 from typing import Any, Dict, Mapping, Optional
+from urllib.parse import urljoin
 
 import redis
 from flatten_dict import unflatten
@@ -34,6 +35,13 @@ def get_url(filename: str) -> Optional[str]:
         extension.
     """
     prefix = "src" + os.sep
+    if filename.startswith(prefix):
+        relative_path = filename[len(prefix) :]
+        base, ext = os.path.splitext(relative_path)
+        if ext.lower() in (".md", ".yml", ".yaml"):
+            html_path = base + ".html"
+            return "/" + html_path
+    prefix = "build" + os.sep
     if filename.startswith(prefix):
         relative_path = filename[len(prefix) :]
         base, ext = os.path.splitext(relative_path)
@@ -99,10 +107,32 @@ def _add_id_if_missing(metadata: dict[str, Any], filepath: str) -> None:
         )
 
 
+def _add_canonical_link_if_missing(
+    metadata: dict[str, Any], filepath: str
+) -> None:
+    """Create ``link.canonical`` from ``url`` when missing."""
+
+    if metadata.get("link", {}).get("canonical"):
+        return
+
+    url = metadata.get("url")
+    if url is None:
+        logger.debug(
+            "Skipping canonical link; no url present", filename=filepath
+        )
+        return
+
+    base_url = os.getenv("BASE_URL", "").rstrip("/")
+    canonical = urljoin(base_url + "/", url.lstrip("/")) if base_url else url
+
+    metadata.setdefault("link", {})["canonical"] = canonical
+
+
 def generate_missing_metadata(metadata: dict[str, Any], filepath: str) -> dict[str, Any]:
     """Populate ``metadata`` with fields derived from ``filepath`` if absent."""
 
     _add_url_if_missing(metadata, filepath)
+    _add_canonical_link_if_missing(metadata, filepath)
     _add_citation_if_missing(metadata, filepath)
     _add_id_if_missing(metadata, filepath)
     return metadata

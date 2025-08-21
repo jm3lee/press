@@ -1,24 +1,24 @@
-title: Home
 author: Brian Lee
-definition: Example home page
-og_image: /img/home.png
-url: https://example.com/
-toc: false
+description: Example home page
 meta:
-  - property: og:title
-    content: Example Home
-  - property: og:description
-    content: Example home page
-  - property: og:image
-    content: /img/home.png
-  - property: og:url
-    content: https://example.com/
-  - name: twitter:card
-    content: summary_large_image
-  - name: twitter:title
-    content: Example Home
-  - name: twitter:description
-    content: Example home page
-  - name: twitter:image
-    content: /img/home.png
-pubdate: Aug 09, 2025
+- content: Example Home
+  property: og:title
+- content: Example home page
+  property: og:description
+- content: /img/home.png
+  property: og:image
+- content: https://example.com/
+  property: og:url
+- content: summary_large_image
+  name: twitter:card
+- content: Example Home
+  name: twitter:title
+- content: Example home page
+  name: twitter:description
+- content: /img/home.png
+  name: twitter:image
+og_image: /img/home.png
+pubdate: Aug 21, 2025
+title: Home
+toc: false
+url: /

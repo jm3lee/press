@@ -41,6 +41,7 @@ setup(
             'update-link-filters=pie.update.link_filters:main',
             'update-pubdate=pie.update.pubdate:main',
             'upgrade-indextree=pie.update.indextree:main',
+            'process-yaml=pie.process_yaml:main',
         ],
     },
 )
