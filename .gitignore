@@ -182,3 +182,7 @@ dist/app/webp/output
 logs
 log/
 app/*/.init
+
+# SSH keys generated for distbuild
+app/distbuild/id_rsa
+app/distbuild/id_rsa.pub

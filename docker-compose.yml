@@ -94,3 +94,25 @@ services:
     volumes:
       - ./app/shell/py/pie:/pie
     profiles: ["pdoc"]
+
+  build-worker:
+    build:
+      context: ./app/distbuild
+      dockerfile: Dockerfile.worker
+    container_name: press-build-worker
+    volumes:
+      - ./:/data
+
+  build-master:
+    build:
+      context: ./app/distbuild
+      dockerfile: Dockerfile.master
+    container_name: press-build-master
+    environment:
+      WORKER_HOSTS: build-worker
+    volumes:
+      - ./:/data
+    ports:
+      - "2222:22"
+    depends_on:
+      - build-worker

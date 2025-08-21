@@ -1,0 +1,20 @@
+FROM press-shell
+
+RUN apt-get update \
+    && apt-get install -y openssh-server \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir /var/run/sshd \
+    && ssh-keygen -A \
+    && mkdir -p /root/.ssh \
+    && ssh-keygen -t rsa -N '' -f /root/.ssh/id_rsa \
+    && cat /root/.ssh/id_rsa.pub > /root/.ssh/authorized_keys \
+    && chmod 600 /root/.ssh/authorized_keys /root/.ssh/id_rsa
+
+RUN pip install --no-cache-dir fabric invoke
+
+WORKDIR /app
+COPY py /app/py
+ENV PYTHONPATH=/app/py
+
+EXPOSE 22
+CMD ["/usr/sbin/sshd", "-D"]
