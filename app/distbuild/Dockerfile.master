@@ -10,11 +10,11 @@ RUN apt-get update \
     && cat /root/.ssh/id_rsa.pub > /root/.ssh/authorized_keys \
     && chmod 600 /root/.ssh/authorized_keys /root/.ssh/id_rsa
 
-RUN pip install --no-cache-dir --break-system-packages fabric invoke
-
 WORKDIR /app
-COPY py /app/py
-ENV PYTHONPATH=/app/py
+COPY . /app
+RUN pip install --no-cache-dir --break-system-packages .
+RUN mkdir -p /data
+WORKDIR /data
 
 EXPOSE 22
 ENTRYPOINT ["/usr/sbin/sshd", "-D"]
