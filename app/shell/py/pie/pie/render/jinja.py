@@ -424,7 +424,6 @@ def get_desc(name):
 def render_jinja(snippet):
     """Render a Jinja snippet using the current environment."""
 
-    logger.info(snippet)
     return env.from_string(snippet).render(**index_json)
 
 def to_alpha_index(i):
@@ -436,7 +435,6 @@ def read_yaml(filename):
     """Read ``filename`` as YAML and yield the ``toc`` sequence."""
 
     y = yaml.safe_load(read_utf8(filename))
-    logger.info(y["toc"])
     yield from y["toc"]
 
 def load_config(path: str | Path = DEFAULT_CONFIG) -> dict:
