@@ -111,6 +111,8 @@ def main(argv: Sequence[str] | None = None) -> None:
     else:
         print(output, end="")
 
+    logger.info("Generated redirects", count=len(redirects))
+
 
 if __name__ == "__main__":  # pragma: no cover - manual execution
     main()
