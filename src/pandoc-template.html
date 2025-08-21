@@ -35,6 +35,10 @@
         <meta$if(meta.name)$ name="$meta.name$"$endif$$if(meta.property)$ property="$meta.property$"$endif$ content="$meta.content$" />
         $endfor$
 
+        $if(link.canonical)$
+        <link rel="canonical" href="$link.canonical$" />
+        $endif$
+
         <!-- If you supply multiple CSS files via metadata -->
         <!-- The main stylesheet has to be included here because mobile browsers
             don't seem to apply the stylesheet otherwise, and fonts are too
