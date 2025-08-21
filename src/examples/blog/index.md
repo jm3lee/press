@@ -1,6 +1,6 @@
 <section>
 Welcome to the future of blogging! This sample article demonstrates the
-`pandoc` blog template included with Press.
+MUI-powered blog template included with Press.
 </section>
 
 <section>
@@ -29,8 +29,8 @@ improving performance on slower devices.
 - customize accent colors
 - extend the fade-in effect with your own classes
 
-Water.css provides a clean base, while the template's variables make it
-simple to tweak the look.
+MUI's baseline and theming system make it simple to tweak the look while
+keeping the footprint small.
 </section>
 
 <section>
