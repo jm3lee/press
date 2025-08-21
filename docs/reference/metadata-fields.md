@@ -15,6 +15,7 @@ This document lists the common metadata keys used by Press and explains how miss
 - `icon` – Emoji or icon displayed by link globals.
 - `link.tracking` – Boolean controlling external link behaviour.
 - `link.class` – CSS class for rendered links.
+- `link.canonical` – Absolute URL for the page.
 - `name` – **Deprecated.** Former display name used in navigation and indexes.
 
 ## Auto‑Generated Values
@@ -26,6 +27,7 @@ During indexing, `generate_missing_metadata` in `pie.metadata` fills in several 
 | `id`       | Filename without the extension                 |
 | `citation` | Lowercase form of the `title` value            |
 | `url`      | Derived from the source path (e.g. `src/foo.md` → `/foo.html`) |
+| `link.canonical` | Absolute form of the `url` value              |
 
 The `citation` value is used as the anchor text when other pages link to this document using Jinja globals such as `linktitle`.
 The helper that assigns these defaults lives in `generate_missing_metadata` within `pie.metadata`.
