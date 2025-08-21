@@ -1,0 +1,5 @@
+#!/bin/bash
+
+git fetch --all --prune --prune-tags
+git pull --rebase
+git submodule update --init --recursive --remote
