@@ -18,6 +18,7 @@ documents provide context for the task‑oriented
 - [update-pubdate.md](update-pubdate.md) – update the `pubdate` field for modified files.
 - [update-link-filters.md](update-link-filters.md) – convert legacy `link*` filters into globals.
 - [shell.md](shell.md) – run the project's shell service via docker compose.
+- [sitemap.md](sitemap.md) – generate an XML sitemap with absolute URLs.
 - [standalone-bin-scripts.md](standalone-bin-scripts.md) – rationale for self-contained helper scripts.
 
 For step‑by‑step workflows and tutorials, head back to the
