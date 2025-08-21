@@ -2,7 +2,7 @@ title: Trendy Blog Template Demo
 author: Ada Lovelace
 id: trendy-blog-template
 pubdate: Jan 1, 2025
-hero_image: https://via.placeholder.com/1200x400/F4A460/FFFFFF?text=Fall+Hero
+hero_image: hero.svg
 preamble: A short intro shows how you might tease readers into the story.
 pandoc:
   template: src/examples/blog/pandoc-template.html
@@ -12,6 +12,6 @@ css:
 header-includes:
   - '<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>'
   - '<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>'
-  - '<script src="https://unpkg.com/@emotion/react@11.11.1/umd/emotion-react.umd.min.js" crossorigin></script>'
-  - '<script src="https://unpkg.com/@emotion/styled@11.11.0/umd/emotion-styled.umd.min.js" crossorigin></script>'
+  - '<script src="https://unpkg.com/@emotion/react@11.11.1/dist/emotion-react.umd.min.js" crossorigin="anonymous"></script>'
+  - '<script src="https://unpkg.com/@emotion/styled@11.11.0/dist/emotion-styled.umd.min.js" crossorigin="anonymous"></script>'
   - '<script src="https://unpkg.com/@mui/material@5.15.0/umd/material-ui.production.min.js" crossorigin></script>'
