@@ -56,7 +56,9 @@ def execute_commands(
             connect_kwargs=connect_kwargs,
             config=config,
         )
-        runner = lambda c: conn.run(c, hide=True, warn=True, pty=False, in_stream=False)
+        runner = lambda c: conn.run(
+            f"cd /data && {c}", hide=True, warn=True, pty=False, in_stream=False
+        )
     else:
         runner = lambda c: local_run(c, hide=True, warn=True, pty=False, in_stream=False)
 

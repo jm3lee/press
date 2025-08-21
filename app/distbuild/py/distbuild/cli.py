@@ -1,10 +1,13 @@
 import argparse
+import os
 import sys
 
 from .worker import execute_commands
 
 
 def main() -> None:
+    if os.path.isdir("/data"):
+        os.chdir("/data")
     parser = argparse.ArgumentParser(
         description="Dispatch commands to a worker via SSH"
     )
