@@ -1,5 +1,6 @@
 import os
 import pytest
+import yaml
 
 from pie import metadata
 
@@ -78,4 +79,17 @@ def test_load_metadata_pair_conflict_shows_path(tmp_path):
         assert "dir/post.yml" in str(record[0].message)
     finally:
         os.chdir("/tmp")
+
+
+def test_read_from_yaml_error_logs_path(tmp_path):
+    """Malformed YAML reports the filename."""
+    bad = tmp_path / "bad.yml"
+    bad.write_text(":\n")
+    os.chdir(tmp_path)
+    try:
+        with pytest.raises(yaml.YAMLError) as excinfo:
+            metadata.read_from_yaml("bad.yml")
+    finally:
+        os.chdir("/tmp")
+    assert "bad.yml" in str(excinfo.value)
 
