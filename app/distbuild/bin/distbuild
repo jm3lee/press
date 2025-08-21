@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
-
+set -x
 ssh -o StrictHostKeyChecking=no -p 2222 root@localhost python -m distbuild.cli "$@"
