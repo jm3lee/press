@@ -284,11 +284,11 @@ def figure(desc):
     )
 
 
-def description(desc):
-    """Return the rendered ``description`` for ``desc``.
+def definition(desc):
+    """Return the rendered ``definition`` for ``desc``.
 
     ``desc`` may be either a metadata dictionary or a string key which will be
-    resolved via :func:`get_cached_metadata`. The ``description`` field may
+    resolved via :func:`get_cached_metadata`. The ``definition`` field may
     contain Markdown with embedded Jinja code. This helper expands any Jinja
     expressions using :func:`render_jinja` and returns the resulting text.
     """
@@ -299,7 +299,7 @@ def description(desc):
         logger.error("Invalid descriptor type", type=str(type(desc)))
         raise SystemExit(1)
 
-    snippet = desc.get("description")
+    snippet = desc.get("definition")
     if not snippet:
         return ""
 
@@ -467,7 +467,7 @@ def create_env():
     env.globals["linkicon"] = linkicon
     env.globals["linkshort"] = linkshort
     env.globals["figure"] = figure
-    env.globals["description"] = description
+    env.globals["definition"] = definition
     env.filters["get_desc"] = get_desc
     env.globals["render_jinja"] = render_jinja
     env.globals["to_alpha_index"] = to_alpha_index
