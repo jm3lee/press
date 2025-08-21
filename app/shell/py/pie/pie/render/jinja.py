@@ -283,6 +283,28 @@ def figure(desc):
         f'loading="lazy"/><figcaption>{caption}</figcaption></figure>'
     )
 
+
+def definition(desc):
+    """Return the rendered ``definition`` for ``desc``.
+
+    ``desc`` may be either a metadata dictionary or a string key which will be
+    resolved via :func:`get_cached_metadata`. The ``definition`` field may
+    contain Markdown with embedded Jinja code. This helper expands any Jinja
+    expressions using :func:`render_jinja` and returns the resulting text.
+    """
+
+    if isinstance(desc, str):
+        desc = get_cached_metadata(desc)
+    elif not isinstance(desc, dict):
+        logger.error("Invalid descriptor type", type=str(type(desc)))
+        raise SystemExit(1)
+
+    snippet = desc.get("definition")
+    if not snippet:
+        return ""
+
+    return render_jinja(snippet)
+
 def cite(*names: str) -> str:
     """Return Chicago style citation links for ``names``.
 
@@ -402,7 +424,6 @@ def get_desc(name):
 def render_jinja(snippet):
     """Render a Jinja snippet using the current environment."""
 
-    logger.info(snippet)
     return env.from_string(snippet).render(**index_json)
 
 def to_alpha_index(i):
@@ -414,7 +435,6 @@ def read_yaml(filename):
     """Read ``filename`` as YAML and yield the ``toc`` sequence."""
 
     y = yaml.safe_load(read_utf8(filename))
-    logger.info(y["toc"])
     yield from y["toc"]
 
 def load_config(path: str | Path = DEFAULT_CONFIG) -> dict:
@@ -445,6 +465,7 @@ def create_env():
     env.globals["linkicon"] = linkicon
     env.globals["linkshort"] = linkshort
     env.globals["figure"] = figure
+    env.globals["definition"] = definition
     env.filters["get_desc"] = get_desc
     env.globals["render_jinja"] = render_jinja
     env.globals["to_alpha_index"] = to_alpha_index

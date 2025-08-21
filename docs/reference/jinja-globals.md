@@ -22,6 +22,8 @@ for details on the structure of this metadata.
   be supplied via `desc['figure']['urls']` or a `widths`/`pattern` pair to
   populate `srcset` and `sizes`. The caption defaults to
   `desc['figure']['caption']` when present, otherwise the entry's `title`.
+- `definition(desc)` – expand the `definition` metadata field as Markdown.
+  See [definition.md](definition.md) for details.
 
 Example:
 
