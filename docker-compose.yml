@@ -80,6 +80,15 @@ services:
       - ./app/shell/py/pie/tests:/press/py/pie/tests
       - ./src/dep.mk:/app/mk/dep.mk
 
+  builder:
+    image: press-shell
+    container_name: press-builder
+    entrypoint: ["sshd", "-D"]
+    ports:
+      - "2222:22"
+    volumes:
+      - ~/.ssh/id_rsa.pub:/root/.ssh/authorized_keys:ro
+
   release:
     image: press-release
     build:
