@@ -28,3 +28,12 @@ def test_fail_display(tmp_path: Path, capsys) -> None:
     assert check_bad_mathjax.main([str(tmp_path)]) == 1
     captured = capsys.readouterr()
     assert "bad math" in captured.err
+
+
+def test_exclude_file(tmp_path: Path) -> None:
+    """Files listed in the exclude YAML are ignored."""
+    bad = tmp_path / "bad.md"
+    bad.write_text("text \\(a+b\\)", encoding="utf-8")
+    exclude = tmp_path / "exclude.yml"
+    exclude.write_text(f"- {bad.name}\n", encoding="utf-8")
+    assert check_bad_mathjax.main([str(tmp_path), "-x", str(exclude)]) == 0
