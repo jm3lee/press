@@ -96,6 +96,8 @@ services:
     volumes:
       - ./:/data
       - ~/.ssh/id_rsa.pub:/tmp/id_rsa.pub:ro
+    depends_on:
+      - shell
 
   release:
     image: press-release
