@@ -51,10 +51,15 @@ $(BUILD_DIR): ## Helper target used by other rules
 	$(call status,Prepare build directory $@)
 	$(Q)mkdir -p $@
 
+all: build/examples/mermaid/diagram.svg | build/examples/mermaid
+
+build/examples/mermaid:
+	mkdir -p $@
+
 # Generate SVG diagrams from Mermaid source files
-$(BUILD_DIR)/%.svg: $(BUILD_DIR)/%.mmd | $(BUILD_DIR)
+$(BUILD_DIR)/%.svg: $(SRC_DIR)/%.mmd | $(dir $@)
 	$(call status,Render Mermaid $<)
-	$(Q)$(COMPOSE_RUN) mermaid -i $< -o $@
+	$(Q)$(COMPOSE_RUN) -u `id -u` mermaid -i $< -o $@
 
 # Docker-related targets
 # Initialize Docker authentication and build the Nginx image

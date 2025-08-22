@@ -54,9 +54,8 @@ services:
       - ../log:/app/log
 
   mermaid:
-    image: ghcr.io/mermaid-js/mermaid-cli:latest
+    image: minlag/mermaid-cli
     container_name: press-mermaid
-    entrypoint: ["mmdc"]
     volumes:
       - ./:/data
 

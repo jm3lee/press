@@ -6,6 +6,7 @@ features.
 - [Index Tree Demo](examples/indextree/index.md)
 - [Jinja Examples](examples/jinja.md)
 - [Link Global Examples](examples/link-globals.md)
+- [Mermaid Diagram Example](examples/mermaid/index.md)
 - [MagicBar Demo](magicbar/index.md)
 - [Quickstart](quickstart.md)
 - [Quiz Demo](quiz/index.md)
