@@ -16,7 +16,7 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 from pie.cli import create_parser
 from pie.logging import configure_logging
-from pie.utils import read_yaml
+from pie.utils import load_exclude_file
 
 
 # Detect whether we should emit ANSI colour codes. We only use colours when
@@ -68,14 +68,7 @@ def main(argv: list[str] | None = None) -> int:
     configure_logging(args.verbose, args.log)
     directory = Path(args.directory).resolve()
     html_files = list(directory.rglob("*.html"))
-    exclude: set[Path] = set()
-    if args.exclude:
-        data = read_yaml(args.exclude) or []
-        for item in data:
-            p = Path(item)
-            if not p.is_absolute():
-                p = directory / p
-            exclude.add(p.resolve())
+    exclude = load_exclude_file(args.exclude, directory)
     ok = True
     for html_file in html_files:
         if html_file.resolve() in exclude:

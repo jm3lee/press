@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
+from pathlib import Path
 
 import yaml
 
@@ -61,6 +62,25 @@ def write_yaml(data, filename: str) -> None:
     logger.debug("Writing YAML", filename=filename)
     with open(filename, "w", encoding="utf-8") as f:
         yaml.safe_dump(data, f, allow_unicode=True, sort_keys=False)
+
+
+def load_exclude_file(filename: str | Path | None, root: Path) -> set[Path]:
+    """Return a set of resolved paths listed in *filename*.
+
+    The YAML file may contain absolute paths or ones relative to *root*.
+    If *filename* is ``None`` an empty set is returned.
+    """
+
+    exclude: set[Path] = set()
+    if not filename:
+        return exclude
+    data = read_yaml(str(filename)) or []
+    for item in data:
+        p = Path(item)
+        if not p.is_absolute():
+            p = root / p
+        exclude.add(p.resolve())
+    return exclude
 
 
 def get_pubdate(date: datetime | None = None) -> str:

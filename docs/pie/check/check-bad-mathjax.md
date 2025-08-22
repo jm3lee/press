@@ -7,8 +7,10 @@ returns a non-zero exit status when deprecated delimiters are found.
 ## Usage
 
 ```bash
-check-bad-mathjax [directory]
+check-bad-mathjax [-x EXCLUDE] [directory]
 ```
-
-The optional directory defaults to `src`. Each file that contains forbidden
+ 
+The optional directory defaults to `src`. When present,
+`cfg/check-bad-mathjax-exclude.yml` is loaded to determine files to skip. Use
+``-x`` to supply a different YAML file. Each file that contains forbidden
 delimiters is logged for review.
