@@ -67,7 +67,8 @@ container:
    `dep.mk` can introduce custom targets.
 5. **Validation** – Link checking and page title verification run against the
    generated HTML before the build is considered complete. See
-   [checklinks](checklinks.md) and [check-page-title](check-page-title.md).
+  [checklinks](../pie/check/checklinks.md) and
+  [check-page-title](../pie/check/check-page-title.md).
 
 The Makefiles track dependencies so incremental runs only rebuild what changed.
 Deleting targets with `remake` or `r clean` forces regeneration when needed.

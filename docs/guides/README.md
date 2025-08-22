@@ -14,10 +14,16 @@ concepts and data formats, see the
 - [update-index.md](update-index.md) – keep the index in sync after edits.
 
 ## Validation and testing
-- [checklinks.md](checklinks.md) – scan rendered HTML for broken links.
-- [check-page-title.md](check-page-title.md) – verify page titles.
-- [check-underscores.md](check-underscores.md) – report internal URLs that contain underscores.
-- [check-bad-mathjax.md](check-bad-mathjax.md) – detect old MathJax delimiters.
+- [checklinks](../pie/check/checklinks.md) – scan rendered HTML for
+  broken links.
+- [check-page-title](../pie/check/check-page-title.md) – verify page
+  titles.
+- [check-underscores](../pie/check/check-underscores.md) – report
+  internal URLs that contain underscores.
+- [check-post-build](../pie/check/check-post-build.md) – verify build
+  artifacts.
+- [check-bad-mathjax](../pie/check/check-bad-mathjax.md) – detect old
+  MathJax delimiters.
 - [tests.md](tests.md) – run the automated test suite.
 
 ## Services and utilities
