@@ -1,18 +1,26 @@
 # Architecture
 
 ## Overview
-Press is a static-site generator that wraps Pandoc tooling in a containerized build and runtime environment. Docker Compose services and Makefiles coordinate building Markdown content into HTML or PDF and serving the generated site.
+Press is a static-site generator that wraps Pandoc tooling in a
+containerized build and runtime environment. Docker Compose services and
+Makefiles coordinate building Markdown content into HTML or PDF and
+serving the generated site.
 
 ## Repository Layout
-- `app/` – Dockerfiles, Docker Compose templates, and build scripts used inside containers.
+- `app/` – Dockerfiles, Docker Compose templates, and build scripts used
+  inside containers.
 - `bin/` – host-side helper scripts for container management.
 - `cfg/` – configuration files used during validation tasks.
 - `src/` – markdown sources, templates, and static assets.
 
 ## Orchestration
-The top-level Makefile (`redo.mk`) drives all host-side automation. It launches required services and executes the inner build Makefile within the shell container:
+The top-level Makefile (`redo.mk`) drives all host-side automation. It
+launches required services and executes the repository Makefile through
+the builder service:
 
-- The default goal starts `dragonfly` and invokes `/app/mk/build.mk` inside the shell container to render the site.
+- The default goal starts `dragonfly` and `builder` and uses SSH to run the
+  project-root `makefile` inside the builder container, which shares its
+  image with `shell`.
 - A `test` target reruns the build's own tests from the host environment.
 
 ## Services
@@ -20,23 +28,37 @@ The top-level Makefile (`redo.mk`) drives all host-side automation. It launches 
 
 - `nginx` and `nginx-dev` serve generated content.
 - `shell` provides the build environment and exposes tools and tests.
-- `dragonfly` supplies a Redis-compatible store used for tracking document metadata.
-- Auxiliary services `sync`, `seed`, and `webp` handle S3 uploads, database seeding, and WebP image conversion. The `sync` and `seed` containers read the S3 bucket from the `S3_BUCKET_PATH` environment variable (default: `s3://press`) and the S3 configuration file from `S3CFG_PATH` (default: `/root/.s3cfg`).
+- `builder` runs the same image as `shell` but exposes an SSH daemon. The
+  host Makefile drives builds through it for a clean, repeatable
+  environment.
+- `dragonfly` supplies a Redis-compatible store used for tracking
+  document metadata.
+- `mermaid` renders diagram sources with `mermaid-cli`. It remains a
+  standalone service because the tool is self-contained and kept
+  separate from containers like `shell` and `builder`.
+- Auxiliary services `sync`, `seed`, and `webp` handle S3 uploads,
+  database seeding, and WebP image conversion. The `sync` and `seed`
+  containers read the S3 bucket from the `S3_BUCKET_PATH` environment
+  variable (default: `s3://press`) and the S3 configuration file from
+  `S3CFG_PATH` (default: `/root/.s3cfg`).
 
 ## Build Pipeline
-The shell container executes `app/shell/mk/build.mk` to transform sources into deliverables:
-
-1. Discover Markdown and YAML files and update a Redis-backed index. See [build-index](../guides/build-index.md) and [update-index](../guides/update-index.md) for details on this step. Each document's source paths are stored under `<id>.path`, and each path also maps back to the document `id` for reverse lookups.
-2. Convert preprocessed Markdown to HTML and PDF using Pandoc with a shared template and options for table of contents, math rendering, and cross references.
-3. Copy CSS assets and minify the resulting site.
-4. Run link checking and page title validation before marking the build complete. See [checklinks](../guides/checklinks.md) and [check-page-title](../guides/check-page-title.md).
+The builder service runs the project-root `makefile` to transform sources
+into deliverables. It performs index discovery, pre-processing, rendering,
+asset handling, and validation. See the [build-process guide](../guides/
+build-process.md) for a detailed walkthrough of each stage. Make's
+dependency tracking means subsequent runs only rebuild files whose inputs
+changed; use `remake` or `r clean` to force a full regeneration.
 
 ## Data Flow
-Source files in `src/` become processed artifacts in `build/`. The development `nginx-dev` service mounts the build directory for local preview, while production content can be synchronized or served by `nginx`.
+Source files in `src/` become processed artifacts in `build/`. The
+development `nginx-dev` service mounts the build directory for local
+preview, while production content can be synchronized or served by
+`nginx`.
 
 ## Testing
-Python utilities that support the build live under `app/shell/py/pie`. Unit
-tests for these helpers execute with `pytest` via the host Makefile or directly
-inside the shell container. See the [tests guide](../guides/tests.md) for
-usage.
+Python utilities that support the build live under
+`app/shell/py/pie`. Unit tests for these helpers execute with `pytest`
+via the host Makefile or directly inside the shell container. See the
+[tests guide](../guides/tests.md) for usage.
 
