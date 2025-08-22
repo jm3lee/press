@@ -51,6 +51,11 @@ $(BUILD_DIR): ## Helper target used by other rules
 	$(call status,Prepare build directory $@)
 	$(Q)mkdir -p $@
 
+# Generate SVG diagrams from Mermaid source files
+$(BUILD_DIR)/%.svg: $(BUILD_DIR)/%.mmd | $(BUILD_DIR)
+	$(call status,Render Mermaid $<)
+	$(Q)$(COMPOSE_RUN) mermaid -i $< -o $@
+
 # Docker-related targets
 # Initialize Docker authentication and build the Nginx image
 # Uncomment the lines below to tag and push the Docker image
