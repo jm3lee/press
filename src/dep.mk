@@ -9,3 +9,12 @@ build/static/js:
 include app/quiz/dep.mk
 include app/indextree/dep.mk
 include app/magicbar/dep.mk
+
+# Mermaid example diagram
+all: build/examples/mermaid/diagram.mmd
+
+build/examples/mermaid:
+	mkdir -p $@
+
+build/examples/mermaid/diagram.mmd: src/examples/mermaid/diagram.mmd | build/examples/mermaid
+	cp $< $@
