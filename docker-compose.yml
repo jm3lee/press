@@ -89,11 +89,12 @@ services:
   builder:
     image: press-shell
     container_name: press-builder
-    entrypoint: ["sshd", "-D"]
+    # Copy the host's public key to a root-owned file before starting sshd.
+    entrypoint: ["/bin/sh", "-c", "install -m 600 /tmp/id_rsa.pub /root/.ssh/authorized_keys && /usr/sbin/sshd -D"]
     ports:
       - "2222:22"
     volumes:
-      - ~/.ssh/id_rsa.pub:/root/.ssh/authorized_keys:ro
+      - ~/.ssh/id_rsa.pub:/tmp/id_rsa.pub:ro
 
   release:
     image: press-release
