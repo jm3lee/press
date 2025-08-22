@@ -31,7 +31,7 @@ run_make() {
 
 cleanup() {
   "${DOCKER_COMPOSE[@]}" down
-  docker prune
+  docker system prune -f
 }
 trap cleanup EXIT
 
