@@ -68,7 +68,7 @@ def get_tracking_options(desc):
     link = desc.get("link")
     if link is not None:
         tracking = link.get("tracking")
-        if not tracking:
+        if tracking == False:
             return 'rel="noopener noreferrer" target="_blank"'
     return ""
 
