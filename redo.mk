@@ -24,7 +24,7 @@ DOCKER_COMPOSE := docker compose -f $(COMPOSE_FILE)
 COMPOSE_RUN := $(DOCKER_COMPOSE) run --build --rm -T
 PYTEST_CMD  := $(DOCKER_COMPOSE) run --entrypoint pytest --rm shell
 
-SSH_MAKE := ssh -p2222 root@localhost make -C /data
+SSH_MAKE := ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p2222 root@localhost make -C /data
 
 # Verbosity control
 VERBOSE ?= 0
@@ -44,7 +44,7 @@ status = @echo "==> $(1)"
 .PHONY: all
 all: ## Build the site using the builder service
 	$(call status,Build site)
-	$(Q)$(DOCKER_COMPOSE) up -d dragonfly
+	$(Q)$(DOCKER_COMPOSE) up -d dragonfly builder
 	$(Q)$(SSH_MAKE) VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR)
 
 $(BUILD_DIR): ## Helper target used by other rules

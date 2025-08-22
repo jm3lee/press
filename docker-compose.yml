@@ -91,6 +91,12 @@ services:
     container_name: press-builder
     # Copy the host's public key to a root-owned file before starting sshd.
     entrypoint: ["/bin/sh", "-c", "mkdir -p /root/.ssh; install -m 600 /tmp/id_rsa.pub /root/.ssh/authorized_keys && /usr/sbin/sshd -D"]
+    environment:
+      OPENAI_API_KEY: "${OPENAI_API_KEY}"
+      REDIS_HOST: dragonfly
+      REDIS_PORT: 6379
+      TEST_HOST_URL: ${TEST_HOST_URL:-http://nginx-test}
+      BASE_URL: ${BASE_URL:-http://localhost}
     ports:
       - "2222:22"
     volumes:

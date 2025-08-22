@@ -1,6 +1,9 @@
 # Makefile for building and managing Press
 # Migrated from app/shell/mk/build.mk. Targets now run from the repository root.
 
+export PATH := /app/bin:$(PATH)
+export BASE_URL := http://localhost
+
 # Override MAKEFLAGS (so your settings can’t be clobbered by the environment)
 # docker-make previously passed these flags inside the container; still useful.
 override MAKEFLAGS += --warn-undefined-variables  \
