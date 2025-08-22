@@ -23,6 +23,10 @@ Include the image in your document:
 ![Example flowchart](diagram.svg)
 ```
 
+It will show up like this:
+
+![Example flowchart](diagram.svg)
+
 Mermaid supports many chart types. The snippet below shows a simple
 sequence diagram:
 
