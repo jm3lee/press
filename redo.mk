@@ -24,7 +24,8 @@ DOCKER_COMPOSE := docker compose -f $(COMPOSE_FILE)
 COMPOSE_RUN := $(DOCKER_COMPOSE) run --build --rm -T
 PYTEST_CMD  := $(DOCKER_COMPOSE) run --entrypoint pytest --rm shell
 
-SSH_MAKE := ssh -p 2222 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@localhost make -C /data
+SSH_PORT ?= 2222
+SSH_MAKE := ssh -p $(SSH_PORT) -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@localhost make -C /data
 
 # Verbosity control
 VERBOSE ?= 0
