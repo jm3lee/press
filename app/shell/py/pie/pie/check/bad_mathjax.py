@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail if Markdown files use \(\) or \[\] math delimiters."""
+r"""Fail if Markdown files use \(\) or \[\] math delimiters."""
 
 from __future__ import annotations
 
