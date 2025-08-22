@@ -56,7 +56,6 @@ services:
   mermaid:
     image: minlag/mermaid-cli
     container_name: press-mermaid
-    entrypoint: ["mmdc"]
     volumes:
       - ./:/data
 

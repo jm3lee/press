@@ -59,7 +59,7 @@ build/examples/mermaid:
 # Generate SVG diagrams from Mermaid source files
 $(BUILD_DIR)/%.svg: $(SRC_DIR)/%.mmd | $(dir $@)
 	$(call status,Render Mermaid $<)
-	$(Q)$(COMPOSE_RUN) mermaid -i $< -o $@
+	$(Q)$(COMPOSE_RUN) -u `id -u` mermaid -i $< -o $@
 
 # Docker-related targets
 # Initialize Docker authentication and build the Nginx image
