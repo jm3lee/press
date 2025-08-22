@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import os
 
 from pie.check import bad_mathjax as check_bad_mathjax
 
@@ -37,3 +38,19 @@ def test_exclude_file(tmp_path: Path) -> None:
     exclude = tmp_path / "exclude.yml"
     exclude.write_text(f"- {bad.name}\n", encoding="utf-8")
     assert check_bad_mathjax.main([str(tmp_path), "-x", str(exclude)]) == 0
+
+
+def test_default_exclude_file(tmp_path: Path) -> None:
+    """Default exclude YAML is used when present."""
+    bad = tmp_path / "bad.md"
+    bad.write_text("text \\(a+b\\)", encoding="utf-8")
+    cfg = tmp_path / "cfg"
+    cfg.mkdir()
+    exclude = cfg / "check-bad-mathjax-exclude.yml"
+    exclude.write_text(f"- {bad.name}\n", encoding="utf-8")
+    cwd = os.getcwd()
+    os.chdir(tmp_path)
+    try:
+        assert check_bad_mathjax.main([str(tmp_path)]) == 0
+    finally:
+        os.chdir(cwd)

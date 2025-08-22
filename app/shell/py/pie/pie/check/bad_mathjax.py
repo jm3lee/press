@@ -12,6 +12,7 @@ from pie.logging import configure_logging, logger
 from pie.utils import load_exclude_file
 
 DEFAULT_LOG = "log/check-bad-mathjax.txt"
+DEFAULT_EXCLUDE = Path("cfg/check-bad-mathjax-exclude.yml")
 PATTERNS = [
     re.compile(r"\\\([^\n]*?\\\)"),
     re.compile(r"\\\[[^\n]*?\\\]"),
@@ -33,7 +34,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "-x",
         "--exclude",
-        help="YAML file listing Markdown files to skip",
+        help=(
+            "YAML file listing Markdown files to skip "
+            f"(default: {DEFAULT_EXCLUDE})"
+        ),
     )
     return parser.parse_args(argv)
 
@@ -49,7 +53,12 @@ def main(argv: list[str] | None = None) -> int:
     configure_logging(args.verbose, args.log)
 
     root = Path(args.directory)
-    exclude = load_exclude_file(args.exclude, root)
+    if args.exclude:
+        exclude = load_exclude_file(args.exclude, root)
+    elif DEFAULT_EXCLUDE.is_file():
+        exclude = load_exclude_file(DEFAULT_EXCLUDE, root)
+    else:
+        exclude = set()
     ok = True
     for md in root.rglob("*.md"):
         if md.resolve() in exclude:
