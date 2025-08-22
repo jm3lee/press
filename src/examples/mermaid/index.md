@@ -1,30 +1,15 @@
-# Mermaid Example
+two ways to include mermaid diagrams
 
-This short tutorial shows how to render a Mermaid diagram during the build.
+## method 1
 
-The source lives in `diagram.mmd`:
+use include.py
 
 ```mermaid
 {{ include("diagram.mmd") }}
 ```
 
-The `src/dep.mk` file copies the source into the build tree and invokes the
-Mermaid CLI:
+## method 2
 
-```make
-all: build/examples/mermaid/diagram.mmd
-
-build/examples/mermaid:
-        mkdir -p $@
-
-build/examples/mermaid/diagram.mmd: src/examples/mermaid/diagram.mmd | \
-    build/examples/mermaid
-        cp $< $@
-```
-
-The rule above uses a pattern from `redo.mk` to convert the copied `.mmd`
-file into `diagram.svg`.
-
-Refer to the generated image below:
+use build rules in redo.mk to generate .svg and include it as an image
 
 ![Example flowchart](diagram.svg)
