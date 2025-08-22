@@ -22,10 +22,12 @@ RUN apt-get update -qq && \
         locales \
         make \
         minify \
+        openssh-server \
         pysassc && \
     curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get install -y --no-install-recommends nodejs && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+    apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    mkdir -p /run/sshd
 
 # -------------------------------------------------------------------
 # Locale configuration
