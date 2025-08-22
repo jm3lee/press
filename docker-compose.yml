@@ -53,6 +53,13 @@ services:
       - ./app/webp/output:/app/output
       - ../log:/app/log
 
+  mermaid:
+    image: ghcr.io/mermaid-js/mermaid-cli:latest
+    container_name: press-mermaid
+    entrypoint: ["mmdc"]
+    volumes:
+      - ./:/data
+
   # Default port is 6379. Not exposed to the host to avoid port conflicts.
   # You can run redis-cli within this container.
   #   docker compose exec dragonfly redis-cli
