@@ -24,7 +24,7 @@ DOCKER_COMPOSE := docker compose -f $(COMPOSE_FILE)
 COMPOSE_RUN := $(DOCKER_COMPOSE) run --build --rm -T
 PYTEST_CMD  := $(DOCKER_COMPOSE) run --entrypoint pytest --rm shell
 
-MAKE_CMD := $(DOCKER_COMPOSE) run --rm --entrypoint make -u $(shell id -u) -T shell
+SSH_MAKE := ssh -p 2222 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@localhost make -C /data
 
 # Verbosity control
 VERBOSE ?= 0
@@ -42,10 +42,10 @@ status = @echo "==> $(1)"
 
 # Define the default target to build everything
 .PHONY: all
-all: ## Build the site by invoking /app/mk/build.mk inside the shell container
+all: ## Build the site using the builder service
 	$(call status,Build site)
-	$(Q)$(DOCKER_COMPOSE) up -d dragonfly
-	$(Q)$(MAKE_CMD) -f /app/mk/build.mk VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR)
+	$(Q)$(DOCKER_COMPOSE) up -d dragonfly builder
+	$(Q)$(SSH_MAKE) VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR)
 
 $(BUILD_DIR): ## Helper target used by other rules
 	$(call status,Prepare build directory $@)
@@ -57,7 +57,7 @@ build/examples/mermaid:
 	mkdir -p $@
 
 # Generate SVG diagrams from Mermaid source files
-$(BUILD_DIR)/%.svg: $(SRC_DIR)/%.mmd | $(dir $@)
+$(BUILD_DIR)/%.svg: $(SRC_DIR)/%.mmd | $(dir $(BUILD_DIR)/%.svg)
 	$(call status,Render Mermaid $<)
 	$(Q)$(COMPOSE_RUN) -u `id -u` mermaid -i $< -o $@
 
@@ -81,12 +81,12 @@ docker: test ## Build and push the Nginx image after running test
 .PHONY: test
 test: ## Restart nginx-dev and run tests
 	$(call status,Run tests)
-	$(Q)$(MAKE_CMD) -f /app/mk/build.mk VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) test
+	$(Q)$(SSH_MAKE) VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) test
 
 .PHONY: check
 check:
 	$(call status,Run checks)
-	$(Q)$(MAKE_CMD) -f /app/mk/build.mk VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) check
+	$(Q)$(SSH_MAKE) VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) check
 
 # Target to bring up the development Nginx container
 .PHONY: up
@@ -107,9 +107,7 @@ down: ## Stop and remove the compose stack
 # Clean the build directory by removing all build artifacts
 .PHONY: clean
 clean: ## Remove everything under build/
-	$(call status,Remove build artifacts)
-	$(Q)-rm -rf $(BUILD_DIR)/*
-	$(Q)-rm -f $(BUILD_DIR)/.update-index
+	$(Q)$(SSH_MAKE) VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) clean
 
 .PHONY: distclean
 distclean: clean ## Remove .init markers and clear Dragonfly index cache
@@ -185,7 +183,7 @@ cov:
 .PHONY: t
 t: ## Restart nginx-dev and run tests, ansi colors
 	$(call status,Run tests with colors)
-	$(Q)$(DOCKER_COMPOSE) run --entrypoint make --rm shell -f /app/mk/build.mk VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) test
+	$(Q)$(SSH_MAKE) VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) test
 	$(Q)$(PYTEST_CMD) /press/py/pie/tests
 
 .PHONY: redis
