@@ -98,7 +98,7 @@ services:
       TEST_HOST_URL: ${TEST_HOST_URL:-http://nginx-test}
       BASE_URL: ${BASE_URL:-http://localhost}
     ports:
-      - "2222:22"
+      - "${SSH_PORT:-2222}:22"
     volumes:
       - ./:/data
       - ~/.ssh/id_rsa.pub:/tmp/id_rsa.pub:ro
