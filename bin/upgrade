@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 # Run after git pull to rebuild everything required for development.
+# Use -p to run bin/pull after distclean.
 set -euo pipefail
+
+RUN_PULL=0
+while getopts "p" opt; do
+  case "$opt" in
+    p) RUN_PULL=1 ;;
+    *) echo "Usage: $0 [-p]" >&2; exit 1 ;;
+  esac
+done
+shift $((OPTIND - 1))
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
@@ -32,6 +42,10 @@ echo "Starting dragonfly..."
 "${DOCKER_COMPOSE[@]}" up -d dragonfly
 echo "Running distclean..."
 run_make distclean
+if [ "$RUN_PULL" -eq 1 ]; then
+  echo "Running pull..."
+  bin/pull
+fi
 echo "Building shell image..."
 "${DOCKER_COMPOSE[@]}" build shell
 echo "Running make..."
