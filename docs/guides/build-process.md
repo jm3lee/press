@@ -30,21 +30,55 @@ Start the development stack and render the site:
 
 ```bash
 r up      # start compose services
-r all     # invoke app/shell/mk/build.mk inside the shell container
+r all     # run the repository makefile inside the builder container
 ```
 
-The build reads source files under `src/` (or `SRC_DIR` if overridden) and writes
-HTML and assets to `build/`. Logs are stored in `log/`.
+The build reads source files under `src/` (or `SRC_DIR` if overridden) and
+writes HTML and assets to `build/`. Logs are stored in `log/`.
 
 If you only need the build step without starting services, run `r all` directly.
 
+Behind the scenes `r all` talks to the **builder** service over SSH. Builder
+shares the same image and mounted volumes as `shell` but exposes an SSH daemon
+so the host Makefile can drive the project-root `makefile` inside a long-lived
+container. Use `shell` for ad-hoc commands and tests; rely on `builder` for
+repeatable builds from the host.
+
+## Pipeline overview
+
+Running `r all` triggers a sequence of Make targets inside the builder
+container:
+
+1. **Index discovery** – Markdown and YAML files are scanned and their metadata
+   recorded in the `dragonfly` key-value store. Each document's source paths are
+   stored under `<id>.path` and each path maps back to its owning ID. The build
+   uses this index to resolve cross references and dependency relationships.
+2. **Pre-processing** – Custom filters convert assets before Pandoc sees them.
+   Examples include `preprocess` for macro expansion, YAML normalization, and
+   rules that turn Mermaid diagrams into SVG. Diagram rendering delegates to the
+   standalone `mermaid` service, which isolates the third-party CLI from core
+   images such as `shell` and `builder`.
+3. **Pandoc rendering** – Pre-processed Markdown is converted to HTML and PDF
+   using a shared template. The command enables table of contents generation,
+   MathJax rendering, and cross-reference resolution.
+4. **Asset pipeline** – SCSS stylesheets and other static files are compiled or
+   copied into `build/`. The default `src/css/style.css` file supports the full
+   SCSS syntax and produces `build/css/style.css`. Additional rules from
+   `dep.mk` can introduce custom targets.
+5. **Validation** – Link checking and page title verification run against the
+   generated HTML before the build is considered complete. See
+   [checklinks](checklinks.md) and [check-page-title](check-page-title.md).
+
+The Makefiles track dependencies so incremental runs only rebuild what changed.
+Deleting targets with `remake` or `r clean` forces regeneration when needed.
+
 ## Styling with SCSS
 
-Site styles live under `src/css/` and are compiled with the Python `libsass` library into
-`build/css/`. The default stylesheet is `src/css/style.css` which supports
-full SCSS syntax. Any changes to files in this directory are automatically
-processed during the `r all` build and the output CSS is written to
-`build/css/style.css`.
+Site styles live under `src/css/` and are compiled with the Python `libsass`
+library into `build/css/`. The default stylesheet is `src/css/style.css` which
+supports full SCSS syntax. Any changes to files in this directory are
+automatically processed during the `r all` build and the output CSS is written
+to `build/css/style.css`.
 
 To add additional stylesheets, create new files in `src/css/` and reference the
 resulting `/css/*.css` paths from your pages or templates.
@@ -60,7 +94,8 @@ r distclean   # also clear cached data and .init markers
 
 ## Troubleshooting
 
-Set `VERBOSE=1` on any command to see the underlying Docker and Make invocations:
+Set `VERBOSE=1` on any command to see the underlying Docker and Make
+invocations:
 
 ```bash
 r all VERBOSE=1
