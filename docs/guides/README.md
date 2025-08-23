@@ -24,6 +24,8 @@ concepts and data formats, see the
   artifacts.
 - [check-bad-mathjax](../pie/check/check-bad-mathjax.md) – detect old
   MathJax delimiters.
+- [check-unescaped-dollar](../pie/check/check-unescaped-dollar.md) – detect
+  unescaped dollar signs.
 - [tests.md](tests.md) – run the automated test suite.
 
 ## Services and utilities

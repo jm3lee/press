@@ -10,4 +10,6 @@ Documentation for Pie's validation scripts.
   rendering.
 - [check-bad-mathjax](check-bad-mathjax.md) – detect deprecated MathJax
   delimiters.
+- [check-unescaped-dollar](check-unescaped-dollar.md) – detect unescaped
+  dollar signs.
 

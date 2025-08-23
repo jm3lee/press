@@ -141,6 +141,8 @@ check:
 	$(Q)check-author $(SRC_DIR)
 	$(call status,Check for bad MathJax)
 	$(Q)check-bad-mathjax $(SRC_DIR)
+	$(call status,Check for unescaped dollar signs)
+	$(Q)check-unescaped-dollar $(SRC_DIR)
 	$(call status,Check page titles)
 	$(Q)check-page-title -x $(CFG_DIR)/check-page-title-exclude.yml $(BUILD_DIR)
 	$(call status,Check post-build artifacts)

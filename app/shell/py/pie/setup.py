@@ -21,6 +21,7 @@ setup(
             'check-author=pie.check.author:main',
             'check-bad-jinja-output=pie.check.bad_jinja_output:main',
             'check-bad-mathjax=pie.check.bad_mathjax:main',
+            'check-unescaped-dollar=pie.check.unescaped_dollar:main',
             'check-page-title=pie.check.page_title:main',
             'check-post-build=pie.check.post_build:main',
             'check-unexpanded-jinja=pie.check.unexpanded_jinja:main',
