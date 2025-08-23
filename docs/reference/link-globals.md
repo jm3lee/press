@@ -62,6 +62,28 @@ When you pass a string instead of a dictionary, the helper fetches the
 corresponding metadata from Redis. The lookup retries a few times before
 aborting so templates are more resilient when entries are added concurrently.
 
+### Link tracking
+
+Metadata may include a nested `link.tracking` field to control referral
+behaviour. When this value is `false` the rendered anchor receives `rel` and
+`target` attributes so the link opens in a new tab without sending referrer
+information. Omitting the field or setting it to `true` leaves these
+attributes off.
+
+Example:
+
+```jinja
+{{ link({"citation": "press.io", "url": "https://press.io",
+         "link": {"tracking": false}}) }}
+```
+
+renders as:
+
+```html
+<a href="https://press.io" class="internal-link" rel="noopener noreferrer"
+   target="_blank">press.io</a>
+```
+
 ### Legacy helpers
 
 Older globals such as `linktitle`, `linkcap`, `linkicon`, `link_icon_title`,
