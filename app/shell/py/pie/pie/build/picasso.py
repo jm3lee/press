@@ -172,10 +172,20 @@ def _resolve_include_paths(
     the raw argument string captured by ``INCLUDE_RE``.
     """
 
+    logger.debug(
+        "Resolving include paths",
+        func=func,
+        arglist=arglist,
+        src_build=src_build.as_posix(),
+        src_root=src_root.as_posix(),
+        build_root=build_root.as_posix(),
+    )
+
     try:
         call = ast.parse(f"f({arglist})", mode="eval").body
     except SyntaxError:
         # Ignore malformed Python blocks such as ``include('a', bad=)``.
+        logger.debug("Malformed include statement", arglist=arglist)
         return []
 
     # Extract positional string arguments and optional ``glob`` keyword.
@@ -195,6 +205,7 @@ def _resolve_include_paths(
             ):
                 glob = kw.value.value
                 break
+    logger.debug("Parsed include arguments", paths=paths, glob=glob)
 
     src_build_str = src_build.as_posix()
     build_root_str = build_root.as_posix()
@@ -211,13 +222,24 @@ def _resolve_include_paths(
     def resolve(dep: Path) -> tuple[Iterable[Path], bool]:
         dep_str = dep.as_posix()
         is_build = dep.is_absolute() or dep_str.startswith(build_root_str)
+        logger.debug("Evaluating dependency", dep=dep_str, is_build=is_build)
         if not is_build:
             # Resolve relative paths against ``src_root``. ``include('src/foo')``
             # is treated the same as ``include('foo')``.
             if dep.parts and dep.parts[0] == src_root.name:
                 dep = src_root / Path(*dep.parts[1:])
+                logger.debug(
+                    "Resolved with src_root prefix",
+                    original=dep_str,
+                    resolved=dep.as_posix(),
+                )
             else:
                 dep = src_root / dep
+                logger.debug(
+                    "Resolved relative path",
+                    original=dep_str,
+                    resolved=dep.as_posix(),
+                )
         return iter_targets(dep), is_build
 
     rules: list[str] = []
@@ -229,8 +251,11 @@ def _resolve_include_paths(
                 target_str = (
                     Path(build_path(target)).with_suffix(target.suffix).as_posix()
                 )
-            rules.append(f"{src_build_str}: {target_str}")
+            rule = f"{src_build_str}: {target_str}"
+            logger.debug("Adding include dependency", rule=rule, is_build=is_build)
+            rules.append(rule)
 
+    logger.debug("Resolved rules", count=len(rules))
     return rules
 
 
