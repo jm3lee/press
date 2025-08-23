@@ -466,7 +466,7 @@ def create_env():
     env.globals["linkshort"] = linkshort
     env.globals["figure"] = figure
     env.globals["definition"] = definition
-    env.filters["get_desc"] = get_desc
+    env.globals["get_desc"] = get_desc
     env.globals["render_jinja"] = render_jinja
     env.globals["to_alpha_index"] = to_alpha_index
     env.globals["read_json"] = read_json
