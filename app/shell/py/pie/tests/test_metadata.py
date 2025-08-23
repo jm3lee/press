@@ -82,7 +82,7 @@ def test_load_metadata_pair_conflict_shows_path(tmp_path):
 
 
 def test_read_from_yaml_error_logs_path(tmp_path):
-    """Malformed YAML reports the filename."""
+    """Malformed YAML reports the filename and offending line."""
     bad = tmp_path / "bad.yml"
     bad.write_text(":\n")
     os.chdir(tmp_path)
@@ -92,4 +92,6 @@ def test_read_from_yaml_error_logs_path(tmp_path):
     finally:
         os.chdir("/tmp")
     assert "bad.yml" in str(excinfo.value)
+    notes = getattr(excinfo.value, "__notes__", [])
+    assert any("line 1: :" in note for note in notes)
 
