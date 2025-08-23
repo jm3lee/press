@@ -41,9 +41,9 @@ def replace_filters(text: str) -> tuple[str, int]:
             inner = args[1:-1].strip()
             if inner:
                 total += 1
-                return f"{{{{ {name}({val}, {inner}) }}}}"
+                return f"{{{{ {name}('{val}', {inner}) }}}}"
         total += 1
-        return f"{{{{ {name}({val}) }}}}"
+        return f"{{{{ {name}('{val}') }}}}"
 
     for name, pattern in PATTERNS.items():
         text = pattern.sub(lambda m, n=name: repl(n, m), text)
