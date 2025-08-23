@@ -38,11 +38,11 @@ def test_no_link_returns_empty():
     assert opts == ""
 
 
-def test_missing_tracking_interpreted_as_false():
-    """Absent tracking treated as False."""
+def test_missing_tracking_returns_empty():
+    """Absent tracking returns empty options."""
     desc = {"link": {}}
     opts = render_template.get_tracking_options(desc)
-    assert opts == 'rel="noopener noreferrer" target="_blank"'
+    assert opts == ""
 
 
 def test_linktitle_uses_redis(monkeypatch):
