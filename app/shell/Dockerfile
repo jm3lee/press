@@ -51,8 +51,7 @@ COPY ./py/pie /press/py/pie
 
 RUN pip install --no-cache-dir --break-system-packages \
         -e /press/py/pie \
-        -r /press/py/pie/requirements.txt \
-        yamllint
+        -r /press/py/pie/requirements.txt
 
 # -------------------------------------------------------------------
 # Custom helper scripts and makefiles
