@@ -1,4 +1,6 @@
 import os
+
+import fakeredis
 import pytest
 import yaml
 
@@ -92,4 +94,47 @@ def test_read_from_yaml_error_logs_path(tmp_path):
     finally:
         os.chdir("/tmp")
     assert "bad.yml" in str(excinfo.value)
+
+
+def test_get_url_from_build_md(tmp_path):
+    """'build/foo.md' -> '/foo.html'."""
+    path = tmp_path / "build" / "foo.md"
+    path.parent.mkdir(parents=True)
+    path.write_text("")
+    os.chdir(tmp_path)
+    try:
+        assert metadata.get_url("build/foo.md") == "/foo.html"
+    finally:
+        os.chdir("/tmp")
+
+
+def test__add_citation_if_missing_from_name():
+    """Deprecated 'name' populates 'citation'."""
+    info = {"name": "Example"}
+    metadata._add_citation_if_missing(info, "doc.md")
+    assert info["citation"] == "example"
+
+
+def test__add_canonical_link_if_missing_existing():
+    """Existing canonical link is preserved."""
+    info = {"link": {"canonical": "/x"}}
+    metadata._add_canonical_link_if_missing(info, "doc.md")
+    assert info["link"]["canonical"] == "/x"
+
+
+def test__add_canonical_link_if_missing_no_url():
+    """No url leaves canonical link unset."""
+    info: dict[str, str] = {}
+    metadata._add_canonical_link_if_missing(info, "doc.md")
+    assert "link" not in info
+
+
+def test__get_redis_value_missing_returns_none():
+    """Missing Redis key returns None."""
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    metadata.redis_conn = fake
+    try:
+        assert metadata._get_redis_value("nope") is None
+    finally:
+        metadata.redis_conn = None
 
