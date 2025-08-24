@@ -7,18 +7,18 @@ from pie.update import link_filters
 
 def test_converts_basic_filters(tmp_path: Path) -> None:
     fp = tmp_path / "example.md"
-    fp.write_text('{{ "hull" | link }}\n', encoding="utf-8")
+    fp.write_text('{{ hull | link }}\n', encoding="utf-8")
     assert link_filters.process_file(fp)
-    assert fp.read_text(encoding="utf-8") == '{{ link("hull") }}\n'
+    assert fp.read_text(encoding="utf-8") == "{{ link('hull') }}\n"
 
 
 def test_preserves_arguments(tmp_path: Path) -> None:
     fp = tmp_path / "example.md"
-    fp.write_text('{{ "hull"|link(style="title") }}', encoding="utf-8")
+    fp.write_text('{{ hull|link(style="title") }}', encoding="utf-8")
     link_filters.process_file(fp)
     assert (
         fp.read_text(encoding="utf-8")
-        == '{{ link("hull", style="title") }}'
+        == """{{ link('hull', style="title") }}"""
     )
 
 
@@ -50,7 +50,7 @@ def test_parse_args_defaults() -> None:
 
 def test_main_changes_files(tmp_path: Path, capsys: "pytest.CaptureFixture[str]") -> None:
     fp1 = tmp_path / "a.md"
-    fp1.write_text('{{ "hull" | link }}', encoding="utf-8")
+    fp1.write_text('{{ hull | link }}', encoding="utf-8")
     fp2 = tmp_path / "b.md"
     fp2.write_text("nothing here", encoding="utf-8")
     log_file = tmp_path / "log.txt"
@@ -60,5 +60,5 @@ def test_main_changes_files(tmp_path: Path, capsys: "pytest.CaptureFixture[str]"
     assert str(fp1) in out[0]
     assert "2 files checked" in out[-2]
     assert "1 file changed" in out[-1]
-    assert fp1.read_text(encoding="utf-8") == '{{ link("hull") }}'
+    assert fp1.read_text(encoding="utf-8") == "{{ link('hull') }}"
     assert fp2.read_text(encoding="utf-8") == "nothing here"
