@@ -158,6 +158,8 @@ check:
 	$(Q)check-underscores $(BUILD_DIR)
 	$(call status,Check canonical links)
 	$(Q)check-canonical $(BUILD_DIR)
+	$(call status,Check sitemap)
+	$(Q)check-sitemap-hostname
 
 # Create necessary build directories
 $(BUILD_DIR): | $(BUILD_SUBDIRS)
