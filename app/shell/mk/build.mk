@@ -75,6 +75,7 @@ VPATH := $(SRC_DIR)
 # Find all Markdown files excluding specified directories
 MARKDOWNS := $(shell find $(SRC_DIR)/ -name '*.md')
 YAMLS := $(shell find $(SRC_DIR) -name "*.yml")
+BUILD_YAMLS := $(patsubst $(SRC_DIR)/%,$(BUILD_DIR)/%,$(YAMLS))
 
 # Define the corresponding HTML and PDF output files
 HTMLS := $(patsubst $(SRC_DIR)/%.md, $(BUILD_DIR)/%.html, $(MARKDOWNS))
@@ -120,6 +121,11 @@ $(BUILD_DIR)/.update-index: $(MARKDOWNS) $(YAMLS)
 	$(call status,Updating Redis Index)
 	$(Q)update-index --host $(REDIS_HOST) --port $(REDIS_PORT) src
 	$(Q)touch $@
+
+$(BUILD_DIR)/.process-yamls: $(BUILD_YAMLS) | $(BUILD_DIR)
+$(call status,Process YAML metadata)
+$(Q)find $(BUILD_DIR) -name '*.yml' -print0 | xargs -0 process-yaml
+$(Q)touch $@
 
 # Target to minify HTML and CSS files
 # Modifies file timestamps. The preserve option doesn't seem to work.

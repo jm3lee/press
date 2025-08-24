@@ -1,31 +1,37 @@
 # process-yaml
 
-Fill in missing metadata fields in a YAML file.
+Fill in missing metadata fields in YAML files.
 
 ```
-usage: process-yaml <input.yml> <output.yml>
+usage: process-yaml <file.yml> [file.yml ...]
 ```
 
-The command reads the input YAML file, generates any missing values as described in [Metadata Fields](../reference/metadata-fields.md), and writes the result to the output file. Use `--log` to save verbose logs.
+The command reads each YAML file and generates any missing values as described
+in [Metadata Fields](../reference/metadata-fields.md). It writes the result back
+to the same path. Use `--log` to save verbose logs.
 
 Example:
 
 ```bash
-process-yaml in.yml out.yml --log build.log
+process-yaml foo.yml bar.yml --log build.log
 ```
 
 ## Integration
 
 `process-yaml` is typically invoked automatically during a build. The
-[`picasso`](picasso.md) tool scans metadata files and emits Makefile rules
-that call this script before running Pandoc. A generated rule looks like:
+[`picasso`](picasso.md) tool scans metadata files and emits Makefile rules.
+The YAML files are preprocessed individually and then processed in batch. A
+`find`/`xargs` pipeline keeps the command line short even with many files:
 
 ```make
 build/foo/bar.yml: src/foo/bar.yml
     $(Q)mkdir -p $(dir $@)
     $(Q)emojify < $< > $@
-    $(Q)process-yaml $< $@
+    $(Q)render-jinja-template $@ $@
+
+$(BUILD_DIR)/.process-yamls: $(BUILD_YAMLS)
+    find $(BUILD_DIR) -name '*.yml' -print0 | xargs -0 process-yaml
 ```
 
-Running the script ensures each document has a complete metadata block
-so Pandoc and other tools can rely on fields like `id` or `citation`.
+Running the script ensures each document has a complete metadata block so
+Pandoc and other tools can rely on fields like `id` or `citation`.

@@ -14,9 +14,12 @@ from pie.metadata import generate_missing_metadata, read_from_yaml
 
 def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
-    parser = create_parser("Generate missing metadata fields for a YAML file")
-    parser.add_argument("input", help="Source YAML file")
-    parser.add_argument("output", help="Destination file to write")
+    parser = create_parser("Generate missing metadata fields for YAML files")
+    parser.add_argument(
+        "paths",
+        nargs="+",
+        help="YAML files to update in place",
+    )
     return parser.parse_args(list(argv) if argv is not None else None)
 
 
@@ -25,21 +28,21 @@ def main(argv: Iterable[str] | None = None) -> None:
     args = parse_args(argv)
     configure_logging(args.verbose, args.log)
 
-    try:
-        metadata = read_from_yaml(args.input)
-        if metadata is not None:
-            metadata = generate_missing_metadata(metadata, args.input)
-    except Exception as exc:  # pragma: no cover - pass through message
-        logger.error("Failed to process YAML", filename=args.input)
-        raise SystemExit(1) from exc
+    for path in args.paths:
+        try:
+            metadata = read_from_yaml(path)
+            if metadata is not None:
+                metadata = generate_missing_metadata(metadata, path)
+        except Exception as exc:  # pragma: no cover - pass through message
+            logger.error("Failed to process YAML", filename=path)
+            raise SystemExit(1) from exc
 
-    if metadata is None:
-        logger.error("No metadata found", filename=args.input)
-        sys.exit(1)
+        if metadata is None:
+            logger.error("No metadata found", filename=path)
+            sys.exit(1)
 
-    write_yaml(metadata, args.output)
-
-    logger.debug("Processed YAML written", path=args.output)
+        write_yaml(metadata, path)
+        logger.debug("Processed YAML written", path=path)
 
 
 if __name__ == "__main__":
