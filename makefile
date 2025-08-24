@@ -6,7 +6,7 @@ export PATH := /app/bin:$(PATH)
 # Allow the environment to override BASE_URL instead of forcing localhost.
 # This ensures tooling such as the sitemap generator picks up the value
 # provided via docker-compose or the user's shell.
-BASE_URL ?= http://localhost
+BASE_URL ?= http://press.io
 export BASE_URL
 
 # Override MAKEFLAGS (so your settings can’t be clobbered by the environment)
