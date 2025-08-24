@@ -1,6 +1,7 @@
 # process-yaml
 
-Fill in missing metadata fields in YAML files.
+Fill in missing metadata fields in YAML files and replace `:emoji:` codes with
+their Unicode counterparts.
 
 ```
 usage: process-yaml <file.yml> [file.yml ...]
@@ -26,8 +27,7 @@ The YAML files are preprocessed individually and then processed in batch. A
 ```make
 build/foo/bar.yml: src/foo/bar.yml
     $(Q)mkdir -p $(dir $@)
-    $(Q)emojify < $< > $@
-    $(Q)render-jinja-template $@ $@
+    $(Q)render-jinja-template $< $@
 
 $(BUILD_DIR)/.process-yamls: $(BUILD_YAMLS)
     find $(BUILD_DIR) -name '*.yml' -print0 | xargs -0 process-yaml

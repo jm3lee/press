@@ -14,7 +14,7 @@ features.
 
 ## Emoji Replacement
 
-The build pipeline runs `emojify` so colon codes are replaced with real emoji:
+Colon codes are replaced with real emoji during the build:
 
 :muscle:
 

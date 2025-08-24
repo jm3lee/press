@@ -30,8 +30,7 @@ For a source file `src/index.yml` the output looks like:
 build/index.yml: src/index.yml
     $(call status,Preprocess $<)
     mkdir -p $(dir build/index.yml)
-    emojify < $< > $@
-    render-jinja-template $@ $@
+    render-jinja-template $< $@
 build/index.html: build/index.md build/index.yml $(PANDOC_TEMPLATE)
     $(call status,Generate HTML $@)
     $(PANDOC_CMD) $(PANDOC_OPTS) --template=$(PANDOC_TEMPLATE) --metadata-file=build/index.yml -o $@ $<
