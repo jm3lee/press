@@ -28,7 +28,13 @@ def get_changed_files() -> list[Path]:
     for directories."""
     try:
         result = subprocess.run(
-            ["git", "status", "--short"],
+            [
+                "git",
+                "-c",
+                f"safe.directory={Path.cwd()}",
+                "status",
+                "--short",
+            ],
             check=True,
             capture_output=True,
             text=True,
@@ -37,7 +43,14 @@ def get_changed_files() -> list[Path]:
         logger.warning("git executable not found", error=str(err))
         return []
     except subprocess.CalledProcessError as err:
-        logger.warning("git repository not initialised", error=str(err))
+        stderr = (err.stderr or "").lower()
+        if "dubious ownership" in stderr or "safe.directory" in stderr:
+            logger.warning(
+                f"run: git config --global --add safe.directory {Path.cwd()}",
+                error=str(err),
+            )
+        else:
+            logger.warning("git repository not initialised", error=str(err))
         return []
     paths: list[Path] = []
     for line in result.stdout.splitlines():
