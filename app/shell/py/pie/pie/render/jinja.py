@@ -273,7 +273,7 @@ def figure(desc):
             if not src:
                 src = pattern.format(width=widths[0])
 
-    srcset_attr = f' srcset="{', '.join(srcset_parts)}"' if srcset_parts else ""
+    srcset_attr = f' srcset="{", ".join(srcset_parts)}"' if srcset_parts else ""
 
     sizes = fig.get("sizes")
     sizes_attr = f' sizes="{sizes}"' if sizes and srcset_parts else ""

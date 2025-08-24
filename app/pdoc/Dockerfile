@@ -8,4 +8,4 @@ RUN pip install --no-cache-dir pdoc \
     && pip install --no-cache-dir -r /tmp/requirements.txt
 
 EXPOSE 8080
-ENTRYPOINT ["pdoc", "--http", "0.0.0.0:8080", "pie"]
+ENTRYPOINT ["pdoc", "-h", "0.0.0.0", "-p", "8080", "pie"]
