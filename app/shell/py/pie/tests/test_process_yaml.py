@@ -7,8 +7,7 @@ from pie import process_yaml
 
 def test_parse_args_returns_paths() -> None:
     args = process_yaml.parse_args(["in.yml", "out.yml"])
-    assert args.input == "in.yml"
-    assert args.output == "out.yml"
+    assert args.paths == ["in.yml", "out.yml"]
 
 
 def test_main_writes_augmented_metadata(monkeypatch) -> None:
@@ -35,9 +34,9 @@ def test_main_writes_augmented_metadata(monkeypatch) -> None:
     monkeypatch.setattr(process_yaml, "configure_logging", lambda *a, **k: None)
     monkeypatch.setattr(process_yaml.logger, "debug", lambda *a, **k: None)
 
-    process_yaml.main(["in.yml", "out.yml"])
+    process_yaml.main(["in.yml"])
 
-    assert written["path"] == "out.yml"
+    assert written["path"] == "in.yml"
     assert written["meta"]["id"] == "t"
 
 
@@ -49,7 +48,7 @@ def test_main_errors_on_missing_metadata(monkeypatch) -> None:
     monkeypatch.setattr(process_yaml.logger, "error", lambda msg, **k: errors.append(msg))
 
     with pytest.raises(SystemExit) as excinfo:
-        process_yaml.main(["in.yml", "out.yml"])
+        process_yaml.main(["in.yml"])
 
     assert excinfo.value.code == 1
     assert errors == ["No metadata found"]
@@ -66,7 +65,7 @@ def test_main_errors_on_read_failure(monkeypatch) -> None:
     monkeypatch.setattr(process_yaml.logger, "error", lambda msg, **k: errors.append(msg))
 
     with pytest.raises(SystemExit) as excinfo:
-        process_yaml.main(["in.yml", "out.yml"])
+        process_yaml.main(["in.yml"])
 
     assert excinfo.value.code == 1
     assert errors == ["Failed to process YAML"]
