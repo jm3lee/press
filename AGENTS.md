@@ -8,3 +8,5 @@
   - use `_` instead of `-` when modifying `id` 
 - When editing math, always use `$` and `$$` instead of `\( \)` or `\[ \]`.
 - When editing makefiles, make sure to indent with tabs, not spaces.
+- When writing software documentation, write as an expert software engineer.
+  Give enough details to help new engineers on the team.
