@@ -40,6 +40,31 @@ def test_main_writes_augmented_metadata(monkeypatch) -> None:
     assert written["meta"]["id"] == "t"
 
 
+def test_main_emojifies_text(monkeypatch) -> None:
+    data = {"title": ":smile:"}
+
+    def fake_read(path: str):
+        return data
+
+    def fake_generate(meta: dict, path: str):
+        return meta
+
+    written: dict[str, object] = {}
+
+    def fake_write(meta: dict, path: str) -> None:
+        written["meta"] = meta
+
+    monkeypatch.setattr(process_yaml, "read_from_yaml", fake_read)
+    monkeypatch.setattr(process_yaml, "generate_missing_metadata", fake_generate)
+    monkeypatch.setattr(process_yaml, "write_yaml", fake_write)
+    monkeypatch.setattr(process_yaml, "configure_logging", lambda *a, **k: None)
+    monkeypatch.setattr(process_yaml.logger, "debug", lambda *a, **k: None)
+
+    process_yaml.main(["in.yml"])
+
+    assert written["meta"]["title"] == "😄"
+
+
 def test_main_errors_on_missing_metadata(monkeypatch) -> None:
     monkeypatch.setattr(process_yaml, "read_from_yaml", lambda path: None)
     monkeypatch.setattr(process_yaml, "configure_logging", lambda *a, **k: None)

@@ -18,11 +18,12 @@ The canonical list of terms lives at `src/keyterms/index.json`. Each entry maps 
 
 ## Build Steps
 
-1. **Copy to the build directory** – Generic make rules copy JSON files from `src/` to `build/` using the `emojify` tool:
+1. **Copy to the build directory** – Generic make rules copy JSON files from
+   `src/` to `build/`:
 
 ```
 build/%.json: %.json
-    emojify < $< > $@
+    cp $< $@
 ```
 
 This rule produces `build/keyterms/index.json` from `src/keyterms/index.json`.
