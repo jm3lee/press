@@ -69,3 +69,18 @@ def configure_logging(verbose: bool, log_path: str | None) -> None:
     logger.remove()
     logger.add(sys.stderr, format=LOG_FORMAT, level=level)
     setup_file_logger(log_path, level=level)
+
+
+def log_issue(message: str, *, warn: bool = False, **kwargs) -> bool:
+    """Log ``message`` as a warning when *warn* is :data:`True`.
+
+    The message is logged as an error when *warn* is :data:`False` and the
+    function returns :data:`False`.  When *warn* is :data:`True`, the message is
+    logged as a warning and the function returns :data:`True`.
+    """
+
+    if warn:
+        logger.warning(message, **kwargs)
+        return True
+    logger.error(message, **kwargs)
+    return False

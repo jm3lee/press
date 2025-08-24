@@ -8,7 +8,7 @@ import re
 from pathlib import Path
 
 from pie.cli import create_parser
-from pie.logging import configure_logging, logger
+from pie.logging import configure_logging, logger, log_issue
 from pie.utils import load_exclude_file
 
 DEFAULT_LOG = "log/check-bad-mathjax.txt"
@@ -24,6 +24,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = create_parser(
         "Check Markdown files for LaTeX delimiters \\(\\) or \\[\\]",
         log_default=DEFAULT_LOG,
+        warnings=True,
     )
     parser.add_argument(
         "directory",
@@ -65,8 +66,8 @@ def main(argv: list[str] | None = None) -> int:
             continue
         text = md.read_text(encoding="utf-8")
         if _has_bad_math(text):
-            logger.error("Found bad math delimiter", path=str(md))
-            ok = False
+            if not log_issue("Found bad math delimiter", path=str(md), warn=args.warn):
+                ok = False
     if ok:
         logger.info("No bad math delimiters found.")
     return 0 if ok else 1

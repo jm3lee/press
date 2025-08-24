@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 
 from pie.cli import create_parser
-from pie.logging import configure_logging, logger
+from pie.logging import configure_logging, logger, log_issue
 
 DEFAULT_LOG = "log/check-canonical.txt"
 
@@ -20,6 +20,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = create_parser(
         "Verify canonical links do not reference the hostname localhost.",
         log_default=DEFAULT_LOG,
+        warnings=True,
     )
     parser.add_argument(
         "directory",
@@ -44,10 +45,13 @@ def main(argv: list[str] | None = None) -> int:
         for tag in soup.find_all("link", rel="canonical", href=True):
             href = tag["href"]
             if urlparse(href).hostname == "localhost":
-                logger.error(
-                    "Canonical link references localhost", path=str(html), href=href
-                )
-                found = True
+                if not log_issue(
+                    "Canonical link references localhost",
+                    path=str(html),
+                    href=href,
+                    warn=args.warn,
+                ):
+                    found = True
     if not found:
         logger.info("No canonical links pointing to localhost found.")
     return 1 if found else 0

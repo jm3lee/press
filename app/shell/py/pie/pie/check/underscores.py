@@ -17,7 +17,7 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 
 from pie.cli import create_parser
-from pie.logging import logger, configure_logging
+from pie.logging import logger, configure_logging, log_issue
 
 DEFAULT_LOG = "log/check-underscores.txt"
 
@@ -27,6 +27,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = create_parser(
         "Check HTML files for URLs containing underscores.",
         log_default=DEFAULT_LOG,
+        warnings=True,
     )
     parser.add_argument(
         "directory",
@@ -63,13 +64,16 @@ def main(argv: list[str] | None = None) -> int:
         for url in _iter_urls(html):
             parsed = urlparse(url)
             if not parsed.scheme and not parsed.netloc and "_" in url:
-                logger.error("Underscore in URL", path=str(html), url=url)
+                warn = args.warn or not args.error
+                log_issue("Underscore in URL", path=str(html), url=url, warn=warn)
                 bad_urls.add(url)
     if bad_urls:
         logger.warning("Using dashes instead of underscores in URLs is recommended.")
         for url in sorted(bad_urls):
             logger.warning("Fix URL", url=url)
-        return 1 if args.error else 0
+        if args.error and not args.warn:
+            return 1
+        return 0
     logger.info("No URLs with underscores found.")
     return 0
 

@@ -37,6 +37,16 @@ def test_main_passes_and_logs(tmp_path: Path, monkeypatch) -> None:
     assert log.exists()
 
 
+def test_warn_option(tmp_path: Path, monkeypatch) -> None:
+    """Missing author with ``-w`` exits successfully."""
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "doc.md").write_text("---\ntitle: Test\n---\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    rc = check_author.main(["-w"])
+    assert rc == 0
+
+
 def test_parse_args_defaults() -> None:
     """parse_args returns default paths."""
     args = check_author.parse_args([])

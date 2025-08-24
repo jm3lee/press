@@ -9,7 +9,7 @@ from typing import Iterable
 from itertools import chain
 
 from pie.cli import create_parser
-from pie.logging import logger, configure_logging
+from pie.logging import logger, configure_logging, log_issue
 from pie.metadata import load_metadata_pair
 
 DEFAULT_LOG = "log/check-author.txt"
@@ -20,6 +20,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = create_parser(
         "Check that metadata files include an author field.",
         log_default=DEFAULT_LOG,
+        warnings=True,
     )
     parser.add_argument(
         "directory",
@@ -68,8 +69,8 @@ def main(argv: list[str] | None = None) -> int:
             if author:
                 logger.debug("Found author", path=str(path), author=author)
             else:
-                logger.error("Missing author", path=str(path))
-                ok = False
+                if not log_issue("Missing author", path=str(path), warn=args.warn):
+                    ok = False
     return 0 if ok else 1
 
 

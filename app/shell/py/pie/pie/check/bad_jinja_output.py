@@ -7,7 +7,7 @@ import argparse
 import re
 from bs4 import BeautifulSoup
 from pie.cli import create_parser
-from pie.logging import logger, configure_logging
+from pie.logging import logger, configure_logging, log_issue
 
 def contains_python_dict(text: str) -> bool:
     """Return ``True`` if *text* looks like a Python dictionary literal."""
@@ -17,7 +17,10 @@ def contains_python_dict(text: str) -> bool:
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Return parsed command line arguments."""
 
-    parser = create_parser("Check for Python dictionaries in HTML text nodes")
+    parser = create_parser(
+        "Check for Python dictionaries in HTML text nodes",
+        warnings=True,
+    )
     parser.add_argument("html_file", help="Path to the HTML file to inspect")
     return parser.parse_args(argv)
 
@@ -34,8 +37,11 @@ def main(argv: list[str] | None = None) -> int:
 
     for line in soup.stripped_strings:
         if contains_python_dict(line):
-            logger.error("Found Python dictionary in HTML text", line=line)
-            return 1
+            if not log_issue(
+                "Found Python dictionary in HTML text", line=line, warn=args.warn
+            ):
+                return 1
+            return 0
 
     logger.debug("No Python dictionaries found in HTML.")
     return 0

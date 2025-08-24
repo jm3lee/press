@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 from pie.cli import create_parser
-from pie.logging import logger, configure_logging
+from pie.logging import logger, configure_logging, log_issue
 from pie.utils import read_yaml
 
 DEFAULT_LOG = "log/check-post-build.txt"
@@ -19,6 +19,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = create_parser(
         "Verify that expected build artifacts exist.",
         log_default=DEFAULT_LOG,
+        warnings=True,
     )
     parser.add_argument(
         "directory",
@@ -51,8 +52,8 @@ def main(argv: list[str] | None = None) -> int:
         if target.is_file():
             logger.info("Found artifact", path=str(target))
         else:
-            logger.error("Missing artifact", path=str(target))
-            missing = True
+            if not log_issue("Missing artifact", path=str(target), warn=args.warn):
+                missing = True
     return 1 if missing else 0
 
 

@@ -30,6 +30,16 @@ def test_main_ignores_jinja_in_pre_and_code(tmp_path):
     assert rc == 0
 
 
+def test_warn_option(tmp_path):
+    """Jinja with ``-w`` exits 0."""
+    build = tmp_path / "build"
+    build.mkdir()
+    html = build / "page.html"
+    html.write_text("<p>{{ a }}</p>", encoding="utf-8")
+    rc = unexpanded_jinja.main([str(build), "-w"])
+    assert rc == 0
+
+
 def test_main_writes_log_file(tmp_path):
     """Clean HTML -> exit 0 and create log."""
     build = tmp_path / "build"

@@ -14,9 +14,9 @@ def test_main_ok(monkeypatch, capsys) -> None:
     monkeypatch.setattr(
         check_all,
         "CHECKS",
-        [("First", lambda: 0), ("Second", lambda: 0)],
+        [("First", lambda _w: 0), ("Second", lambda _w: 0)],
     )
-    rc = check_all.main()
+    rc = check_all.main([])
     out = capsys.readouterr().out
     assert rc == 0
     assert "==> First" in out
@@ -28,10 +28,21 @@ def test_main_failure(monkeypatch) -> None:
     monkeypatch.setattr(
         check_all,
         "CHECKS",
-        [("One", lambda: 0), ("Two", lambda: 1)],
+        [("One", lambda _w: 0), ("Two", lambda _w: 1)],
     )
-    rc = check_all.main()
+    rc = check_all.main([])
     assert rc == 1
+
+
+def test_warn_flag(monkeypatch) -> None:
+    """``-w`` forces a zero exit code."""
+    monkeypatch.setattr(
+        check_all,
+        "CHECKS",
+        [("One", lambda w: 1 if not w else 0)],
+    )
+    rc = check_all.main(["-w"])
+    assert rc == 0
 
 
 def test_run_as_script(monkeypatch) -> None:
@@ -54,6 +65,7 @@ def test_run_as_script(monkeypatch) -> None:
         setattr(check_pkg, name, mod)
         monkeypatch.setitem(sys.modules, f"pie.check.{name}", mod)
 
+    monkeypatch.setattr(sys, "argv", ["check-all"]) 
     with pytest.raises(SystemExit) as excinfo:
         runpy.run_module("pie.check.all", run_name="__main__")
     assert excinfo.value.code == 0

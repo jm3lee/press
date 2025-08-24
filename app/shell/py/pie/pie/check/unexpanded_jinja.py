@@ -7,7 +7,7 @@ import argparse
 from pathlib import Path
 from bs4 import BeautifulSoup
 from pie.cli import create_parser
-from pie.logging import logger, configure_logging
+from pie.logging import configure_logging, log_issue
 
 DEFAULT_LOG = "log/check-unexpanded-jinja.txt"
 
@@ -23,6 +23,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = create_parser(
         "Check for unexpanded Jinja code in HTML files.",
         log_default=DEFAULT_LOG,
+        warnings=True,
     )
     parser.add_argument(
         "directory",
@@ -33,7 +34,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def check_file(path: Path) -> bool:
+def check_file(path: Path, warn: bool) -> bool:
     """Return ``True`` if *path* is free of unexpanded Jinja."""
     with open(path, "r", encoding="utf-8") as f:
         soup = BeautifulSoup(f, "html.parser")
@@ -42,8 +43,10 @@ def check_file(path: Path) -> bool:
         if text.find_parent(["pre", "code"]):
             continue
         if contains_unexpanded_jinja(text):
-            logger.error("Found unexpanded Jinja", path=str(path), snippet=text.strip())
-            return False
+            if not log_issue(
+                "Found unexpanded Jinja", path=str(path), snippet=text.strip(), warn=warn
+            ):
+                return False
 
     for tag in soup.find_all(True):
         if tag.name in {"pre", "code"} or tag.find_parent(["pre", "code"]):
@@ -52,8 +55,10 @@ def check_file(path: Path) -> bool:
             values = value if isinstance(value, (list, tuple)) else [value]
             for v in values:
                 if isinstance(v, str) and contains_unexpanded_jinja(v):
-                    logger.error("Found unexpanded Jinja", path=str(path), snippet=v.strip())
-                    return False
+                    if not log_issue(
+                        "Found unexpanded Jinja", path=str(path), snippet=v.strip(), warn=warn
+                    ):
+                        return False
     return True
 
 
@@ -69,7 +74,7 @@ def main(argv: list[str] | None = None) -> int:
 
     ok = True
     for html_file in html_files:
-        if not check_file(html_file):
+        if not check_file(html_file, args.warn):
             ok = False
 
     return 0 if ok else 1

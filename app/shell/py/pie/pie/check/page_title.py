@@ -46,7 +46,8 @@ def check_file(path: Path) -> bool:
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
     parser = create_parser(
-        "Verify that HTML files contain non-empty <h1> tags."
+        "Verify that HTML files contain non-empty <h1> tags.",
+        warnings=True,
     )
     parser.add_argument(
         "directory",
@@ -70,19 +71,21 @@ def main(argv: list[str] | None = None) -> int:
     html_files = list(directory.rglob("*.html"))
     exclude = load_exclude_file(args.exclude, directory)
     ok = True
+    errors = False
     for html_file in html_files:
         if html_file.resolve() in exclude:
             continue
         if not check_file(html_file):
-            ok = False
-    if ok:
+            errors = True
+            if not args.warn:
+                ok = False
+    if not errors:
         message = "All pages have <h1> titles."
         if USE_COLOR:
             print(f"{GREEN}{message}{RESET}")
         else:
             print(message)
-        return 0
-    return 1
+    return 0 if ok else 1
 
 
 if __name__ == "__main__":
