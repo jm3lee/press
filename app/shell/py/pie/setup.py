@@ -24,6 +24,7 @@ setup(
             'check-unescaped-dollar=pie.check.unescaped_dollar:main',
             'check-page-title=pie.check.page_title:main',
             'check-post-build=pie.check.post_build:main',
+            'check-sitemap-hostname=pie.check.sitemap_hostname:main',
             'check-unexpanded-jinja=pie.check.unexpanded_jinja:main',
             'check-underscores=pie.check.underscores:main',
             'create-post=pie.create.post:main',
