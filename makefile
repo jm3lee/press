@@ -151,6 +151,8 @@ check:
 	$(Q)check-unexpanded-jinja $(BUILD_DIR)
 	$(call status,Check for URL underscores)
 	$(Q)check-underscores $(BUILD_DIR)
+	$(call status,Check canonical links)
+	$(Q)check-canonical $(BUILD_DIR)
 
 # Create necessary build directories
 $(BUILD_DIR): | $(BUILD_SUBDIRS)
