@@ -123,9 +123,9 @@ $(BUILD_DIR)/.update-index: $(MARKDOWNS) $(YAMLS)
 	$(Q)touch $@
 
 $(BUILD_DIR)/.process-yamls: $(BUILD_YAMLS) | $(BUILD_DIR)
-$(call status,Process YAML metadata)
-$(Q)find $(BUILD_DIR) -name '*.yml' -print0 | xargs -0 process-yaml
-$(Q)touch $@
+	$(call status,Process YAML metadata)
+	$(Q)find $(BUILD_DIR) -name '*.yml' -print0 | xargs -0 process-yaml
+	$(Q)touch $@
 
 # Target to minify HTML and CSS files
 # Modifies file timestamps. The preserve option doesn't seem to work.
