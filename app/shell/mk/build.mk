@@ -24,6 +24,14 @@ endif
 # Helper to print status messages
 status = @echo "==> $(1)"
 
+# Performance metrics
+PERF_LOG := $(LOG_DIR)/perf.log
+
+define time_cmd
+	@start=$$(date +%s); $(1); end=$$(date +%s); \
+	echo "$(2),$$((end-start))" >> $(PERF_LOG)
+endef
+
 # Redis connection settings
 REDIS_HOST ?= dragonfly
 REDIS_PORT ?= 6379
@@ -93,12 +101,17 @@ PERMALINKS_CONF := $(BUILD_DIR)/permalinks.conf
 # Define the default target to build everything
 .PHONY: everything
 everything: | $(BUILD_DIR) $(BUILD_SUBDIRS)
+	$(call status,Collect performance metrics)
+	$(Q)echo "target,seconds" > $(PERF_LOG)
 	$(call status,Updating author)
-	$(Q)update-author --sort-keys
+	$(call time_cmd,update-author --sort-keys,update-author)
 	$(call status,Updating pubdate)
-	$(Q)update-pubdate --sort-keys
-	$(Q)make -s -f /app/mk/build.mk $(BUILD_DIR)/.update-index VERBOSE=$(VERBOSE)
-	$(Q)make -s -f /app/mk/build.mk all VERBOSE=$(VERBOSE)
+	$(call time_cmd,update-pubdate --sort-keys,update-pubdate)
+	$(call time_cmd,make -s -f /app/mk/build.mk $(BUILD_DIR)/.update-index VERBOSE=$(VERBOSE),update-index)
+	$(call time_cmd,make -s -f /app/mk/build.mk all VERBOSE=$(VERBOSE),all)
+	$(call status,Performance summary)
+	$(Q)cat $(PERF_LOG)
+	$(Q)awk -F, 'NR>1 {total+=$$2} END {printf "Total: %.2fs\n", total}' $(PERF_LOG)
 
 all: $(HTMLS)
 all: $(CSS)
