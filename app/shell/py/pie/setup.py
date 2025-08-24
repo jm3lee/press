@@ -28,6 +28,7 @@ setup(
             'check-sitemap-hostname=pie.check.sitemap_hostname:main',
             'check-unexpanded-jinja=pie.check.unexpanded_jinja:main',
             'check-underscores=pie.check.underscores:main',
+            'check-all=pie.check.all:main',
             'create-post=pie.create.post:main',
             'create-site=pie.create.site:main',
             'emojify=pie.filter.emojify:main',

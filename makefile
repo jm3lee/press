@@ -142,24 +142,8 @@ test: $(BUILD_DIR)/.minify check | $(LOG_DIR)
 
 .PHONY: check
 check:
-	$(call status,Check metadata authors)
-	$(Q)check-author $(SRC_DIR)
-	$(call status,Check for bad MathJax)
-	$(Q)check-bad-mathjax $(SRC_DIR)
-	$(call status,Check for unescaped dollar signs)
-	$(Q)check-unescaped-dollar $(SRC_DIR)
-	$(call status,Check page titles)
-	$(Q)check-page-title -x $(CFG_DIR)/check-page-title-exclude.yml $(BUILD_DIR)
-	$(call status,Check post-build artifacts)
-	$(Q)check-post-build -c $(CFG_DIR)/check-post-build.yml
-	$(call status,Check for unexpanded Jinja)
-	$(Q)check-unexpanded-jinja $(BUILD_DIR)
-	$(call status,Check for URL underscores)
-	$(Q)check-underscores $(BUILD_DIR)
-	$(call status,Check canonical links)
-	$(Q)check-canonical $(BUILD_DIR)
-	$(call status,Check sitemap)
-	$(Q)check-sitemap-hostname
+	$(call status,Run checks)
+	$(Q)check-all
 
 # Create necessary build directories
 $(BUILD_DIR): | $(BUILD_SUBDIRS)
