@@ -128,6 +128,11 @@ $(BUILD_DIR)/.minify:
 	$(call status,Minify HTML and CSS)
 	$(Q)cd $(BUILD_DIR); $(MINIFY_CMD) -a -v -r -o . .
 
+.PHONY: yamllint
+yamllint:
+	$(call status,Check YAML files)
+	$(Q)yamllint $(BUILD_DIR)
+
 .PHONY: test
 # Triggered by the test target in redo.mk; see docs/guides/redo-mk.md.
 test: $(BUILD_DIR)/.minify check | $(LOG_DIR)
@@ -135,7 +140,7 @@ test: $(BUILD_DIR)/.minify check | $(LOG_DIR)
 	$(Q)$(CHECKLINKS_CMD) $(TEST_HOST_URL)
 
 .PHONY: check
-check:
+check: yamllint
 	$(call status,Check metadata authors)
 	$(Q)check-author $(SRC_DIR)
 	$(call status,Check for bad MathJax)
