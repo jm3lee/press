@@ -40,7 +40,7 @@ echo "Starting upgrade build..."
 echo "Stopping existing containers..."
 "${DOCKER_COMPOSE[@]}" down >/dev/null 2>&1 || true
 echo "Building shell and builder images..."
-"${DOCKER_COMPOSE[@]}" build --pull shell builder
+"${DOCKER_COMPOSE[@]}" build shell builder
 echo "Starting dragonfly and builder..."
 "${DOCKER_COMPOSE[@]}" up -d dragonfly builder
 echo "Running distclean..."
