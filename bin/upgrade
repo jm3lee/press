@@ -39,7 +39,9 @@ echo "Starting upgrade build..."
 
 echo "Stopping existing containers..."
 "${DOCKER_COMPOSE[@]}" down >/dev/null 2>&1 || true
-echo "Starting dragonfly..."
+echo "Building shell and builder images..."
+"${DOCKER_COMPOSE[@]}" build --pull shell builder
+echo "Starting dragonfly and builder..."
 "${DOCKER_COMPOSE[@]}" up -d dragonfly builder
 echo "Running distclean..."
 run_make distclean
@@ -47,8 +49,6 @@ if [ "$RUN_PULL" -eq 1 ]; then
   echo "Running pull..."
   bin/pull
 fi
-echo "Building shell image..."
-"${DOCKER_COMPOSE[@]}" build shell
 echo "Running make..."
 run_make
 echo "Starting nginx-test..."
