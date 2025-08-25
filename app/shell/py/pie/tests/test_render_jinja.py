@@ -93,22 +93,25 @@ def test_main_renders_template(tmp_path, monkeypatch):
     index = tmp_path / "index.json"
     index.write_text(json.dumps({"name": "World"}), encoding="utf-8")
     out = tmp_path / "out.txt"
-    jinja.main([str(tmpl), str(out), "--index", str(index)])
+    monkeypatch.setenv("PIE_DATA_DIR", str(tmp_path))
+    jinja.env = jinja.create_env()
+    jinja.main(["tmpl.txt", str(out), "--index", str(index)])
     assert out.read_text(encoding="utf-8") == "Hello World"
 
 def test_entry_point_executes_main(tmp_path, monkeypatch):
-    data_dir = Path("/data")
-    data_dir.mkdir(exist_ok=True)
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
     tmpl = data_dir / "tmpl.txt"
     tmpl.write_text("Hi {{ name }}", encoding="utf-8")
     index = tmp_path / "index.json"
     index.write_text(json.dumps({"name": "Agent"}), encoding="utf-8")
     out = tmp_path / "out.txt"
     script = Path(__file__).resolve().parent.parent / "pie" / "render" / "jinja.py"
+    monkeypatch.setenv("PIE_DATA_DIR", str(data_dir))
     monkeypatch.setattr(
         sys,
         "argv",
-        ["jinja.py", str(tmpl), str(out), "--index", str(index)],
+        ["jinja.py", "tmpl.txt", str(out), "--index", str(index)],
         raising=False,
     )
     runpy.run_path(str(script), run_name="__main__")
