@@ -15,12 +15,11 @@ serving the generated site.
 
 ## Orchestration
 The top-level Makefile (`redo.mk`) drives all host-side automation. It
-launches required services and executes the repository Makefile through
-the builder service:
+launches required services and executes the repository Makefile in the
+`shell` service:
 
-- The default goal starts `dragonfly` and `builder` and uses SSH to run the
-  project-root `makefile` inside the builder container, which shares its
-  image with `shell`.
+- The default goal starts `dragonfly` and runs the project-root
+  `makefile` inside an ephemeral `shell` container.
 - A `test` target reruns the build's own tests from the host environment.
 
 ## Services
@@ -28,14 +27,11 @@ the builder service:
 
 - `nginx` and `nginx-dev` serve generated content.
 - `shell` provides the build environment and exposes tools and tests.
-- `builder` runs the same image as `shell` but exposes an SSH daemon. The
-  host Makefile drives builds through it for a clean, repeatable
-  environment.
 - `dragonfly` supplies a Redis-compatible store used for tracking
   document metadata.
 - `mermaid` renders diagram sources with `mermaid-cli`. It remains a
   standalone service because the tool is self-contained and kept
-  separate from containers like `shell` and `builder`.
+  separate from containers like `shell`.
 - Auxiliary services `sync`, `seed`, and `webp` handle S3 uploads,
   database seeding, and WebP image conversion. The `sync` and `seed`
   containers read the S3 bucket from the `S3_BUCKET_PATH` environment
@@ -43,12 +39,13 @@ the builder service:
   `S3CFG_PATH` (default: `/root/.s3cfg`).
 
 ## Build Pipeline
-The builder service runs the project-root `makefile` to transform sources
-into deliverables. It performs index discovery, pre-processing, rendering,
-asset handling, and validation. See the [build-process guide](../guides/
-build-process.md) for a detailed walkthrough of each stage. Make's
-dependency tracking means subsequent runs only rebuild files whose inputs
-changed; use `remake` or `r clean` to force a full regeneration.
+The `shell` service runs the project-root `makefile` to transform sources
+into deliverables. It performs index discovery, pre-processing,
+rendering, asset handling, and validation. See the [build-process
+guide](../guides/build-process.md) for a detailed walkthrough of each
+stage. Make's dependency tracking means subsequent runs only rebuild
+files whose inputs changed; use `remake` or `r clean` to force a full
+regeneration.
 
 ## Data Flow
 Source files in `src/` become processed artifacts in `build/`. The

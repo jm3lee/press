@@ -4,8 +4,8 @@
 #   Invoke `make` inside the Docker Compose `shell` service.
 #   Runs from the project root (/data) so the default `makefile`
 #   is used, ensuring a consistent build environment across
-#   systems. All arguments are passed directly to the underlying
-#   `make` command.
+#   systems. All arguments are passed directly to the
+#   underlying `make` command.
 #
 # Usage:
 #   make [MAKE_TARGETS]
@@ -13,10 +13,9 @@
 # Example:
 #   make all
 #
-# Run "make" in the container with the current user's UID so that
-# generated files are owned by the invoking user. The container is
-# removed after completion.
+# Run `make` in a disposable container via:
+#   docker compose run --rm --user "$(id -u):$(id -g)" shell make
+# Files are created with the invoking user's UID and GID to avoid
+# permission issues. The container is removed after completion.
 
-docker compose run \
-  --rm --entrypoint make -u "$(id -u)" -w /data \
-  shell "$@"
+docker compose run --rm --user "$(id -u):$(id -g)" shell make "$@"

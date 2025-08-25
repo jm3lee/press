@@ -21,11 +21,12 @@ VPATH := $(SRC_DIR)
 COMPOSE_FILE := docker-compose.yml
 DOCKER_COMPOSE := docker compose -f $(COMPOSE_FILE)
 
-COMPOSE_RUN := $(DOCKER_COMPOSE) run --build --rm -T
-PYTEST_CMD  := $(DOCKER_COMPOSE) run --entrypoint pytest --rm shell
+UID := $(shell id -u)
+GID := $(shell id -g)
 
-SSH_PORT ?= 2222
-SSH_MAKE := ssh -p $(SSH_PORT) -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@localhost make -C /data
+COMPOSE_RUN := $(DOCKER_COMPOSE) run --build --rm -T
+PYTEST_CMD  := $(DOCKER_COMPOSE) run --rm --user $(UID):$(GID) --entrypoint pytest shell
+RUN_MAKE   := $(DOCKER_COMPOSE) run --rm --user $(UID):$(GID) shell make
 
 # Verbosity control
 VERBOSE ?= 0
@@ -46,10 +47,10 @@ status = @echo "==> $(1)"
 
 # Define the default target to build everything
 .PHONY: all
-all: ## Build the site using the builder service
+all: ## Build the site using the shell service
 	$(call status,Build site)
-	$(Q)$(DOCKER_COMPOSE) up -d dragonfly builder
-	$(Q)$(SSH_MAKE) VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) BUILD_VER=$(BUILD_VER)
+	$(Q)$(DOCKER_COMPOSE) up -d dragonfly
+	$(Q)$(RUN_MAKE) VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) BUILD_VER=$(BUILD_VER)
 
 $(BUILD_DIR): ## Helper target used by other rules
 	$(call status,Prepare build directory $@)
@@ -85,12 +86,12 @@ docker: test ## Build and push the Nginx image after running test
 .PHONY: test
 test: ## Restart nginx-dev and run tests
 	$(call status,Run tests)
-	$(Q)$(SSH_MAKE) VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) test
+	$(Q)$(RUN_MAKE) VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) test
 
 .PHONY: check
 check:
 	$(call status,Run checks)
-	$(Q)$(SSH_MAKE) VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) check
+	$(Q)$(RUN_MAKE) VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) check
 
 # Target to bring up the development Nginx container
 .PHONY: up
@@ -111,7 +112,7 @@ down: ## Stop and remove the compose stack
 # Clean the build directory by removing all build artifacts
 .PHONY: clean
 clean: ## Remove everything under build/
-	$(Q)$(SSH_MAKE) VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) clean
+	$(Q)$(RUN_MAKE) VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) clean
 
 .PHONY: distclean
 distclean: clean ## Remove .init markers and clear Dragonfly index cache
@@ -187,7 +188,7 @@ cov:
 .PHONY: t
 t: ## Restart nginx-dev and run tests, ansi colors
 	$(call status,Run tests with colors)
-	$(Q)$(SSH_MAKE) VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) test
+	$(Q)$(RUN_MAKE) VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) test
 	$(Q)$(PYTEST_CMD) /press/py/pie/tests
 
 .PHONY: redis

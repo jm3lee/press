@@ -39,10 +39,10 @@ echo "Starting upgrade build..."
 
 echo "Stopping existing containers..."
 "${DOCKER_COMPOSE[@]}" down >/dev/null 2>&1 || true
-echo "Building shell and builder images..."
-"${DOCKER_COMPOSE[@]}" build shell builder
-echo "Starting dragonfly and builder..."
-"${DOCKER_COMPOSE[@]}" up -d dragonfly builder
+echo "Building shell image..."
+"${DOCKER_COMPOSE[@]}" build shell
+echo "Starting dragonfly..."
+"${DOCKER_COMPOSE[@]}" up -d dragonfly
 echo "Running distclean..."
 run_make distclean
 if [ "$RUN_PULL" -eq 1 ]; then

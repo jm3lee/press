@@ -4,7 +4,8 @@
 #   Remove the specified build directories and then invoke
 #   `make` inside the Docker Compose `shell` service. Runs
 #   from the project root (/data) so the default `makefile`
-#   is used, allowing a clean rebuild of one or more targets.
+#   is used, allowing a clean rebuild of one or more
+#   targets.
 #
 # Usage:
 #   remake [TARGETS...]
@@ -13,10 +14,9 @@
 #   remake build webp
 #
 # Each argument is recursively deleted with `rm -rf` before
-# delegating to `make` so the build artifacts are regenerated
-# from scratch.
+# delegating to `make` so the build artifacts are
+# regenerated from scratch. `make` is run via:
+#   docker compose run --rm --user "$(id -u):$(id -g)" shell make
 
 rm -rf "$@"
-docker compose run \
-  --rm --entrypoint make -u "$(id -u)" -w /data \
-  shell "$@"
+docker compose run --rm --user "$(id -u):$(id -g)" shell make "$@"
