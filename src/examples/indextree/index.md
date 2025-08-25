@@ -5,5 +5,5 @@ the `indextree-json` console script:
 indextree-json files demo.json
 ```
 
-<div id="indextree-root" data-src="/examples/indextree/demo.json"></div>
+<div class="indextree-root" data-src="/examples/indextree/demo.json"></div>
 <script type="module" src="/static/js/indextree.js" defer></script>

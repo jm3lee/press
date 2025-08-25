@@ -58,12 +58,14 @@ indextree-json docs doc-tree.json
 ```
 
 ```markdown
-<div id="indextree-root" data-src="/doc-tree.json"></div>
+<div class="indextree-root" data-src="/doc-tree.json"></div>
 <script type="module" src="/static/js/indextree.js" defer></script>
 ```
 
-The `div` marks where the tree renders. The script loads the JSON and
-displays a collapsible index when the page loads.
+Any element with the `indextree-root` class marks where a tree renders. Add
+as many as needed on the same page, each with a `data-src` attribute pointing
+to its JSON file. The script loads the JSON and displays a collapsible index
+when the page loads.
 
 ## Usage
 
