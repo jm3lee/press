@@ -457,7 +457,10 @@ def load_config(path: str | Path = DEFAULT_CONFIG) -> dict:
 def create_env():
     """Create and configure the Jinja2 environment."""
 
-    env = Environment(loader=FileSystemLoader("/data"), undefined=StrictUndefined)
+    data_dir = os.environ.get("PIE_DATA_DIR", "/data")
+    env = Environment(
+        loader=FileSystemLoader(data_dir), undefined=StrictUndefined
+    )
     env.globals["link"] = render_link
     env.globals["linktitle"] = linktitle
     env.globals["linkcap"] = linkcap

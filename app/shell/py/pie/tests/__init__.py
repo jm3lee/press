@@ -27,7 +27,9 @@ class _Env:
     def get_template(self, name: str):
         return _Template(Path(name).read_text(encoding='utf-8'))
 
-if 'jinja2' not in sys.modules:
+try:  # pragma: no cover - only used when jinja2 is missing
+    import jinja2  # type: ignore[unused-import]
+except ModuleNotFoundError:  # pragma: no cover - fallback for missing dep
     class _FSLoader:
         def __init__(self, _path: str):
             self.path = _path
@@ -35,8 +37,8 @@ if 'jinja2' not in sys.modules:
     class _StrictUndefined:
         pass
 
-    jinja2 = types.ModuleType('jinja2')
+    jinja2 = types.ModuleType("jinja2")
     jinja2.Environment = lambda *a, **k: _Env()
     jinja2.FileSystemLoader = _FSLoader
     jinja2.StrictUndefined = _StrictUndefined
-    sys.modules['jinja2'] = jinja2
+    sys.modules["jinja2"] = jinja2
