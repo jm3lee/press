@@ -7,4 +7,5 @@ ARG NGINX_CONF=app/nginx/default.conf
 # mount.
 COPY ${NGINX_CONF} /etc/nginx/conf.d/default.conf
 
-COPY ./build /usr/share/nginx/html
+# Copy built site and preserve timestamps for Last-Modified headers
+COPY --link ./build /usr/share/nginx/html
