@@ -2,8 +2,8 @@
 
 `include-filter` processes Markdown files and expands inline Python directives.
 
-Typical usage chains the command multiple times in `app/shell/mk/build.mk`
-to resolve nested includes before Pandoc.
+Typical usage chains the command multiple times in the project `makefile` to
+resolve nested includes before Pandoc.
 
 It resolves custom `include()` calls and renders Mermaid diagrams during
 preprocessing. Any links ending with `.md` are automatically rewritten to
