@@ -117,6 +117,43 @@ def test_link_false_and_recursion(tmp_path, monkeypatch):
     ]
 
 
+def test_numeric_filenames_sort(tmp_path, monkeypatch):
+    """Files named numerically appear in numerical order."""
+    (tmp_path / "1.yml").write_text("id: one\ntitle: Beta\n")
+    (tmp_path / "2.yml").write_text("id: two\ntitle: Alpha\n")
+
+    def fake_meta(filepath: str, keypath: str):
+        data = yaml.safe_load(Path(filepath).read_text()) or {}
+        if "id" not in data:
+            data["id"] = Path(filepath).with_suffix("").name
+        for key in keypath.split("."):
+            if not isinstance(data, dict):
+                return None
+            data = data.get(key)
+            if data is None:
+                return None
+        return data
+
+    monkeypatch.setattr(index_tree, "get_metadata_by_path", fake_meta)
+
+    def fake_build(prefix: str):
+        doc_id = prefix.rstrip(".")
+        for p in tmp_path.rglob("*.yml"):
+            data = yaml.safe_load(p.read_text()) or {}
+            if data.get("id", p.with_suffix("").name) == doc_id:
+                return data
+        return None
+
+    monkeypatch.setattr(metadata, "build_from_redis", fake_build)
+
+    lines = list(generate(tmp_path))
+
+    assert lines == [
+        '- {{ linktitle("one") }}',
+        '- {{ linktitle("two") }}',
+    ]
+
+
 def test_main_prints_generated_index(tmp_path, monkeypatch, capsys):
     """The ``main`` function prints generated lines."""
     path = tmp_path / "foo.yml"

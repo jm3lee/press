@@ -7,7 +7,7 @@ from pathlib import Path
 from pie.cli import create_parser
 from pie.logging import logger, configure_logging
 
-from pie.index_tree import walk, getopt_link, getopt_show
+from pie.index_tree import walk, getopt_link, getopt_show, sort_entries
 
 
 def process_dir(directory: Path):
@@ -16,7 +16,7 @@ def process_dir(directory: Path):
     for meta, path in entries:
         if "title" not in meta:
             raise ValueError(f"Missing 'title' in {path}")
-    entries.sort(key=lambda x: x[0]["title"].lower())
+    sort_entries(entries)
     for meta, path in entries:
         entry_id = meta["id"]
         entry_title = meta["title"]

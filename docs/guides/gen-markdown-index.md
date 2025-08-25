@@ -1,6 +1,9 @@
 # gen-markdown-index
 
-`gen-markdown-index` walks a directory tree of YAML metadata files and prints a Markdown list.
+`gen-markdown-index` walks a directory tree of YAML metadata files and
+prints a Markdown list. Nodes honour `indextree.order` to customise
+sorting. Items with numerical filenames are ordered numerically before
+falling back to case-insensitive titles.
 
 ```
 usage: gen-markdown-index [ROOT_DIR]

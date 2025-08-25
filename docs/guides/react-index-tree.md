@@ -13,7 +13,9 @@ scanning a directory of YAML metadata files and producing nodes for each
 file and subdirectory. Entries honour the same `indextree`
 options (`show` and `link`) used by the Markdown index generator. When
 linking is enabled, the `url` property is copied from the metadata
-without modification:
+without modification. Items may also specify `indextree.order` to control
+their position. Numeric filenames are sorted numerically before falling
+back to case-insensitive titles:
 
 ```bash
 indextree-json docs doc-tree.json
