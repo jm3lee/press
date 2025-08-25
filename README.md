@@ -42,12 +42,3 @@ r cov
 Coverage reports are written to `log/cov`. See
 [docs/guides/tests.md](docs/guides/tests.md) for more details.
 
-## SSH port
-
-The builder service exposes its SSH daemon on the host. By default port 2222
-is used. Override it by setting `SSH_PORT`:
-
-```
-SSH_PORT=3000 docker compose up builder
-SSH_PORT=3000 make test
-```

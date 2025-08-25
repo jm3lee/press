@@ -86,24 +86,6 @@ services:
       - ./app/shell/py/pie/tests:/press/py/pie/tests
       - ./src/dep.mk:/app/mk/dep.mk
 
-  builder:
-    image: press-shell
-    container_name: press-builder
-    # Copy the host's public key to a root-owned file before starting sshd.
-    entrypoint: ["/bin/sh", "-c", "mkdir -p /root/.ssh; install -m 600 /tmp/id_rsa.pub /root/.ssh/authorized_keys && /usr/sbin/sshd -D"]
-    environment:
-      OPENAI_API_KEY: "${OPENAI_API_KEY}"
-      REDIS_HOST: dragonfly
-      REDIS_PORT: 6379
-      TEST_HOST_URL: ${TEST_HOST_URL:-http://nginx-test}
-      BASE_URL: ${BASE_URL:-http://press.io}
-    ports:
-      - "${SSH_PORT:-2222}:22"
-    volumes:
-      - ./:/data
-      - ~/.ssh/id_rsa.pub:/tmp/id_rsa.pub:ro
-    depends_on:
-      - shell
 
   release:
     image: press-release

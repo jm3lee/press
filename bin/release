@@ -48,7 +48,7 @@ echo "Starting release build..."
 echo "Stopping existing containers..."
 "${DOCKER_COMPOSE[@]}" down >/dev/null 2>&1 || true
 echo "Starting dragonfly..."
-"${DOCKER_COMPOSE[@]}" up -d dragonfly builder
+"${DOCKER_COMPOSE[@]}" up -d dragonfly
 echo "Running distclean..."
 run_make distclean
 echo "Building shell image..."

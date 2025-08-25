@@ -30,7 +30,7 @@ Start the development stack and render the site:
 
 ```bash
 r up      # start compose services
-r all     # run the repository makefile inside the builder container
+r all     # run the repository makefile in the shell service
 ```
 
 The build reads source files under `src/` (or `SRC_DIR` if overridden) and
@@ -38,15 +38,13 @@ writes HTML and assets to `build/`. Logs are stored in `log/`.
 
 If you only need the build step without starting services, run `r all` directly.
 
-Behind the scenes `r all` talks to the **builder** service over SSH. Builder
-shares the same image and mounted volumes as `shell` but exposes an SSH daemon
-so the host Makefile can drive the project-root `makefile` inside a long-lived
-container. Use `shell` for ad-hoc commands and tests; rely on `builder` for
-repeatable builds from the host.
+Behind the scenes `r all` runs the build inside the `shell` service using
+`docker compose run`. Use `shell` for ad-hoc commands, tests, and
+repeatable builds.
 
 ## Pipeline overview
 
-Running `r all` triggers a sequence of Make targets inside the builder
+Running `r all` triggers a sequence of Make targets inside the `shell`
 container:
 
 1. **Index discovery** – Markdown and YAML files are scanned and their metadata
@@ -57,7 +55,7 @@ container:
    Examples include `preprocess` for macro expansion, YAML normalization, and
    rules that turn Mermaid diagrams into SVG. Diagram rendering delegates to the
    standalone `mermaid` service, which isolates the third-party CLI from core
-   images such as `shell` and `builder`.
+   images such as `shell`.
 3. **Pandoc rendering** – Pre-processed Markdown is converted to HTML and PDF
    using a shared template. The command enables table of contents generation,
    MathJax rendering, and cross-reference resolution.
