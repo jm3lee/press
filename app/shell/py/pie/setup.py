@@ -47,6 +47,7 @@ setup(
             'update-pubdate=pie.update.pubdate:main',
             'upgrade-indextree=pie.update.indextree:main',
             'process-yaml=pie.process_yaml:main',
+            'sitemap=pie.sitemap:main',
         ],
     },
 )
