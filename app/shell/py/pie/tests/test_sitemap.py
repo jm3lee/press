@@ -37,3 +37,18 @@ def test_reads_base_url_from_env(tmp_path, monkeypatch):
     text = (build / "sitemap.xml").read_text(encoding="utf-8")
     assert "http://example.com/page.html" in text
 
+
+def test_excludes_paths(tmp_path):
+    build = tmp_path / "build"
+    build.mkdir()
+    (build / "keep.html").write_text("", encoding="utf-8")
+    (build / "skip.html").write_text("", encoding="utf-8")
+    exclude = tmp_path / "exclude.yml"
+    exclude.write_text("- skip.html\n", encoding="utf-8")
+
+    sitemap.main(["-x", str(exclude), str(build), "http://example.com"])
+
+    text = (build / "sitemap.xml").read_text(encoding="utf-8")
+    assert "keep.html" in text
+    assert "skip.html" not in text
+
