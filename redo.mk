@@ -49,7 +49,7 @@ status = @echo "==> $(1)"
 .PHONY: all
 all: ## Build the site using the shell service
 	$(call status,Build site)
-	$(Q)$(DOCKER_COMPOSE) up -d dragonfly
+	$(Q)$(DOCKER_COMPOSE) up -d --remove-orphans dragonfly
 	$(Q)$(RUN_MAKE) VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) BUILD_VER=$(BUILD_VER)
 
 $(BUILD_DIR): ## Helper target used by other rules
@@ -107,7 +107,7 @@ upd: ## Start development containers in detached mode
 .PHONY: down
 down: ## Stop and remove the compose stack
 	$(call status,Stop compose stack)
-	$(Q)$(DOCKER_COMPOSE) down
+	$(Q)$(DOCKER_COMPOSE) down --remove-orphans
 
 # Clean the build directory by removing all build artifacts
 .PHONY: clean

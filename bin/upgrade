@@ -30,7 +30,7 @@ run_make() {
 }
 
 cleanup() {
-  "${DOCKER_COMPOSE[@]}" down
+  "${DOCKER_COMPOSE[@]}" down --remove-orphans
   docker system prune -f
 }
 trap cleanup EXIT
@@ -38,11 +38,11 @@ trap cleanup EXIT
 echo "Starting upgrade build..."
 
 echo "Stopping existing containers..."
-"${DOCKER_COMPOSE[@]}" down >/dev/null 2>&1 || true
+"${DOCKER_COMPOSE[@]}" down --remove-orphans >/dev/null 2>&1 || true
 echo "Building shell image..."
 "${DOCKER_COMPOSE[@]}" build shell
 echo "Starting dragonfly..."
-"${DOCKER_COMPOSE[@]}" up -d dragonfly
+"${DOCKER_COMPOSE[@]}" up -d --remove-orphans dragonfly
 echo "Running distclean..."
 run_make distclean
 if [ "$RUN_PULL" -eq 1 ]; then
@@ -52,7 +52,7 @@ fi
 echo "Running make..."
 run_make
 echo "Starting nginx-test..."
-"${DOCKER_COMPOSE[@]}" up -d --build nginx-test
+"${DOCKER_COMPOSE[@]}" up -d --build --remove-orphans nginx-test
 echo "Running make test..."
 run_make test
 echo "Running pytest..."
