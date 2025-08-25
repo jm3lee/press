@@ -142,6 +142,50 @@ def test_process_dir_sorts_by_numeric_filename(tmp_path, monkeypatch):
     assert [node["id"] for node in data] == ["one", "two"]
 
 
+def test_process_dir_filters_by_tag(tmp_path, monkeypatch):
+    """Only entries with a matching tag are returned."""
+    src = tmp_path / "src"
+    alpha = src / "alpha"
+    alpha.mkdir(parents=True)
+    (alpha / "index.yml").touch()
+    (alpha / "beta.yml").touch()
+    (src / "gamma.yml").touch()
+
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    monkeypatch.setattr(metadata, "redis_conn", fake)
+
+    save_meta(fake, "src/alpha/index.yml", "alpha", {"title": "Alpha", "url": "/alpha/index.html"})
+    save_meta(
+        fake,
+        "src/alpha/beta.yml",
+        "beta",
+        {"title": "Beta", "url": "/alpha/beta.html", "tags": ["foo"]},
+    )
+    save_meta(
+        fake,
+        "src/gamma.yml",
+        "gamma",
+        {"title": "Gamma", "url": "/gamma.html", "tags": ["bar"]},
+    )
+
+    os.chdir(tmp_path)
+    try:
+        data = list(indextree_json.process_dir(Path("src"), tag="foo"))
+    finally:
+        os.chdir("/tmp")
+
+    assert data == [
+        {
+            "id": "alpha",
+            "label": "Alpha",
+            "children": [
+                {"id": "beta", "label": "Beta", "url": "/alpha/beta.html"}
+            ],
+            "url": "/alpha/index.html",
+        }
+    ]
+
+
 def test_main_writes_output_file(tmp_path, monkeypatch, capsys):
     """JSON is written to file when an output path is provided."""
     src = tmp_path / "src"
