@@ -18,4 +18,4 @@
 # Files are created with the invoking user's UID and GID to avoid
 # permission issues. The container is removed after completion.
 
-docker compose run --rm --user "$(id -u):$(id -g)" shell make "$@"
+docker compose run --rm --user "$(id -u):$(id -g)" --entrypoint make shell "$@"
