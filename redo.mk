@@ -1,9 +1,10 @@
 # Makefile for building and managing Press
 
 # Override MAKEFLAGS (so your settings can’t be clobbered by the environment)
+NPROC := $(shell nproc)
 override MAKEFLAGS += --warn-undefined-variables  \
 	              --no-builtin-rules        \
-	              -j16                      \
+	              -j$(NPROC)                      \
 
 # Export it so sub-makes see the same flags
 export MAKEFLAGS

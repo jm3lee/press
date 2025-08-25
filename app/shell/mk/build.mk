@@ -4,9 +4,10 @@
 
 # Override MAKEFLAGS (so your settings can’t be clobbered by the environment)
 # docker-make passes these flags to the container; see docs/guides/docker-make.md
+NPROC := $(shell nproc)
 override MAKEFLAGS += --warn-undefined-variables  \
                       --no-builtin-rules        \
-                      -j16                      \
+                      -j$(NPROC)                      \
                       --no-print-directory      \
 
 # Export it so sub-makes see the same flags
@@ -72,9 +73,9 @@ TEST_HOST_URL ?= https://nginx-test
 
 VPATH := $(SRC_DIR)
 
-# Find all Markdown files excluding specified directories
-MARKDOWNS := $(shell find $(SRC_DIR)/ -name '*.md')
-YAMLS := $(shell find $(SRC_DIR) -name "*.yml")
+# Collect source files using wildcard to avoid repeated find scans
+MARKDOWNS := $(wildcard $(SRC_DIR)/**/*.md)
+YAMLS := $(wildcard $(SRC_DIR)/**/*.yml)
 BUILD_YAMLS := $(patsubst $(SRC_DIR)/%,$(BUILD_DIR)/%,$(YAMLS))
 
 # Define the corresponding HTML and PDF output files
