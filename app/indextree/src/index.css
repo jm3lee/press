@@ -1,6 +1,8 @@
 /* Ensure the IndexTree demo uses the site's base styling */
 #indextree-root,
-#indextree-root * {
+#indextree-root *,
+.indextree-root,
+.indextree-root * {
   font-family: var(--font-base, "minion-pro", serif);
   color: var(--color-text);
 }
