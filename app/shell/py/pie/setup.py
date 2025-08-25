@@ -45,6 +45,7 @@ setup(
             'update-index=pie.update.index:main',
             'update-link-filters=pie.update.link_filters:main',
             'update-pubdate=pie.update.pubdate:main',
+            'update-url=pie.update.url:main',
             'upgrade-indextree=pie.update.indextree:main',
             'process-yaml=pie.process_yaml:main',
             'sitemap=pie.sitemap:main',

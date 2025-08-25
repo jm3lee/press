@@ -17,6 +17,7 @@ documents provide context for the task‑oriented
 - [update-author.md](update-author.md) – refresh the `author` field for existing documents.
 - [update-index.md](update-index.md) – insert index values into Redis.
 - [update-pubdate.md](update-pubdate.md) – update the `pubdate` field for modified files.
+- [update-url.md](update-url.md) – rename files and update URL fields.
 - [update-link-filters.md](update-link-filters.md) – convert legacy `link*` filters into globals.
 - [shell.md](shell.md) – run the project's shell service via docker compose.
 - [sitemap.md](sitemap.md) – generate an XML sitemap with absolute URLs.
