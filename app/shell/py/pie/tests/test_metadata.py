@@ -67,7 +67,7 @@ def test_read_from_yaml_generates_fields(tmp_path):
     assert data["id"] == "item"
 
 
-def test_load_metadata_pair_conflict_shows_path(tmp_path):
+def test_load_metadata_pair_conflict_shows_path(tmp_path, monkeypatch):
     """Conflicting values include path in warning."""
     md = tmp_path / "dir" / "post.md"
     md.parent.mkdir(parents=True)
@@ -76,9 +76,15 @@ def test_load_metadata_pair_conflict_shows_path(tmp_path):
     yml.write_text("url: /yml\n")
     os.chdir(tmp_path)
     try:
-        with pytest.warns(UserWarning) as record:
-            metadata.load_metadata_pair(yml)
-        assert "dir/post.yml" in str(record[0].message)
+        messages = []
+
+        def fake_warning(msg, *args, **kwargs):
+            messages.append(msg.format(*args))
+
+        monkeypatch.setattr(metadata.logger, "warning", fake_warning)
+
+        metadata.load_metadata_pair(yml)
+        assert any("dir/post.yml" in m for m in messages)
     finally:
         os.chdir("/tmp")
 
