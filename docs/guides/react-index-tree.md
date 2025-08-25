@@ -21,6 +21,13 @@ back to case-insensitive titles:
 indextree-json docs doc-tree.json
 ```
 
+Use `-t` to limit results to entries whose `tags` list contains an exact
+match:
+
+```bash
+indextree-json -t tutorial docs doc-tree.json
+```
+
 A runnable demo lives in `app/indextree` and can be started with `npm run dev`.
 
 ## Build setup
