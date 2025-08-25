@@ -26,7 +26,7 @@ GID := $(shell id -g)
 
 COMPOSE_RUN := $(DOCKER_COMPOSE) run --build --rm -T
 PYTEST_CMD  := $(DOCKER_COMPOSE) run --rm --user $(UID):$(GID) --entrypoint pytest shell
-RUN_MAKE   := $(DOCKER_COMPOSE) run --rm --user $(UID):$(GID) shell make
+RUN_MAKE   := $(DOCKER_COMPOSE) run --rm --user $(UID):$(GID) --entrypoint make shell
 
 # Verbosity control
 VERBOSE ?= 0
