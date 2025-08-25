@@ -22,7 +22,7 @@ Each input file is processed in place:
 
 ### Makefile Integration
 
-`app/shell/mk/build.mk` invokes `preprocess` when building `.md` targets:
+The project's `makefile` invokes `preprocess` when building `.md` targets:
 
 ```make
 build/%.md: %.md | build
