@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from pathlib import Path
 import subprocess
+import glob
+from itertools import chain
 from typing import Iterable
 
 from pie.metadata import load_metadata_pair
@@ -20,6 +22,7 @@ __all__ = [
     "get_changed_files",
     "replace_field",
     "update_files",
+    "collect_paths",
 ]
 
 
@@ -62,6 +65,38 @@ def get_changed_files() -> list[Path]:
         if len(parts) >= 2:
             paths.append(Path(parts[-1]))
     return paths
+
+
+def collect_paths(patterns: Iterable[str]) -> list[Path]:
+    """Expand *patterns* into Markdown and YAML files.
+
+    Each pattern may refer to a file, directory, or glob. Returned paths are
+    relative to the current working directory. Non-existent paths are skipped
+    and duplicates are removed while preserving order.
+    """
+    cwd = Path.cwd()
+    seen: set[Path] = set()
+    results: list[Path] = []
+    for pattern in patterns:
+        matches = glob.glob(pattern, recursive=True) or [pattern]
+        for match in matches:
+            p = Path(match)
+            if not p.exists():
+                continue
+            if p.is_dir():
+                for child in chain(p.rglob("*.md"), p.rglob("*.yml"), p.rglob("*.yaml")):
+                    if child.is_file():
+                        rel = child.relative_to(cwd) if child.is_absolute() else child
+                        if rel not in seen:
+                            seen.add(rel)
+                            results.append(rel)
+            else:
+                if p.suffix in {".md", ".yml", ".yaml"}:
+                    rel = p.relative_to(cwd) if p.is_absolute() else p
+                    if rel not in seen:
+                        seen.add(rel)
+                        results.append(rel)
+    return results
 
 
 def replace_field(
