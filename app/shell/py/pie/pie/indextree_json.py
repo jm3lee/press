@@ -18,7 +18,7 @@ def process_dir(directory: Path, tag: str | None = None) -> Iterator[dict]:
     exact string are included. Directories are kept when they match or have
     matching descendants.
     """
-
+    logger.debug("Scanning directory %s", directory)
     entries = list(walk(directory))
     for meta, path in entries:
         if "title" not in meta:
@@ -32,7 +32,19 @@ def process_dir(directory: Path, tag: str | None = None) -> Iterator[dict]:
         entry_show = getopt_show(meta)
         tags = meta.get("tags") or []
         include_current = tag is None or tag in tags
+        if tag:
+            if include_current:
+                logger.debug(
+                    "Tag '%s' matched entry %s with tags %s", tag, path, tags
+                )
+            else:
+                logger.debug(
+                    "Tag '%s' did not match entry %s with tags %s", tag, path, tags
+                )
+        else:
+            logger.debug("Processing entry %s with tags %s", path, tags)
         if path.is_dir():
+            logger.debug("Descending into directory %s", path)
             children = list(process_dir(path, tag))
             if entry_show and (include_current or children):
                 node: dict[str, object] = {"id": entry_id, "label": entry_title}
