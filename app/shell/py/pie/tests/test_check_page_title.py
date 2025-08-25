@@ -18,7 +18,7 @@ def test_main_fail(tmp_path: Path, capsys) -> None:
     html.write_text("<html></html>", encoding="utf-8")
     assert check_page_title.main([str(tmp_path)]) == 1
     captured = capsys.readouterr()
-    assert "Missing or empty <h1>" in captured.out
+    assert "Missing or empty <h1>" in captured.err
 
 
 def test_main_exclude(tmp_path: Path) -> None:
