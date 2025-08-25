@@ -6,10 +6,10 @@ import html
 
 
 def parse_errors(output: str) -> dict[str, list[str]]:
-    """Return mapping of check names to error lines from *output*.
+    """Return mapping of check names to error or warning lines.
 
     Lines beginning with ``==>`` denote the start of a check section.
-    Only lines containing ``" E "`` are recorded as errors.
+    Lines containing ``" E "`` or ``" W "`` are recorded from *output*.
     """
 
     errors: dict[str, list[str]] = {}
@@ -17,7 +17,7 @@ def parse_errors(output: str) -> dict[str, list[str]]:
     for line in output.splitlines():
         if line.startswith("==>"):
             current = line[3:].strip()
-        elif " E " in line:
+        elif " E " in line or " W " in line:
             key = current or "General"
             errors.setdefault(key, []).append(line.strip())
     return errors
