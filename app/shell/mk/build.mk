@@ -192,7 +192,7 @@ clean:
 
 # Optionally include user dependencies; see docs/guides/redo-mk.md and
 # docs/guides/dep-mk.md.
--include /app/mk/dep.mk
+-include $(SRC_DIR)/dep.mk
 
 $(BUILD_DIR)/picasso.mk: $(YAMLS) | $(BUILD_DIR)
 	$(call status,Generate picasso rules)
