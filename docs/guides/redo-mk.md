@@ -6,13 +6,13 @@ is meant to be invoked with `make -f redo.mk` (often aliased to `r`). By default
 it prints only brief status messages; set `VERBOSE=1` to also show the
 underlying commands.
 
-This repository actually uses three Makefiles that work together:
+This repository uses two Makefiles that work together:
 
 - **`redo.mk`** – run from the host to start Docker containers and delegate
   commands.
-- **`build.mk`** – copied into the shell container as `/app/mk/build.mk` and
-  executed by `make` inside that container to build the site.
-- **`dep.mk`** – optional file included by `build.mk` for custom dependencies.
+- **`makefile`** – lives in the project root and runs inside the shell
+  container to build the site. It optionally includes `src/dep.mk` for custom
+  dependencies.
 
 ## Variables
 
@@ -33,7 +33,7 @@ This repository actually uses three Makefiles that work together:
 
 | Target | Description |
 | ------ | ----------- |
-| `all`  | Builds the site by invoking `/app/mk/build.mk` inside the shell container. |
+| `all`  | Builds the site by invoking the top-level makefile inside the shell container. |
 | `clean` | Removes everything under `build/`. |
 | `cov` | Generates an HTML coverage report for the `pie` package inside the shell container (output in `log/cov`). |
 | `distclean` | Runs `clean` and removes `.init` markers and the Dragonfly index cache. |
@@ -47,7 +47,7 @@ This repository actually uses three Makefiles that work together:
 | `setup` | Prepares `app/webp` directories and builds all services. |
 | `shell` | Opens an interactive shell container. |
 | `sync` | Runs the `sync` container to upload site files to S3 (bucket from `S3_BUCKET_PATH`, default `s3://press`; config from `S3CFG_PATH`, default `/root/.s3cfg`). |
-| `test` | Restarts `nginx-dev` and runs tests defined in `/app/mk/build.mk`. |
+| `test` | Restarts `nginx-dev` and runs tests defined in the top-level makefile. |
 | `up` / `upd` | Starts development containers (`SERVICES`). `upd` runs detached. |
 | `webp` | Runs the image conversion service. |
 

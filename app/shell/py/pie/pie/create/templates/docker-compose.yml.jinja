@@ -16,8 +16,8 @@ services:
 
   shell:
     build: app/shell
+    working_dir: /data
     entrypoint: ["bash"]
 
     volumes:
       - ./:/data
-      - ./src/dep.mk:/app/mk/dep.mk

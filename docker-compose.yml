@@ -71,6 +71,7 @@ services:
     image: press-shell
     build: ./app/shell
     container_name: press-shell
+    working_dir: /data
     entrypoint: ["bash"]
     environment:
       OPENAI_API_KEY: "${OPENAI_API_KEY}"
@@ -80,11 +81,9 @@ services:
       BASE_URL: ${BASE_URL:-http://press.io}
     volumes:
       - ./:/data
-      - ./app/shell/mk:/app/mk
       - ./app/shell/bin:/app/bin
       - ./app/shell/py/pie/pie:/press/py/pie/pie
       - ./app/shell/py/pie/tests:/press/py/pie/tests
-      - ./src/dep.mk:/app/mk/dep.mk
 
 
   release:

@@ -15,9 +15,9 @@ def test_create_scaffolding(tmp_path: Path) -> None:
     for svc in ["nginx:", "nginx-dev:", "dragonfly:", "shell:"]:
         assert svc in text
     assert "    build: app/shell" in text
+    assert "    working_dir: /data" in text
     assert '    entrypoint: ["bash"]' in text
     assert "      - ./:/data" in text
-    assert "      - ./src/dep.mk:/app/mk/dep.mk" in text
     assert (target / "src").is_dir()
 
     dep_mk = target / "src/dep.mk"

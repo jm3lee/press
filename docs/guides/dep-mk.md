@@ -1,23 +1,15 @@
 # dep.mk Custom Dependencies
 
-`dep.mk` is an optional Makefile that extends the build process with project specific rules.
-It is included at the end of `app/shell/mk/build.mk` if present.
+`dep.mk` is an optional Makefile that extends the build process with project
+specific rules. Place it under `src/dep.mk` and the main Makefile will include
+it automatically if present.
 
 ## How It Works
 
-`build.mk` contains the line:
+The top-level `makefile` contains the line:
 
 ```make
--include /app/mk/dep.mk
-```
-
-During `docker compose` runs, the repository's `dep.mk` is mounted into the
-shell container at `/app/mk/dep.mk`:
-
-```yaml
-shell:
-  volumes:
-    - ./dep.mk:/app/mk/dep.mk
+-include src/dep.mk
 ```
 
 If the file doesn't exist, the include is ignored. Any targets defined here run
@@ -39,4 +31,4 @@ include app/quiz/dep.mk
 
 Add your own targets or includes to `dep.mk` to hook extra tools into the build.
 This is a convenient place to generate assets that are not handled by the core
-`build.mk` file.
+`makefile`.
