@@ -23,6 +23,11 @@ This repository actually uses three Makefiles that work together:
 - **`COMPOSE_FILE`** – Compose file used by commands. Defaults to `docker-compose.yml` in the project root.
 - **`DOCKER_COMPOSE`** – Shortcut for `docker compose -f $(COMPOSE_FILE)`.
 - **`VERBOSE`** – Set to `1` to print each command executed by `make` in addition to status messages.
+- **`BUILD_VER`** – Short Git commit hash used to bust caches for static
+  assets. The value comes from `git rev-parse --short HEAD` and is appended
+  as a query string in generated URLs, for example
+  `/css/style.css?v=<hash>`. This ensures browsers fetch updated assets
+  after each commit.
 
 ## Common Targets
 

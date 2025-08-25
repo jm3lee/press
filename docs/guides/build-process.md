@@ -84,6 +84,11 @@ to `build/css/style.css`.
 To add additional stylesheets, create new files in `src/css/` and reference the
 resulting `/css/*.css` paths from your pages or templates.
 
+The build injects a version query string into stylesheet links using the
+`BUILD_VER` variable. Each run sets it to the short Git commit hash,
+producing references like `/css/style.css?v=<hash>` so browsers always
+fetch the latest CSS after each commit.
+
 ## Cleaning up
 
 Use the provided targets to tidy generated files:
