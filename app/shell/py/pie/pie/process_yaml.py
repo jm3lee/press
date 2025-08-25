@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import argparse
 import sys
+from pathlib import Path
 from typing import Iterable
+
+import copy
 
 from pie.cli import create_parser
 from pie.filter.emojify import emojify_text
@@ -40,22 +43,32 @@ def main(argv: Iterable[str] | None = None) -> None:
     args = parse_args(argv)
     configure_logging(args.verbose, args.log)
 
-    for path in args.paths:
+    for path_str in args.paths:
+        path = Path(path_str)
+        existing: dict | None = None
         try:
-            metadata = read_from_yaml(path)
+            if path.exists():
+                existing = read_from_yaml(str(path))
+                metadata = copy.deepcopy(existing) if existing is not None else None
+            else:
+                metadata = {}
             if metadata is not None:
-                metadata = generate_missing_metadata(metadata, path)
+                metadata = generate_missing_metadata(metadata, str(path))
                 metadata = _emojify(metadata)
         except Exception as exc:  # pragma: no cover - pass through message
-            logger.error("Failed to process YAML", filename=path)
+            logger.error("Failed to process YAML", filename=str(path))
             raise SystemExit(1) from exc
 
         if metadata is None:
-            logger.error("No metadata found", filename=path)
+            logger.error("No metadata found", filename=str(path))
             sys.exit(1)
 
-        write_yaml(metadata, path)
-        logger.debug("Processed YAML written", path=path)
+        if existing is not None and existing == metadata:
+            logger.debug("Processed YAML unchanged", path=str(path))
+            continue
+
+        write_yaml(metadata, str(path))
+        logger.debug("Processed YAML written", path=str(path))
 
 
 if __name__ == "__main__":

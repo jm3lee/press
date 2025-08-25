@@ -8,8 +8,11 @@ usage: process-yaml <file.yml> [file.yml ...]
 ```
 
 The command reads each YAML file and generates any missing values as described
-in [Metadata Fields](../reference/metadata-fields.md). It writes the result back
-to the same path. Use `--log` to save verbose logs.
+in [Metadata Fields](../reference/metadata-fields.md). It writes the result
+back to the same path. If the destination exists and its metadata is
+unchanged, the file is left as is; cosmetic differences like key ordering or
+quoting are ignored. Otherwise a new or updated file is written. Use `--log`
+to save verbose logs.
 
 Example:
 
