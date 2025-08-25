@@ -181,5 +181,4 @@ dist/app/webp/input
 dist/app/webp/output
 logs
 log/*
-!log/report.html
 app/*/.init
