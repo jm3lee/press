@@ -1,6 +1,7 @@
 # Shell Service
 
-The `shell` directory defines the Docker image that provides the build and test environment for Press.
+The `shell` directory defines the Docker image that provides the build and test
+environment for Press.
 
 ## Layout
 
@@ -11,7 +12,10 @@ The `shell` directory defines the Docker image that provides the build and test 
 
 ## Usage
 
-The top-level Makefile `redo.mk` builds this image and runs `app/shell/mk/build.mk` inside it. Open an interactive container with:
+The top-level `redo.mk` file builds this image and then invokes the root
+`makefile` inside it. Targets can be run from the host with
+`make -f redo.mk <target>` or directly inside the container with `make`.
+Open an interactive container with:
 
 ```bash
 make -f redo.mk shell
@@ -20,5 +24,7 @@ make -f redo.mk shell
 Run the test suite inside the container with:
 
 ```bash
-make -f redo.mk pytest
+make -f redo.mk test
+# or inside the container
+make test
 ```

@@ -8,7 +8,7 @@ Markdown files and ``mermaid()`` for converting Mermaid diagrams to images.
 
 Links that end with ``.md`` are rewritten to ``.html`` so the output can be fed
 directly to Pandoc.  The command is primarily driven via ``preprocess`` and the
-``build.mk`` makefile.
+repository root ``makefile``.
 """
 
 from __future__ import annotations
