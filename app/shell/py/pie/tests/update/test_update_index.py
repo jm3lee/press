@@ -4,6 +4,7 @@ import sys
 import threading
 import fakeredis
 import pytest
+from pie import metadata
 from pie.update import index as update_index
 
 
@@ -112,13 +113,21 @@ def test_main_combines_md_and_yaml(tmp_path, monkeypatch):
     fake = fakeredis.FakeRedis(decode_responses=True)
     monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
 
+    messages = []
+
+    def fake_warning(msg, *args, **kwargs):
+        messages.append(msg.format(*args))
+
+    monkeypatch.setattr(metadata.logger, "warning", fake_warning)
+
     os.chdir(tmp_path)
     try:
-        with pytest.warns(UserWarning):
-            update_index.main(["src/doc.md"])
+        update_index.main(["src/doc.md"])
     finally:
         os.chdir("/tmp")
 
+    assert messages
+    
     assert fake.get("doc.foo") == "bar"
     assert fake.get("doc.baz") == "qux"
     assert fake.get("doc.title") == "Yaml"

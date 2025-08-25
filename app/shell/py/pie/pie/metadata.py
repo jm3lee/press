@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import json
 import os
-import warnings
 from pathlib import Path
 from typing import Any, Dict, Mapping, Optional
 from urllib.parse import urljoin
@@ -336,9 +335,10 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
     if yaml_data:
         for k, v in yaml_data.items():
             if k in combined and combined[k] != v:
-                warnings.warn(
-                    f"Conflict for '{k}', using value from {yaml_file.resolve().relative_to(Path.cwd())}",
-                    UserWarning,
+                logger.warning(
+                    "Conflict for '{}', using value from {}",
+                    k,
+                    yaml_file.resolve().relative_to(Path.cwd()),
                 )
             combined[k] = v
 
