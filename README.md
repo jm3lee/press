@@ -24,6 +24,23 @@ directory using SCSS syntax to customize the site appearance.
 
 All project documentation lives under [docs/](docs/). Start with the [guides](docs/guides/README.md) for step-by-step workflows and see the [reference](docs/reference/README.md) for technical details.
 
+## Testing
+
+Run the test suite inside the same container used for development:
+
+```bash
+r pytest
+```
+
+This command executes pytest in the shell service so results match CI. For
+coverage reporting use:
+
+```bash
+r cov
+```
+
+Coverage reports are written to `log/cov`. See
+[docs/guides/tests.md](docs/guides/tests.md) for more details.
 
 ## SSH port
 
