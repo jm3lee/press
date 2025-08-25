@@ -13,7 +13,7 @@ from typing import Iterator
 
 from pie.cli import create_parser
 from pie.logging import configure_logging
-from pie.index_tree import walk, getopt_link, getopt_show
+from pie.index_tree import walk, getopt_link, getopt_show, sort_entries
 
 warnings.warn(
     "pie.gen_markdown_index is deprecated and will be removed in a future release",
@@ -24,7 +24,8 @@ warnings.warn(
 
 def generate(directory: Path, level: int = 0) -> Iterator[str]:
     """Yield Markdown list items for *directory* recursively."""
-    entries = sorted(walk(directory), key=lambda x: x[0]["title"].lower())
+    entries = list(walk(directory))
+    sort_entries(entries)
     for meta, path in entries:
         entry_id = meta["id"]
         title = meta["title"]

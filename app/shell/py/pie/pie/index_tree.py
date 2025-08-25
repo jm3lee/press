@@ -57,3 +57,38 @@ def walk(
         except Exception:
             warnings.warn(f"Failed to process {path}")
             raise
+
+
+def sort_entries(entries: list[tuple[Mapping[str, Any], Path]]) -> None:
+    """Sort *entries* in place for predictable index ordering.
+
+    Entries are ordered by the following precedence:
+
+    1. ``indextree.order`` metadata, if present
+    2. Numerical filename or directory name
+    3. Case-insensitive title
+    """
+
+    def sort_key(item: tuple[Mapping[str, Any], Path]) -> tuple[int, int | str]:
+        """Return a ``(priority, value)`` tuple used for ordering.
+
+        ``priority`` indicates which field determined the ordering:
+
+        - ``0`` for explicit ``indextree.order``
+        - ``1`` for a numeric filename or directory name
+        - ``2`` for alphabetical title fallback
+
+        ``value`` holds the associated sort value for comparison.
+        """
+
+        meta, path = item
+        section = meta.get("indextree") or {}
+        order = section.get("order")
+        if order is not None:
+            return (0, int(order))
+        name = path.stem if path.is_file() else path.name
+        if name.isdigit():
+            return (1, int(name))
+        return (2, meta["title"].lower())
+
+    entries.sort(key=sort_key)

@@ -120,6 +120,28 @@ def test_process_dir_honours_show_and_link(tmp_path, monkeypatch):
     ]
 
 
+def test_process_dir_sorts_by_numeric_filename(tmp_path, monkeypatch):
+    """Numeric file names are ordered numerically."""
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "1.yml").touch()
+    (src / "2.yml").touch()
+
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    monkeypatch.setattr(metadata, "redis_conn", fake)
+
+    save_meta(fake, "src/1.yml", "one", {"title": "Beta"})
+    save_meta(fake, "src/2.yml", "two", {"title": "Alpha"})
+
+    os.chdir(tmp_path)
+    try:
+        data = list(indextree_json.process_dir(Path("src")))
+    finally:
+        os.chdir("/tmp")
+
+    assert [node["id"] for node in data] == ["one", "two"]
+
+
 def test_main_writes_output_file(tmp_path, monkeypatch, capsys):
     """JSON is written to file when an output path is provided."""
     src = tmp_path / "src"
