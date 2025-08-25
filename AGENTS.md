@@ -10,3 +10,4 @@
 - When editing makefiles, make sure to indent with tabs, not spaces.
 - When writing software documentation, write as an expert software engineer.
   Give enough details to help new engineers on the team.
+- pie.logging.logger is an instance of loguru logger.
