@@ -1,5 +1,5 @@
 # Makefile for building and managing Press
-# Migrated from app/shell/mk/build.mk. Targets now run from the repository root.
+# Targets run from the repository root.
 
 export PATH := /app/bin:$(PATH)
 
