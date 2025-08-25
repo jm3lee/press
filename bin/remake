@@ -2,8 +2,9 @@
 #
 # Description:
 #   Remove the specified build directories and then invoke
-#   `make` with the same arguments. This is useful when
-#   you want to force a clean rebuild of one or more targets.
+#   `make` inside the Docker Compose `shell` service. Runs
+#   from the project root (/data) so the default `makefile`
+#   is used, allowing a clean rebuild of one or more targets.
 #
 # Usage:
 #   remake [TARGETS...]
@@ -17,5 +18,5 @@
 
 rm -rf "$@"
 docker compose run \
-  --rm --entrypoint make -u "$(id -u)" \
-  shell -f /app/mk/build.mk "$@"
+  --rm --entrypoint make -u "$(id -u)" -w /data \
+  shell "$@"

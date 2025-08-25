@@ -2,10 +2,10 @@
 #
 # Description:
 #   Invoke `make` inside the Docker Compose `shell` service.
-#   This mirrors running `make -f app/shell/mk/build.mk` but
-#   executes inside the container so the build environment is
-#   consistent across systems. All arguments are passed directly
-#   to the underlying `make` command.
+#   Runs from the project root (/data) so the default `makefile`
+#   is used, ensuring a consistent build environment across
+#   systems. All arguments are passed directly to the underlying
+#   `make` command.
 #
 # Usage:
 #   make [MAKE_TARGETS]
@@ -18,5 +18,5 @@
 # removed after completion.
 
 docker compose run \
-  --rm --entrypoint make -u "$(id -u)" \
-  shell -f /app/mk/build.mk "$@"
+  --rm --entrypoint make -u "$(id -u)" -w /data \
+  shell "$@"
