@@ -8,7 +8,7 @@ It is disabled by default so it only runs when explicitly requested.
 Start the container using the `pdoc` profile:
 
 ```bash
-docker compose --profile pdoc up pdoc
+docker compose --profile pdoc up --remove-orphans pdoc
 ```
 
 Then open <http://localhost:8080> in your browser to explore the documentation.
