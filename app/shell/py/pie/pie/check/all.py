@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import io
+import sys
+from contextlib import redirect_stderr, redirect_stdout
+from pathlib import Path
 from typing import Callable, Iterable
 
 from pie.check import (
@@ -12,9 +16,12 @@ from pie.check import (
     underscores,
     canonical,
     sitemap_hostname,
+    report,
 )
 
 CheckFunc = Callable[[], int]
+
+OUTPUT_PATH = Path("log/report.html")
 
 CHECKS: Iterable[tuple[str, CheckFunc]] = (
     ("Check metadata authors", lambda: author.main(["src"])),
@@ -48,18 +55,37 @@ CHECKS: Iterable[tuple[str, CheckFunc]] = (
 )
 
 
+class _Tee(io.TextIOBase):
+    def __init__(self, stream: io.TextIOBase, buffer: io.StringIO) -> None:
+        self.stream = stream
+        self.buffer = buffer
+
+    def write(self, s: str) -> int:  # type: ignore[override]
+        self.stream.write(s)
+        self.buffer.write(s)
+        return len(s)
+
+    def flush(self) -> None:  # type: ignore[override]
+        self.stream.flush()
+
+
 def main(argv: list[str] | None = None) -> int:
-    """Run all checkers sequentially.
+    """Run all checkers sequentially and write an error report."""
 
-    This combines the existing stand-alone scripts into a single entry
-    point, avoiding repeated Python start-up costs during a build.
-    """
+    buffer = io.StringIO()
+    tee_out = _Tee(sys.stdout, buffer)
+    tee_err = _Tee(sys.stderr, buffer)
 
-    ok = True
-    for message, func in CHECKS:
-        print(f"==> {message}")
-        if func() != 0:
-            ok = False
+    with redirect_stdout(tee_out), redirect_stderr(tee_err):
+        ok = True
+        for message, func in CHECKS:
+            print(f"==> {message}")
+            if func() != 0:
+                ok = False
+
+    errors = report.parse_errors(buffer.getvalue())
+    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    OUTPUT_PATH.write_text(report.render_html(errors), encoding="utf-8")
     return 0 if ok else 1
 
 
