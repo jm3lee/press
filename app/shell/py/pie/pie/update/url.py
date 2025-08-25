@@ -6,7 +6,11 @@ from typing import Iterable, Sequence
 
 from pie.cli import create_parser
 from pie.logging import configure_logging, logger
-from .common import get_changed_files, update_files as common_update_files
+from .common import (
+    collect_paths,
+    get_changed_files,
+    update_files as common_update_files,
+)
 from pie.metadata import load_metadata_pair
 
 __all__ = ["main"]
@@ -22,6 +26,14 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         "--sort-keys",
         action="store_true",
         help="Sort keys when writing YAML output",
+    )
+    parser.add_argument(
+        "paths",
+        nargs="*",
+        help=(
+            "Directories, files, or glob patterns to scan; if omitted, changed files"
+            " are read from git"
+        ),
     )
     return parser.parse_args(list(argv) if argv is not None else None)
 
@@ -80,9 +92,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.log:
         Path(args.log).parent.mkdir(parents=True, exist_ok=True)
     configure_logging(args.verbose, args.log)
-    changed = get_changed_files()
-    changed = list(filter(lambda p: str(p).startswith("src/"), changed))
+    logger.debug("Parsed arguments", args=vars(args))
+    if args.paths:
+        changed = collect_paths(args.paths)
+    else:
+        changed = get_changed_files()
+        changed = list(filter(lambda p: str(p).startswith("src/"), changed))
+    logger.debug("Files to check", files=[str(p) for p in changed])
     messages, checked = update_files(changed, args.sort_keys)
+    logger.debug("Update complete", messages=messages, checked=checked)
     changed_count = len(messages)
     logger.info("Summary", checked=checked, changed_count=changed_count)
     return 0

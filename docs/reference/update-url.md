@@ -7,8 +7,12 @@ substituting `-` for `_`. When a `url` field is present in the metadata, its
 value is updated accordingly.
 
 ```bash
-update-url [--sort-keys] [-l LOGFILE] [-v]
+update-url [--sort-keys] [-l LOGFILE] [-v] [PATH ...]
 ```
+
+When `PATH` arguments are given they may refer to files, directories, or glob
+patterns. Each path is scanned for Markdown or YAML files before processing. If
+no paths are supplied, files changed in git are used instead.
 
 Renamed files and updated `url` fields are logged to `LOGFILE`. When not
 provided, logs are written to `log/update-url.txt`. Use `--sort-keys` to write
