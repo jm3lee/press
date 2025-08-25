@@ -59,6 +59,3 @@ RUN pip install --no-cache-dir --break-system-packages \
 # Add helper scripts to PATH
 COPY ./bin/ /app/bin
 ENV PATH="/app/bin:${PATH}"
-
-# Copy additional Makefile fragments
-COPY ./mk/ /app/mk
