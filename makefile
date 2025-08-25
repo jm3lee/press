@@ -48,9 +48,6 @@ CFG_DIR   := cfg
 PANDOC_CMD := pandoc
 PANDOC_TEMPLATE := $(SRC_DIR)/pandoc-template.html
 
-# Git version for cache busting
-BUILD_VER := $(shell git rev-parse --short HEAD)
-
 # Options for generating HTML output with Pandoc
 PANDOC_OPTS := \
 	--css '/css/style.css?v=$(BUILD_VER)' \
