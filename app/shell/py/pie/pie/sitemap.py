@@ -10,18 +10,31 @@ from typing import Sequence
 
 from pie.cli import create_parser
 from pie.logging import configure_logging, logger
+from pie.utils import load_exclude_file
 
 
-def generate(build_dir: Path, base_url: str) -> list[str]:
-    """Return sitemap entries for *build_dir* using *base_url*."""
+DEFAULT_EXCLUDE = Path("cfg/sitemap-exclude.yml")
 
+
+def generate(
+    build_dir: Path, base_url: str, exclude: set[Path] | None = None
+) -> list[str]:
+    """Return sitemap entries for *build_dir* using *base_url*.
+
+    ``exclude`` contains resolved paths that are omitted from the sitemap.
+    """
+
+    skip = set(exclude or set())
     base = base_url.rstrip("/")
     entries: list[str] = []
     for path in sorted(build_dir.rglob("*.html")):
-        rel = path.relative_to(build_dir).as_posix()
+        if path.resolve() in skip:
+            continue
+        rel_path = path.relative_to(build_dir)
+        rel = rel_path.as_posix()
         url = f"{base}/{rel}"
         if path.name == "index.html":
-            rel_dir = path.relative_to(build_dir).parent.as_posix()
+            rel_dir = rel_path.parent.as_posix()
             rel_dir = "" if rel_dir == "." else rel_dir
             url = f"{base}/{rel_dir}" if rel_dir else base
             if not url.endswith("/"):
@@ -50,6 +63,11 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         help="Directory containing HTML files",
     )
     parser.add_argument(
+        "-x",
+        "--exclude",
+        help="YAML file listing HTML files to skip",
+    )
+    parser.add_argument(
         "base_url",
         nargs="?",
         help="Base URL for absolute links",
@@ -65,7 +83,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     if not base_url:
         raise SystemExit("BASE_URL must be provided")
     configure_logging(args.verbose, args.log)
-    generate(Path(args.directory), base_url)
+    build_dir = Path(args.directory)
+    if args.exclude:
+        exclude = load_exclude_file(args.exclude, build_dir)
+    elif DEFAULT_EXCLUDE.is_file():
+        exclude = load_exclude_file(DEFAULT_EXCLUDE, build_dir)
+    else:
+        exclude = set()
+    generate(build_dir, base_url, exclude)
     return 0
 
 
