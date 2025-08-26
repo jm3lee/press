@@ -44,6 +44,7 @@ setup(
             'update-author=pie.update.author:main',
             'update-index=pie.update.index:main',
             'update-link-filters=pie.update.link_filters:main',
+            'update-metadata=pie.update.metadata:main',
             'update-pubdate=pie.update.pubdate:main',
             'update-url=pie.update.url:main',
             'upgrade-indextree=pie.update.indextree:main',
