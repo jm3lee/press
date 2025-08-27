@@ -64,15 +64,16 @@ def main(argv: list[str] | None = None) -> int:
     directory = Path(args.directory).resolve()
     html_files = list(directory.rglob("*.html"))
     if args.exclude:
-        exclude = load_exclude_file(args.exclude, directory)
+        exclude_file = args.exclude
     elif DEFAULT_EXCLUDE.is_file():
-        exclude = load_exclude_file(DEFAULT_EXCLUDE, directory)
+        exclude_file = DEFAULT_EXCLUDE
     else:
-        exclude = set()
+        exclude_file = None
+    exclude = load_exclude_file(exclude_file, directory)
 
     ok = True
     for html_file in html_files:
-        if html_file.resolve() in exclude:
+        if html_file in exclude:
             continue
         if not check_file(html_file):
             ok = False

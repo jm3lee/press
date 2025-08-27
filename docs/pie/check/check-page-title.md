@@ -16,6 +16,7 @@ files that fail the check and returns `1` when a problem is found. The
 default exclude file `cfg/check-page-title-exclude.yml` is used when
 present. Use `-x`/`--exclude` to provide a YAML file listing HTML files to
 skip. Paths may be absolute or relative to the directory being scanned.
+Entries may include wildcards or regular expressions prefixed with `regex:`.
 
 ### Example exclude file
 

@@ -40,6 +40,24 @@ def test_exclude_file(tmp_path: Path) -> None:
     assert check_bad_mathjax.main([str(tmp_path), "-x", str(exclude)]) == 0
 
 
+def test_exclude_file_wildcard(tmp_path: Path) -> None:
+    """Wildcard patterns in the exclude file are honoured."""
+    bad = tmp_path / "bad-math.md"
+    bad.write_text("text \\(a+b\\)", encoding="utf-8")
+    exclude = tmp_path / "exclude.yml"
+    exclude.write_text("- bad-*\n", encoding="utf-8")
+    assert check_bad_mathjax.main([str(tmp_path), "-x", str(exclude)]) == 0
+
+
+def test_exclude_file_regex(tmp_path: Path) -> None:
+    """Regex patterns in the exclude file are honoured."""
+    bad = tmp_path / "bad-1.md"
+    bad.write_text("text \\(a+b\\)", encoding="utf-8")
+    exclude = tmp_path / "exclude.yml"
+    exclude.write_text("- regex:bad-\\d\\.md\n", encoding="utf-8")
+    assert check_bad_mathjax.main([str(tmp_path), "-x", str(exclude)]) == 0
+
+
 def test_default_exclude_file(tmp_path: Path) -> None:
     """Default exclude YAML is used when present."""
     bad = tmp_path / "bad.md"

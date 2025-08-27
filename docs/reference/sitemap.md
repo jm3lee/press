@@ -9,7 +9,8 @@ sitemap [-x EXCLUDE] [DIRECTORY] [BASE_URL]
 ```
 
 - `-x EXCLUDE` – YAML file listing HTML files to skip. When omitted,
-  `cfg/sitemap-exclude.yml` is loaded if present.
+  `cfg/sitemap-exclude.yml` is loaded if present. Entries may include
+  wildcards or regular expressions prefixed with `regex:`.
 - `DIRECTORY` – location of the HTML files; defaults to `build`.
 - `BASE_URL` – base URL for absolute links. When omitted, the command reads
   the `BASE_URL` environment variable.
