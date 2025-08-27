@@ -127,6 +127,10 @@ main li + li {
   margin-top: 0.5rem;
 }
 
+main nav li + li {
+  margin-top: 0 !important;
+}
+
 .image-container {
   position: relative;
   display: inline-block;
