@@ -11,6 +11,7 @@ from pie.check import (
     bad_mathjax,
     unescaped_dollar,
     page_title,
+    breadcrumbs,
     post_build,
     unexpanded_jinja,
     underscores,
@@ -38,6 +39,7 @@ CHECKS: Iterable[tuple[str, CheckFunc]] = (
             "build",
         ]),
     ),
+    ("Check breadcrumbs", lambda: breadcrumbs.main(["src"])),
     (
         "Check post-build artifacts",
         lambda: post_build.main(["-c", "cfg/check-post-build.yml"]),
