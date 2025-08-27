@@ -161,8 +161,9 @@ def read_from_yaml(filepath: str) -> Optional[Dict[str, Any]]:
     try:
         return read_yaml(filepath)
     except YAMLError as err:
+        logger.error("Failed to parse YAML file", filepath=filepath)
         err.add_note(f"file: {filepath}")
-        logger.warning("Failed to parse YAML file {}", filepath)
+        logger.error(err)
         raise
 
 # Global connection reused by helper functions.  It is initialised lazily so
