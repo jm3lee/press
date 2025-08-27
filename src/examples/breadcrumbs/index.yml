@@ -1,0 +1,9 @@
+title: Breadcrumb Demo
+author: Ada Lovelace
+id: breadcrumb_demo
+pubdate: Jan 2, 2025
+description: Demonstrates breadcrumb navigation.
+breadcrumbs:
+  - title: Examples
+    url: /examples/
+  - title: Breadcrumb Demo
