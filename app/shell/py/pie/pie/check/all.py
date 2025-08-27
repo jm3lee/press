@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import io
+import importlib
 import sys
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from typing import Callable, Iterable
+
+from pie.utils import read_yaml
 
 from pie.check import (
     author,
@@ -21,9 +24,30 @@ from pie.check import (
 
 CheckFunc = Callable[[], int]
 
+EXTRA_CHECKS_PATH = Path("cfg/check-extra.yml")
+
+
+def load_extra_checks() -> Iterable[tuple[str, CheckFunc]]:
+    """Load extra checks from ``EXTRA_CHECKS_PATH``.
+
+    The YAML file contains a list of ``module:function`` strings. Each
+    function must accept no arguments and return an int.
+    """
+
+    if not EXTRA_CHECKS_PATH.exists():
+        return
+
+    names = read_yaml(str(EXTRA_CHECKS_PATH)) or []
+    for name in names:
+        module_name, func_name = name.split(":")
+        module = importlib.import_module(module_name)
+        func: CheckFunc = getattr(module, func_name)
+        yield (f"Custom: {name}", func)
+
+
 OUTPUT_PATH = Path("log/report.html")
 
-CHECKS: Iterable[tuple[str, CheckFunc]] = (
+BUILTIN_CHECKS: tuple[tuple[str, CheckFunc], ...] = (
     ("Check metadata authors", lambda: author.main(["src"])),
     ("Check for bad MathJax", lambda: bad_mathjax.main(["src"])),
     (
@@ -52,6 +76,10 @@ CHECKS: Iterable[tuple[str, CheckFunc]] = (
     ),
     ("Check canonical links", lambda: canonical.main(["build"])),
     ("Check sitemap", lambda: sitemap_hostname.main([])),
+)
+
+CHECKS: Iterable[tuple[str, CheckFunc]] = BUILTIN_CHECKS + tuple(
+    load_extra_checks()
 )
 
 

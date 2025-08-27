@@ -28,3 +28,19 @@ Use `remake` to delete targets before rebuilding:
 ```bash
 remake build webp
 ```
+
+### Custom checkers
+
+Run additional validators by mounting a module and a YAML file listing the
+checks:
+
+```bash
+docker compose run --rm \
+  -v "$PWD/mychecks.py":/press/mychecks.py \
+  -v "$PWD/extra.yml":/press/cfg/check-extra.yml \
+  press-release \
+  make check
+```
+
+The file contains `module:function` pairs, one per line. Each referenced
+function runs after the built-in checks.

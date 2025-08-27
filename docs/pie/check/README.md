@@ -13,3 +13,16 @@ Documentation for Pie's validation scripts.
 - [check-unescaped-dollar](check-unescaped-dollar.md) – detect unescaped
   dollar signs.
 
+## Custom checks
+
+`cfg/check-extra.yml` adds user checkers to the built-ins. The file lists
+`module:function` references, one per line:
+
+```yaml
+- mypkg.checks:run
+- other.mod:verify
+```
+
+Every referenced module must be on `PYTHONPATH`. After mounting the module and
+configuration file, run `make check` as usual.
+
