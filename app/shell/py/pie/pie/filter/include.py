@@ -20,10 +20,12 @@ import sys
 from pathlib import Path
 from typing import IO, Iterable, Callable
 
-import yaml
+from ruamel.yaml import YAML
 from pie.cli import create_parser
 from pie.logging import logger, configure_logging
 from pie.metadata import get_metadata_by_path
+
+yaml = YAML(typ="safe")
 
 MD_LINK_PATTERN = re.compile(r"\[([^\]]+)\]\(([^)]+)\.md\)")
 
@@ -53,7 +55,7 @@ def parse_metadata_or_print_first_line(f: IO[str]) -> dict | None:
                 if line.strip() == "---":
                     break
                 y += line
-            return yaml.safe_load(y)
+            return yaml.load(y)
         print(line, end="", file=outfile)
         break
 

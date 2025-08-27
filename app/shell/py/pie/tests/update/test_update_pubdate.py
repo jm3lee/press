@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 from pathlib import Path
-import yaml
+
+from ruamel.yaml import YAML
+
+yaml = YAML(typ="safe")
+yaml.default_flow_style = False
 
 from pie.update import pubdate as update_pubdate
 from pie.utils import get_pubdate
@@ -98,7 +102,7 @@ def test_pubdate_with_special_characters_is_escaped(
     update_pubdate.main([])
 
     front = md.read_text(encoding="utf-8").split("---\n")[1]
-    data = yaml.safe_load(front)
+    data = yaml.load(front)
     assert data["pubdate"] == special
 
 

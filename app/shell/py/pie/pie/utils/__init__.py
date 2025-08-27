@@ -13,7 +13,12 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-import yaml
+from ruamel.yaml import YAML
+
+yaml = YAML(typ="safe")
+yaml.allow_unicode = True
+yaml.sort_keys = False
+yaml.default_flow_style = False
 
 from pie.logging import logger
 
@@ -53,7 +58,7 @@ def read_yaml(filename: str):
 
     logger.debug("Reading YAML", filename=filename)
     with open(filename, "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
+        return yaml.load(f)
 
 
 def write_yaml(data, filename: str) -> None:
@@ -61,7 +66,7 @@ def write_yaml(data, filename: str) -> None:
 
     logger.debug("Writing YAML", filename=filename)
     with open(filename, "w", encoding="utf-8") as f:
-        yaml.safe_dump(data, f, allow_unicode=True, sort_keys=False)
+        yaml.dump(data, f)
 
 
 def load_exclude_file(filename: str | Path | None, root: Path) -> set[Path]:

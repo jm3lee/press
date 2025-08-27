@@ -5,12 +5,18 @@ import sys
 from pathlib import Path
 from typing import Any, Iterable, Sequence
 
-import yaml
+from io import StringIO
+
+from ruamel.yaml import YAML
 
 from pie.cli import create_parser
 from pie.logging import configure_logging, logger
 from pie.metadata import load_metadata_pair
 from .common import collect_paths, get_changed_files
+
+yaml = YAML(typ="safe")
+yaml.allow_unicode = True
+yaml.default_flow_style = False
 
 __all__ = ["main"]
 
@@ -80,14 +86,15 @@ def _merge_file(fp: Path, data: dict, sort_keys: bool) -> tuple[bool, bool]:
     """
     text = fp.read_text(encoding="utf-8") if fp.exists() else ""
     if fp.suffix in {".yml", ".yaml"}:
-        existing = yaml.safe_load(text) or {}
+        existing = yaml.load(text) or {}
         merged, conflict = _merge(existing, data)
         if conflict:
             return False, True
         if merged != existing:
-            fp.write_text(
-                yaml.safe_dump(merged, sort_keys=sort_keys), encoding="utf-8"
-            )
+            buf = StringIO()
+            yaml.sort_keys = sort_keys
+            yaml.dump(merged, buf)
+            fp.write_text(buf.getvalue(), encoding="utf-8")
             return True, False
         return False, False
     if fp.suffix == ".md":
@@ -101,12 +108,15 @@ def _merge_file(fp: Path, data: dict, sort_keys: bool) -> tuple[bool, bool]:
             if end is None:
                 return False, True
             frontmatter = "".join(lines[1:end])
-            existing = yaml.safe_load(frontmatter) or {}
+            existing = yaml.load(frontmatter) or {}
             merged, conflict = _merge(existing, data)
             if conflict:
                 return False, True
             if merged != existing:
-                dumped = yaml.safe_dump(merged, sort_keys=sort_keys)
+                buf = StringIO()
+                yaml.sort_keys = sort_keys
+                yaml.dump(merged, buf)
+                dumped = buf.getvalue()
                 lines[1:end] = [dumped]
                 fp.write_text("".join(lines), encoding="utf-8")
                 return True, False
@@ -115,7 +125,10 @@ def _merge_file(fp: Path, data: dict, sort_keys: bool) -> tuple[bool, bool]:
             merged, conflict = _merge({}, data)
             if conflict:
                 return False, True
-            dumped = yaml.safe_dump(merged, sort_keys=sort_keys)
+            buf = StringIO()
+            yaml.sort_keys = sort_keys
+            yaml.dump(merged, buf)
+            dumped = buf.getvalue()
             new_lines = ["---\n", dumped, "---\n"] + lines
             fp.write_text("".join(new_lines), encoding="utf-8")
             return True, False
@@ -127,7 +140,7 @@ def _read_data(path: Path | None) -> dict:
         text = path.read_text(encoding="utf-8")
     else:
         text = sys.stdin.read()
-    data = yaml.safe_load(text) or {}
+    data = yaml.load(text) or {}
     if not isinstance(data, dict):
         logger.warning("Input YAML must define a mapping")
         raise SystemExit(1)

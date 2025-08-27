@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import yaml
+from ruamel.yaml import YAML
+
+yaml = YAML(typ="safe")
 
 from pie import store_files
 
@@ -43,7 +45,7 @@ def test_process_file_moves_and_creates_metadata(tmp_path: Path, monkeypatch) ->
     assert dest_file.read_text() == "data"
     expected_yaml = store_files.METADATA_TEMPLATE.render(baseurl="", file_id="fixedid")
     assert meta_file.read_text() == expected_yaml
-    meta_data = yaml.safe_load(expected_yaml)
+    meta_data = yaml.load(expected_yaml)
     assert meta_data["id"] == "fixedid"
     assert meta_data["url"] == "/v2/files/0/fixedid"
     assert meta_data["author"] == ""
@@ -61,7 +63,7 @@ def test_process_file_uses_baseurl(tmp_path: Path, monkeypatch) -> None:
 
     store_files.process_file(src, dest, meta, baseurl="https://example.com")
     meta_file = meta / "fixedid.yml"
-    meta_data = yaml.safe_load(meta_file.read_text())
+    meta_data = yaml.load(meta_file.read_text())
     assert meta_data["url"] == "https://example.com/v2/files/0/fixedid"
 
 
@@ -99,7 +101,7 @@ def test_main_uses_config_file(tmp_path: Path, monkeypatch) -> None:
     store_files.main([str(base), "--config", str(cfg)])
 
     meta_file = Path("src") / "static" / "files" / "id1.yml"
-    meta_data = yaml.safe_load(meta_file.read_text())
+    meta_data = yaml.load(meta_file.read_text())
     assert meta_data["url"] == "https://files.example/v2/files/0/id1"
 
 

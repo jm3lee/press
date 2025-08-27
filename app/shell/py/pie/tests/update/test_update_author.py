@@ -2,7 +2,14 @@ from __future__ import annotations
 
 from pathlib import Path
 import sys
-import yaml
+from io import StringIO
+
+from ruamel.yaml import YAML
+
+yaml = YAML(typ="safe")
+yaml.allow_unicode = True
+yaml.sort_keys = False
+yaml.default_flow_style = False
 
 from pie.update import author as update_author
 
@@ -133,9 +140,9 @@ def test_author_with_special_characters_is_escaped(
     cfg = tmp_path / "cfg"
     cfg.mkdir()
     special = "Jane: Doe #1"
-    (cfg / "update-author.yml").write_text(
-        yaml.safe_dump({"author": special}, sort_keys=False), encoding="utf-8"
-    )
+    buf = StringIO()
+    yaml.dump({"author": special}, buf)
+    (cfg / "update-author.yml").write_text(buf.getvalue(), encoding="utf-8")
 
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(
@@ -145,7 +152,7 @@ def test_author_with_special_characters_is_escaped(
     update_author.main([])
 
     front = md.read_text(encoding="utf-8").split("---\n")[1]
-    data = yaml.safe_load(front)
+    data = yaml.load(front)
     assert data["author"] == special
 
 

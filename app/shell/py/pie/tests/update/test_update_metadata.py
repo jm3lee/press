@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from pathlib import Path
 import io
-import yaml
+
+from ruamel.yaml import YAML
+
+yaml = YAML(typ="safe")
 
 from pie.update import metadata as update_metadata
 
@@ -19,7 +22,7 @@ def test_adds_metadata_from_file(tmp_path: Path, monkeypatch, capsys) -> None:
     monkeypatch.chdir(tmp_path)
     update_metadata.main(["-f", str(data_file), "src/doc.yml"])
 
-    assert yaml.safe_load(yml.read_text(encoding="utf-8")) == {
+    assert yaml.load(yml.read_text(encoding="utf-8")) == {
         "title": "Test",
         "foo": {"bar": "a"},
     }
@@ -43,7 +46,7 @@ def test_reads_yaml_from_stdin(tmp_path: Path, monkeypatch, capsys) -> None:
     )
     update_metadata.main(["src/doc.yml"])
 
-    assert yaml.safe_load(yml.read_text(encoding="utf-8")) == {
+    assert yaml.load(yml.read_text(encoding="utf-8")) == {
         "title": "Test",
         "foo": ["a", "b"],
     }
@@ -64,7 +67,7 @@ def test_conflict_skips_file(tmp_path: Path, monkeypatch, capsys) -> None:
     code = update_metadata.main(["-f", str(data_file), "src/doc.yml"])
 
     assert code == 1
-    assert yaml.safe_load(yml.read_text(encoding="utf-8")) == {"foo": 1}
+    assert yaml.load(yml.read_text(encoding="utf-8")) == {"foo": 1}
     captured = capsys.readouterr()
     assert captured.out == ""
     log_text = (tmp_path / "log/update-metadata.txt").read_text(encoding="utf-8")

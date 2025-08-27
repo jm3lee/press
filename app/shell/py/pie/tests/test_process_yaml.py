@@ -1,7 +1,14 @@
 from __future__ import annotations
 
 import pytest
-import yaml
+from io import StringIO
+
+from ruamel.yaml import YAML
+
+yaml = YAML(typ="safe")
+yaml.allow_unicode = True
+yaml.sort_keys = False
+yaml.default_flow_style = False
 
 from pie import process_yaml
 
@@ -103,7 +110,9 @@ def test_main_errors_on_read_failure(monkeypatch) -> None:
 
 def test_main_skips_write_when_unchanged(tmp_path, monkeypatch) -> None:
     path = tmp_path / "in.yml"
-    content = yaml.safe_dump({"title": "T"}, allow_unicode=True, sort_keys=False)
+    buf = StringIO()
+    yaml.dump({"title": "T"}, buf)
+    content = buf.getvalue()
     path.write_text(content, encoding="utf-8")
 
     monkeypatch.setattr(

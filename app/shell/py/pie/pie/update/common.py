@@ -16,7 +16,8 @@ from typing import Iterable
 from pie.metadata import load_metadata_pair
 from pie.logging import logger
 import os
-import yaml
+from io import StringIO
+from ruamel.yaml import YAML
 
 __all__ = [
     "get_changed_files",
@@ -24,6 +25,10 @@ __all__ = [
     "update_files",
     "collect_paths",
 ]
+
+yaml = YAML(typ="safe")
+yaml.allow_unicode = True
+yaml.default_flow_style = False
 
 
 def get_changed_files() -> list[Path]:
@@ -119,13 +124,14 @@ def _replace_yaml_field(
     fp: Path, text: str, field: str, value: str, sort_keys: bool
 ) -> tuple[bool, str | None]:
     """Update ``field`` in YAML *fp*, optionally sorting keys."""
-    data = yaml.safe_load(text) or {}
+    data = yaml.load(text) or {}
     old = data.get(field)
     if old != value:
         data[field] = value
-        fp.write_text(
-            yaml.safe_dump(data, sort_keys=sort_keys), encoding="utf-8"
-        )
+        buf = StringIO()
+        yaml.sort_keys = sort_keys
+        yaml.dump(data, buf)
+        fp.write_text(buf.getvalue(), encoding="utf-8")
         return True, old if old is not None else "undefined"
     return True, None
 
@@ -141,7 +147,10 @@ def _replace_markdown_field(
     lines = text.splitlines(keepends=True)
     if not lines or not lines[0].startswith("---"):
         # no frontmatter, add a new block with the field
-        dumped = yaml.safe_dump({field: value}, sort_keys=sort_keys)
+        buf = StringIO()
+        yaml.sort_keys = sort_keys
+        yaml.dump({field: value}, buf)
+        dumped = buf.getvalue()
         new_lines = ["---\n", dumped, "---\n"] + lines
         fp.write_text("".join(new_lines), encoding="utf-8")
         return True, "undefined"
@@ -153,11 +162,14 @@ def _replace_markdown_field(
     if end is None:
         return False, None
     frontmatter = "".join(lines[1:end])
-    data = yaml.safe_load(frontmatter) or {}
+    data = yaml.load(frontmatter) or {}
     old = data.get(field)
     if old != value:
         data[field] = value
-        dumped = yaml.safe_dump(data, sort_keys=sort_keys)
+        buf = StringIO()
+        yaml.sort_keys = sort_keys
+        yaml.dump(data, buf)
+        dumped = buf.getvalue()
         lines[1:end] = [dumped]
         fp.write_text("".join(lines), encoding="utf-8")
         return True, old if old is not None else "undefined"

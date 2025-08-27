@@ -2,7 +2,7 @@ import os
 
 import fakeredis
 import pytest
-import yaml
+import ruamel.yaml as yaml
 
 from pie import metadata
 

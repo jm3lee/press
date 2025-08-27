@@ -6,10 +6,15 @@ import argparse
 from pathlib import Path
 from typing import Iterable, Sequence
 
-import yaml
+from io import StringIO
+from ruamel.yaml import YAML
 
 from pie.cli import create_parser
 from pie.logging import configure_logging, logger
+
+yaml = YAML(typ="safe")
+yaml.allow_unicode = True
+yaml.default_flow_style = False
 
 __all__ = ["main"]
 
@@ -17,12 +22,15 @@ __all__ = ["main"]
 def _upgrade_yaml(path: Path) -> bool:
     """Return ``True`` if *path* was updated."""
 
-    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    data = yaml.load(path.read_text(encoding="utf-8")) or {}
     section = data.pop("gen-markdown-index", None)
     if section is None:
         return False
     data["indextree"] = section
-    path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+    buf = StringIO()
+    yaml.sort_keys = False
+    yaml.dump(data, buf)
+    path.write_text(buf.getvalue(), encoding="utf-8")
     return True
 
 
@@ -36,12 +44,15 @@ def _upgrade_markdown(path: Path) -> bool:
         end = next(i for i, line in enumerate(lines[1:], start=1) if line.startswith("---"))
     except StopIteration:
         return False
-    front = yaml.safe_load("".join(lines[1:end])) or {}
+    front = yaml.load("".join(lines[1:end])) or {}
     section = front.pop("gen-markdown-index", None)
     if section is None:
         return False
     front["indextree"] = section
-    new_front = yaml.safe_dump(front, sort_keys=False).splitlines(keepends=True)
+    buf = StringIO()
+    yaml.sort_keys = False
+    yaml.dump(front, buf)
+    new_front = buf.getvalue().splitlines(keepends=True)
     path.write_text("".join(["---\n", *new_front, *lines[end:]]), encoding="utf-8")
     return True
 

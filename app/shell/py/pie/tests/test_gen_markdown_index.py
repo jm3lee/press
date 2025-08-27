@@ -1,6 +1,8 @@
 from pathlib import Path
 
-import yaml
+from ruamel.yaml import YAML
+
+yaml = YAML(typ="safe")
 
 import pie.gen_markdown_index as gen_markdown_index
 from pie.gen_markdown_index import generate, main
@@ -21,7 +23,7 @@ def test_show_property(tmp_path, monkeypatch):
     (hidden / "child.yml").write_text("id: child\ntitle: Child\n")
 
     def fake_meta(filepath: str, keypath: str):
-        data = yaml.safe_load(Path(filepath).read_text()) or {}
+        data = yaml.load(Path(filepath).read_text()) or {}
         if "id" not in data:
             data["id"] = Path(filepath).with_suffix("").name
         for key in keypath.split("."):
@@ -37,7 +39,7 @@ def test_show_property(tmp_path, monkeypatch):
     def fake_build(prefix: str):
         doc_id = prefix.rstrip(".")
         for p in tmp_path.rglob("*.yml"):
-            data = yaml.safe_load(p.read_text()) or {}
+            data = yaml.load(p.read_text()) or {}
             if data.get("id", p.with_suffix("").name) == doc_id:
                 return data
         return None
@@ -56,7 +58,7 @@ def test_missing_id_uses_filename(tmp_path, monkeypatch):
     (tmp_path / "foo.yml").write_text("title: Foo\n")
 
     def fake_meta(filepath: str, keypath: str):
-        data = yaml.safe_load(Path(filepath).read_text()) or {}
+        data = yaml.load(Path(filepath).read_text()) or {}
         if "id" not in data:
             data["id"] = Path(filepath).with_suffix("").name
         for key in keypath.split("."):
@@ -72,7 +74,7 @@ def test_missing_id_uses_filename(tmp_path, monkeypatch):
     def fake_build(prefix: str):
         doc_id = prefix.rstrip(".")
         for p in tmp_path.rglob("*.yml"):
-            data = yaml.safe_load(p.read_text()) or {}
+            data = yaml.load(p.read_text()) or {}
             if data.get("id", p.with_suffix("").name) == doc_id:
                 return data
         return None
@@ -123,7 +125,7 @@ def test_numeric_filenames_sort(tmp_path, monkeypatch):
     (tmp_path / "2.yml").write_text("id: two\ntitle: Alpha\n")
 
     def fake_meta(filepath: str, keypath: str):
-        data = yaml.safe_load(Path(filepath).read_text()) or {}
+        data = yaml.load(Path(filepath).read_text()) or {}
         if "id" not in data:
             data["id"] = Path(filepath).with_suffix("").name
         for key in keypath.split("."):
@@ -139,7 +141,7 @@ def test_numeric_filenames_sort(tmp_path, monkeypatch):
     def fake_build(prefix: str):
         doc_id = prefix.rstrip(".")
         for p in tmp_path.rglob("*.yml"):
-            data = yaml.safe_load(p.read_text()) or {}
+            data = yaml.load(p.read_text()) or {}
             if data.get("id", p.with_suffix("").name) == doc_id:
                 return data
         return None

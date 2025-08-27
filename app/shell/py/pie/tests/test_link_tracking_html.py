@@ -8,7 +8,9 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 
 import pytest
-import yaml
+from ruamel.yaml import YAML
+
+yaml = YAML(typ="safe")
 from pie.render import jinja as render_template
 
 
@@ -17,7 +19,7 @@ def _collect_tracking_disabled_urls(src_root: Path) -> list[str]:
     urls: list[str] = []
     for yml in src_root.rglob("*.yml"):
         try:
-            data = yaml.safe_load(yml.read_text(encoding="utf-8"))
+            data = yaml.load(yml.read_text(encoding="utf-8"))
             if isinstance(data, dict):
                 link = data.get("link", {})
                 if isinstance(link, dict) and link.get("tracking") is False:

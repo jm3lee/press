@@ -11,10 +11,12 @@ from urllib.parse import urljoin
 
 import redis
 from flatten_dict import unflatten
-import yaml
+from ruamel.yaml import YAML, YAMLError
 
 from pie.logging import logger
 from pie.utils import read_yaml
+
+yaml = YAML(typ="safe")
 
 
 def get_url(filename: str) -> Optional[str]:
@@ -68,7 +70,7 @@ def get_frontmatter(filename: str) -> Optional[Dict[str, Any]]:
         yaml_lines.append(line)
 
     content = "".join(yaml_lines)
-    return yaml.safe_load(content)
+    return yaml.load(content)
 
 
 def _add_url_if_missing(metadata: dict[str, Any], filepath: str) -> None:
@@ -160,7 +162,7 @@ def read_from_yaml(filepath: str) -> Optional[Dict[str, Any]]:
 
     try:
         return read_yaml(filepath)
-    except yaml.YAMLError as err:
+    except YAMLError as err:
         err.add_note(f"file: {filepath}")
         logger.warning("Failed to parse YAML file {}", filepath)
         raise
