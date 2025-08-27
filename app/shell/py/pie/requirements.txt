@@ -1,4 +1,4 @@
-PyYAML
+ruamel.yaml>=0.18
 loguru
 redis
 fakeredis
