@@ -42,5 +42,6 @@ concepts and data formats, see the
 Refer to the individual files for additional guides not listed here.
 
 ## Content features
+- [breadcrumbs.md](breadcrumbs.md) – show hierarchical navigation at the page top.
 - [responsive-images.md](responsive-images.md) – render responsive images with the figure helper.
 - [reading-notes.md](reading-notes.md) – add reading notes for a book.

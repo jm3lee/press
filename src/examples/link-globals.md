@@ -3,6 +3,12 @@ title: Link Global Examples
 author: Brian Lee
 id: link-globals
 citation: link globals
+breadcrumbs:
+  - title: Home
+    url: /
+  - title: Examples
+    url: /examples/
+  - title: Link Global Examples
 ---
 
 Press provides custom Jinja globals for formatting links. Each example

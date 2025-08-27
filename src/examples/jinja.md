@@ -3,6 +3,12 @@ title: Jinja Examples
 author: Brian Lee
 id: jinja
 citation: jinja
+breadcrumbs:
+  - title: Home
+    url: /
+  - title: Examples
+    url: /examples/
+  - title: Jinja Examples
 ---
 
 This tutorial introduces the basics of embedding Jinja in Markdown. Each

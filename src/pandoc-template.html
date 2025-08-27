@@ -189,6 +189,19 @@
     </style>
 
     <main class="container mb-5" style="max-width: 65ch">
+      $if(breadcrumbs)$
+      <nav style="--bs-breadcrumb-divider: '>'" aria-label="breadcrumb">
+        <ol class="breadcrumb pt-3">
+          $for(breadcrumbs)$
+          $if(breadcrumbs.url)$
+          <li class="breadcrumb-item"><a href="$breadcrumbs.url$">$breadcrumbs.title$</a></li>
+          $else$
+          <li class="breadcrumb-item active" aria-current="page">$breadcrumbs.title$</li>
+          $endif$
+          $endfor$
+        </ol>
+      </nav>
+      $endif$
       <div class="metablock">
         $if(author)$ $author$<br />
         $endif$ $if(pubdate)$ $pubdate$<br />

@@ -3,6 +3,12 @@ title: Chicago Citation Examples
 author: Brian Lee
 id: chicago-citations
 citation: chicago citations
+breadcrumbs:
+  - title: Home
+    url: /
+  - title: Examples
+    url: /examples/
+  - title: Chicago Citation Examples
 ---
 
 Demonstrates Chicago-style citations using the `cite` and `link`

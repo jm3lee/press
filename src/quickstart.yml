@@ -4,3 +4,7 @@ id: quickstart
 permalink: /q
 pubdate: Aug 15, 2025
 title: Quickstart
+breadcrumbs:
+  - title: Home
+    url: /
+  - title: Quickstart

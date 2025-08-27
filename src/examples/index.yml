@@ -4,3 +4,7 @@ indextree:
   link: false
 author: Brian Lee
 pubdate: Aug 12, 2025
+breadcrumbs:
+  - title: Home
+    url: /
+  - title: Examples
