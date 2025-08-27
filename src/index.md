@@ -2,6 +2,7 @@ Welcome to the demo site for **Press**. Use the links below to explore key
 features.
 
 - [Blog Demo](examples/blog/index.md)
+- [Breadcrumb Demo](examples/breadcrumbs/index.md)
 - [Chicago Citation Examples](examples/chicago-citations.md)
 - [Index Tree Demo](examples/indextree/index.md)
 - [Jinja Examples](examples/jinja.md)
