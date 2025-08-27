@@ -4,10 +4,9 @@ import argparse
 from pathlib import Path
 from typing import Iterable, Sequence
 
-import yaml
-
 from pie.cli import create_parser
 from pie.logging import configure_logging, logger
+from pie.utils import read_yaml
 from .common import (
     collect_paths,
     get_changed_files,
@@ -21,7 +20,7 @@ def load_default_author(cfg_path: Path | None = None) -> str:
     """Return the default author from ``cfg/update-author.yml``."""
     path = cfg_path or Path("cfg") / "update-author.yml"
     try:
-        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+        data = read_yaml(str(path))
     except FileNotFoundError:
         return ""
     if isinstance(data, dict):

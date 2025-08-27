@@ -12,11 +12,26 @@ import subprocess
 import glob
 from itertools import chain
 from typing import Iterable
+import io
 
 from pie.metadata import load_metadata_pair
 from pie.logging import logger
 import os
-import yaml
+from pie.utils import yaml
+
+
+def _sort(obj):
+    if isinstance(obj, dict):
+        return {k: _sort(v) for k, v in sorted(obj.items())}
+    if isinstance(obj, list):
+        return [_sort(i) for i in obj]
+    return obj
+
+
+def _dump(data) -> str:
+    buf = io.StringIO()
+    yaml.dump(data, buf)
+    return buf.getvalue()
 
 __all__ = [
     "get_changed_files",
@@ -119,13 +134,13 @@ def _replace_yaml_field(
     fp: Path, text: str, field: str, value: str, sort_keys: bool
 ) -> tuple[bool, str | None]:
     """Update ``field`` in YAML *fp*, optionally sorting keys."""
-    data = yaml.safe_load(text) or {}
+    data = yaml.load(text) or {}
     old = data.get(field)
     if old != value:
         data[field] = value
-        fp.write_text(
-            yaml.safe_dump(data, sort_keys=sort_keys), encoding="utf-8"
-        )
+        if sort_keys:
+            data = _sort(data)
+        fp.write_text(_dump(data), encoding="utf-8")
         return True, old if old is not None else "undefined"
     return True, None
 
@@ -141,7 +156,10 @@ def _replace_markdown_field(
     lines = text.splitlines(keepends=True)
     if not lines or not lines[0].startswith("---"):
         # no frontmatter, add a new block with the field
-        dumped = yaml.safe_dump({field: value}, sort_keys=sort_keys)
+        data = {field: value}
+        if sort_keys:
+            data = _sort(data)
+        dumped = _dump(data)
         new_lines = ["---\n", dumped, "---\n"] + lines
         fp.write_text("".join(new_lines), encoding="utf-8")
         return True, "undefined"
@@ -153,11 +171,13 @@ def _replace_markdown_field(
     if end is None:
         return False, None
     frontmatter = "".join(lines[1:end])
-    data = yaml.safe_load(frontmatter) or {}
+    data = yaml.load(frontmatter) or {}
     old = data.get(field)
     if old != value:
         data[field] = value
-        dumped = yaml.safe_dump(data, sort_keys=sort_keys)
+        if sort_keys:
+            data = _sort(data)
+        dumped = _dump(data)
         lines[1:end] = [dumped]
         fp.write_text("".join(lines), encoding="utf-8")
         return True, old if old is not None else "undefined"

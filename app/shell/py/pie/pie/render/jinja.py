@@ -15,11 +15,17 @@ import sys
 import time
 from pathlib import Path
 
-import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
+from ruamel.yaml import YAMLError
 from pie.cli import create_parser
 from pie.logging import logger, configure_logging
-from pie.utils import read_json, read_utf8, write_utf8, read_yaml as load_yaml_file
+from pie.utils import (
+    read_json,
+    read_utf8,
+    write_utf8,
+    read_yaml as load_yaml_file,
+    yaml,
+)
 from pie import metadata
 
 DEFAULT_CONFIG = Path("cfg/render-jinja-template.yml")
@@ -383,8 +389,11 @@ def extract_front_matter(file_path: str) -> dict | None:
 
     if in_block and front_matter_lines:
         try:
-            return yaml.safe_load("".join(front_matter_lines))
-        except yaml.YAMLError:
+            data = yaml.load("".join(front_matter_lines))
+            if not isinstance(data, dict) or None in data:
+                return None
+            return data
+        except YAMLError:
             return None
     return None
 
@@ -433,9 +442,9 @@ def to_alpha_index(i):
 
 def read_yaml(filename):
     """Read ``filename`` as YAML and yield the ``toc`` sequence."""
-
-    y = yaml.safe_load(read_utf8(filename))
-    yield from y["toc"]
+    y = load_yaml_file(filename)
+    if y:
+        yield from y["toc"]
 
 def load_config(path: str | Path = DEFAULT_CONFIG) -> dict:
     """Load configuration from *path* and return a dict."""
@@ -447,12 +456,16 @@ def load_config(path: str | Path = DEFAULT_CONFIG) -> dict:
         logger.error("Configuration file not found", path=str(cfg_path))
         raise SystemExit(1)
     try:
-        return load_yaml_file(str(cfg_path)) or {}
+        data = load_yaml_file(str(cfg_path)) or {}
     except Exception as exc:
         logger.error(
             "Failed to load configuration", path=str(cfg_path), exception=str(exc)
         )
         raise SystemExit(1)
+    if None in data:
+        logger.error("Failed to load configuration", path=str(cfg_path))
+        raise SystemExit(1)
+    return data
 
 def create_env():
     """Create and configure the Jinja2 environment."""

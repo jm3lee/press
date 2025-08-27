@@ -11,10 +11,9 @@ from urllib.parse import urljoin
 
 import redis
 from flatten_dict import unflatten
-import yaml
-
 from pie.logging import logger
-from pie.utils import read_yaml
+from pie.utils import read_yaml, yaml
+from ruamel.yaml import YAMLError
 
 
 def get_url(filename: str) -> Optional[str]:
@@ -68,7 +67,7 @@ def get_frontmatter(filename: str) -> Optional[Dict[str, Any]]:
         yaml_lines.append(line)
 
     content = "".join(yaml_lines)
-    return yaml.safe_load(content)
+    return yaml.load(content)
 
 
 def _add_url_if_missing(metadata: dict[str, Any], filepath: str) -> None:
@@ -159,11 +158,18 @@ def read_from_yaml(filepath: str) -> Optional[Dict[str, Any]]:
     """
 
     try:
-        return read_yaml(filepath)
-    except yaml.YAMLError as err:
+        data = read_yaml(filepath)
+    except YAMLError as err:
         err.add_note(f"file: {filepath}")
         logger.warning("Failed to parse YAML file {}", filepath)
         raise
+    if not isinstance(data, dict) or None in data:
+        import yaml as _pyyaml
+
+        err = _pyyaml.YAMLError(f"invalid YAML: {filepath}")
+        logger.warning("Failed to parse YAML file {}", filepath)
+        raise err
+    return data
 
 # Global connection reused by helper functions.  It is initialised lazily so
 # unit tests can swap in a fake client.
