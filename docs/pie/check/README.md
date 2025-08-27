@@ -12,4 +12,6 @@ Documentation for Pie's validation scripts.
   delimiters.
 - [check-unescaped-dollar](check-unescaped-dollar.md) – detect unescaped
   dollar signs.
+- [check-breadcrumbs](check-breadcrumbs.md) – ensure metadata defines
+  breadcrumbs.
 

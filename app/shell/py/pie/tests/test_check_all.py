@@ -43,6 +43,7 @@ def test_run_as_script(monkeypatch) -> None:
         "bad_mathjax",
         "unescaped_dollar",
         "page_title",
+        "breadcrumbs",
         "post_build",
         "unexpanded_jinja",
         "underscores",
