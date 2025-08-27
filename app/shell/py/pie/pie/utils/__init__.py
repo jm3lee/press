@@ -13,7 +13,8 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-import yaml
+from ruamel.yaml import YAML
+from ruamel.yaml.scalarstring import LiteralScalarString
 
 from pie.logging import logger
 
@@ -48,12 +49,17 @@ def write_utf8(text: str, filename: str) -> None:
         f.write(text)
 
 
+yaml = YAML(typ="rt")
+yaml.preserve_quotes = True
+yaml.indent(mapping=2, sequence=2, offset=0)
+
+
 def read_yaml(filename: str):
     """Return YAML-decoded data from *filename*."""
 
     logger.debug("Reading YAML", filename=filename)
     with open(filename, "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
+        return yaml.load(f)
 
 
 def write_yaml(data, filename: str) -> None:
@@ -61,7 +67,13 @@ def write_yaml(data, filename: str) -> None:
 
     logger.debug("Writing YAML", filename=filename)
     with open(filename, "w", encoding="utf-8") as f:
-        yaml.safe_dump(data, f, allow_unicode=True, sort_keys=False)
+        yaml.dump(data, f)
+
+
+def yaml_literal(text: str) -> LiteralScalarString:
+    """Return *text* marked as a literal scalar for multi-line YAML."""
+
+    return LiteralScalarString(text)
 
 
 def load_exclude_file(filename: str | Path | None, root: Path) -> set[Path]:
