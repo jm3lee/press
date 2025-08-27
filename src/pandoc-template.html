@@ -1,14 +1,41 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta charset="utf-8" />
-        <title>$title$</title>
-        <!--
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="utf-8" />
+    <title>$title$</title>
+    $if(description)$
+    <meta name="description" content="$description$" />
+    $endif$ $if(og-title)$
+    <meta property="og:title" content="$og-title$" />
+    $else$
+    <meta property="og:title" content="$title$" />
+    $endif$ $if(og-description)$
+    <meta property="og:description" content="$og-description$" />
+    $elseif(description)$
+    <meta property="og:description" content="$description$" />
+    $endif$ $if(og-image)$
+    <meta property="og:image" content="$og-image$" />
+    $elseif(og_image)$
+    <meta property="og:image" content="$og_image$" />
+    $endif$ $if(og-url)$
+    <meta property="og:url" content="$og-url$" />
+    $elseif(link.canonical)$
+    <meta property="og:url" content="$link.canonical$" />
+    $endif$ $if(twitter-card)$
+    <meta name="twitter:card" content="$twitter-card$" />
+    $else$
+    <meta name="twitter:card" content="summary_large_image" />
+    $endif$ $if(twitter-image)$
+    <meta name="twitter:image" content="$twitter-image$" />
+    $elseif(og_image)$
+    <meta name="twitter:image" content="$og_image$" />
+    $endif$
+    <!--
         Example metadata block for social tags used by Pandoc:
         ---
         title: "Example Page"
-        definition: "Page description."
+        description: "Page description."
         og_image: "/img/example.png"
         url: "https://example.com/example"
         meta:
@@ -30,94 +57,209 @@
             content: "/img/example.png"
         ---
         -->
-        <!-- Pandoc's metadata block: values come from the document's YAML front matter -->
-        $for(meta)$
-        <meta$if(meta.name)$ name="$meta.name$"$endif$$if(meta.property)$ property="$meta.property$"$endif$ content="$meta.content$" />
-        $endfor$
+    <!-- Pandoc's metadata block: values come from the document's YAML front matter -->
+    $for(meta)$
+    <meta$if(meta.name)$
+      name="$meta.name$"
+      $endif$$if(meta.property)$
+      property="$meta.property$"
+      $endif$
+      content="$meta.content$"
+    />
+    $endfor$ $if(link.canonical)$
+    <link rel="canonical" href="$link.canonical$" />
+    $endif$ $if(prev)$
+    <link rel="prev" href="$prev$" />
+    $endif$ $if(next)$
+    <link rel="next" href="$next$" />
+    $endif$
 
-        $if(link.canonical)$
-        <link rel="canonical" href="$link.canonical$" />
-        $endif$
-
-        <!-- If you supply multiple CSS files via metadata -->
-        <!-- The main stylesheet has to be included here because mobile browsers
+    <!-- If you supply multiple CSS files via metadata -->
+    <!-- The main stylesheet has to be included here because mobile browsers
             don't seem to apply the stylesheet otherwise, and fonts are too
             small. -->
-        $for(css)$
-        <link rel="stylesheet" href="$css$" />
-        $endfor$
-    </head>
+    $for(css)$
+    <link rel="stylesheet" href="$css$" />
+    $endfor$
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+    />
 
-    <body>
-        <!-- site nav -->
-        <nav class="site-nav">
-            <ul>
-                <li><a href="/" class="internal-link">Home</a></li>
-            </ul>
-        </nav>
+    $if(schema.headline)$
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "$schema.headline$",
+        "author": "$schema.author$",
+        "datePublished": "$schema.datePublished$",
+        "description": "$schema.description$"
+      }
+    </script>
+    $endif$
+  </head>
 
-        <h1>$title$</h1>
-
-        <p class="metablock">
-        $if(author)$
-          $author$<br/>
-        $endif$
-        $if(pubdate)$
-          $pubdate$<br/>
-        $endif$
-        $if(status)$
-          $status$
-        $endif$
-        </p>
-
-        $if(preamble)$
-        <p class="preamble">
-        $preamble$
-        </p>
-        $endif$
-
-        <!-- page nav -->
-        $if(toc)$
-        <details id="TOC">
-            <summary>Content</summary>
-            $toc$
-        </details>
-        $endif$
-
-        <!-- Body content generated from Markdown goes here -->
-        $body$
-
-        <!-- Optional scripts and footers can be included similarly -->
-        $for(header-includes)$
-        $header-includes$
-        $endfor$
-
-
-        <div class="footer">
-            <hr/>
-            <p>
-            © 2025 by Brian Lee is licensed under CC BY-NC-ND 4.0.
-            </p>
-            <p>
-            <small>Published using Press</small>
-            </p>
+  <body class="fs-5 lh-lg">
+    <!-- site nav -->
+    <nav class="navbar navbar-expand-lg bg-body-tertiary fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="/">Home</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="/blog/">Blog</a>
+            </li>
+          </ul>
         </div>
+      </div>
+    </nav>
 
-        <!-- MATHJAX SUPPORT -->
-        $if(mathjax)$
-        <script async
-                src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-        </script>
+    <header
+      class="hero-header mb-5 text-white border-bottom position-relative bg-black d-flex align-items-center"
+    >
+      $if(header.src)$
+      <img
+        src="$header.src$"
+        $if(header.srcset)$srcset="$header.srcset$"
         $endif$
-        <link rel="stylesheet" href="https://use.typekit.net/qvc8xlz.css">
+        sizes="100vw"
+        class="bg-image position-absolute top-0 start-0 w-100 h-100 object-fit-cover opacity-0"
+        onload="this.classList.add('opacity-100')"
+        $if(header.alt)$alt="$header.alt$"
+        $else$alt="Background"
+        $endif$
+      />
+      <div class="bg-overlay position-absolute top-0 start-0 w-100 h-100"></div>
+      $endif$
 
-        <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/a11y-dark.min.css">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+      <div class="container-fluid position-relative text-center">
+        <h1 class="display-3 fw-bold">
+          $if(page_heading)$ $page_heading$ $else$ $title$ $endif$
+        </h1>
+      </div>
+    </header>
 
-        <!-- and it's easy to individually load additional languages -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/go.min.js"></script>
+    <style>
+      .hero-header {
+        min-height: 30vh;
+      }
+      $if(header.src)$
+      .bg-image {
+        transition: opacity 0.6s ease;
+        $if(header.object_position)$object-position: $header.object_position$;$endif$
+      }
+      $if(header.object_position_mobile)$
+      @media (max-width: 576px) {
+        .bg-image {
+          object-position: $header.object_position_mobile$;
+        }
+      }
+      $endif$
+      .bg-overlay {
+        /* Slightly stronger at the bottom; adjust as needed */
+        background: linear-gradient(
+          180deg,
+          rgba(0, 0, 0, 0.45) 0%,
+          rgba(0, 0, 0, 0.65) 60%,
+          rgba(0, 0, 0, 0.75) 100%
+        );
+        pointer-events: none;
+      }
+      $endif$
+    </style>
 
-        <script>hljs.highlightAll();</script>
-    </body>
+    <main class="container mb-5" style="max-width: 65ch">
+      <div class="metablock">
+        $if(author)$ $author$<br />
+        $endif$ $if(pubdate)$ $pubdate$<br />
+        $endif$ $if(status)$ $status$ $endif$ $if(partof)$ Part of: $partof$
+        $endif$
+      </div>
+
+      $if(preamble)$ $preamble$ $endif$
+
+      <!-- page nav -->
+      $if(toc)$
+      <details id="TOC">
+        <summary>Table of Contents</summary>
+        $toc$
+      </details>
+      $endif$
+
+      <!-- Body content generated from Markdown goes here -->
+      $body$
+
+      <!-- prev/next page links -->
+      $if(prev)$
+      <nav
+        class="d-flex justify-content-between border-top pt-4 mt-5"
+        aria-label="Page navigation"
+      >
+        <a class="btn btn-outline-primary" rel="prev" href="$prev$">
+          &larr; Previous
+        </a>
+        $if(next)$
+        <a class="btn btn-outline-primary" rel="next" href="$next$">
+          Next &rarr;
+        </a>
+        $endif$
+      </nav>
+      $elseif(next)$
+      <nav
+        class="d-flex justify-content-end border-top pt-4 mt-5"
+        aria-label="Page navigation"
+      >
+        <a class="btn btn-outline-primary" rel="next" href="$next$">
+          Next &rarr;
+        </a>
+      </nav>
+      $endif$
+
+      <!-- Optional scripts and footers can be included similarly -->
+      $for(header-includes)$ $header-includes$ $endfor$
+    </main>
+
+    <footer class="footer p-5 bg-dark text-white text-center">
+      <p>
+        <small>
+          <a href="/privacy/">Privacy</a> |
+          <a href="/disclaimer/">Disclaimer</a>
+        </small>
+      </p>
+      <p style="line-height: 1em">
+        <small>
+          John 14:27 RSV2CE<br />Peace I leave with you; my peace I give to you;
+          not as the world gives do I give to you. Let not your hearts be
+          troubled, neither let them be afraid.
+        </small>
+      </p>
+      <p>© 2025 by Brian Lee is licensed under CC BY-NC-ND 4.0.</p>
+      <p>
+        <small>Published using Press</small>
+      </p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+    $if(mathjax)$
+    <!-- MATHJAX SUPPORT -->
+    <script
+      type="text/javascript"
+      id="MathJax-script"
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+    ></script>
+    $endif$
+  </body>
 </html>

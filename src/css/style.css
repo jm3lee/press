@@ -1,244 +1,150 @@
-/*!
- * Main Stylesheet
- * A vanilla CSS setup with responsive typography, layout, and common element styles.
+/*! 
+ * Custom styles supplementing Bootstrap.
+ * Defines styles for quiz components and utility classes.
  */
 
-:root {
-  /* Colors & borders */
-  --color-text: black;
-  --color-light: lightgrey;
-  --color-link: #0645ad;
-  --color-link-visited: #0b0080;
-  --border-main: 1px solid var(--color-text);
-  --border-toc: 1px dotted var(--color-text);
-  --border-nav: 1px dashed var(--color-text);
-  --border-radius: 10px;
-
-  /* Typography */
-  --font-base: "minion-pro", serif;
-  --font-weight-normal: 400;
-  --font-weight-bold: 600;
-  --font-size-desktop: 1.5rem;
-  --font-size-mobile: 1.5rem;
-
-  /* Layout */
-  --max-width-desktop: 50%;
-  --max-width-mobile: 90%;
-  --min-width: 300px;
-
-  /* Images & figures */
-  --max-img-dim: 300px;
-  --max-figure-width: 600px;
-
-  /* Spacing */
-  --space-sm: 0.5em;
-  --space-md: 1em;
-  --space-lg: 1.5em;
-}
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-/* ==========================================================================
-   TYPOGRAPHY
-   ========================================================================== */
-
+/* Layout */
 body {
-  font-family: var(--font-base);
-  font-weight: var(--font-weight-normal);
-  font-size: var(--font-size-desktop);
-  min-width: var(--min-width);
-  max-width: var(--max-width-desktop);
-  margin: auto;
-  color: var(--color-text);
-}
-
-@media (max-width: 1080px) {
-  body {
-    font-size: var(--font-size-mobile);  /* Larger text on mobile */
-    max-width: var(--max-width-mobile);
-  }
-}
-
-h1 {
-  margin-bottom: 0.1em; /* Keeps metablock close */
-}
-
-h2 {
-  text-align: center;
-  margin-top: var(--space-lg);
-  text-transform: uppercase;
-  font-weight: var(--font-weight-bold);
-}
-
-h3 {
-  text-decoration: underline;
-}
-
-/* ==========================================================================
-   NAVIGATION
-   ========================================================================== */
-nav:not(#TOC) {
-  ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-
-    li {
-      display: inline-block;
-      padding-right: 0.5rem;
-      text-transform: uppercase;
-    }
-  }
-}
-
-nav.site-nav {
-  margin-top: var(--space-lg);
-
-  li {
-    &:not(:first-child) {
-      margin-left: var(--space-sm);        /* Spacing between nav items */
-      padding-left: var(--space-sm);
-      border-left: var(--border-nav);
-    }
-  }
-}
-
-/* ==========================================================================
-   LISTS & TOC
-   ========================================================================== */
-
-ol,
-ul {
-  margin-left: var(--space-lg);
-  padding-left: 0;
-}
-
-#TOC {
-  padding: 0 var(--space-md);
-  border: var(--border-toc);
-  border-radius: var(--border-radius);
-
-  summary {
-    cursor: pointer;
-  }
-
-  /* Direct children of #TOC as decimal; adjust selectors for deeper nesting if needed */
-  > ul,
-  ul {
-    list-style-type: decimal;
-    margin-left: 1.5em; /* optional indentation adjustment */
-    padding-left: 0;
-  }
-}
-
-/* ==========================================================================
-   TABLES
-   ========================================================================== */
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  border-spacing: 0;
-}
-
-th,
-td {
-  border: var(--border-main);
-  padding: var(--space-md);
-}
-
-.align-center {
-  text-align: center;
-}
-
-/* Remove all borders in "align-only" tables */
-table.align-only td {
-  border: none !important;
-}
-
-/* Compact lists inside table cells */
-td ol,
-td ul {
   margin: 0;
-  margin-left: var(--space-md);
+  padding-top: calc(56px + env(safe-area-inset-top));
 }
 
-/* ==========================================================================
-   IMAGES & FIGURES
-   ========================================================================== */
-
-img {
-  max-width: 100%;
-  height: auto;
-  margin: auto;
-  display: block;
+/* Quiz */
+.quiz-container {
+  max-width: 600px;
+  margin: 2rem auto;
 }
 
-img.diagram,
-img.bookcover {
-  max-width: var(--max-img-dim);
-  max-height: var(--max-img-dim);
+.question-block {
+  margin-bottom: 2rem;
 }
 
-img.thumbnail {
-    max-width: 300px;
-    height: auto;
+.question {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
 }
 
-@media (max-width: 1080px) {
-    img.thumbnail {
-        max-width: 100%;
-        height: auto;
-    }
+.choices {
+  list-style: none;
+  padding: 0;
 }
 
-.footer {
-    padding-top: 1.5rem;
-    padding-bottom: 1.5rem;
-    text-align: center;
+.choice {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  margin-bottom: 0.3rem;
+  cursor: pointer;
+  border-radius: 4px;
+  user-select: none;
 }
 
-.metablock {
-  font-size: 0.8em;
-  color: var(--color-text);
-  margin-top: 0;
+.choice:hover {
+  background-color: #f5f5f5;
 }
 
-a {
+.choice.selected {
+  background-color: #e0f7fa;
+}
+
+.choice.correct {
+  background-color: #c8f7c5;
+  border-color: #27ae60;
+}
+
+.choice.incorrect {
+  background-color: #f7c5c5;
+  border-color: #e74c3c;
+}
+
+.explanation {
+  background: #f9f9f9;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  border-left: 3px solid #ccc;
+}
+
+/* Buttons */
+.opcalc-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1rem auto;
+  padding: 0.5rem 1.25rem;
+  background-color: #1976d2;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
   text-decoration: none;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02857em;
+  box-shadow:
+    0px 2px 4px -1px rgba(0, 0, 0, 0.2),
+    0px 4px 5px 0px rgba(0, 0, 0, 0.14),
+    0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+  transition: background-color 0.3s, box-shadow 0.3s;
+  max-width: fit-content;
 }
 
-a.internal-link {
-  text-decoration: underline;
-  color: var(--color-link);
+.opcalc-btn:hover,
+.opcalc-btn:focus {
+  background-color: #1565c0;
+  box-shadow:
+    0px 3px 5px -1px rgba(0, 0, 0, 0.2),
+    0px 5px 8px 0px rgba(0, 0, 0, 0.14),
+    0px 1px 14px 0px rgba(0, 0, 0, 0.12);
 }
 
-a.internal-link:visited {
-  color: var(--color-link-visited);
+@media (max-width: 600px) {
+  .opcalc-btn {
+    width: 100%;
+    padding: 0.75rem;
+  }
+}
+
+.submit-btn {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+/* Misc */
+.my-comment {
+  font-style: italic;
+}
+
+.preamble {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Table of Contents */
+#TOC {
+  margin-bottom: 2rem;
+}
+
+main li + li {
+  margin-top: 0.5rem;
 }
 
 .image-container {
   position: relative;
   display: inline-block;
-  
-  .magnify-icon {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    background-color: rgba(255, 255, 255, 0.8);
-    border-radius: 50%;
-    padding: 6px;
-    font-size: 20px;
-    cursor: pointer;
-  }
+}
+
+.magnify-icon {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  padding: 6px;
+  font-size: 20px;
+  cursor: pointer;
 }
 
 .citation {
-  border: solid thin black;
+  border: thin solid black;
   border-radius: 3px;
   padding: 2px;
 }
@@ -247,90 +153,98 @@ a.internal-link:visited {
   font-size: 1.1em;
   line-height: 1;
 }
+
 ol + details.answer {
   margin-top: 15px;
 }
 
-.quiz-container {
-  max-width: 600px;
-  margin: 2rem auto;
-
-  .question-block {
-    margin-bottom: 2rem;
-  }
-
-  .question {
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-  }
-
-  .choices {
-    list-style-type: none;
-    padding: 0;
-
-    .choice {
-      padding: 0.5rem;
-      border: 1px solid #ccc;
-      margin-bottom: 0.3rem;
-      cursor: pointer;
-      border-radius: 4px;
-      user-select: none;
-
-      &:hover {
-        background-color: #f5f5f5;
-      }
-
-      &.selected {
-        background-color: #e0f7fa;
-      }
-
-      &.correct {
-        background-color: #c8f7c5;
-        border-color: #27ae60;
-      }
-
-      &.incorrect {
-        background-color: #f7c5c5;
-        border-color: #e74c3c;
-      }
-    }
-  }
-
-  .explanation {
-    background: #f9f9f9;
-    padding: 0.5rem;
-    margin-top: 0.5rem;
-    border-left: 3px solid #ccc;
-  }
-
-  .submit-btn {
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
-    cursor: pointer;
-  }
+/* Metadata block */
+.metablock {
+  background-color: #f8f9fa;
+  border-left: 4px solid #6c757d;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  border-radius: 0.25rem;
 }
 
-dt {
-  font-weight: bold;
+/* Headings and section layout */
+main h1,
+main h2,
+main h3,
+main h4,
+main h5,
+main h6 {
+  margin-top: 3rem;
+  margin-bottom: 2rem;
 }
 
-dd {
-  & + dt {
-    margin-top: 1em;
-  }
-
-  & + dd {
-    margin-top: 0.5em;
-  }
-
-  > p {
-    margin-top: 0;
-  }
-}
-ul.examples {
-  list-style: none;
+main h2 {
+  padding-top: 1rem;
+  border-top: 2px solid #e9ecef;
 }
 
-pre {
-  overflow: auto;
+h1 + p,
+h2 + p,
+h3 + p,
+h4 + p,
+h5 + p,
+h6 + p {
+  margin-top: 2rem;
+}
+
+main section {
+  margin-bottom: 3rem;
+  padding: 2.5rem;
+  background-color: #f8f9fa;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Paragraph spacing and indentation */
+main > p,
+main section > p {
+  margin-bottom: 2rem;
+}
+
+main > p:first-of-type,
+main section > p:first-of-type {
+}
+
+/* Figures */
+main figure {
+  max-width: 100%;
+  margin: 0 auto 2rem;
+}
+
+main figure img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+main dd + dt {
+    margin-top: 2rem;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 2rem;
+}
+
+th,
+td {
+  border: 1px solid #dee2e6;
+  padding: 0.5rem;
+}
+
+th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  text-align: left;
+}
+
+tbody tr:nth-of-type(even) {
+  background-color: #f2f2f2;
 }
