@@ -1,11 +1,11 @@
-id: examples
-title: Examples
+author: Brian Lee
+breadcrumbs:
+- title: Home
+  url: /
+- title: Examples
 description: Demonstrations of Press features
+id: examples
 indextree:
   link: true
-author: Brian Lee
-pubdate: Aug 12, 2025
-breadcrumbs:
-  - title: Home
-    url: /
-  - title: Examples
+pubdate: Aug 27, 2025
+title: Examples

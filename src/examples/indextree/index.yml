@@ -1,10 +1,10 @@
-title: IndexTree Demo
-id: indextree-demo
 author: Brian Lee
-pubdate: Aug 12, 2025
 breadcrumbs:
-  - title: Home
-    url: /
-  - title: Examples
-    url: /examples/
-  - title: IndexTree Demo
+- title: Home
+  url: /
+- title: Examples
+  url: /examples/
+- title: IndexTree Demo
+id: indextree-demo
+pubdate: Aug 27, 2025
+title: IndexTree Demo

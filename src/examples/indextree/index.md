@@ -12,6 +12,9 @@ matching tag:
 indextree-json -t demo files tagged.json
 ```
 
+## Demo
 <div class="indextree-root" data-src="/examples/indextree/demo.json"></div>
+
+## Tagged
 <div class="indextree-root" data-src="/examples/indextree/tagged.json"></div>
 <script type="module" src="/static/js/indextree.js" defer></script>

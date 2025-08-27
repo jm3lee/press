@@ -1,2 +1,5 @@
 # List metadata files for check-breadcrumbs to skip.
 # Paths may be absolute or relative to the directory being scanned.
+- examples/hull.yml
+- examples/doe.yml
+- links/*.yml

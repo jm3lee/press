@@ -6,6 +6,14 @@
 build/static/js:
 	mkdir -p $@
 
+build/static/index:
+	mkdir -p $@
+
 include app/quiz/dep.mk
 include app/indextree/dep.mk
 include app/magicbar/dep.mk
+
+all: build/static/index/examples.json
+
+build/static/index/examples.json: $(shell find src/examples -name '*.yml') | build/static/index
+	indextree-json src/examples > $@
