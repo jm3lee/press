@@ -2,3 +2,9 @@ author: Brian Lee
 id: mermaid-example
 pubdate: Aug 22, 2025
 title: Mermaid Diagram Example
+breadcrumbs:
+  - title: Home
+    url: /
+  - title: Examples
+    url: /examples/
+  - title: Mermaid Diagram Example

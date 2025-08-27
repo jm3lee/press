@@ -3,6 +3,12 @@ title: Responsive Images
 author: Brian Lee
 id: responsive-images
 citation: responsive-images
+breadcrumbs:
+  - title: Home
+    url: /
+  - title: Examples
+    url: /examples/
+  - title: Responsive Images
 ---
 
 This example shows how to build a responsive image using the `figure` Jinja macro.

@@ -4,6 +4,8 @@ id: nested_breadcrumb_demo
 pubdate: Jan 3, 2025
 description: Demonstrates a three-level breadcrumb trail.
 breadcrumbs:
+  - title: Home
+    url: /
   - title: Examples
     url: /examples/
   - title: Breadcrumb Demo

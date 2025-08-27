@@ -8,3 +8,9 @@ pandoc:
   template: src/examples/blog/pandoc-template.html
 css:
   - https://cdn.jsdelivr.net/npm/water.css@2/out/water.css
+breadcrumbs:
+  - title: Home
+    url: /
+  - title: Examples
+    url: /examples/
+  - title: Trendy Blog Template Demo
