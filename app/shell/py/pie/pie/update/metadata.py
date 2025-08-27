@@ -7,16 +7,11 @@ from typing import Any, Iterable, Sequence
 
 from io import StringIO
 
-from ruamel.yaml import YAML
-
 from pie.cli import create_parser
 from pie.logging import configure_logging, logger
 from pie.metadata import load_metadata_pair
+from pie.yaml import YAML_EXTS, yaml, write_yaml
 from .common import collect_paths, get_changed_files
-
-yaml = YAML(typ="safe")
-yaml.allow_unicode = True
-yaml.default_flow_style = False
 
 __all__ = ["main"]
 
@@ -85,16 +80,14 @@ def _merge_file(fp: Path, data: dict, sort_keys: bool) -> tuple[bool, bool]:
     Returns ``(changed, conflict)``.
     """
     text = fp.read_text(encoding="utf-8") if fp.exists() else ""
-    if fp.suffix in {".yml", ".yaml"}:
+    if fp.suffix in YAML_EXTS:
         existing = yaml.load(text) or {}
         merged, conflict = _merge(existing, data)
         if conflict:
             return False, True
         if merged != existing:
-            buf = StringIO()
             yaml.sort_keys = sort_keys
-            yaml.dump(merged, buf)
-            fp.write_text(buf.getvalue(), encoding="utf-8")
+            write_yaml(merged, fp)
             return True, False
         return False, False
     if fp.suffix == ".md":
@@ -168,7 +161,7 @@ def update_files(paths: Iterable[Path], data: dict, sort_keys: bool) -> tuple[li
         if metadata and "path" in metadata:
             file_paths.update(Path(p) for p in metadata["path"])
 
-        yaml_files = [fp for fp in file_paths if fp.suffix in {".yml", ".yaml"}]
+        yaml_files = [fp for fp in file_paths if fp.suffix in YAML_EXTS]
         target_files = yaml_files or sorted(file_paths)
 
         for fp in target_files:

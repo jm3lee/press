@@ -17,7 +17,7 @@ from pie.metadata import load_metadata_pair
 from pie.logging import logger
 import os
 from io import StringIO
-from ruamel.yaml import YAML
+from pie.yaml import YAML_EXTS, yaml, write_yaml
 
 __all__ = [
     "get_changed_files",
@@ -25,10 +25,6 @@ __all__ = [
     "update_files",
     "collect_paths",
 ]
-
-yaml = YAML(typ="safe")
-yaml.allow_unicode = True
-yaml.default_flow_style = False
 
 
 def get_changed_files() -> list[Path]:
@@ -89,14 +85,14 @@ def collect_paths(patterns: Iterable[str]) -> list[Path]:
             if not p.exists():
                 continue
             if p.is_dir():
-                for child in chain(p.rglob("*.md"), p.rglob("*.yml"), p.rglob("*.yaml")):
+                for child in chain(p.rglob("*.md"), *(p.rglob(f"*{ext}") for ext in YAML_EXTS)):
                     if child.is_file():
                         rel = child.relative_to(cwd) if child.is_absolute() else child
                         if rel not in seen:
                             seen.add(rel)
                             results.append(rel)
             else:
-                if p.suffix in {".md", ".yml", ".yaml"}:
+                if p.suffix in {".md"} | YAML_EXTS:
                     rel = p.relative_to(cwd) if p.is_absolute() else p
                     if rel not in seen:
                         seen.add(rel)
@@ -113,7 +109,7 @@ def replace_field(
     sorted order.
     """
     text = fp.read_text(encoding="utf-8")
-    if fp.suffix in {".yml", ".yaml"}:
+    if fp.suffix in YAML_EXTS:
         return _replace_yaml_field(fp, text, field, value, sort_keys)
     if fp.suffix == ".md":
         return _replace_markdown_field(fp, text, field, value, sort_keys)
@@ -128,10 +124,8 @@ def _replace_yaml_field(
     old = data.get(field)
     if old != value:
         data[field] = value
-        buf = StringIO()
         yaml.sort_keys = sort_keys
-        yaml.dump(data, buf)
-        fp.write_text(buf.getvalue(), encoding="utf-8")
+        write_yaml(data, fp)
         return True, old if old is not None else "undefined"
     return True, None
 
@@ -202,7 +196,7 @@ def update_files(
             file_paths.update(Path(p) for p in metadata["path"])
 
         yaml_files = sorted(
-            [fp for fp in file_paths if fp.suffix in {".yml", ".yaml"}]
+            [fp for fp in file_paths if fp.suffix in YAML_EXTS]
         )
         target_files = yaml_files or sorted(file_paths)
         logger.debug("", target_files=target_files)

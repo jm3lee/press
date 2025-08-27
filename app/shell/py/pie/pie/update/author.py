@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 from typing import Iterable, Sequence
 
-from ruamel.yaml import YAML
+from pie.yaml import yaml
 
 from pie.cli import create_parser
 from pie.logging import configure_logging, logger
@@ -16,7 +16,6 @@ from .common import (
 
 __all__ = ["main"]
 
-yaml = YAML(typ="safe")
 
 
 def load_default_author(cfg_path: Path | None = None) -> str:

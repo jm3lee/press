@@ -11,12 +11,10 @@ from urllib.parse import urljoin
 
 import redis
 from flatten_dict import unflatten
-from ruamel.yaml import YAML, YAMLError
+from ruamel.yaml import YAMLError
 
 from pie.logging import logger
-from pie.utils import read_yaml
-
-yaml = YAML(typ="safe")
+from pie.yaml import YAML_EXTS, read_yaml, yaml
 
 
 def get_url(filename: str) -> Optional[str]:
@@ -39,14 +37,14 @@ def get_url(filename: str) -> Optional[str]:
     if filename.startswith(prefix):
         relative_path = filename[len(prefix) :]
         base, ext = os.path.splitext(relative_path)
-        if ext.lower() in (".md", ".yml", ".yaml"):
+        if ext.lower() in {".md"} | YAML_EXTS:
             html_path = base + ".html"
             return "/" + html_path
     prefix = "build" + os.sep
     if filename.startswith(prefix):
         relative_path = filename[len(prefix) :]
         base, ext = os.path.splitext(relative_path)
-        if ext.lower() in (".md", ".yml", ".yaml"):
+        if ext.lower() in {".md"} | YAML_EXTS:
             html_path = base + ".html"
             return "/" + html_path
     logger.warning("Can't create a url.", filename=filename)

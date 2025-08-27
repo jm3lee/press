@@ -10,7 +10,8 @@ for details on the structure of this metadata.
 - `render_jinja(snippet)` – render a snippet of text using the same environment.
 - `to_alpha_index(i)` – convert `0`–`3` to `a`–`d`.
 - `read_json(path)` – read and parse a JSON file.
-- `read_yaml(path)` – read YAML and yield the sequence stored under `toc`.
+- `read_yaml(path)` – read YAML via the shared `pie.yaml` helpers and yield the
+  sequence stored under `toc`.
 - `cite(*ids)` – format one or more metadata entries as Chicago style
   citations. When multiple entries share the same author and year their page
   numbers are combined.

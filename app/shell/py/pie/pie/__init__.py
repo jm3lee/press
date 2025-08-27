@@ -34,6 +34,7 @@ __all__ = [
     "render_study_json",
     "gen_markdown_index",
     "process_yaml",
+    "yaml",
     "build",
     "check",
     "update",

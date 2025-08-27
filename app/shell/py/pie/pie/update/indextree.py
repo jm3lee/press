@@ -7,14 +7,9 @@ from pathlib import Path
 from typing import Iterable, Sequence
 
 from io import StringIO
-from ruamel.yaml import YAML
-
 from pie.cli import create_parser
 from pie.logging import configure_logging, logger
-
-yaml = YAML(typ="safe")
-yaml.allow_unicode = True
-yaml.default_flow_style = False
+from pie.yaml import YAML_EXTS, yaml, write_yaml
 
 __all__ = ["main"]
 
@@ -27,10 +22,8 @@ def _upgrade_yaml(path: Path) -> bool:
     if section is None:
         return False
     data["indextree"] = section
-    buf = StringIO()
     yaml.sort_keys = False
-    yaml.dump(data, buf)
-    path.write_text(buf.getvalue(), encoding="utf-8")
+    write_yaml(data, path)
     return True
 
 
@@ -60,7 +53,7 @@ def _upgrade_markdown(path: Path) -> bool:
 def upgrade_file(path: Path) -> bool:
     """Upgrade metadata in *path*."""
 
-    if path.suffix.lower() in {".yml", ".yaml"}:
+    if path.suffix.lower() in YAML_EXTS:
         return _upgrade_yaml(path)
     if path.suffix.lower() == ".md":
         return _upgrade_markdown(path)
@@ -75,7 +68,7 @@ def walk_files(paths: Iterable[Path]) -> Iterable[Path]:
             yield from (
                 child
                 for child in p.rglob("*")
-                if child.is_file() and child.suffix.lower() in {".md", ".yml", ".yaml"}
+                if child.is_file() and child.suffix.lower() in {".md"} | YAML_EXTS
             )
         else:
             yield p

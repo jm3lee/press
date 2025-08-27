@@ -15,14 +15,13 @@ import sys
 import time
 from pathlib import Path
 
-from ruamel.yaml import YAML, YAMLError
+from ruamel.yaml import YAMLError
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from pie.cli import create_parser
 from pie.logging import logger, configure_logging
-from pie.utils import read_json, read_utf8, write_utf8, read_yaml as load_yaml_file
+from pie.utils import read_json, read_utf8, write_utf8
+from pie.yaml import read_yaml as load_yaml_file, yaml
 from pie import metadata
-
-yaml = YAML(typ="safe")
 
 DEFAULT_CONFIG = Path("cfg/render-jinja-template.yml")
 

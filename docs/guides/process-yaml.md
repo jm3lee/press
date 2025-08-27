@@ -3,6 +3,9 @@
 Fill in missing metadata fields in YAML files and replace `:emoji:` codes with
 their Unicode counterparts.
 
+The command relies on the consolidated helpers in `pie.yaml` for consistent
+YAML parsing and writing across tools.
+
 ```
 usage: process-yaml <file.yml> [file.yml ...]
 ```
