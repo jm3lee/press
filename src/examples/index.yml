@@ -1,6 +1,7 @@
 id: examples
 title: Examples
+description: Demonstrations of Press features
 indextree:
-  link: false
+  link: true
 author: Brian Lee
 pubdate: Aug 12, 2025
