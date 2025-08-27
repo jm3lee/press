@@ -10,25 +10,26 @@ from typing import Sequence
 
 from pie.cli import create_parser
 from pie.logging import configure_logging, logger
-from pie.utils import load_exclude_file
+from pie.utils import ExcludeList, load_exclude_file
 
 
 DEFAULT_EXCLUDE = Path("cfg/sitemap-exclude.yml")
 
 
 def generate(
-    build_dir: Path, base_url: str, exclude: set[Path] | None = None
+    build_dir: Path, base_url: str, exclude: ExcludeList | None = None
 ) -> list[str]:
     """Return sitemap entries for *build_dir* using *base_url*.
 
-    ``exclude`` contains resolved paths that are omitted from the sitemap.
+    ``exclude`` contains paths, wildcards, or regular expressions that are
+    omitted from the sitemap.
     """
 
-    skip = set(exclude or set())
+    skip = exclude or ExcludeList([], build_dir)
     base = base_url.rstrip("/")
     entries: list[str] = []
     for path in sorted(build_dir.rglob("*.html")):
-        if path.resolve() in skip:
+        if path in skip:
             continue
         rel_path = path.relative_to(build_dir)
         rel = rel_path.as_posix()
@@ -85,11 +86,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     configure_logging(args.verbose, args.log)
     build_dir = Path(args.directory)
     if args.exclude:
-        exclude = load_exclude_file(args.exclude, build_dir)
+        exclude_file = args.exclude
     elif DEFAULT_EXCLUDE.is_file():
-        exclude = load_exclude_file(DEFAULT_EXCLUDE, build_dir)
+        exclude_file = DEFAULT_EXCLUDE
     else:
-        exclude = set()
+        exclude_file = None
+    exclude = load_exclude_file(exclude_file, build_dir)
     generate(build_dir, base_url, exclude)
     return 0
 

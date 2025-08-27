@@ -12,5 +12,6 @@ check-unescaped-dollar [-x EXCLUDE] [directory]
 
 The optional directory defaults to `src`. When present,
 `cfg/check-unescaped-dollar-exclude.yml` is loaded to determine files to skip.
-Use `-x` to supply a different YAML file. Each file with an unescaped dollar
+Use `-x` to supply a different YAML file. Entries may include wildcards or
+regular expressions prefixed with `regex:`. Each file with an unescaped dollar
 sign is logged for review.

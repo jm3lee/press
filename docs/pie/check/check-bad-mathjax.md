@@ -12,5 +12,6 @@ check-bad-mathjax [-x EXCLUDE] [directory]
  
 The optional directory defaults to `src`. When present,
 `cfg/check-bad-mathjax-exclude.yml` is loaded to determine files to skip. Use
-``-x`` to supply a different YAML file. Each file that contains forbidden
+``-x`` to supply a different YAML file. Entries may include wildcards or
+regular expressions prefixed with `regex:`. Each file that contains forbidden
 delimiters is logged for review.

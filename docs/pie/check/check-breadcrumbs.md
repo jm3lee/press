@@ -15,5 +15,6 @@ If no directory is given, `src/` is assumed. The command logs errors for files
 that fail the check and returns `1` when a problem is found. The default
 exclude file `cfg/check-breadcrumbs-exclude.yml` is used when present. Use
 `-x`/`--exclude` to provide a YAML file listing metadata files to skip. Paths
-may be absolute or relative to the directory being scanned.
+may be absolute or relative to the directory being scanned. Entries may include
+wildcards or regular expressions prefixed with `regex:`.
 

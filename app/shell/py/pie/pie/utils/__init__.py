@@ -10,8 +10,11 @@ compatibility.
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime
+from fnmatch import fnmatch
 from pathlib import Path
+from typing import Iterable
 
 from pie.logging import logger
 from pie.yaml import read_yaml, write_yaml
@@ -47,23 +50,66 @@ def write_utf8(text: str, filename: str) -> None:
         f.write(text)
 
 
-def load_exclude_file(filename: str | Path | None, root: Path) -> set[Path]:
-    """Return a set of resolved paths listed in *filename*.
+class ExcludeList:
+    """Collection of file patterns to skip when scanning directories.
 
-    The YAML file may contain absolute paths or ones relative to *root*.
-    If *filename* is ``None`` an empty set is returned.
+    Items may be literal paths, shell-style wildcards, or regular
+    expressions prefixed with ``regex:``.
     """
 
-    exclude: set[Path] = set()
-    if not filename:
-        return exclude
-    data = read_yaml(str(filename)) or []
-    for item in data:
-        p = Path(item)
-        if not p.is_absolute():
-            p = root / p
-        exclude.add(p.resolve())
-    return exclude
+    def __init__(self, items: Iterable[str], root: Path) -> None:
+        self.root = root
+        self.paths: set[Path] = set()
+        self.wildcards: list[str] = []
+        self.regexes: list[re.Pattern[str]] = []
+        for raw in items:
+            if raw.startswith("regex:") or raw.startswith("re:"):
+                pattern = raw.split(":", 1)[1]
+                self.regexes.append(re.compile(pattern))
+            elif any(ch in raw for ch in "*?[]"):
+                p = Path(raw)
+                if not p.is_absolute():
+                    p = root / raw
+                self.wildcards.append(p.as_posix())
+            else:
+                p = Path(raw)
+                if not p.is_absolute():
+                    p = root / p
+                self.paths.add(p.resolve())
+
+    def __contains__(self, path: Path) -> bool:
+        p = path.resolve()
+        if p in self.paths:
+            return True
+        abs_str = p.as_posix()
+        try:
+            rel_str = p.relative_to(self.root).as_posix()
+        except ValueError:
+            rel_str = None
+        for pattern in self.wildcards:
+            if fnmatch(abs_str, pattern):
+                return True
+            if rel_str and fnmatch(rel_str, pattern):
+                return True
+        for regex in self.regexes:
+            if regex.search(abs_str):
+                return True
+            if rel_str and regex.search(rel_str):
+                return True
+        return False
+
+
+def load_exclude_file(filename: str | Path | None, root: Path) -> ExcludeList:
+    """Return an :class:`ExcludeList` from *filename*.
+
+    The YAML file may contain absolute paths or ones relative to *root*.
+    If *filename* is ``None`` an empty :class:`ExcludeList` is returned.
+    """
+
+    data: list[str] = []
+    if filename:
+        data = read_yaml(str(filename)) or []
+    return ExcludeList(data, root)
 
 
 def get_pubdate(date: datetime | None = None) -> str:

@@ -72,17 +72,18 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(args.directory)
     if args.exclude:
-        exclude = load_exclude_file(args.exclude, root)
+        exclude_file = args.exclude
     elif DEFAULT_EXCLUDE.is_file():
-        exclude = load_exclude_file(DEFAULT_EXCLUDE, root)
+        exclude_file = DEFAULT_EXCLUDE
     else:
-        exclude = set()
+        exclude_file = None
+    exclude = load_exclude_file(exclude_file, root)
 
     ok = True
     for paths, meta in _iter_metadata(root):
         breadcrumbs = meta.get("breadcrumbs") if meta else None
         for path in paths:
-            if path.resolve() in exclude:
+            if path in exclude:
                 continue
             if breadcrumbs:
                 logger.debug("Found breadcrumbs", path=str(path))
