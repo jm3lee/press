@@ -106,7 +106,10 @@
       <div class="container position-relative">
         <a class="navbar-brand" href="/">Home</a>
         <span
-          class="navbar-text page-title fw-semibold position-absolute top-50 start-50 translate-middle d-none"
+          class="navbar-text page-title fw-semibold position-absolute top-50
+          start-50 translate-middle d-none text-truncate d-inline-block
+          text-truncate"
+          style="max-width: 16ch"
         >
           $if(page_heading)$ $page_heading$ $else$ $title$ $endif$
         </span>
