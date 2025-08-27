@@ -48,6 +48,9 @@ run_make distclean
 if [ "$RUN_PULL" -eq 1 ]; then
   echo "Running pull..."
   bin/pull
+  # Dockerfile for shell may have been updated.
+  echo "Building shell image..."
+  "${DOCKER_COMPOSE[@]}" build shell
 fi
 echo "Running make..."
 run_make
