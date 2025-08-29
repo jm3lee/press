@@ -1,4 +1,4 @@
-"""Fill missing metadata fields in a YAML file."""
+"""Fill missing metadata fields in a YAML file after rendering Jinja."""
 
 from __future__ import annotations
 
@@ -9,11 +9,15 @@ from typing import Iterable
 
 import copy
 
+from ruamel.yaml import YAMLError
+
 from pie.cli import create_parser
 from pie.filter.emojify import emojify_text
 from pie.logging import logger, configure_logging
+from pie.render import jinja as render_jinja
 from pie.utils import write_yaml
-from pie.metadata import generate_missing_metadata, read_from_yaml
+from pie.yaml import yaml
+from pie.metadata import generate_missing_metadata
 
 
 def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
@@ -38,24 +42,54 @@ def _emojify(value):
     return value
 
 
+def _render_templates(value):
+    """Recursively expand Jinja templates in ``value``."""
+    if isinstance(value, dict):
+        for k, v in value.items():
+            value[k] = _render_templates(v)
+        return value
+    if isinstance(value, list):
+        for i, v in enumerate(value):
+            value[i] = _render_templates(v)
+        return value
+    if isinstance(value, str):
+        rendered = render_jinja.render_jinja(value)
+        if rendered == value:
+            return value
+        try:
+            parsed = yaml.load(rendered)
+        except YAMLError:
+            parsed = rendered
+        return _render_templates(parsed)
+    return value
+
+
 def main(argv: Iterable[str] | None = None) -> None:
     """Entry point used by the ``process-yaml`` console script."""
     args = parse_args(argv)
     configure_logging(args.verbose, args.log)
+    # ``render_jinja`` expects a mapping; default to an empty one.
+    render_jinja.index_json = {}
 
     for path_str in args.paths:
         path = Path(path_str)
         existing: dict | None = None
+        text = rendered = None
         try:
             if path.exists():
-                existing = read_from_yaml(str(path))
+                text = path.read_text(encoding="utf-8")
+                rendered = render_jinja.render_jinja(text)
+                existing = yaml.load(rendered)
                 metadata = copy.deepcopy(existing) if existing is not None else None
             else:
                 metadata = {}
             if metadata is not None:
+                render_jinja.index_json = metadata
+                metadata = _render_templates(metadata)
                 metadata = generate_missing_metadata(metadata, str(path))
+                metadata = _render_templates(metadata)
                 metadata = _emojify(metadata)
-        except Exception as exc:  # pragma: no cover - pass through message
+        except (YAMLError, Exception) as exc:  # pragma: no cover - pass through message
             logger.error("Failed to process YAML", filename=str(path))
             raise SystemExit(1) from exc
 
@@ -63,7 +97,13 @@ def main(argv: Iterable[str] | None = None) -> None:
             logger.error("No metadata found", filename=str(path))
             sys.exit(1)
 
-        if existing is not None and existing == metadata:
+        if (
+            existing is not None
+            and existing == metadata
+            and rendered is not None
+            and text is not None
+            and rendered.rstrip() == text.rstrip()
+        ):
             logger.debug("Processed YAML unchanged", path=str(path))
             continue
 

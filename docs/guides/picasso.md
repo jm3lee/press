@@ -31,8 +31,8 @@ For a source file `src/index.yml` the output looks like:
 build/index.yml: src/index.yml
     $(call status,Preprocess $<)
     mkdir -p $(dir build/index.yml)
-    render-jinja-template $< $@
-build/index.html: build/index.md build/index.yml $(PANDOC_TEMPLATE)
+    cp $< $@
+build/index.html: build/index.md build/index.yml $(PANDOC_TEMPLATE) $(BUILD_DIR)/.process-yamls
     $(call status,Generate HTML $@)
     $(PANDOC_CMD) $(PANDOC_OPTS) --template=$(PANDOC_TEMPLATE) --metadata-file=build/index.yml -o $@ $<
     check-bad-jinja-output $@

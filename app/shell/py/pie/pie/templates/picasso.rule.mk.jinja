@@ -1,7 +1,7 @@
 {preprocessed_yml}: {input_path}
 	$(call status,Preprocess $<)
 	$(Q)mkdir -p $(dir {preprocessed_yml})
-	$(Q)render-jinja-template $< $@
+	$(Q)cp $< $@
 {output_html}: {preprocessed_md} {preprocessed_yml} {template_dep} $(BUILD_DIR)/.process-yamls
 	$(call status,Generate HTML $@)
 	$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) {template_arg} --metadata-file={preprocessed_yml} -o $@ $<
