@@ -9,7 +9,7 @@ concepts and data formats, see the
 - [build-process.md](build-process.md) – overview of the build pipeline for new engineers.
 - [build-index.md](build-index.md) – generate a JSON index of document
   metadata. See the [metadata fields reference](../reference/metadata-fields.md).
-- [picasso.md](picasso.md) – create Makefile rules from YAML metadata.
+- [picasso.md](picasso.md) – create Makefile rules from metadata files.
 - [preprocess.md](preprocess.md) – run custom pre‑processing steps.
 - [update-index.md](update-index.md) – keep the index in sync after edits.
 

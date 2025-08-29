@@ -198,7 +198,7 @@ clean:
 # Optionally include user dependencies
 -include src/dep.mk
 
-$(BUILD_DIR)/picasso.mk: $(YAMLS) | $(BUILD_DIR)
+$(BUILD_DIR)/picasso.mk: $(YAMLS) $(FLATFILES) | $(BUILD_DIR)
 	$(call status,Generate picasso rules)
 	$(Q)picasso --src $(SRC_DIR) --build $(BUILD_DIR) > $@
 
