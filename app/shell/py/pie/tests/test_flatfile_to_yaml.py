@@ -3,7 +3,7 @@ from pie.yaml import read_yaml
 
 
 def test_flatfile_to_yaml(tmp_path):
-    src = tmp_path / "data.ff"
+    src = tmp_path / "data.flatfile"
     out = tmp_path / "out.yml"
     src.write_text("pie.answer\n{{ 3 + 4 }}\n", encoding="utf-8")
     main([str(src), str(out)])

@@ -28,4 +28,11 @@ from pie.update import index
 index.main(["index.json"])
 ```
 
-When a directory is given, `update-index` scans recursively for `.md`, `.yml`, and `.yaml` files, processing each Markdown/YAML pair only once. A single metadata file may also be supplied and is processed directly. When an index JSON file is provided, it should be produced by [`build-index`](build-index.md). Entries are written to the configured Redis instance using pipelined batch writes, with each value stored under its own key, including `id.path` entries pointing to the original files.
+When a directory is given, `update-index` scans recursively for `.md`, `.yml`,
+`.yaml`, and `.flatfile` files, processing each Markdown and metadata pair only
+once.
+A single metadata file may also be supplied and is processed directly. When an
+index JSON file is provided, it should be produced by
+[`build-index`](build-index.md). Entries are written to the configured Redis
+instance using pipelined batch writes, with each value stored under its own
+key, including `id.path` entries pointing to the original files.
