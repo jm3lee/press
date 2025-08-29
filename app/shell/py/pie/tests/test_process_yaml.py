@@ -115,6 +115,29 @@ def test_main_errors_on_read_failure(tmp_path, monkeypatch) -> None:
     assert errors == ["Failed to process YAML"]
 
 
+def test_main_reports_yaml_line(tmp_path, monkeypatch) -> None:
+    path = tmp_path / "bad.yml"
+    path.write_text('foo: bar\n- baz\n', encoding="utf-8")
+
+    monkeypatch.setattr(process_yaml, "configure_logging", lambda *a, **k: None)
+    monkeypatch.setattr(process_yaml.render_jinja, "render_jinja", lambda t: t)
+
+    errors: list[tuple[str, dict]] = []
+
+    def fake_error(msg, **kw):
+        errors.append((msg, kw))
+
+    monkeypatch.setattr(process_yaml.logger, "error", fake_error)
+
+    with pytest.raises(SystemExit) as excinfo:
+        process_yaml.main([str(path)])
+
+    assert excinfo.value.code == 1
+    assert errors == [
+        ("Failed to process YAML", {"filename": str(path), "line": 2})
+    ]
+
+
 def test_main_skips_write_when_unchanged(tmp_path, monkeypatch) -> None:
     path = tmp_path / "in.yml"
     buf = StringIO()
