@@ -89,7 +89,21 @@ def main(argv: Iterable[str] | None = None) -> None:
                 metadata = generate_missing_metadata(metadata, str(path))
                 metadata = _render_templates(metadata)
                 metadata = _emojify(metadata)
-        except (YAMLError, Exception) as exc:  # pragma: no cover - pass through message
+        except YAMLError as exc:
+            line = getattr(getattr(exc, "problem_mark", None), "line", None)
+            if line is None:
+                line = getattr(getattr(exc, "context_mark", None), "line", None)
+            lineno = line + 1 if line is not None else None
+            if lineno is not None:
+                logger.error(
+                    "Failed to process YAML",
+                    filename=str(path),
+                    line=lineno,
+                )
+            else:
+                logger.error("Failed to process YAML", filename=str(path))
+            raise SystemExit(1) from exc
+        except Exception as exc:  # pragma: no cover - pass through message
             logger.error("Failed to process YAML", filename=str(path))
             raise SystemExit(1) from exc
 
