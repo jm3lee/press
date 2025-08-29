@@ -48,9 +48,8 @@ def generate_rule(
         build/foo/bar.yml: src/foo/bar.yml
             $(call status,Preprocess $<)
             $(Q)mkdir -p $(dir build/foo/bar.yml)
-            $(Q)emojify < $< > $@
-            $(Q)render-jinja-template $@ $@
-        build/foo/bar.html: build/foo/bar.md build/foo/bar.yml $(PANDOC_TEMPLATE)
+            $(Q)cp $< $@
+        build/foo/bar.html: build/foo/bar.md build/foo/bar.yml $(PANDOC_TEMPLATE) $(BUILD_DIR)/.process-yamls
             $(call status,Generate HTML $@)
             $(Q)$(PANDOC_CMD) $(PANDOC_OPTS) --template=$(PANDOC_TEMPLATE) --metadata-file=build/foo/bar.yml -o $@ $<
             $(Q)check-bad-jinja-output $@
