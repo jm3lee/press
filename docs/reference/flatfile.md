@@ -3,7 +3,8 @@
 The flatfile format stores nested key and value pairs one entry after another.
 Each key appears on its own line and may use dot notation for nesting. The
 following line holds the value. All values are stored as strings. Clients should
-cast them to the desired type after loading.
+cast them to the desired type after loading. Files that use this format
+typically end with the `.flatfile` extension.
 
 Flatfile handlers are implemented in the `pie.flatfile` module, which exposes
 helpers like `load`, `load_key`, `loads`, and `dumps` for working with the
@@ -209,11 +210,11 @@ cream
 
 ## Working with files
 
-Use `flatfile.load(path)` to read an entire file into a dictionary.
-To retrieve a
-single value without loading the whole file, call `flatfile.load_key(path,
-"pie.flavor")`. Cast the returned string yourself if another type is needed:
+Use `flatfile.load(path)` to read an entire `.flatfile` into a dictionary.
+To retrieve a single value without loading the whole file, call
+`flatfile.load_key(path, "pie.flavor")`. Cast the returned string yourself if
+another type is needed:
 
 ```
-age = int(flatfile.load_key("people.ff", "alice.age"))
+age = int(flatfile.load_key("people.flatfile", "alice.age"))
 ```
