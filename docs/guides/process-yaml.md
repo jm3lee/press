@@ -27,8 +27,9 @@ process-yaml foo.yml bar.yml --log build.log
 
 `process-yaml` is typically invoked automatically during a build. The
 [`picasso`](picasso.md) tool scans metadata files and emits Makefile rules. The
-YAML files are copied to the build tree and then processed in batch. A
-`find`/`xargs` pipeline keeps the command line short even with many files:
+metadata files are copied or converted to YAML in the build tree and then
+processed in batch. A `find`/`xargs` pipeline keeps the command line short even
+with many files:
 
 ```make
 build/foo/bar.yml: src/foo/bar.yml

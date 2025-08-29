@@ -1,10 +1,10 @@
 """
-Generate Makefile rules for processing ``.yml`` files with ``pandoc``.
+Generate Makefile rules for processing metadata files with ``pandoc``.
 
 By default the script scans the ``src`` directory and writes rules that
 produce preprocessed ``.md`` and rendered ``.html`` files under ``build``.
 Both the source root and build root can be overridden via function
-parameters or command–line arguments.  The script also emits dependency
+parameters or command–line arguments. The script also emits dependency
 rules for cross-document links and ``include-filter`` directives so that
 changes to referenced files trigger a rebuild.
 """
@@ -32,10 +32,10 @@ def generate_rule(
     src_root: Path = Path("src"),
     build_root: Path = Path("build"),
 ) -> str:
-    """Generate a Makefile rule for a given YAML metadata file.
+    """Generate a Makefile rule for a given metadata file.
 
     Args:
-        input_path (Path): Path to the source `.yml` file.
+        input_path (Path): Path to the source metadata file.
         src_root (Path): Directory that contains the source files.
         build_root (Path): Directory where build artifacts are written.
 
@@ -61,6 +61,10 @@ def generate_rule(
     output_html = (build_root / relative.with_suffix(".html")).as_posix()
     preprocessed_md = (build_root / relative.with_suffix(".md")).as_posix()
     preprocessed_yml = (build_root / relative.with_suffix(".yml")).as_posix()
+
+    preprocess_cmd = "cp $< $@"
+    if input_path.suffix == ".flatfile":
+        preprocess_cmd = "flatfile-to-yml $< $@"
     metadata = load_metadata_pair(input_path)
     tmpl = None
     if metadata:
@@ -79,6 +83,7 @@ def generate_rule(
         preprocessed_md=preprocessed_md,
         template_dep=template_dep,
         template_arg=template_arg,
+        preprocess_cmd=preprocess_cmd,
     )
     return f"\n{rule}"
 
@@ -96,7 +101,7 @@ def collect_ids(src_root: Path) -> dict[str, Path]:
     processed: set[Path] = set()
 
     for path in src_root.rglob("*"):
-        if path.suffix.lower() not in {".md", ".yml", ".yaml"}:
+        if path.suffix.lower() not in {".md", ".yml", ".yaml", ".flatfile"}:
             continue
 
         base = path.with_suffix("")
@@ -315,7 +320,7 @@ def generate_dependencies(src_root: Path, build_root: Path) -> list[str]:
     rules: set[str] = set()
 
     for path in src_root.rglob("*"):
-        if path.suffix.lower() not in {".md", ".yml", ".yaml"}:
+        if path.suffix.lower() not in {".md", ".yml", ".yaml", ".flatfile"}:
             continue
 
         try:
@@ -341,12 +346,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command-line arguments."""
 
     parser = argparse.ArgumentParser(
-        description="Generate Makefile rules for processing YAML files with pandoc",
+        description="Generate Makefile rules for processing metadata files with pandoc",
     )
     parser.add_argument(
         "--src",
         default="src",
-        help="Directory containing source `.yml` files",
+        help="Directory containing source metadata files",
     )
     parser.add_argument(
         "--build",
@@ -364,7 +369,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def main(argv: list[str] | None = None) -> None:
-    """Entry point: print Makefile rules for ``.yml`` files under ``src_root``."""
+    """Entry point: print Makefile rules for metadata files under ``src_root``."""
 
     args = parse_args(argv)
     configure_logging(args.verbose, args.log)
@@ -375,8 +380,9 @@ def main(argv: list[str] | None = None) -> None:
         logger.error("Directory does not exist", directory=str(src_root))
         sys.exit(1)
 
-    for yml_file in src_root.rglob("*.yml"):
-        print(generate_rule(yml_file, src_root=src_root, build_root=build_root))
+    for path in sorted(src_root.rglob("*")):
+        if path.suffix.lower() in {".yml", ".yaml", ".flatfile"}:
+            print(generate_rule(path, src_root=src_root, build_root=build_root))
 
     for rule in generate_dependencies(src_root, build_root):
         print(rule)
