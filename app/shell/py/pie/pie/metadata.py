@@ -331,7 +331,11 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
         meta_data = read_from_yaml(str(yaml_path))
     elif flatfile_path.exists():
         meta_file = flatfile_path
-        meta_data = flatfile.load(flatfile_path)
+        try:
+            meta_data = flatfile.load(flatfile_path)
+        except Exception as exc:
+            exc.add_note(f"file: {flatfile_path}")
+            raise
 
     if md_data is None and meta_data is None:
         return None
