@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 import pytest
-from jinja2 import FileSystemLoader
+from jinja2 import FileSystemLoader, TemplateSyntaxError
 
 from pie.render import jinja
 
@@ -116,3 +116,26 @@ def test_entry_point_executes_main(tmp_path, monkeypatch):
     )
     runpy.run_path(str(script), run_name="__main__")
     assert out.read_text(encoding="utf-8") == "Hi Agent"
+
+
+def test_render_jinja_logs_template_syntax_error(monkeypatch):
+    messages: list[str] = []
+    handle = jinja.logger.add(messages.append, level="ERROR")
+    try:
+        with pytest.raises(TemplateSyntaxError):
+            jinja.render_jinja("{{ oops")
+    finally:
+        jinja.logger.remove(handle)
+    assert any("Template syntax error on line 1" in m for m in messages)
+    assert any("{{ oops" in m for m in messages)
+
+
+def test_render_jinja_logs_non_string_snippet(monkeypatch):
+    messages: list[str] = []
+    handle = jinja.logger.add(messages.append, level="ERROR")
+    try:
+        with pytest.raises(TypeError):
+            jinja.render_jinja({"a": 1})
+    finally:
+        jinja.logger.remove(handle)
+    assert any("Non-string snippet of type dict" in m for m in messages)

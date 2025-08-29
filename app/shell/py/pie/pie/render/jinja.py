@@ -16,7 +16,12 @@ import time
 from pathlib import Path
 
 from ruamel.yaml import YAMLError
-from jinja2 import Environment, FileSystemLoader, StrictUndefined
+from jinja2 import (
+    Environment,
+    FileSystemLoader,
+    StrictUndefined,
+    TemplateSyntaxError,
+)
 from pie.cli import create_parser
 from pie.logging import logger, configure_logging
 from pie.utils import read_json, read_utf8, write_utf8
@@ -424,8 +429,31 @@ def get_desc(name):
 
 def render_jinja(snippet):
     """Render a Jinja snippet using the current environment."""
-
-    return env.from_string(snippet).render(**index_json)
+    try:
+        return env.from_string(snippet).render(**index_json)
+    except TemplateSyntaxError as exc:
+        line = ""
+        if exc.lineno is not None and isinstance(snippet, str):
+            lines = snippet.splitlines()
+            if 0 < exc.lineno <= len(lines):
+                line = lines[exc.lineno - 1].strip()
+        logger.error(
+            "Template syntax error on line {lineno}: {line}",
+            lineno=exc.lineno,
+            line=line,
+        )
+        raise
+    except TypeError as exc:
+        if isinstance(snippet, str):
+            for lineno, line in enumerate(snippet.splitlines(), start=1):
+                logger.error("{lineno}: {line}", lineno=lineno, line=line)
+        else:
+            logger.error(
+                "Non-string snippet of type {type}: {snippet}",
+                type=type(snippet).__name__,
+                snippet=snippet,
+            )
+        raise
 
 def to_alpha_index(i):
     """Convert ``0``–``3`` to ``a``–``d``."""
