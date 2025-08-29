@@ -6,6 +6,8 @@ from typing import Dict, Iterable, Iterator, List, Tuple
 SENTINEL = '"""'
 LIST_START = '['
 LIST_END = ']'
+DICT_START = '{'
+DICT_END = '}'
 
 
 
@@ -38,11 +40,28 @@ def _parse_list(it: Iterator[str]) -> List:
     return items
 
 
+def _parse_dict(it: Iterator[str]) -> Dict:
+    mapping: Dict = {}
+    for key in it:
+        if key == DICT_END:
+            break
+        try:
+            first = next(it)
+        except StopIteration:
+            raise ValueError(f"Missing value for key '{key}'")
+        _set_nested(mapping, key, _parse_value(it, first))
+    else:
+        raise ValueError("Unterminated dict")
+    return mapping
+
+
 def _parse_value(it: Iterator[str], first: str):
     if first == SENTINEL:
         return _parse_multiline(it)
     if first == LIST_START:
         return _parse_list(it)
+    if first == DICT_START:
+        return _parse_dict(it)
     return first
 
 
@@ -60,15 +79,6 @@ def loads(lines: Iterable[str]) -> Dict:
     return result
 
 
-def _flatten(prefix: str, obj) -> Iterable[Tuple[str, object]]:
-    if isinstance(obj, dict):
-        for k, v in obj.items():
-            dotted = f"{prefix}.{k}" if prefix else k
-            yield from _flatten(dotted, v)
-    else:
-        yield prefix, obj
-
-
 def _dump_multiline(text: str) -> List[str]:
     return [SENTINEL, *text.splitlines(), SENTINEL]
 
@@ -79,8 +89,11 @@ def _dump_list(items: List) -> List[str]:
         if isinstance(item, list):
             lines.extend(_dump_list(item))
             continue
+        if isinstance(item, dict):
+            lines.extend(_dump_dict(item))
+            continue
         item_str = str(item)
-        if item_str in (SENTINEL, LIST_START, LIST_END) or "\n" in item_str:
+        if item_str in (SENTINEL, LIST_START, LIST_END, DICT_START, DICT_END) or "\n" in item_str:
             lines.extend(_dump_multiline(item_str))
         else:
             lines.append(item_str)
@@ -88,11 +101,26 @@ def _dump_list(items: List) -> List[str]:
     return lines
 
 
+def _dump_dict(mapping: Dict) -> List[str]:
+    lines = [DICT_START]
+    for key, value in mapping.items():
+        lines.append(key)
+        lines.extend(_dump_value(value))
+    lines.append(DICT_END)
+    return lines
+
+
 def _dump_value(value) -> List[str]:
     if isinstance(value, list):
         return _dump_list(value)
+    if isinstance(value, dict):
+        return _dump_dict(value)
     value_str = str(value)
-    if "\n" in value_str or value_str == SENTINEL:
+    if (
+        "\n" in value_str
+        or value_str
+        in (SENTINEL, LIST_START, LIST_END, DICT_START, DICT_END)
+    ):
         return _dump_multiline(value_str)
     return [value_str]
 
@@ -101,7 +129,7 @@ def dumps(mapping: Dict) -> str:
     """Serialize a mapping into flatfile format."""
 
     lines: List[str] = []
-    for key, value in _flatten("", mapping):
+    for key, value in mapping.items():
         lines.append(key)
         lines.extend(_dump_value(value))
     return "\n".join(lines) + "\n"
