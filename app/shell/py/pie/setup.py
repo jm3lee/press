@@ -33,6 +33,7 @@ setup(
             'create-post=pie.create.post:main',
             'create-site=pie.create.site:main',
             'emojify=pie.filter.emojify:main',
+            'flatfile-to-yml=pie.flatfile_to_yaml:main',
             'gen-markdown-index=pie.gen_markdown_index:main',
             'include-filter=pie.filter.include:main',
             'indextree-json=pie.indextree_json:main',
