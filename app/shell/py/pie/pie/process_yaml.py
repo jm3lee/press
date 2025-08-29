@@ -10,6 +10,7 @@ from typing import Iterable
 import copy
 
 from ruamel.yaml import YAMLError
+from jinja2 import TemplateSyntaxError
 
 from pie.cli import create_parser
 from pie.filter.emojify import emojify_text
@@ -89,6 +90,19 @@ def main(argv: Iterable[str] | None = None) -> None:
                 metadata = generate_missing_metadata(metadata, str(path))
                 metadata = _render_templates(metadata)
                 metadata = _emojify(metadata)
+        except TemplateSyntaxError as exc:
+            lineno = getattr(exc, "lineno", None)
+            macro = getattr(exc, "name", None)
+            source = getattr(exc, "source", None)
+            kwargs = {"filename": str(path)}
+            if lineno is not None:
+                kwargs["line"] = lineno
+            if macro:
+                kwargs["macro"] = macro
+            if source:
+                kwargs["template"] = source
+            logger.error("Failed to process YAML", **kwargs)
+            raise SystemExit(1) from exc
         except YAMLError as exc:
             line = getattr(getattr(exc, "problem_mark", None), "line", None)
             if line is None:
