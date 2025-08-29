@@ -80,17 +80,17 @@ def test_roundtrip_nested_dicts_and_lists() -> None:
 
 
 def test_load_reads_file(tmp_path) -> None:
-    path = tmp_path / 'data.ff'
+    path = tmp_path / 'data.flatfile'
     path.write_text('foo.bar\n42\n')
     assert flatfile.load(path) == {'foo': {'bar': '42'}}
 
 
 def test_load_key(tmp_path) -> None:
-    path = tmp_path / 'data.ff'
+    path = tmp_path / 'data.flatfile'
     path.write_text('foo.bar\nbaz\n')
     assert flatfile.load_key(path, 'foo.bar') == 'baz'
 
 def test_load_key_cast(tmp_path) -> None:
-    path = tmp_path / 'data.ff'
+    path = tmp_path / 'data.flatfile'
     path.write_text('foo.bar\n7\n')
     assert int(flatfile.load_key(path, 'foo.bar')) == 7

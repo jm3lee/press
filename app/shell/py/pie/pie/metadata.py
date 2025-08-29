@@ -15,6 +15,7 @@ from ruamel.yaml import YAMLError
 
 from pie.logging import logger
 from pie.yaml import YAML_EXTS, read_yaml, yaml
+from pie import flatfile
 
 
 def get_url(filename: str) -> Optional[str]:
@@ -37,14 +38,14 @@ def get_url(filename: str) -> Optional[str]:
     if filename.startswith(prefix):
         relative_path = filename[len(prefix) :]
         base, ext = os.path.splitext(relative_path)
-        if ext.lower() in {".md"} | YAML_EXTS:
+        if ext.lower() in {".md", ".flatfile"} | YAML_EXTS:
             html_path = base + ".html"
             return "/" + html_path
     prefix = "build" + os.sep
     if filename.startswith(prefix):
         relative_path = filename[len(prefix) :]
         base, ext = os.path.splitext(relative_path)
-        if ext.lower() in {".md"} | YAML_EXTS:
+        if ext.lower() in {".md", ".flatfile"} | YAML_EXTS:
             html_path = base + ".html"
             return "/" + html_path
     logger.warning("Can't create a url.", filename=filename)
@@ -292,12 +293,13 @@ def get_metadata_by_path(filepath: str, keypath: str) -> Any | None:
 
 
 def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
-    """Load metadata from ``path`` and a sibling Markdown/YAML file.
+    """Load metadata from ``path`` and a sibling Markdown or metadata file.
 
-    If both a ``.md`` and ``.yml``/``.yaml`` exist for the same base name,
-    the metadata from each file is combined. Values from YAML override those
-    from Markdown when keys conflict and a :class:`UserWarning` is emitted.
-    Returns ``None`` if neither file contains metadata.
+    If both a ``.md`` and ``.yml``/``.yaml``/``.flatfile`` exist for the same base
+    name, the metadata from each file is combined. Values from YAML or flatfile
+    override those from Markdown when keys conflict and a
+    :class:`UserWarning` is emitted. Returns ``None`` if neither file contains
+    metadata.
 
     Example
     -------
@@ -313,46 +315,50 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
     md_path = base.with_suffix(".md")
     yml_path = base.with_suffix(".yml")
     yaml_path = base.with_suffix(".yaml")
+    flatfile_path = base.with_suffix(".flatfile")
 
     md_data = None
     if md_path.exists():
         md_data = _read_from_markdown(str(md_path))
 
-    yaml_data = None
-    yaml_file: Path | None = None
+    meta_data = None
+    meta_file: Path | None = None
     if yml_path.exists():
-        yaml_file = yml_path
-        yaml_data = read_from_yaml(str(yml_path))
+        meta_file = yml_path
+        meta_data = read_from_yaml(str(yml_path))
     elif yaml_path.exists():
-        yaml_file = yaml_path
-        yaml_data = read_from_yaml(str(yaml_path))
+        meta_file = yaml_path
+        meta_data = read_from_yaml(str(yaml_path))
+    elif flatfile_path.exists():
+        meta_file = flatfile_path
+        meta_data = flatfile.load(flatfile_path)
 
-    if md_data is None and yaml_data is None:
+    if md_data is None and meta_data is None:
         return None
 
     combined: dict[str, Any] = {}
     if md_data:
         combined.update(md_data)
-    if yaml_data:
-        for k, v in yaml_data.items():
+    if meta_data:
+        for k, v in meta_data.items():
             if k in combined and combined[k] != v:
                 logger.warning(
                     "Conflict for '{}', using value from {}",
                     k,
-                    yaml_file.resolve().relative_to(Path.cwd()),
+                    meta_file.resolve().relative_to(Path.cwd()),
                 )
             combined[k] = v
 
     files: list[Path] = []
-    if yaml_file:
-        files.append(yaml_file)
+    if meta_file:
+        files.append(meta_file)
     if md_path.exists():
         files.append(md_path)
 
     if files:
         combined["path"] = [str(p.resolve().relative_to(Path.cwd())) for p in files]
     # Populate any missing metadata fields based on the source path.
-    source = md_path if md_path.exists() else yaml_file or path
+    source = md_path if md_path.exists() else meta_file or path
     combined = generate_missing_metadata(combined, str(source))
 
     logger.debug('returning', combined=combined)

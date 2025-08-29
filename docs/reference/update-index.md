@@ -2,10 +2,11 @@
 
 Insert index values into DragonflyDB or Redis.
 
-The console script loads `index.json`, a metadata file, or scans a directory of
-metadata files and flattens each document into `<id>.<property>` keys. Complex
-values are stored as JSON strings. Source paths are recorded under
-`<id>.path` and each path also maps back to the document `id`.
+The console script loads `index.json`, a metadata file (`.md`, `.yml`, `.yaml`,
+or `.flatfile`), or scans a directory of metadata files and flattens each document
+into `<id>.<property>` keys. Complex values are stored as JSON strings. Source
+paths are recorded under `<id>.path` and each path also maps back to the
+document `id`.
 
 ```bash
 update-index PATH [--host HOST] [--port PORT] [-l LOGFILE]

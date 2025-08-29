@@ -215,5 +215,5 @@ single value without loading the whole file, call `flatfile.load_key(path,
 "pie.flavor")`. Cast the returned string yourself if another type is needed:
 
 ```
-age = int(flatfile.load_key("people.ff", "alice.age"))
+age = int(flatfile.load_key("people.flatfile", "alice.age"))
 ```
