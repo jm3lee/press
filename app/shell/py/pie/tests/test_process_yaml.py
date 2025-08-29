@@ -4,6 +4,7 @@ import pytest
 from io import StringIO
 
 from ruamel.yaml import YAML
+from jinja2 import TemplateSyntaxError
 
 yaml = YAML(typ="safe")
 yaml.allow_unicode = True
@@ -113,6 +114,65 @@ def test_main_errors_on_read_failure(tmp_path, monkeypatch) -> None:
 
     assert excinfo.value.code == 1
     assert errors == ["Failed to process YAML"]
+
+
+def test_main_reports_yaml_line(tmp_path, monkeypatch) -> None:
+    path = tmp_path / "bad.yml"
+    path.write_text('foo: bar\n- baz\n', encoding="utf-8")
+
+    monkeypatch.setattr(process_yaml, "configure_logging", lambda *a, **k: None)
+    monkeypatch.setattr(process_yaml.render_jinja, "render_jinja", lambda t: t)
+
+    errors: list[tuple[str, dict]] = []
+
+    def fake_error(msg, **kw):
+        errors.append((msg, kw))
+
+    monkeypatch.setattr(process_yaml.logger, "error", fake_error)
+
+    with pytest.raises(SystemExit) as excinfo:
+        process_yaml.main([str(path)])
+
+    assert excinfo.value.code == 1
+    assert errors == [
+        ("Failed to process YAML", {"filename": str(path), "line": 2})
+    ]
+
+
+def test_main_reports_jinja_line_macro_and_template(tmp_path, monkeypatch) -> None:
+    path = tmp_path / "bad-jinja.yml"
+    path.write_text("title: T\n", encoding="utf-8")
+
+    def boom(_text: str) -> str:
+        exc = TemplateSyntaxError("bad syntax", 3, name="foo")
+        exc.source = "{{ bad syntax }}"
+        raise exc
+
+    monkeypatch.setattr(process_yaml.render_jinja, "render_jinja", boom)
+    monkeypatch.setattr(process_yaml, "configure_logging", lambda *a, **k: None)
+
+    errors: list[tuple[str, dict]] = []
+
+    def fake_error(msg, **kw):
+        errors.append((msg, kw))
+
+    monkeypatch.setattr(process_yaml.logger, "error", fake_error)
+
+    with pytest.raises(SystemExit) as excinfo:
+        process_yaml.main([str(path)])
+
+    assert excinfo.value.code == 1
+    assert errors == [
+        (
+            "Failed to process YAML",
+            {
+                "filename": str(path),
+                "line": 3,
+                "macro": "foo",
+                "template": "{{ bad syntax }}",
+            },
+        )
+    ]
 
 
 def test_main_skips_write_when_unchanged(tmp_path, monkeypatch) -> None:
