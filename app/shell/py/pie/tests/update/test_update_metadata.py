@@ -7,6 +7,7 @@ from ruamel.yaml import YAML
 
 yaml = YAML(typ="safe")
 
+from pie import flatfile
 from pie.update import metadata as update_metadata
 
 
@@ -73,3 +74,21 @@ def test_conflict_skips_file(tmp_path: Path, monkeypatch, capsys) -> None:
     log_text = (tmp_path / "log/update-metadata.txt").read_text(encoding="utf-8")
     assert "Conflict merging metadata for src/doc.yml" in log_text
     assert "Summary {'checked': 1, 'changed_count': 0}" in log_text
+
+
+def test_prefers_flatfile(tmp_path: Path, monkeypatch) -> None:
+    """Flatfile metadata is updated instead of YAML."""
+    src = tmp_path / "src"
+    src.mkdir()
+    flat = src / "doc.flatfile"
+    flat.write_text("title\nT\n", encoding="utf-8")
+    yml = src / "doc.yml"
+    yml.write_text("title: T\n", encoding="utf-8")
+    data_file = tmp_path / "add.yml"
+    data_file.write_text("author: New\n", encoding="utf-8")
+
+    monkeypatch.chdir(tmp_path)
+    update_metadata.main(["-f", str(data_file), "src/doc.flatfile"])
+
+    assert "author: New" not in yml.read_text(encoding="utf-8")
+    assert flatfile.load(flat) == {"title": "T", "author": "New"}

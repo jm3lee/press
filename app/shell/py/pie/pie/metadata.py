@@ -323,19 +323,19 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
 
     meta_data = None
     meta_file: Path | None = None
-    if yml_path.exists():
-        meta_file = yml_path
-        meta_data = read_from_yaml(str(yml_path))
-    elif yaml_path.exists():
-        meta_file = yaml_path
-        meta_data = read_from_yaml(str(yaml_path))
-    elif flatfile_path.exists():
+    if flatfile_path.exists():
         meta_file = flatfile_path
         try:
             meta_data = flatfile.load(flatfile_path)
         except Exception as exc:
             exc.add_note(f"file: {flatfile_path}")
             raise
+    elif yml_path.exists():
+        meta_file = yml_path
+        meta_data = read_from_yaml(str(yml_path))
+    elif yaml_path.exists():
+        meta_file = yaml_path
+        meta_data = read_from_yaml(str(yaml_path))
 
     if md_data is None and meta_data is None:
         return None

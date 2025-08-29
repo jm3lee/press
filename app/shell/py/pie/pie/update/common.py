@@ -15,6 +15,7 @@ from typing import Iterable
 
 from pie.metadata import load_metadata_pair
 from pie.logging import logger
+from pie import flatfile
 import os
 from io import StringIO
 from pie.yaml import YAML_EXTS, yaml, write_yaml
@@ -69,7 +70,7 @@ def get_changed_files() -> list[Path]:
 
 
 def collect_paths(patterns: Iterable[str]) -> list[Path]:
-    """Expand *patterns* into Markdown and YAML files.
+    """Expand *patterns* into Markdown, flatfile, and YAML files.
 
     Each pattern may refer to a file, directory, or glob. Returned paths are
     relative to the current working directory. Non-existent paths are skipped
@@ -85,14 +86,18 @@ def collect_paths(patterns: Iterable[str]) -> list[Path]:
             if not p.exists():
                 continue
             if p.is_dir():
-                for child in chain(p.rglob("*.md"), *(p.rglob(f"*{ext}") for ext in YAML_EXTS)):
+                for child in chain(
+                    p.rglob("*.md"),
+                    p.rglob("*.flatfile"),
+                    *(p.rglob(f"*{ext}") for ext in YAML_EXTS),
+                ):
                     if child.is_file():
                         rel = child.relative_to(cwd) if child.is_absolute() else child
                         if rel not in seen:
                             seen.add(rel)
                             results.append(rel)
             else:
-                if p.suffix in {".md"} | YAML_EXTS:
+                if p.suffix in {".md", ".flatfile"} | YAML_EXTS:
                     rel = p.relative_to(cwd) if p.is_absolute() else p
                     if rel not in seen:
                         seen.add(rel)
@@ -113,6 +118,8 @@ def replace_field(
         return _replace_yaml_field(fp, text, field, value, sort_keys)
     if fp.suffix == ".md":
         return _replace_markdown_field(fp, text, field, value, sort_keys)
+    if fp.suffix == ".flatfile":
+        return _replace_flatfile_field(fp, text, field, value)
     return False, None
 
 
@@ -170,6 +177,20 @@ def _replace_markdown_field(
     return True, None
 
 
+def _replace_flatfile_field(
+    fp: Path, text: str, field: str, value: str
+) -> tuple[bool, str | None]:
+    """Update ``field`` in flatfile *fp*."""
+
+    data = flatfile.loads(text.splitlines())
+    old = data.get(field)
+    if old != value:
+        data[field] = value
+        fp.write_text(flatfile.dumps(data), encoding="utf-8")
+        return True, old if old is not None else "undefined"
+    return True, None
+
+
 def update_files(
     paths: Iterable[Path], field: str, value: str, sort_keys: bool = False
 ) -> tuple[list[str], int]:
@@ -195,10 +216,9 @@ def update_files(
         if metadata and "path" in metadata:
             file_paths.update(Path(p) for p in metadata["path"])
 
-        yaml_files = sorted(
-            [fp for fp in file_paths if fp.suffix in YAML_EXTS]
-        )
-        target_files = yaml_files or sorted(file_paths)
+        flat_files = sorted([fp for fp in file_paths if fp.suffix == ".flatfile"])
+        yaml_files = sorted([fp for fp in file_paths if fp.suffix in YAML_EXTS])
+        target_files = flat_files or yaml_files or sorted(file_paths)
         logger.debug("", target_files=target_files)
 
         for fp in target_files:
