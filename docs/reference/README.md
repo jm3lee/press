@@ -10,6 +10,7 @@ documents provide context for the task‑oriented
 - [link-globals.md](link-globals.md) – global Jinja helpers for link formatting.
 - [jinja-globals.md](jinja-globals.md) – global variables exposed to templates.
 - [definition.md](definition.md) – render snippets from the `definition` field.
+- [flatfile.md](flatfile.md) – flatfile format and helper functions.
 - [keyterms.md](keyterms.md) – glossary of important terminology.
 - [link-metadata.md](link-metadata.md) – link metadata format and usage.
 - [metadata-fields.md](metadata-fields.md) – description of common metadata fields referenced in
