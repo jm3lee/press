@@ -2,9 +2,11 @@
 
 The flatfile format stores nested key and value pairs one entry after another.
 Each key appears on its own line and may use dot notation for nesting. The
-following line holds the value. All values are stored as strings. Clients should
-cast them to the desired type after loading. Files that use this format
-typically end with the `.flatfile` extension.
+following line holds the value, which may be a scalar, list, or dictionary.
+Lists are enclosed by `[` and `]` while dictionaries use `{` and `}`. All values
+are stored as strings. Clients should cast them to the desired type after
+loading. Files that use this format typically end with the `.flatfile`
+extension.
 
 Flatfile handlers are implemented in the `pie.flatfile` module, which exposes
 helpers like `load`, `load_key`, `loads`, and `dumps` for working with the
@@ -95,10 +97,40 @@ butter
 ]
 ```
 
+## Dictionaries
+
+Values that begin with `{` introduce a dictionary. Each entry inside the
+dictionary is written as a key line followed by its value. The dictionary ends
+at a line containing `}`:
+
+YAML:
+
+```
+pie:
+  filling:
+    fruit: apple
+    sugar: cane
+```
+
+Flatfile:
+
+```
+pie
+{
+filling
+{
+fruit
+apple
+sugar
+cane
+}
+}
+```
+
 ## Nested lists and mixed types
 
-List items can themselves be lists or multi-line strings. Every element is
-handled recursively:
+List items can themselves be lists, dictionaries, or multi-line strings. Every
+element is handled recursively:
 
 YAML:
 
@@ -148,6 +180,32 @@ cane
 ]
 ```
 
+A list item that is itself a dictionary is wrapped in braces:
+
+YAML:
+
+```
+pies:
+  - flavor: apple
+  - flavor: cherry
+```
+
+Flatfile:
+
+```
+pies
+[
+{
+flavor
+apple
+}
+{
+flavor
+cherry
+}
+]
+```
+
 ## Converting YAML to flatfile
 
 1. Walk every key path in the YAML document.
@@ -155,7 +213,8 @@ cane
 3. For scalars, write the value on the next line. If the value contains a
    newline or equals `[`, `]`, or `"""`, wrap it between `"""` lines.
 4. For sequences, write `[`, render each item using these rules, then write `]`.
-5. Repeat for nested mappings.
+5. For mappings, write `{`, render each key and value using these rules, then
+   write `}`.
 
 ### Full example
 
@@ -181,12 +240,16 @@ desserts:
 Flatfile:
 
 ```
-desserts.pie.description
+desserts
+{
+pie
+{
+description
 """
 A flaky crust
 with butter
 """
-desserts.pie.ingredients
+ingredients
 [
 flour
 """
@@ -194,7 +257,7 @@ sugar
 cane
 """
 ]
-desserts.pie.layers
+layers
 [
 [
 crust
@@ -204,8 +267,10 @@ filling
 icing
 ]
 ]
-desserts.pie.topping
+topping
 cream
+}
+}
 ```
 
 ## Working with files

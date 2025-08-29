@@ -66,6 +66,21 @@ def test_loads_nested_dicts() -> None:
     }
 
 
+def test_loads_dict_braces() -> None:
+    text = dedent(
+        '''\
+        pie
+        {
+        flavor
+        apple
+        }
+        '''
+    )
+    assert flatfile.loads(text.splitlines()) == {
+        'pie': {'flavor': 'apple'}
+    }
+
+
 def test_roundtrip_nested_dicts_and_lists() -> None:
     data = {
         'desserts': {
@@ -75,6 +90,12 @@ def test_roundtrip_nested_dicts_and_lists() -> None:
             }
         }
     }
+    dumped = flatfile.dumps(data)
+    assert flatfile.loads(dumped.splitlines()) == data
+
+
+def test_roundtrip_list_of_dicts() -> None:
+    data = {'pies': [{'flavor': 'apple'}, {'flavor': 'cherry'}]}
     dumped = flatfile.dumps(data)
     assert flatfile.loads(dumped.splitlines()) == data
 
