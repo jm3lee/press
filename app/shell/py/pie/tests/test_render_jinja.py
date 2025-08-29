@@ -119,23 +119,25 @@ def test_entry_point_executes_main(tmp_path, monkeypatch):
 
 
 def test_render_jinja_logs_template_syntax_error(monkeypatch):
-    messages: list[str] = []
-    handle = jinja.logger.add(messages.append, level="ERROR")
+    records = []
+    handle = jinja.logger.add(records.append, level="ERROR")
     try:
         with pytest.raises(TemplateSyntaxError):
             jinja.render_jinja("{{ oops")
     finally:
         jinja.logger.remove(handle)
-    assert any("Template syntax error on line 1" in m for m in messages)
-    assert any("{{ oops" in m for m in messages)
+    assert any(r.record["message"] == "Template syntax error" for r in records)
+    assert any(r.record["extra"].get("lineno") == 1 for r in records)
+    assert any(r.record["extra"].get("line") == "{{ oops" for r in records)
 
 
 def test_render_jinja_logs_non_string_snippet(monkeypatch):
-    messages: list[str] = []
-    handle = jinja.logger.add(messages.append, level="ERROR")
+    records = []
+    handle = jinja.logger.add(records.append, level="ERROR")
     try:
         with pytest.raises(TypeError):
             jinja.render_jinja({"a": 1})
     finally:
         jinja.logger.remove(handle)
-    assert any("Non-string snippet of type dict" in m for m in messages)
+    assert any(r.record["message"] == "Non-string snippet" for r in records)
+    assert any(r.record["extra"].get("type") == "dict" for r in records)
