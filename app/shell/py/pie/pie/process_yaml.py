@@ -65,6 +65,65 @@ def _render_templates(value):
     return value
 
 
+def _raise_processing_error(path: Path, exc: Exception) -> None:
+    """Log ``exc`` and re-raise as ``SystemExit``."""
+    kwargs = {"filename": str(path)}
+    if isinstance(exc, TemplateSyntaxError):
+        lineno = getattr(exc, "lineno", None)
+        macro = getattr(exc, "name", None)
+        source = getattr(exc, "source", None)
+        if lineno is not None:
+            kwargs["line"] = lineno
+        if macro:
+            kwargs["macro"] = macro
+        if source:
+            kwargs["template"] = source
+    elif isinstance(exc, YAMLError):
+        line = getattr(getattr(exc, "problem_mark", None), "line", None)
+        if line is None:
+            line = getattr(getattr(exc, "context_mark", None), "line", None)
+        if line is not None:
+            kwargs["line"] = line + 1
+    logger.error("Failed to process YAML", **kwargs)
+    raise SystemExit(1) from exc
+
+
+def _process_path(path: Path) -> tuple[dict | None, dict | None, str | None, str | None]:
+    """Return metadata and intermediate values for ``path``."""
+    if path.exists():
+        text = path.read_text(encoding="utf-8")
+        rendered = render_jinja.render_jinja(text)
+        existing = yaml.load(rendered)
+        metadata = copy.deepcopy(existing) if existing is not None else None
+    else:
+        existing = None
+        text = rendered = None
+        metadata = {}
+    if metadata is not None:
+        render_jinja.index_json = metadata
+        metadata = _render_templates(metadata)
+        metadata = generate_missing_metadata(metadata, str(path))
+        metadata = _render_templates(metadata)
+        metadata = _emojify(metadata)
+    return metadata, existing, rendered, text
+
+
+def _unchanged(
+    existing: dict | None,
+    metadata: dict | None,
+    rendered: str | None,
+    text: str | None,
+) -> bool:
+    """Return ``True`` if no meaningful change was made."""
+    return (
+        existing is not None
+        and existing == metadata
+        and rendered is not None
+        and text is not None
+        and rendered.rstrip() == text.rstrip()
+    )
+
+
 def main(argv: Iterable[str] | None = None) -> None:
     """Entry point used by the ``process-yaml`` console script."""
     args = parse_args(argv)
@@ -74,64 +133,16 @@ def main(argv: Iterable[str] | None = None) -> None:
 
     for path_str in args.paths:
         path = Path(path_str)
-        existing: dict | None = None
-        text = rendered = None
         try:
-            if path.exists():
-                text = path.read_text(encoding="utf-8")
-                rendered = render_jinja.render_jinja(text)
-                existing = yaml.load(rendered)
-                metadata = copy.deepcopy(existing) if existing is not None else None
-            else:
-                metadata = {}
-            if metadata is not None:
-                render_jinja.index_json = metadata
-                metadata = _render_templates(metadata)
-                metadata = generate_missing_metadata(metadata, str(path))
-                metadata = _render_templates(metadata)
-                metadata = _emojify(metadata)
-        except TemplateSyntaxError as exc:
-            lineno = getattr(exc, "lineno", None)
-            macro = getattr(exc, "name", None)
-            source = getattr(exc, "source", None)
-            kwargs = {"filename": str(path)}
-            if lineno is not None:
-                kwargs["line"] = lineno
-            if macro:
-                kwargs["macro"] = macro
-            if source:
-                kwargs["template"] = source
-            logger.error("Failed to process YAML", **kwargs)
-            raise SystemExit(1) from exc
-        except YAMLError as exc:
-            line = getattr(getattr(exc, "problem_mark", None), "line", None)
-            if line is None:
-                line = getattr(getattr(exc, "context_mark", None), "line", None)
-            lineno = line + 1 if line is not None else None
-            if lineno is not None:
-                logger.error(
-                    "Failed to process YAML",
-                    filename=str(path),
-                    line=lineno,
-                )
-            else:
-                logger.error("Failed to process YAML", filename=str(path))
-            raise SystemExit(1) from exc
+            metadata, existing, rendered, text = _process_path(path)
         except Exception as exc:  # pragma: no cover - pass through message
-            logger.error("Failed to process YAML", filename=str(path))
-            raise SystemExit(1) from exc
+            _raise_processing_error(path, exc)
 
         if metadata is None:
             logger.error("No metadata found", filename=str(path))
             sys.exit(1)
 
-        if (
-            existing is not None
-            and existing == metadata
-            and rendered is not None
-            and text is not None
-            and rendered.rstrip() == text.rstrip()
-        ):
+        if _unchanged(existing, metadata, rendered, text):
             logger.debug("Processed YAML unchanged", path=str(path))
             continue
 
