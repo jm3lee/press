@@ -10,6 +10,7 @@ from pie.logging import logger, configure_logging
 from pie.render import jinja as render_jinja
 from pie import flatfile
 from pie.utils import read_utf8, write_yaml
+from pie.filter.emojify import emojify_text
 
 __all__ = ["parse_args", "main"]
 
@@ -26,6 +27,7 @@ def _convert(src: Path, dst: Path) -> None:
 
     text = read_utf8(str(src))
     rendered = render_jinja.render_jinja(text)
+    rendered = emojify_text(rendered)
     data = flatfile.loads(rendered.splitlines())
     write_yaml(data, dst)
 
