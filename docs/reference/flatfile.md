@@ -5,6 +5,22 @@ Each key appears on its own line and may use dot notation for nesting. The
 following line holds the value. All values are stored as strings. Clients should
 cast them to the desired type after loading.
 
+Flatfile handlers are implemented in the `pie.flatfile` module, which exposes
+helpers like `load`, `load_key`, `loads`, and `dumps` for working with the
+format. The module includes:
+
+`load(path: str) -> dict`
+: Read a flatfile from disk.
+
+`load_key(path: str, key: str) -> str`
+: Return the value for a single key without reading the entire file.
+
+`loads(data: str) -> dict`
+: Parse flatfile text already in memory.
+
+`dumps(mapping: Mapping[str, Any]) -> str`
+: Serialize a mapping to flatfile text.
+
 ```
 pie.flavor
 apple
