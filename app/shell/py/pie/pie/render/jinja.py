@@ -438,7 +438,7 @@ def render_jinja(snippet):
             if 0 < exc.lineno <= len(lines):
                 line = lines[exc.lineno - 1].strip()
         logger.error(
-            "Template syntax error on line {lineno}: {line}",
+            "Template syntax error",
             lineno=exc.lineno,
             line=line,
         )
@@ -449,7 +449,7 @@ def render_jinja(snippet):
                 logger.error("{lineno}: {line}", lineno=lineno, line=line)
         else:
             logger.error(
-                "Non-string snippet of type {type}: {snippet}",
+                "Non-string snippet",
                 type=type(snippet).__name__,
                 snippet=snippet,
             )
