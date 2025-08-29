@@ -81,6 +81,18 @@ def test_loads_dict_braces() -> None:
     }
 
 
+def test_loads_jinja_macro_value() -> None:
+    text = dedent(
+        '''\
+        foo.bar
+        {{"abcd"}}
+        '''
+    )
+    assert flatfile.loads(text.splitlines()) == {
+        'foo': {'bar': '{{"abcd"}}'}
+    }
+
+
 def test_roundtrip_nested_dicts_and_lists() -> None:
     data = {
         'desserts': {
