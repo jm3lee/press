@@ -10,17 +10,22 @@ from pie.create import post
 from pie.utils import get_pubdate
 
 
-def test_create_post_creates_files(tmp_path: Path) -> None:
-    target = tmp_path / "blog" / "my-post"
+def test_create_post_creates_files(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    target = Path("blog") / "my-post"
     post.main([str(target)])
 
-    md_file = target.with_suffix(".md")
-    yml_file = target.with_suffix(".yml")
+    md_file = (tmp_path / target).with_suffix(".md")
+    yml_file = (tmp_path / target).with_suffix(".yml")
 
     assert md_file.exists(), "Markdown file should be created"
     assert yml_file.exists(), "YAML file should be created"
 
     data = yaml.load(yml_file.read_text(encoding="utf-8"))
-    assert set(data) == {"author", "pubdate", "title"}
-    assert "name" not in data
+    assert set(data) == {"author", "pubdate", "title", "breadcrumbs"}
     assert data["pubdate"] == get_pubdate()
+    assert data["breadcrumbs"] == [
+        {"title": "Home", "url": "/"},
+        {"title": "Blog", "url": "/blog/"},
+        {"title": "My Post"},
+    ]
