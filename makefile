@@ -198,7 +198,7 @@ clean:
 -include src/dep.mk
 
 $(BUILD_DIR)/picasso.mk: $(YAMLS) | $(BUILD_DIR)
-        $(call status,Generate picasso rules)
-        $(Q)picasso --src $(SRC_DIR) --build $(BUILD_DIR) > $@
+	$(call status,Generate picasso rules)
+	$(Q)picasso --src $(SRC_DIR) --build $(BUILD_DIR) > $@
 
 include $(BUILD_DIR)/picasso.mk
