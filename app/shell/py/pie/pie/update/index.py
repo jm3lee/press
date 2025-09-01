@@ -9,14 +9,14 @@ inserts each value into a Redis compatible database using keys of the form
 from __future__ import annotations
 
 import argparse
-import os
-import json
-import time
 import hashlib
-from pathlib import Path
-from typing import Any, Iterable, Mapping
+import json
+import os
+import time
 import warnings
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+from typing import Any, Iterable, Mapping
 
 import redis
 from pie.cli import create_parser
@@ -30,6 +30,22 @@ def load_index(path: str | Path) -> Mapping[str, Mapping[str, Any]]:
     return json.loads(text)
 
 
+def _flatten_mapping(prefix, obj):
+    for k, v in obj.items():
+        yield from _walk(f"{prefix}.{k}", v)
+
+
+def _walk(prefix: str, obj: Any) -> Iterable[tuple[str, str]]:
+    if isinstance(obj, Mapping):
+        yield from _flatten_mapping(prefix, obj)
+    elif isinstance(obj, list):
+        for i, item in enumerate(obj):
+            yield from _walk(f"{prefix}.{i}", item)
+    else:
+        val = obj if isinstance(obj, str) else json.dumps(obj, ensure_ascii=False)
+        yield prefix, val
+
+
 def flatten_index(index: Mapping[str, Mapping[str, Any]]) -> Iterable[tuple[str, str]]:
     """Yield ``(key, value)`` pairs for insertion into Redis.
 
@@ -38,20 +54,6 @@ def flatten_index(index: Mapping[str, Mapping[str, Any]]) -> Iterable[tuple[str,
     ``<id>.path`` and SHA1 hashes of each source file are stored as a JSON
     object under ``<id>.sha1``.
     """
-
-    def _walk(prefix: str, obj: Any) -> Iterable[tuple[str, str]]:
-        if isinstance(obj, Mapping):
-            for k, v in obj.items():
-                yield from _walk(f"{prefix}.{k}", v)
-        elif isinstance(obj, list):
-            if prefix.endswith(".path"):
-                yield prefix, json.dumps(obj, ensure_ascii=False)
-            else:
-                for i, item in enumerate(obj):
-                    yield from _walk(f"{prefix}.{i}", item)
-        else:
-            val = obj if isinstance(obj, str) else json.dumps(obj, ensure_ascii=False)
-            yield prefix, val
 
     for doc_id, props in index.items():
         yield from _walk(doc_id, props)
@@ -68,16 +70,12 @@ def flatten_index(index: Mapping[str, Mapping[str, Any]]) -> Iterable[tuple[str,
                 except FileNotFoundError:
                     logger.warning("Source file missing", path=p)
             if sha1_map:
-                yield f"{doc_id}.sha1", json.dumps(sha1_map, ensure_ascii=False)
-
-
+                yield from _flatten_mapping(f"{doc_id}.sha1", sha1_map)
 
 
 def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
-    parser = create_parser(
-        "Insert index values into a DragonflyDB/Redis instance"
-    )
+    parser = create_parser("Insert index values into a DragonflyDB/Redis instance")
     parser.add_argument(
         "path",
         help="Path to index.json, a metadata file, or a directory containing YAML",
@@ -181,9 +179,7 @@ def main(argv: Iterable[str] | None = None) -> None:
     update_redis(r, index)
 
     elapsed = time.perf_counter() - start
-    logger.info(
-        "update complete", files=files_scanned, elapsed=f"{elapsed:.2f}s"
-    )
+    logger.info("update complete", files=files_scanned, elapsed=f"{elapsed:.2f}s")
 
 
 if __name__ == "__main__":
