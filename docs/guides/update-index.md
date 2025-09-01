@@ -3,10 +3,12 @@
 Load a JSON index, metadata file, or directory of metadata and insert each
 value into DragonflyDB or Redis. Keys use a dot-separated format of
 `<id>.<property>` with nested objects and arrays flattened. Complex values are
-stored as JSON strings. When processing metadata files, the paths to the source
-files are recorded under `<id>.path` as a JSON array; this `path` array is
-stored unflattened. Each source path is also stored separately with the path as
-the key and the document `id` as the value for quick reverse lookups.
+stored as JSON strings. When processing metadata files, paths to source files
+are recorded under `<id>.path` as a JSON array; this `path` array is stored
+unflattened. A new `<id>.sha1` key holds a JSON object that maps each
+relative source path to its SHA1 digest. Each path is also stored separately
+with the path as the key and the document `id` as the value for quick reverse
+lookups.
 
 ## Usage
 
@@ -40,4 +42,5 @@ A single metadata file may also be supplied and is processed directly. When an
 index JSON file is provided, it should be produced by
 [`build-index`](build-index.md). Entries are written to the configured Redis
 instance using pipelined batch writes, with each value stored under its own
-key, including `id.path` entries pointing to the original files.
+key, including `id.path` and `id.sha1` entries pointing to the original files
+and their hashes.

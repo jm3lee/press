@@ -2,6 +2,7 @@ import json
 import os
 import sys
 import threading
+import hashlib
 import fakeredis
 import pytest
 from pie import metadata
@@ -176,6 +177,33 @@ def test_main_adds_path_id_mapping(tmp_path, monkeypatch):
 
     assert fake.get("src/doc.md") == "doc"
     assert fake.get("src/doc.yml") == "doc"
+
+
+def test_main_inserts_sha1(tmp_path, monkeypatch):
+    """Stores SHA1 hashes for each source path."""
+    src = tmp_path / "src"
+    src.mkdir()
+    md = src / "doc.md"
+    md_text = "---\n{\"title\": \"Md\"}\n---\n"
+    md.write_text(md_text)
+    yml = src / "doc.yml"
+    yml_text = '{"title": "Yaml"}'
+    yml.write_text(yml_text)
+
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
+
+    os.chdir(tmp_path)
+    try:
+        update_index.main(["src/doc.md"])
+    finally:
+        os.chdir("/tmp")
+
+    expected = {
+        "src/doc.yml": hashlib.sha1(yml_text.encode("utf-8")).hexdigest(),
+        "src/doc.md": hashlib.sha1(md_text.encode("utf-8")).hexdigest(),
+    }
+    assert fake.get("doc.sha1") == json.dumps(expected)
 
 
 def test_main_missing_id_generates(tmp_path, monkeypatch):
