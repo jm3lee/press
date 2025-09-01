@@ -10,7 +10,6 @@ from io import StringIO
 from pie.cli import create_parser
 from pie.logging import configure_logging, logger
 from pie.metadata import load_metadata_pair
-from pie import flatfile
 from pie.yaml import YAML_EXTS, yaml, write_yaml
 from .common import collect_paths, get_changed_files
 
@@ -91,15 +90,6 @@ def _merge_file(fp: Path, data: dict, sort_keys: bool) -> tuple[bool, bool]:
             write_yaml(merged, fp)
             return True, False
         return False, False
-    if fp.suffix == ".flatfile":
-        existing = flatfile.loads(text.splitlines()) if text else {}
-        merged, conflict = _merge(existing, data)
-        if conflict:
-            return False, True
-        if merged != existing:
-            fp.write_text(flatfile.dumps(merged), encoding="utf-8")
-            return True, False
-        return False, False
     if fp.suffix == ".md":
         lines = text.splitlines(keepends=True)
         if lines and lines[0].startswith("---"):
@@ -171,9 +161,8 @@ def update_files(paths: Iterable[Path], data: dict, sort_keys: bool) -> tuple[li
         if metadata and "path" in metadata:
             file_paths.update(Path(p) for p in metadata["path"])
 
-        flat_files = [fp for fp in file_paths if fp.suffix == ".flatfile"]
         yaml_files = [fp for fp in file_paths if fp.suffix in YAML_EXTS]
-        target_files = flat_files or yaml_files or sorted(file_paths)
+        target_files = yaml_files or sorted(file_paths)
 
         for fp in target_files:
             if not fp.exists():

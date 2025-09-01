@@ -81,7 +81,6 @@ VPATH := $(SRC_DIR)
 # Find all Markdown files excluding specified directories
 MARKDOWNS := $(shell find $(SRC_DIR)/ -name '*.md')
 YAMLS := $(shell find $(SRC_DIR) -name "*.yml")
-FLATFILES := $(shell find $(SRC_DIR) -name "*.flatfile")
 BUILD_YAMLS := $(patsubst $(SRC_DIR)/%,$(BUILD_DIR)/%,$(YAMLS))
 
 # Define the corresponding HTML and PDF output files
@@ -120,11 +119,11 @@ $(BUILD_DIR)/sitemap.xml: $(HTMLS)
 	$(call status,Generate sitemap)
 	$(Q)sitemap $(BUILD_DIR)
 
-$(PERMALINKS_CONF): $(MARKDOWNS) $(YAMLS) $(FLATFILES) | $(BUILD_DIR) $(LOG_DIR)
+$(PERMALINKS_CONF): $(MARKDOWNS) $(YAMLS) | $(BUILD_DIR) $(LOG_DIR)
 	$(call status,Generate permalink redirects)
 	$(Q)nginx-permalinks $(SRC_DIR) -o $@ --log $(LOG_DIR)/nginx-permalinks.txt
 
-$(BUILD_DIR)/.update-index: $(MARKDOWNS) $(YAMLS) $(FLATFILES)
+$(BUILD_DIR)/.update-index: $(MARKDOWNS) $(YAMLS)
 	$(call status,Updating Redis Index)
 	$(Q)update-index --host $(REDIS_HOST) --port $(REDIS_PORT) src
 	$(Q)touch $@
@@ -198,8 +197,8 @@ clean:
 # Optionally include user dependencies
 -include src/dep.mk
 
-$(BUILD_DIR)/picasso.mk: $(YAMLS) $(FLATFILES) | $(BUILD_DIR)
-	$(call status,Generate picasso rules)
-	$(Q)picasso --src $(SRC_DIR) --build $(BUILD_DIR) > $@
+$(BUILD_DIR)/picasso.mk: $(YAMLS) | $(BUILD_DIR)
+        $(call status,Generate picasso rules)
+        $(Q)picasso --src $(SRC_DIR) --build $(BUILD_DIR) > $@
 
 include $(BUILD_DIR)/picasso.mk

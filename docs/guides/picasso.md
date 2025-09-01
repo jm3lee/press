@@ -1,7 +1,8 @@
 # picasso Makefile Generator
 
-`picasso` scans the `src/` directory for metadata files (`.yml`, `.yaml`, and
-`.flatfile`) and emits Makefile rules that convert them to HTML using Pandoc.
+`picasso` scans the `src/` directory for metadata files (`.yml` and `.yaml`)
+and
+emits Makefile rules that convert them to HTML using Pandoc.
 The generated rules are written to `build/picasso.mk` and included by the
 `makefile` during the build. Refer to
 [Metadata Fields](../reference/metadata-fields.md) for the supported metadata
@@ -15,8 +16,8 @@ Run the command and redirect its output to `build/picasso.mk`:
 picasso > build/picasso.mk
 ```
 
-This happens automatically in the `makefile` whenever any `.yml`, `.yaml`, or
-`.flatfile` file under `src/` changes.
+This happens automatically in the `makefile` whenever any `.yml` or `.yaml`
+file under `src/` changes.
 
 You can override the source or build directories using `--src` and `--build`:
 
@@ -40,8 +41,7 @@ build/index.html: build/index.md build/index.yml $(PANDOC_TEMPLATE) $(BUILD_DIR)
 ```
 
 Each metadata file produces similar targets for preprocessing the metadata and
-rendering the final HTML. Flatfiles are converted to YAML before further
-processing.
+rendering the final HTML.
 
 ## Custom Pandoc Templates
 
@@ -65,5 +65,6 @@ additional Makefile rules so that updates to referenced files trigger a rebuild
 of the including document.
 
 If these dependencies form a cycle, `picasso` logs a warning and drops the
-minimum number of rules required to break the loop. The build continues with the
+minimum number of rules required to break the loop. The build continues with
+the
 remaining rules.

@@ -95,15 +95,15 @@ def update_redis(conn: redis.Redis, index: Mapping[str, Mapping[str, Any]]) -> N
 def load_directory_index(path: Path) -> tuple[dict[str, dict[str, Any]], int]:
     """Return an index built from all metadata files under *path*.
 
-    The directory is scanned for ``.md``, ``.yml``, ``.yaml``, and ``.flatfile``
-    files. Each pair of files is loaded with :func:`load_metadata_pair` using
-    a thread pool. The returned tuple contains the combined index and the
-    number of files that were processed.
+    The directory is scanned for ``.md``, ``.yml``, and ``.yaml`` files. Each
+    pair of files is loaded with :func:`load_metadata_pair` using a thread
+    pool. The returned tuple contains the combined index and the number of
+    files that were processed.
     """
 
     processed: set[Path] = set()
     paths: list[Path] = []
-    exts = {".md", ".yml", ".yaml", ".flatfile"}
+    exts = {".md", ".yml", ".yaml"}
 
     for root, _, files in os.walk(path):
         root_path = Path(root)
@@ -136,7 +136,7 @@ def load_index_from_path(path: Path) -> tuple[dict[str, dict[str, Any]], int]:
     if path.suffix.lower() == ".json":
         return load_index(path), 1
 
-    if path.suffix.lower() in {".md", ".yml", ".yaml", ".flatfile"}:
+    if path.suffix.lower() in {".md", ".yml", ".yaml"}:
         metadata = load_metadata_pair(path)
         if metadata is None:
             logger.error("No metadata found", filename=str(path))
