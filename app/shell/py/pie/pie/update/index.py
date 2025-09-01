@@ -12,6 +12,7 @@ import argparse
 import os
 import json
 import time
+import hashlib
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 import warnings
@@ -32,8 +33,10 @@ def load_index(path: str | Path) -> Mapping[str, Mapping[str, Any]]:
 def flatten_index(index: Mapping[str, Mapping[str, Any]]) -> Iterable[tuple[str, str]]:
     """Yield ``(key, value)`` pairs for insertion into Redis.
 
-    Nested dictionaries are flattened using dot-separated keys. Values that are
-    not strings are encoded as JSON.
+    Nested dictionaries are flattened using dot-separated keys. Values that
+    are not strings are encoded as JSON. Paths are stored as a JSON array under
+    ``<id>.path`` and SHA1 hashes of each source file are stored as a JSON
+    object under ``<id>.sha1``.
     """
 
     def _walk(prefix: str, obj: Any) -> Iterable[tuple[str, str]]:
@@ -54,8 +57,18 @@ def flatten_index(index: Mapping[str, Mapping[str, Any]]) -> Iterable[tuple[str,
         yield from _walk(doc_id, props)
         paths = props.get("path")
         if isinstance(paths, list):
+            sha1_map: dict[str, str] = {}
             for p in paths:
-                yield p, doc_id
+                try:
+                    abs_path = Path(p).resolve()
+                    rel_path = abs_path.relative_to(Path.cwd())
+                    digest = hashlib.sha1(abs_path.read_bytes()).hexdigest()
+                    sha1_map[str(rel_path)] = digest
+                    yield str(rel_path), doc_id
+                except FileNotFoundError:
+                    logger.warning("Source file missing", path=p)
+            if sha1_map:
+                yield f"{doc_id}.sha1", json.dumps(sha1_map, ensure_ascii=False)
 
 
 
