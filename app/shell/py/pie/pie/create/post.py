@@ -12,6 +12,11 @@ from pie.utils import get_pubdate, write_yaml
 __all__ = ["main"]
 
 
+def _title_from_slug(slug: str) -> str:
+    """Return a human readable title from *slug*."""
+    return slug.replace("-", " ").replace("_", " ").title()
+
+
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
     parser = create_parser("Create a new post with Markdown and YAML files")
@@ -31,10 +36,26 @@ def main(argv: Sequence[str] | None = None) -> int:
     yml_path = base.with_suffix(".yml")
 
     md_path.touch()
+    try:
+        rel_parts = base.resolve().relative_to(Path("src").resolve()).parts
+    except ValueError:
+        rel_parts = base.parts
+    breadcrumbs = [{"title": "Home", "url": "/"}]
+    url_parts: list[str] = []
+    for part in rel_parts[:-1]:
+        url_parts.append(part)
+        breadcrumbs.append(
+            {
+                "title": _title_from_slug(part),
+                "url": "/" + "/".join(url_parts) + "/",
+            }
+        )
+    breadcrumbs.append({"title": _title_from_slug(rel_parts[-1])})
     metadata = {
         "author": "",
         "pubdate": get_pubdate(),
         "title": "",
+        "breadcrumbs": breadcrumbs,
     }
     write_yaml(metadata, str(yml_path))
     
