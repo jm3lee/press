@@ -5,6 +5,7 @@ fakeredis
 flatten-dict
 beautifulsoup4
 jinja2
+markdown2
 pytest
 pytest-cov
 emoji
