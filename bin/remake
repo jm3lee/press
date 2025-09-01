@@ -19,4 +19,5 @@
 #   docker compose run --rm --user "$(id -u):$(id -g)" shell make
 
 rm -rf "$@"
+docker compose up -d dragonfly
 docker compose run --rm --user "$(id -u):$(id -g)" --entrypoint make shell "$@"
