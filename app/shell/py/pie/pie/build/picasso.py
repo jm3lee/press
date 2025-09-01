@@ -63,8 +63,6 @@ def generate_rule(
     preprocessed_yml = (build_root / relative.with_suffix(".yml")).as_posix()
 
     preprocess_cmd = "cp $< $@"
-    if input_path.suffix == ".flatfile":
-        preprocess_cmd = "flatfile-to-yml $< $@"
     metadata = load_metadata_pair(input_path)
     tmpl = None
     if metadata:
@@ -101,7 +99,7 @@ def collect_ids(src_root: Path) -> dict[str, Path]:
     processed: set[Path] = set()
 
     for path in src_root.rglob("*"):
-        if path.suffix.lower() not in {".md", ".yml", ".yaml", ".flatfile"}:
+        if path.suffix.lower() not in {".md", ".yml", ".yaml"}:
             continue
 
         base = path.with_suffix("")
@@ -320,7 +318,7 @@ def generate_dependencies(src_root: Path, build_root: Path) -> list[str]:
     rules: set[str] = set()
 
     for path in src_root.rglob("*"):
-        if path.suffix.lower() not in {".md", ".yml", ".yaml", ".flatfile"}:
+        if path.suffix.lower() not in {".md", ".yml", ".yaml"}:
             continue
 
         try:
@@ -381,7 +379,7 @@ def main(argv: list[str] | None = None) -> None:
         sys.exit(1)
 
     for path in sorted(src_root.rglob("*")):
-        if path.suffix.lower() in {".yml", ".yaml", ".flatfile"}:
+        if path.suffix.lower() in {".yml", ".yaml"}:
             print(generate_rule(path, src_root=src_root, build_root=build_root))
 
     for rule in generate_dependencies(src_root, build_root):

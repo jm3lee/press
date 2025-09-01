@@ -81,27 +81,6 @@ def test_main_directory_processes_yamls(tmp_path, monkeypatch):
     assert fake.get("b.url") == "/b.html"
 
 
-def test_main_directory_processes_flatfiles(tmp_path, monkeypatch):
-    """Directory of flatfile -> Redis entries for each."""
-    src = tmp_path / "src"
-    src.mkdir()
-    (src / "a.flatfile").write_text("title\nFoo\n")
-    (src / "b.flatfile").write_text("title\nBar\n")
-
-    fake = fakeredis.FakeRedis(decode_responses=True)
-    monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
-
-    os.chdir(tmp_path)
-    try:
-        update_index.main(["src"])
-    finally:
-        os.chdir("/tmp")
-
-    assert fake.get("a.title") == "Foo"
-    assert fake.get("a.url") == "/a.html"
-    assert fake.get("b.title") == "Bar"
-    assert fake.get("b.url") == "/b.html"
-
 
 def test_main_single_yaml_file(tmp_path, monkeypatch):
     """Single YAML file populates Redis."""
@@ -122,25 +101,6 @@ def test_main_single_yaml_file(tmp_path, monkeypatch):
     assert fake.get("item.title") == "Foo"
     assert fake.get("item.url") == "/item.html"
 
-
-def test_main_single_flatfile(tmp_path, monkeypatch):
-    """Single flatfile populates Redis."""
-    src = tmp_path / "src"
-    src.mkdir()
-    flatfile_path = src / "item.flatfile"
-    flatfile_path.write_text("title\nFoo\n")
-
-    fake = fakeredis.FakeRedis(decode_responses=True)
-    monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
-
-    os.chdir(tmp_path)
-    try:
-        update_index.main(["src/item.flatfile"])
-    finally:
-        os.chdir("/tmp")
-
-    assert fake.get("item.title") == "Foo"
-    assert fake.get("item.url") == "/item.html"
 
 
 def test_main_combines_md_and_yaml(tmp_path, monkeypatch):

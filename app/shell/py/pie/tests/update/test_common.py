@@ -97,22 +97,3 @@ def test_update_files_prefers_yaml(tmp_path: Path, monkeypatch: object) -> None:
     assert "author: Old" in md.read_text(encoding="utf-8")
     assert "author: New" in yml.read_text(encoding="utf-8")
 
-
-def test_update_files_prefers_flatfile(tmp_path: Path, monkeypatch: object) -> None:
-    """Flatfile is updated ahead of YAML and Markdown."""
-    src = tmp_path / "src"
-    src.mkdir()
-    md = src / "doc.md"
-    md.write_text("---\ntitle: T\nauthor: Old\n---\n", encoding="utf-8")
-    yml = src / "doc.yml"
-    yml.write_text("title: T\nauthor: Old\n", encoding="utf-8")
-    flat = src / "doc.flatfile"
-    flat.write_text("title\nT\nauthor\nOld\n", encoding="utf-8")
-
-    monkeypatch.chdir(tmp_path)
-    messages, checked = common.update_files([Path("src/doc.md")], "author", "New")
-    assert checked == 1
-    assert set(messages) == {"src/doc.flatfile: Old -> New"}
-    assert "author: Old" in yml.read_text(encoding="utf-8")
-    assert "author: Old" in md.read_text(encoding="utf-8")
-    assert "author\nNew" in flat.read_text(encoding="utf-8")
