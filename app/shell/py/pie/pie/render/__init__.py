@@ -1,6 +1,5 @@
 """Rendering utilities for the pie package."""
 
-from . import jinja
+from . import html, jinja
 
-__all__ = ["jinja"]
-
+__all__ = ["html", "jinja"]
