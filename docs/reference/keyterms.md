@@ -55,7 +55,7 @@ This rule produces `build/keyterms/index.json` from `src/keyterms/index.json`.
 
 ```
 build/%.html: build/%.md build/%.yml $(HTML_TEMPLATE) | build
-    render-html $< $(HTML_TEMPLATE) $@ -c build/$*.yml
+    render-html --template $(HTML_TEMPLATE) $< $@ -c build/$*.yml
 ```
 
 ## Verification

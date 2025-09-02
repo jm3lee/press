@@ -35,7 +35,7 @@ build/index.yml: src/index.yml
     cp $< $@
 build/index.html: build/index.md build/index.yml $(HTML_TEMPLATE) $(BUILD_DIR)/.process-yamls
     $(call status,Generate HTML $@)
-    render-html $< $(HTML_TEMPLATE) $@ -c build/index.yml
+    render-html --template $(HTML_TEMPLATE) $< $@ -c build/index.yml
     check-bad-jinja-output $@
 ```
 
@@ -44,13 +44,12 @@ rendering the final HTML.
 
 ## Custom Templates
 
-`picasso` retrieves per-document metadata from Redis. If a document defines
-`pandoc.template`, that template path is added as a dependency and passed to
-`render-html` when rendering. For example:
+`picasso` retrieves per-document metadata from Redis. If a document defines a
+`template` path, that file is added as a dependency and passed via
+`--template` to `render-html` when rendering. For example:
 
 ```yaml
-pandoc:
-  template: src/blog/pandoc-template.html
+template: src/blog/custom-template.html
 ```
 
 This allows different pages to use specialized templates while falling back to

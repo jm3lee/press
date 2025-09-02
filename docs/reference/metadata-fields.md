@@ -18,6 +18,7 @@ This document lists the common metadata keys used by Press and explains how miss
 - `link.class` – CSS class for rendered links.
 - `link.canonical` – Absolute URL for the page.
 - `name` – **Deprecated.** Former display name used in navigation and indexes.
+- `template` – Optional Jinja template path passed to `render-html`.
 
 ## Auto‑Generated Values
 

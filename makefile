@@ -146,8 +146,8 @@ $(BUILD_DIR)/%.md: %.md | $(BUILD_DIR)
 
 # Generate HTML from processed Markdown using render-html
 $(BUILD_DIR)/%.html: $(BUILD_DIR)/%.md $(BUILD_DIR)/%.yml $(HTML_TEMPLATE) $(BUILD_DIR)/.process-yamls | $(BUILD_DIR)
-        $(call status,Generate HTML $@)
-        $(Q)render-html $< $(HTML_TEMPLATE) $@ -c $(BUILD_DIR)/$*.yml
+	$(call status,Generate HTML $@)
+	$(Q)render-html --template $(HTML_TEMPLATE) $< $@ -c $(BUILD_DIR)/$*.yml
 
 # Clean the build directory by removing all build artifacts
 .PHONY: clean
