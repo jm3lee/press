@@ -4,5 +4,5 @@
 	$(Q){preprocess_cmd}
 {output_html}: {preprocessed_md} {preprocessed_yml} {template_dep} $(BUILD_DIR)/.process-yamls
 	$(call status,Generate HTML $@)
-	$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) {template_arg} --metadata-file={preprocessed_yml} -o $@ $<
+	$(Q)render-html $< {template_dep} $@ -c {preprocessed_yml}
 	$(Q)check-bad-jinja-output $@

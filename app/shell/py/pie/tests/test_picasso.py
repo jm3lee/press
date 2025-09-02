@@ -19,9 +19,9 @@ def test_generate_rule_basic(tmp_path, monkeypatch):
         "\t$(call status,Preprocess $<)\n"
         "\t$(Q)mkdir -p $(dir build/foo/bar.yml)\n"
         "\t$(Q)cp $< $@\n"
-        "build/foo/bar.html: build/foo/bar.md build/foo/bar.yml $(PANDOC_TEMPLATE) $(BUILD_DIR)/.process-yamls\n"
+        "build/foo/bar.html: build/foo/bar.md build/foo/bar.yml $(HTML_TEMPLATE) $(BUILD_DIR)/.process-yamls\n"
         "\t$(call status,Generate HTML $@)\n"
-        "\t$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) --template=$(PANDOC_TEMPLATE) --metadata-file=build/foo/bar.yml -o $@ $<\n"
+        "\t$(Q)render-html $< $(HTML_TEMPLATE) $@ -c build/foo/bar.yml\n"
         "\t$(Q)check-bad-jinja-output $@"
     )
     assert rule == expected
@@ -50,7 +50,7 @@ def test_generate_rule_with_template(tmp_path, monkeypatch):
         "\t$(Q)cp $< $@\n"
         "build/foo/bar.html: build/foo/bar.md build/foo/bar.yml src/blog/pandoc-template.html $(BUILD_DIR)/.process-yamls\n"
         "\t$(call status,Generate HTML $@)\n"
-        "\t$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) --template=src/blog/pandoc-template.html --metadata-file=build/foo/bar.yml -o $@ $<\n"
+        "\t$(Q)render-html $< src/blog/pandoc-template.html $@ -c build/foo/bar.yml\n"
         "\t$(Q)check-bad-jinja-output $@"
     )
     assert rule == expected
