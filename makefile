@@ -43,7 +43,7 @@ LOG_DIR   := log
 CFG_DIR   := cfg
 
 # Default template used by render-html
-HTML_TEMPLATE := $(SRC_DIR)/pandoc-template.html
+HTML_TEMPLATE := $(SRC_DIR)/template.html.jinja
 
 # Command for minifying HTML files
 MINIFY_CMD := minify

@@ -32,7 +32,7 @@ def test_generate_rule_with_template(tmp_path, monkeypatch):
     """Custom template -> rule includes specific template."""
     src = tmp_path / "src" / "foo"
     src.mkdir(parents=True)
-    template = tmp_path / "src" / "blog" / "pandoc-template.html"
+    template = tmp_path / "src" / "blog" / "template.html.jinja"
     template.parent.mkdir(parents=True, exist_ok=True)
     template.write_text("tmpl")
     (src / "bar.yml").write_text("{}")
@@ -40,7 +40,7 @@ def test_generate_rule_with_template(tmp_path, monkeypatch):
     monkeypatch.setattr(
         picasso,
         "load_metadata_pair",
-        lambda path: {"template": "src/blog/pandoc-template.html"},
+        lambda path: {"template": "src/blog/template.html.jinja"},
     )
     rule = picasso.generate_rule(Path("src/foo/bar.yml")).strip()
     expected = (
@@ -48,9 +48,9 @@ def test_generate_rule_with_template(tmp_path, monkeypatch):
         "\t$(call status,Preprocess $<)\n"
         "\t$(Q)mkdir -p $(dir build/foo/bar.yml)\n"
         "\t$(Q)cp $< $@\n"
-        "build/foo/bar.html: build/foo/bar.md build/foo/bar.yml src/blog/pandoc-template.html $(BUILD_DIR)/.process-yamls\n"
+        "build/foo/bar.html: build/foo/bar.md build/foo/bar.yml src/blog/template.html.jinja $(BUILD_DIR)/.process-yamls\n"
         "\t$(call status,Generate HTML $@)\n"
-        "\t$(Q)render-html --template src/blog/pandoc-template.html $< $@ -c build/foo/bar.yml\n"
+        "\t$(Q)render-html --template src/blog/template.html.jinja $< $@ -c build/foo/bar.yml\n"
         "\t$(Q)check-bad-jinja-output $@"
     )
     assert rule == expected

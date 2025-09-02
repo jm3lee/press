@@ -36,7 +36,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "src/index.md": "index.md.jinja",
         "src/index.yml": "index.yml.jinja",
         "src/css/style.css": "style.css.jinja",
-        "src/pandoc-template.html": "pandoc-template.html.jinja",
+        "src/template.html.jinja": "template.html.jinja",
         "src/dep.mk": "dep.mk.jinja",
         "src/robots.txt": "robots.txt.jinja",
         "README.md": "README.md.jinja",
