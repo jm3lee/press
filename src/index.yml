@@ -1,27 +1,10 @@
 author: Brian Lee
+breadcrumbs:
+- title: Home
 description: Example home page
-meta:
-- content: Example Home
-  property: og:title
-- content: Example home page
-  property: og:description
-- content: /img/home.png
-  property: og:image
-- content: https://example.com/
-  property: og:url
-- content: summary_large_image
-  name: twitter:card
-- content: Example Home
-  name: twitter:title
-- content: Example home page
-  name: twitter:description
-- content: /img/home.png
-  name: twitter:image
+id: home
 og_image: /img/home.png
-pubdate: Aug 21, 2025
+pubdate: Sep 02, 2025
 title: Home
 toc: false
 url: /
-breadcrumbs:
-  - title: Home
-id: home

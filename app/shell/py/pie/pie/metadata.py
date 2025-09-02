@@ -11,10 +11,9 @@ from urllib.parse import urljoin
 
 import redis
 from flatten_dict import unflatten
-from ruamel.yaml import YAMLError
-
 from pie.logging import logger
 from pie.yaml import YAML_EXTS, read_yaml, yaml
+from ruamel.yaml import YAMLError
 
 
 def get_url(filename: str) -> Optional[str]:
@@ -106,9 +105,7 @@ def _add_id_if_missing(metadata: dict[str, Any], filepath: str) -> None:
         )
 
 
-def _add_canonical_link_if_missing(
-    metadata: dict[str, Any], filepath: str
-) -> None:
+def _add_canonical_link_if_missing(metadata: dict[str, Any], filepath: str) -> None:
     """Create ``link.canonical`` from ``url`` when missing."""
 
     if metadata.get("link", {}).get("canonical"):
@@ -116,9 +113,7 @@ def _add_canonical_link_if_missing(
 
     url = metadata.get("url")
     if url is None:
-        logger.debug(
-            "Skipping canonical link; no url present", filename=filepath
-        )
+        logger.debug("Skipping canonical link; no url present", filename=filepath)
         return
 
     base_url = os.getenv("BASE_URL", "").rstrip("/")
@@ -127,13 +122,58 @@ def _add_canonical_link_if_missing(
     metadata.setdefault("link", {})["canonical"] = canonical
 
 
-def generate_missing_metadata(metadata: dict[str, Any], filepath: str) -> dict[str, Any]:
+def _add_empty_if_missing(metadata: dict[str, Any], field: str, filepath: str) -> None:
+    """Generate an ``id`` based on ``filepath`` if absent."""
+
+    if field not in metadata:
+        metadata[field] = None
+        logger.debug(
+            "Generated",
+            id=metadata["id"],
+            field=field,
+            filename=str(Path(filepath).resolve().relative_to(Path.cwd())),
+        )
+
+def _add_if_missing(metadata: dict[str, Any], field: str, value, filepath: str) -> None:
+    """Generate an ``id`` based on ``filepath`` if absent."""
+
+    if field not in metadata:
+        metadata[field] = value
+        logger.debug(
+            "Generated",
+            id=metadata["id"],
+            field=field,
+            filename=str(Path(filepath).resolve().relative_to(Path.cwd())),
+        )
+
+
+def generate_missing_metadata(
+    metadata: dict[str, Any], filepath: str
+) -> dict[str, Any]:
     """Populate ``metadata`` with fields derived from ``filepath`` if absent."""
 
     _add_url_if_missing(metadata, filepath)
     _add_canonical_link_if_missing(metadata, filepath)
     _add_citation_if_missing(metadata, filepath)
     _add_id_if_missing(metadata, filepath)
+    _add_empty_if_missing(metadata, 'breadcrumbs', filepath)
+    _add_empty_if_missing(metadata, 'description', filepath)
+    _add_empty_if_missing(metadata, 'mathjax', filepath)
+    _add_empty_if_missing(metadata, 'next', filepath)
+    _add_empty_if_missing(metadata, 'og_description', filepath)
+    _add_empty_if_missing(metadata, 'og_image', filepath)
+    _add_empty_if_missing(metadata, 'og_title', filepath)
+    _add_empty_if_missing(metadata, 'og_url', filepath)
+    _add_empty_if_missing(metadata, 'page_heading', filepath)
+    _add_empty_if_missing(metadata, 'partof', filepath)
+    _add_empty_if_missing(metadata, 'preamble', filepath)
+    _add_empty_if_missing(metadata, 'prev', filepath)
+    _add_empty_if_missing(metadata, 'status', filepath)
+    _add_empty_if_missing(metadata, 'twitter_card', filepath)
+    _add_empty_if_missing(metadata, 'twitter_image', filepath)
+    _add_if_missing(metadata, 'css', '/style.css', filepath)
+    _add_if_missing(metadata, 'header', {'header':None}, filepath)
+    _add_if_missing(metadata, 'header_includes', [], filepath)
     return metadata
 
 
@@ -165,6 +205,7 @@ def read_from_yaml(filepath: str) -> Optional[Dict[str, Any]]:
         err.add_note(f"file: {filepath}")
         logger.error(err)
         raise
+
 
 # Global connection reused by helper functions.  It is initialised lazily so
 # unit tests can swap in a fake client.
@@ -355,7 +396,5 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
     source = md_path if md_path.exists() else meta_file or path
     combined = generate_missing_metadata(combined, str(source))
 
-    logger.debug('returning', combined=combined)
+    logger.debug("returning", combined=combined)
     return combined
-
-
