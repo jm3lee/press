@@ -32,7 +32,7 @@ def test_create_scaffolding(tmp_path: Path) -> None:
     assert (target / "redo.mk").exists()
 
     assert (target / "src/css/style.css").exists()
-    assert (target / "src/pandoc-template.html").exists()
+    assert (target / "src/template.html.jinja").exists()
 
     shell_dockerfile = target / "app/shell/Dockerfile"
     assert shell_dockerfile.exists()

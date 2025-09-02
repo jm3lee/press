@@ -1,10 +1,10 @@
 title: Trendy Blog Template Demo
 author: Ada Lovelace
-id: trendy-blog-template
+id: trendy_blog_template
 pubdate: Jan 1, 2025
 hero_image: https://via.placeholder.com/1200x400/F4A460/FFFFFF?text=Fall+Hero
 preamble: A short intro shows how you might tease readers into the story.
-template: src/examples/blog/pandoc-template.html
+template: src/examples/blog/template.html.jinja
 css:
   - https://cdn.jsdelivr.net/npm/water.css@2/out/water.css
 breadcrumbs:
