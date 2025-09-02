@@ -29,5 +29,5 @@ def test_main_renders_file(tmp_path, monkeypatch):
     out = tmp_path / "out.html"
     monkeypatch.setenv("PIE_DATA_DIR", str(tmp_path))
     html.env = html.create_env()
-    html.main([str(md), "base.html", str(out), "--context", str(ctx)])
+    html.main([str(md), str(out), "--template", "base.html", "--context", str(ctx)])
     assert "bar" in out.read_text(encoding="utf-8")

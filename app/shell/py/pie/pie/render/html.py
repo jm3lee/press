@@ -82,8 +82,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "Render a Markdown file into an HTML template",
     )
     parser.add_argument("markdown", help="Markdown source file")
-    parser.add_argument("template", help="Jinja template file")
     parser.add_argument("output", help="File to write rendered HTML to")
+    parser.add_argument(
+        "--template",
+        "-t",
+        required=True,
+        help="Jinja template file",
+    )
     parser.add_argument(
         "-c",
         "--context",

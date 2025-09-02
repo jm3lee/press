@@ -21,7 +21,7 @@ def test_generate_rule_basic(tmp_path, monkeypatch):
         "\t$(Q)cp $< $@\n"
         "build/foo/bar.html: build/foo/bar.md build/foo/bar.yml $(HTML_TEMPLATE) $(BUILD_DIR)/.process-yamls\n"
         "\t$(call status,Generate HTML $@)\n"
-        "\t$(Q)render-html $< $(HTML_TEMPLATE) $@ -c build/foo/bar.yml\n"
+        "\t$(Q)render-html --template $(HTML_TEMPLATE) $< $@ -c build/foo/bar.yml\n"
         "\t$(Q)check-bad-jinja-output $@"
     )
     assert rule == expected
@@ -29,7 +29,7 @@ def test_generate_rule_basic(tmp_path, monkeypatch):
 
 
 def test_generate_rule_with_template(tmp_path, monkeypatch):
-    """Custom pandoc.template -> rule includes specific template."""
+    """Custom template -> rule includes specific template."""
     src = tmp_path / "src" / "foo"
     src.mkdir(parents=True)
     template = tmp_path / "src" / "blog" / "pandoc-template.html"
@@ -40,7 +40,7 @@ def test_generate_rule_with_template(tmp_path, monkeypatch):
     monkeypatch.setattr(
         picasso,
         "load_metadata_pair",
-        lambda path: {"pandoc": {"template": "src/blog/pandoc-template.html"}},
+        lambda path: {"template": "src/blog/pandoc-template.html"},
     )
     rule = picasso.generate_rule(Path("src/foo/bar.yml")).strip()
     expected = (
@@ -50,7 +50,7 @@ def test_generate_rule_with_template(tmp_path, monkeypatch):
         "\t$(Q)cp $< $@\n"
         "build/foo/bar.html: build/foo/bar.md build/foo/bar.yml src/blog/pandoc-template.html $(BUILD_DIR)/.process-yamls\n"
         "\t$(call status,Generate HTML $@)\n"
-        "\t$(Q)render-html $< src/blog/pandoc-template.html $@ -c build/foo/bar.yml\n"
+        "\t$(Q)render-html --template src/blog/pandoc-template.html $< $@ -c build/foo/bar.yml\n"
         "\t$(Q)check-bad-jinja-output $@"
     )
     assert rule == expected

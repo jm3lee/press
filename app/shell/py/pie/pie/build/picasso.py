@@ -50,7 +50,7 @@ def generate_rule(
             $(Q)cp $< $@
         build/foo/bar.html: build/foo/bar.md build/foo/bar.yml $(HTML_TEMPLATE) $(BUILD_DIR)/.process-yamls
             $(call status,Generate HTML $@)
-            $(Q)render-html $< $(HTML_TEMPLATE) $@ -c build/foo/bar.yml
+            $(Q)render-html --template $(HTML_TEMPLATE) $< $@ -c build/foo/bar.yml
             $(Q)check-bad-jinja-output $@
     """
     # Compute the path of ``input_path`` relative to the source root
@@ -63,11 +63,7 @@ def generate_rule(
 
     preprocess_cmd = "cp $< $@"
     metadata = load_metadata_pair(input_path)
-    tmpl = None
-    if metadata:
-        pandoc_meta = metadata.get("pandoc")
-        if isinstance(pandoc_meta, dict):
-            tmpl = pandoc_meta.get("template")
+    tmpl = metadata.get("template") if metadata else None
     template = Path(tmpl).as_posix() if tmpl else None
 
     template_dep = template or "$(HTML_TEMPLATE)"
