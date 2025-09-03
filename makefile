@@ -105,6 +105,7 @@ $(BUILD_DIR)/.update-index: $(MARKDOWNS) $(YAMLS)
 $(BUILD_DIR)/.process-yamls: $(BUILD_YAMLS) | $(BUILD_DIR)
 	$(call status,Process YAML metadata)
 	$(Q)find $(BUILD_DIR) -name '*.yml' -print0 | xargs -0 process-yaml
+	$(Q)update-index --host $(REDIS_HOST) --port $(REDIS_PORT) build
 	$(Q)touch $@
 
 # Target to minify HTML and CSS files
