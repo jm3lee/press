@@ -9,3 +9,4 @@ citation: link globals
 id: link-globals
 pubdate: Sep 02, 2025
 title: Link Global Examples
+summary: '{{ link("quickstart") }}'
