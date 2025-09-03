@@ -43,14 +43,18 @@ def walk(
 ) -> Iterator[Tuple[Mapping[str, Any], Path]]:
     """Yield metadata and path pairs for entries in *directory*."""
     for path in directory.iterdir():
+        logger.debug("Scanning entry", path=str(path))
         try:
             if path.is_dir():
                 index_file = path / "index.yml"
+                logger.debug("Checking for index file", path=str(index_file))
                 if index_file.is_file():
+                    logger.debug("Loading metadata", path=str(index_file))
                     meta = loader(index_file)
                     if meta:
                         yield meta, path
             elif path.is_file() and path.suffix == ".yml" and path.name != "index.yml":
+                logger.debug("Loading metadata", path=str(path))
                 meta = loader(path)
                 if meta:
                     yield meta, path
