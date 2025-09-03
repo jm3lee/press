@@ -23,7 +23,7 @@ from pie.cli import create_parser
 from pie.logging import configure_logging
 from pie.utils import read_utf8, write_utf8
 from pie.yaml import yaml, read_yaml as load_yaml_file
-from .jinja import create_env
+from .jinja import create_env, render_jinja
 
 _front_matter_re = re.compile(r"^---\n(.*?)\n---\n(.*)", re.DOTALL)
 
@@ -60,7 +60,7 @@ def render_page(
     metadata, md_text = _parse_markdown(markdown_path)
     ctx = dict(context or {})
     ctx.update(metadata)
-    html = commonmark.commonmark(md_text)
+    html = commonmark.commonmark(render_jinja(md_text))
     ctx["content"] = html
     tmpl = env.get_template(template)
     return tmpl.render(**ctx)

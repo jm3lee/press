@@ -31,7 +31,6 @@ from pie import metadata
 
 DEFAULT_CONFIG = Path("cfg/render-jinja-template.yml")
 
-index_json = None  # Loaded in :func:`main`.
 config = {}
 
 _whitespace_word_pattern = re.compile(r"(\S+)")
@@ -431,7 +430,7 @@ def get_desc(name):
 def render_jinja(snippet):
     """Render a Jinja snippet using the current environment."""
     logger.debug("", snippet=snippet)
-    return env.from_string(snippet).render(**index_json)
+    return env.from_string(snippet).render()
 
 def to_alpha_index(i):
     """Convert ``0``–``3`` to ``a``–``d``."""
@@ -514,16 +513,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def main(argv: list[str] | None = None) -> None:
     """Render the specified template using Redis and an optional ``index.json``."""
 
-    global index_json
     args = parse_args(argv)
 
     configure_logging(args.verbose, args.log)
 
     global config
     config = load_config(args.config)
-    index_json = read_json(args.index) if args.index else {}
     template = env.get_template(args.template)
-    rendered = template.render(**index_json)
+    rendered = template.render()
     write_utf8(rendered, args.output)
 
 if __name__ == "__main__":

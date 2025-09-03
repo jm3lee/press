@@ -105,6 +105,7 @@ $(BUILD_DIR)/.update-index: $(MARKDOWNS) $(YAMLS)
 $(BUILD_DIR)/.process-yamls: $(BUILD_YAMLS) | $(BUILD_DIR)
 	$(call status,Process YAML metadata)
 	$(Q)find $(BUILD_DIR) -name '*.yml' -print0 | xargs -0 process-yaml
+	$(call status,Updating Redis Index)
 	$(Q)update-index --host $(REDIS_HOST) --port $(REDIS_PORT) build
 	$(Q)touch $@
 
@@ -143,7 +144,7 @@ $(BUILD_DIR)/css/%.css: $(SRC_DIR)/css/%.css | $(BUILD_DIR)/css
 # See docs/guides/preprocess.md for preprocessing details
 $(BUILD_DIR)/%.md: %.md | $(BUILD_DIR)
 	$(call status,Preprocess $<)
-	$(Q)preprocess $<
+	$(Q)cp $< $@
 
 # Generate HTML from processed Markdown using render-html
 $(BUILD_DIR)/%.html: $(BUILD_DIR)/%.md $(BUILD_DIR)/%.yml $(HTML_TEMPLATE) $(BUILD_DIR)/.process-yamls | $(BUILD_DIR)
