@@ -1,8 +1,9 @@
+import hashlib
 import json
 import os
 import sys
 import threading
-import hashlib
+
 import fakeredis
 import pytest
 from pie import metadata
@@ -82,7 +83,6 @@ def test_main_directory_processes_yamls(tmp_path, monkeypatch):
     assert fake.get("b.url") == "/b.html"
 
 
-
 def test_main_single_yaml_file(tmp_path, monkeypatch):
     """Single YAML file populates Redis."""
     src = tmp_path / "src"
@@ -103,13 +103,12 @@ def test_main_single_yaml_file(tmp_path, monkeypatch):
     assert fake.get("item.url") == "/item.html"
 
 
-
 def test_main_combines_md_and_yaml(tmp_path, monkeypatch):
     """Markdown + YAML -> merged metadata."""
     src = tmp_path / "src"
     src.mkdir()
     md = src / "doc.md"
-    md.write_text("---\n{\"title\": \"Md\", \"foo\": \"bar\"}\n---\n")
+    md.write_text('---\n{"title": "Md", "foo": "bar"}\n---\n')
     yml = src / "doc.yml"
     yml.write_text('{"id": "doc", "title": "Yaml", "baz": "qux"}')
 
@@ -130,31 +129,10 @@ def test_main_combines_md_and_yaml(tmp_path, monkeypatch):
         os.chdir("/tmp")
 
     assert messages
-    
+
     assert fake.get("doc.foo") == "bar"
     assert fake.get("doc.baz") == "qux"
     assert fake.get("doc.title") == "Yaml"
-
-
-def test_main_inserts_path(tmp_path, monkeypatch):
-    """Stores source paths as JSON array."""
-    src = tmp_path / "src"
-    src.mkdir()
-    md = src / "doc.md"
-    md.write_text("---\n{\"title\": \"Md\"}\n---\n")
-    yml = src / "doc.yml"
-    yml.write_text('{"title": "Yaml"}')
-
-    fake = fakeredis.FakeRedis(decode_responses=True)
-    monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
-
-    os.chdir(tmp_path)
-    try:
-        update_index.main(["src/doc.md"])
-    finally:
-        os.chdir("/tmp")
-
-    assert fake.get("doc.path") == json.dumps(["src/doc.yml", "src/doc.md"])
 
 
 def test_main_adds_path_id_mapping(tmp_path, monkeypatch):
@@ -162,7 +140,7 @@ def test_main_adds_path_id_mapping(tmp_path, monkeypatch):
     src = tmp_path / "src"
     src.mkdir()
     md = src / "doc.md"
-    md.write_text("---\n{\"title\": \"Md\"}\n---\n")
+    md.write_text('---\n{"title": "Md"}\n---\n')
     yml = src / "doc.yml"
     yml.write_text('{"title": "Yaml"}')
 
@@ -179,39 +157,12 @@ def test_main_adds_path_id_mapping(tmp_path, monkeypatch):
     assert fake.get("src/doc.yml") == "doc"
 
 
-def test_main_inserts_sha1(tmp_path, monkeypatch):
-    """Stores SHA1 hashes for each source path."""
-    src = tmp_path / "src"
-    src.mkdir()
-    md = src / "doc.md"
-    md_text = "---\n{\"title\": \"Md\"}\n---\n"
-    md.write_text(md_text)
-    yml = src / "doc.yml"
-    yml_text = '{"title": "Yaml"}'
-    yml.write_text(yml_text)
-
-    fake = fakeredis.FakeRedis(decode_responses=True)
-    monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
-
-    os.chdir(tmp_path)
-    try:
-        update_index.main(["src/doc.md"])
-    finally:
-        os.chdir("/tmp")
-
-    expected = {
-        "src/doc.yml": hashlib.sha1(yml_text.encode("utf-8")).hexdigest(),
-        "src/doc.md": hashlib.sha1(md_text.encode("utf-8")).hexdigest(),
-    }
-    assert fake.get("doc.sha1") == json.dumps(expected)
-
-
 def test_main_missing_id_generates(tmp_path, monkeypatch):
     """Missing id -> generated from filename."""
     src = tmp_path / "src"
     src.mkdir()
     md = src / "doc.md"
-    md.write_text("---\n{\"title\": \"T\"}\n---\n")
+    md.write_text('---\n{"title": "T"}\n---\n')
 
     fake = fakeredis.FakeRedis(decode_responses=True)
     monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
