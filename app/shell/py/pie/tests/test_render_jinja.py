@@ -118,6 +118,15 @@ def test_entry_point_executes_main(tmp_path, monkeypatch):
     assert out.read_text(encoding="utf-8") == "Hi Agent"
 
 
+def test_anchor_macro_available(monkeypatch):
+    data_dir = Path(__file__).resolve().parents[5] / "templates"
+    monkeypatch.setenv("PIE_DATA_DIR", str(data_dir))
+    jinja.env = jinja.create_env()
+    jinja.index_json = {}
+    html = jinja.render_jinja("{{ anchor('test') }}")
+    assert '<a id="test"' in html
+
+
 def test_render_jinja_logs_template_syntax_error(monkeypatch):
     records = []
     handle = jinja.logger.add(records.append, level="ERROR")

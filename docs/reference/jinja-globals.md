@@ -15,6 +15,7 @@ for details on the structure of this metadata.
 - `cite(*ids)` – format one or more metadata entries as Chicago style
   citations. When multiple entries share the same author and year their page
   numbers are combined.
+- `anchor(id)` – generate a heading anchor linking to `#id`.
 - `link(desc, anchor=None)` and related helpers `linktitle`, `linkcap`,
   `link_icon_title`, `linkicon`, and `linkshort` – format metadata into HTML
   anchors. See [link-globals.md](link-globals.md) for details.

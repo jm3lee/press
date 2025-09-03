@@ -21,6 +21,7 @@ from jinja2 import (
     FileSystemLoader,
     StrictUndefined,
     TemplateSyntaxError,
+    TemplateNotFound,
 )
 from pie.cli import create_parser
 from pie.logging import logger, configure_logging
@@ -504,6 +505,10 @@ def create_env():
     env.globals["read_json"] = read_json
     env.globals["read_yaml"] = read_yaml
     env.globals["cite"] = cite
+    try:
+        env.globals["anchor"] = env.get_template("anchor.jinja").module.anchor
+    except TemplateNotFound:
+        logger.warning("Missing anchor.jinja template")
     return env
 
 env = create_env()
