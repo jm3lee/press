@@ -3,101 +3,59 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta charset="utf-8" />
-    <title>$title$</title>
-    $if(description)$
-    <meta name="description" content="$description$" />
-    $endif$ $if(og-title)$
-    <meta property="og:title" content="$og-title$" />
-    $else$
-    <meta property="og:title" content="$title$" />
-    $endif$ $if(og-description)$
-    <meta property="og:description" content="$og-description$" />
-    $elseif(description)$
-    <meta property="og:description" content="$description$" />
-    $endif$ $if(og-image)$
-    <meta property="og:image" content="$og-image$" />
-    $elseif(og_image)$
-    <meta property="og:image" content="$og_image$" />
-    $endif$ $if(og-url)$
-    <meta property="og:url" content="$og-url$" />
-    $elseif(link.canonical)$
-    <meta property="og:url" content="$link.canonical$" />
-    $endif$ $if(twitter-card)$
-    <meta name="twitter:card" content="$twitter-card$" />
-    $else$
+    <title>{{ title }}</title>
+    {% if description %}
+    <meta name="description" content="{{ description }}" />
+    {% endif %}
+    {% if og_title %}
+    <meta property="og:title" content="{{ og_title }}" />
+    {% else %}
+    <meta property="og:title" content="{{ title }}" />
+    {% endif %}
+    {% if og_description %}
+    <meta property="og:description" content="{{ og_description }}" />
+    {% elif description %}
+    <meta property="og:description" content="{{ description }}" />
+    {% endif %}
+    {% if og_image %}
+    <meta property="og:image" content="{{ og_image }}" />
+    {% endif %}
+    {% if og_url %}
+    <meta property="og:url" content="{{ og_url }}" />
+    {% elif link.canonical %}
+    <meta property="og:url" content="{{ link.canonical }}" />
+    {% endif %}
+    {% if twitter_card %}
+    <meta name="twitter:card" content="{{ twitter_card }}" />
+    {% else %}
     <meta name="twitter:card" content="summary_large_image" />
-    $endif$ $if(twitter-image)$
-    <meta name="twitter:image" content="$twitter-image$" />
-    $elseif(og_image)$
-    <meta name="twitter:image" content="$og_image$" />
-    $endif$
-    <!--
-        Example metadata block for social tags used by Pandoc:
-        ---
-        title: "Example Page"
-        description: "Page description."
-        og_image: "/img/example.png"
-        url: "https://example.com/example"
-        meta:
-          - property: og:title
-            content: "Example Page"
-          - property: og:description
-            content: "Page description."
-          - property: og:image
-            content: "/img/example.png"
-          - property: og:url
-            content: "https://example.com/example"
-          - name: twitter:card
-            content: summary_large_image
-          - name: twitter:title
-            content: "Example Page"
-          - name: twitter:description
-            content: "Page description."
-          - name: twitter:image
-            content: "/img/example.png"
-        ---
-        -->
-    <!-- Pandoc's metadata block: values come from the document's YAML front matter -->
-    $for(meta)$
-    <meta$if(meta.name)$
-      name="$meta.name$"
-      $endif$$if(meta.property)$
-      property="$meta.property$"
-      $endif$
-      content="$meta.content$"
-    />
-    $endfor$ $if(link.canonical)$
-    <link rel="canonical" href="$link.canonical$" />
-    $endif$ $if(prev)$
-    <link rel="prev" href="$prev$" />
-    $endif$ $if(next)$
-    <link rel="next" href="$next$" />
-    $endif$
+    {% endif %}
+    {% if twitter_image %}
+    <meta name="twitter:image" content="{{ twitter_image }}" />
+    {% elif og_image %}
+    <meta name="twitter:image" content="{{ og_image }}" />
+    {% endif %}
+    {% if link.canonical %}
+    <link rel="canonical" href="{{ link.canonical }}" />
+    {% endif %}
+    {% if prev %}
+    <link rel="prev" href="{{ prev }}" />
+    {% endif %}
+    {% if next %}
+    <link rel="next" href="{{ next }}" />
+    {% endif %}
 
     <!-- If you supply multiple CSS files via metadata -->
     <!-- The main stylesheet has to be included here because mobile browsers
             don't seem to apply the stylesheet otherwise, and fonts are too
             small. -->
-    $for(css)$
-    <link rel="stylesheet" href="$css$" />
-    $endfor$
+    {% for css in css %}
+    <link rel="stylesheet" href="{{ css }}" />
+    {% endfor %}
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
     />
-
-    $if(schema.headline)$
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "Article",
-        "headline": "$schema.headline$",
-        "author": "$schema.author$",
-        "datePublished": "$schema.datePublished$",
-        "description": "$schema.description$"
-      }
-    </script>
-    $endif$
   </head>
 
   <body class="fs-5 lh-lg">
@@ -111,7 +69,7 @@
           text-truncate"
           style="max-width: 16ch"
         >
-          $if(page_heading)$ $page_heading$ $else$ $title$ $endif$
+          {% if page_heading %} {{ page_heading }} {% else %} {{ title }} {% endif %}
         </span>
         <button
           class="navbar-toggler"
@@ -137,24 +95,24 @@
     <header
       class="hero-header mb-5 text-white border-bottom position-relative bg-black d-flex align-items-center"
     >
-      $if(header.src)$
+      {% if header and header.get("src") %}
       <img
-        src="$header.src$"
-        $if(header.srcset)$srcset="$header.srcset$"
-        $endif$
+        src="{{ header.src }}"
+        {% if header.srcset %}srcset="{{ header.get('srcset') }}"
+        {% endif %}
         sizes="100vw"
         class="bg-image position-absolute top-0 start-0 w-100 h-100 object-fit-cover opacity-0"
         onload="this.classList.add('opacity-100')"
-        $if(header.alt)$alt="$header.alt$"
-        $else$alt="Background"
-        $endif$
+        {% if header.get("alt") %}alt="{{ header.get('alt') }}"
+        {% else %}alt="Background"
+        {% endif %}
       />
       <div class="bg-overlay position-absolute top-0 start-0 w-100 h-100"></div>
-      $endif$
+      {% endif %}
 
       <div class="container-fluid position-relative text-center">
         <h1 class="display-3 fw-bold">
-          $if(page_heading)$ $page_heading$ $else$ $title$ $endif$
+          {% if page_heading %} {{ page_heading }} {% else %} {{ title }} {% endif %}
         </h1>
       </div>
     </header>
@@ -163,18 +121,18 @@
       .hero-header {
         min-height: 30vh;
       }
-      $if(header.src)$
+      {% if header and header.get('src') %}
       .bg-image {
         transition: opacity 0.6s ease;
-        $if(header.object_position)$object-position: $header.object_position$;$endif$
+        {% if header.get('object_position') %}object-position: {{ header.get('object_position') }};{% endif %}
       }
-      $if(header.object_position_mobile)$
+      {% if header.object_position_mobile %}
       @media (max-width: 576px) {
         .bg-image {
-          object-position: $header.object_position_mobile$;
+          object-position: {{ header.object_position_mobile }};
         }
       }
-      $endif$
+      {% endif %}
       .bg-overlay {
         /* Slightly stronger at the bottom; adjust as needed */
         background: linear-gradient(
@@ -185,71 +143,74 @@
         );
         pointer-events: none;
       }
-      $endif$
+      {% endif %}
     </style>
 
     <main class="container mb-5" style="max-width: 65ch">
-      $if(breadcrumbs)$
+      {% if breadcrumbs %}
       <nav style="--bs-breadcrumb-divider: '>'" aria-label="breadcrumb">
         <ol class="breadcrumb pt-3">
-          $for(breadcrumbs)$
-          $if(breadcrumbs.url)$
-          <li class="breadcrumb-item"><a href="$breadcrumbs.url$">$breadcrumbs.title$</a></li>
-          $else$
-          <li class="breadcrumb-item active" aria-current="page">$breadcrumbs.title$</li>
-          $endif$
-          $endfor$
+          {% for breadcrumb in breadcrumbs %}
+          {% if breadcrumb.get('url') %}
+          <li class="breadcrumb-item"><a href="{{ breadcrumb.url }}">{{ breadcrumb.get('title') }}</a></li>
+          {% else %}
+          <li class="breadcrumb-item active" aria-current="page">{{ breadcrumb.get('title') }}</li>
+          {% endif %}
+          {% endfor %}
         </ol>
       </nav>
-      $endif$
+      {% endif %}
       <div class="metablock">
-        $if(author)$ $author$<br />
-        $endif$ $if(pubdate)$ $pubdate$<br />
-        $endif$ $if(status)$ $status$ $endif$ $if(partof)$ Part of: $partof$
-        $endif$
+        {% if author %} {{ author }}<br />
+        {% endif %}
+    {% if pubdate %} {{ pubdate }}<br />
+        {% endif %}
+    {% if status %} {{ status }} {% endif %}
+    {% if partof %} Part of: {{ partof }}
+        {% endif %}
       </div>
 
-      $if(preamble)$ $preamble$ $endif$
+      {% if preamble %} {{ preamble | safe }} {% endif %}
 
       <!-- page nav -->
-      $if(toc)$
+      {% if toc %}
       <details id="TOC">
         <summary>Table of Contents</summary>
-        $toc$
+        {{ toc | safe }}
       </details>
-      $endif$
+      {% endif %}
 
       <!-- Body content generated from Markdown goes here -->
-      $body$
+      {{ content | safe }}
 
       <!-- prev/next page links -->
-      $if(prev)$
+      {% if prev %}
       <nav
         class="d-flex justify-content-between border-top pt-4 mt-5"
         aria-label="Page navigation"
       >
-        <a class="btn btn-outline-primary" rel="prev" href="$prev$">
+        <a class="btn btn-outline-primary" rel="prev" href="{{ prev }}">
           &larr; Previous
         </a>
-        $if(next)$
-        <a class="btn btn-outline-primary" rel="next" href="$next$">
+        {% if next %}
+        <a class="btn btn-outline-primary" rel="next" href="{{ next }}">
           Next &rarr;
         </a>
-        $endif$
+        {% endif %}
       </nav>
-      $elseif(next)$
+      {% elif next %}
       <nav
         class="d-flex justify-content-end border-top pt-4 mt-5"
         aria-label="Page navigation"
       >
-        <a class="btn btn-outline-primary" rel="next" href="$next$">
+        <a class="btn btn-outline-primary" rel="next" href="{{ next }}">
           Next &rarr;
         </a>
       </nav>
-      $endif$
+      {% endif %}
 
       <!-- Optional scripts and footers can be included similarly -->
-      $for(header-includes)$ $header-includes$ $endfor$
+      {% for header_include in header_includes %} {{ header_include | safe }} {% endfor %}
     </main>
 
     <footer class="footer p-5 bg-dark text-white text-center">
@@ -278,7 +239,7 @@
         observer.observe(hero);
       });
     </script>
-    $if(mathjax)$
+    {% if mathjax %}
     <!-- MATHJAX SUPPORT -->
     <script
       type="text/javascript"
@@ -286,6 +247,6 @@
       async
       src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
     ></script>
-    $endif$
+    {% endif %}
   </body>
 </html>

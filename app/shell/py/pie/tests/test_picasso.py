@@ -19,40 +19,20 @@ def test_generate_rule_basic(tmp_path, monkeypatch):
         "\t$(call status,Preprocess $<)\n"
         "\t$(Q)mkdir -p $(dir build/foo/bar.yml)\n"
         "\t$(Q)cp $< $@\n"
-        "build/foo/bar.html: build/foo/bar.md build/foo/bar.yml $(PANDOC_TEMPLATE) $(BUILD_DIR)/.process-yamls\n"
+        "build/foo/bar.html: build/foo/bar.md build/foo/bar.yml $(HTML_TEMPLATE) $(BUILD_DIR)/.process-yamls\n"
         "\t$(call status,Generate HTML $@)\n"
-        "\t$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) --template=$(PANDOC_TEMPLATE) --metadata-file=build/foo/bar.yml -o $@ $<\n"
-        "\t$(Q)check-bad-jinja-output $@"
+        "\t$(Q)render-html --template $(HTML_TEMPLATE) $< $@ -c build/foo/bar.yml"
     )
     assert rule == expected
+    assert "render-html" in rule
 
-
-def test_generate_rule_flatfile(tmp_path, monkeypatch):
-    """generate_rule('src/foo/bar.flatfile') -> build/foo/bar.yml rule."""
-    src = tmp_path / "src" / "foo"
-    src.mkdir(parents=True)
-    (src / "bar.flatfile").write_text("title\nT\n")
-    monkeypatch.chdir(tmp_path)
-    monkeypatch.setattr(picasso, "load_metadata_pair", lambda path: None)
-    rule = picasso.generate_rule(Path("src/foo/bar.flatfile")).strip()
-    expected = (
-        "build/foo/bar.yml: src/foo/bar.flatfile\n"
-        "\t$(call status,Preprocess $<)\n"
-        "\t$(Q)mkdir -p $(dir build/foo/bar.yml)\n"
-        "\t$(Q)flatfile-to-yml $< $@\n"
-        "build/foo/bar.html: build/foo/bar.md build/foo/bar.yml $(PANDOC_TEMPLATE) $(BUILD_DIR)/.process-yamls\n"
-        "\t$(call status,Generate HTML $@)\n"
-        "\t$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) --template=$(PANDOC_TEMPLATE) --metadata-file=build/foo/bar.yml -o $@ $<\n"
-        "\t$(Q)check-bad-jinja-output $@"
-    )
-    assert rule == expected
 
 
 def test_generate_rule_with_template(tmp_path, monkeypatch):
-    """Custom pandoc.template -> rule includes specific template."""
+    """Custom template -> rule includes specific template."""
     src = tmp_path / "src" / "foo"
     src.mkdir(parents=True)
-    template = tmp_path / "src" / "blog" / "pandoc-template.html"
+    template = tmp_path / "src" / "blog" / "template.html.jinja"
     template.parent.mkdir(parents=True, exist_ok=True)
     template.write_text("tmpl")
     (src / "bar.yml").write_text("{}")
@@ -60,7 +40,7 @@ def test_generate_rule_with_template(tmp_path, monkeypatch):
     monkeypatch.setattr(
         picasso,
         "load_metadata_pair",
-        lambda path: {"pandoc": {"template": "src/blog/pandoc-template.html"}},
+        lambda path: {"template": "src/blog/template.html.jinja"},
     )
     rule = picasso.generate_rule(Path("src/foo/bar.yml")).strip()
     expected = (
@@ -68,12 +48,12 @@ def test_generate_rule_with_template(tmp_path, monkeypatch):
         "\t$(call status,Preprocess $<)\n"
         "\t$(Q)mkdir -p $(dir build/foo/bar.yml)\n"
         "\t$(Q)cp $< $@\n"
-        "build/foo/bar.html: build/foo/bar.md build/foo/bar.yml src/blog/pandoc-template.html $(BUILD_DIR)/.process-yamls\n"
+        "build/foo/bar.html: build/foo/bar.md build/foo/bar.yml src/blog/template.html.jinja $(BUILD_DIR)/.process-yamls\n"
         "\t$(call status,Generate HTML $@)\n"
-        "\t$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) --template=src/blog/pandoc-template.html --metadata-file=build/foo/bar.yml -o $@ $<\n"
-        "\t$(Q)check-bad-jinja-output $@"
+        "\t$(Q)render-html --template src/blog/template.html.jinja $< $@ -c build/foo/bar.yml"
     )
     assert rule == expected
+    assert "render-html" in rule
 
 
 def test_main_prints_rules(tmp_path, capsys, monkeypatch):
@@ -89,19 +69,6 @@ def test_main_prints_rules(tmp_path, capsys, monkeypatch):
     expected = picasso.generate_rule(src / "doc.yml", src_root=src, build_root=build).strip()
     assert out == expected
 
-
-def test_main_prints_rules_flatfile(tmp_path, capsys, monkeypatch):
-    """CLI prints rule for doc.flatfile."""
-    src = tmp_path / "src"
-    build = tmp_path / "build"
-    src.mkdir()
-    (src / "doc.flatfile").write_text("title\nT\n")
-
-    monkeypatch.setattr(picasso, "load_metadata_pair", lambda path: None)
-    picasso.main(["--src", str(src), "--build", str(build)])
-    out = capsys.readouterr().out.strip()
-    expected = picasso.generate_rule(src / "doc.flatfile", src_root=src, build_root=build).strip()
-    assert out == expected
 
 
 def test_main_writes_log_file(tmp_path, monkeypatch):

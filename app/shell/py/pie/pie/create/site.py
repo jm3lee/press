@@ -36,7 +36,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         "src/index.md": "index.md.jinja",
         "src/index.yml": "index.yml.jinja",
         "src/css/style.css": "style.css.jinja",
-        "src/pandoc-template.html": "pandoc-template.html.jinja",
+        # Base HTML template used by render-html
+        "src/template.html.jinja": "template.html.jinja",
         "src/dep.mk": "dep.mk.jinja",
         "src/robots.txt": "robots.txt.jinja",
         "README.md": "README.md.jinja",
@@ -47,8 +48,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     for rel_path, template_name in files.items():
         target = root / rel_path
         target.parent.mkdir(parents=True, exist_ok=True)
-        template_text = (template_dir / template_name).read_text(encoding="utf-8")
-        content = env.from_string(template_text).render()
+        template_text = (template_dir / template_name).read_text(
+            encoding="utf-8"
+        )
+        if rel_path.endswith(".jinja"):
+            # Preserve Jinja templates without rendering
+            content = template_text
+        else:
+            content = env.from_string(template_text).render()
         target.write_text(content, encoding="utf-8")
 
     logger.info("Created project scaffolding", path=str(root))

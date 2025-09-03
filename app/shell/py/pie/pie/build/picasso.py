@@ -1,12 +1,11 @@
-"""
-Generate Makefile rules for processing metadata files with ``pandoc``.
+"""Generate Makefile rules for rendering metadata-driven pages.
 
-By default the script scans the ``src`` directory and writes rules that
-produce preprocessed ``.md`` and rendered ``.html`` files under ``build``.
-Both the source root and build root can be overridden via function
-parameters or command–line arguments. The script also emits dependency
-rules for cross-document links and ``include-filter`` directives so that
-changes to referenced files trigger a rebuild.
+The script scans the ``src`` directory and writes rules that produce
+preprocessed ``.md`` and rendered ``.html`` files under ``build``. Both the
+source root and build root can be overridden via function parameters or
+command–line arguments. The script also emits dependency rules for
+cross-document links and ``include-filter`` directives so that changes to
+referenced files trigger a rebuild.
 """
 
 import argparse
@@ -49,9 +48,9 @@ def generate_rule(
             $(call status,Preprocess $<)
             $(Q)mkdir -p $(dir build/foo/bar.yml)
             $(Q)cp $< $@
-        build/foo/bar.html: build/foo/bar.md build/foo/bar.yml $(PANDOC_TEMPLATE) $(BUILD_DIR)/.process-yamls
+        build/foo/bar.html: build/foo/bar.md build/foo/bar.yml $(HTML_TEMPLATE) $(BUILD_DIR)/.process-yamls
             $(call status,Generate HTML $@)
-            $(Q)$(PANDOC_CMD) $(PANDOC_OPTS) --template=$(PANDOC_TEMPLATE) --metadata-file=build/foo/bar.yml -o $@ $<
+            $(Q)render-html --template $(HTML_TEMPLATE) $< $@ -c build/foo/bar.yml
             $(Q)check-bad-jinja-output $@
     """
     # Compute the path of ``input_path`` relative to the source root
@@ -63,18 +62,11 @@ def generate_rule(
     preprocessed_yml = (build_root / relative.with_suffix(".yml")).as_posix()
 
     preprocess_cmd = "cp $< $@"
-    if input_path.suffix == ".flatfile":
-        preprocess_cmd = "flatfile-to-yml $< $@"
     metadata = load_metadata_pair(input_path)
-    tmpl = None
-    if metadata:
-        pandoc_meta = metadata.get("pandoc")
-        if isinstance(pandoc_meta, dict):
-            tmpl = pandoc_meta.get("template")
+    tmpl = metadata.get("template") if metadata else None
     template = Path(tmpl).as_posix() if tmpl else None
 
-    template_dep = template or "$(PANDOC_TEMPLATE)"
-    template_arg = f"--template={template_dep}" if template else "--template=$(PANDOC_TEMPLATE)"
+    template_dep = template or "$(HTML_TEMPLATE)"
 
     rule = _RULE_TEMPLATE.format(
         input_path=input_path.as_posix(),
@@ -82,7 +74,6 @@ def generate_rule(
         output_html=output_html,
         preprocessed_md=preprocessed_md,
         template_dep=template_dep,
-        template_arg=template_arg,
         preprocess_cmd=preprocess_cmd,
     )
     return f"\n{rule}"
@@ -101,7 +92,7 @@ def collect_ids(src_root: Path) -> dict[str, Path]:
     processed: set[Path] = set()
 
     for path in src_root.rglob("*"):
-        if path.suffix.lower() not in {".md", ".yml", ".yaml", ".flatfile"}:
+        if path.suffix.lower() not in {".md", ".yml", ".yaml"}:
             continue
 
         base = path.with_suffix("")
@@ -320,7 +311,7 @@ def generate_dependencies(src_root: Path, build_root: Path) -> list[str]:
     rules: set[str] = set()
 
     for path in src_root.rglob("*"):
-        if path.suffix.lower() not in {".md", ".yml", ".yaml", ".flatfile"}:
+        if path.suffix.lower() not in {".md", ".yml", ".yaml"}:
             continue
 
         try:
@@ -381,7 +372,7 @@ def main(argv: list[str] | None = None) -> None:
         sys.exit(1)
 
     for path in sorted(src_root.rglob("*")):
-        if path.suffix.lower() in {".yml", ".yaml", ".flatfile"}:
+        if path.suffix.lower() in {".yml", ".yaml"}:
             print(generate_rule(path, src_root=src_root, build_root=build_root))
 
     for rule in generate_dependencies(src_root, build_root):

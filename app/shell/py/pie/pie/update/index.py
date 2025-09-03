@@ -9,13 +9,14 @@ inserts each value into a Redis compatible database using keys of the form
 from __future__ import annotations
 
 import argparse
-import os
+import hashlib
 import json
+import os
 import time
-from pathlib import Path
-from typing import Any, Iterable, Mapping
 import warnings
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+from typing import Any, Iterable, Mapping
 
 import redis
 from pie.cli import create_parser
@@ -29,42 +30,52 @@ def load_index(path: str | Path) -> Mapping[str, Mapping[str, Any]]:
     return json.loads(text)
 
 
+def _flatten_mapping(prefix, obj):
+    for k, v in obj.items():
+        yield from _walk(f"{prefix}.{k}", v)
+
+
+def _walk(prefix: str, obj: Any) -> Iterable[tuple[str, str]]:
+    if isinstance(obj, Mapping):
+        yield from _flatten_mapping(prefix, obj)
+    elif isinstance(obj, list):
+        for i, item in enumerate(obj):
+            yield from _walk(f"{prefix}.{i}", item)
+    else:
+        val = obj if isinstance(obj, str) else json.dumps(obj, ensure_ascii=False)
+        yield prefix, val
+
+
 def flatten_index(index: Mapping[str, Mapping[str, Any]]) -> Iterable[tuple[str, str]]:
     """Yield ``(key, value)`` pairs for insertion into Redis.
 
-    Nested dictionaries are flattened using dot-separated keys. Values that are
-    not strings are encoded as JSON.
+    Nested dictionaries are flattened using dot-separated keys. Values that
+    are not strings are encoded as JSON. Paths are stored as a JSON array under
+    ``<id>.path`` and SHA1 hashes of each source file are stored as a JSON
+    object under ``<id>.sha1``.
     """
-
-    def _walk(prefix: str, obj: Any) -> Iterable[tuple[str, str]]:
-        if isinstance(obj, Mapping):
-            for k, v in obj.items():
-                yield from _walk(f"{prefix}.{k}", v)
-        elif isinstance(obj, list):
-            if prefix.endswith(".path"):
-                yield prefix, json.dumps(obj, ensure_ascii=False)
-            else:
-                for i, item in enumerate(obj):
-                    yield from _walk(f"{prefix}.{i}", item)
-        else:
-            val = obj if isinstance(obj, str) else json.dumps(obj, ensure_ascii=False)
-            yield prefix, val
 
     for doc_id, props in index.items():
         yield from _walk(doc_id, props)
         paths = props.get("path")
         if isinstance(paths, list):
+            sha1_map: dict[str, str] = {}
             for p in paths:
-                yield p, doc_id
-
-
+                try:
+                    abs_path = Path(p).resolve()
+                    rel_path = abs_path.relative_to(Path.cwd())
+                    digest = hashlib.sha1(abs_path.read_bytes()).hexdigest()
+                    sha1_map[str(rel_path)] = digest
+                    yield str(rel_path), doc_id
+                except FileNotFoundError:
+                    logger.warning("Source file missing", path=p)
+            if sha1_map:
+                yield from _flatten_mapping(f"{doc_id}.sha1", sha1_map)
 
 
 def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
-    parser = create_parser(
-        "Insert index values into a DragonflyDB/Redis instance"
-    )
+    parser = create_parser("Insert index values into a DragonflyDB/Redis instance")
     parser.add_argument(
         "path",
         help="Path to index.json, a metadata file, or a directory containing YAML",
@@ -95,15 +106,15 @@ def update_redis(conn: redis.Redis, index: Mapping[str, Mapping[str, Any]]) -> N
 def load_directory_index(path: Path) -> tuple[dict[str, dict[str, Any]], int]:
     """Return an index built from all metadata files under *path*.
 
-    The directory is scanned for ``.md``, ``.yml``, ``.yaml``, and ``.flatfile``
-    files. Each pair of files is loaded with :func:`load_metadata_pair` using
-    a thread pool. The returned tuple contains the combined index and the
-    number of files that were processed.
+    The directory is scanned for ``.md``, ``.yml``, and ``.yaml`` files. Each
+    pair of files is loaded with :func:`load_metadata_pair` using a thread
+    pool. The returned tuple contains the combined index and the number of
+    files that were processed.
     """
 
     processed: set[Path] = set()
     paths: list[Path] = []
-    exts = {".md", ".yml", ".yaml", ".flatfile"}
+    exts = {".md", ".yml", ".yaml"}
 
     for root, _, files in os.walk(path):
         root_path = Path(root)
@@ -136,7 +147,7 @@ def load_index_from_path(path: Path) -> tuple[dict[str, dict[str, Any]], int]:
     if path.suffix.lower() == ".json":
         return load_index(path), 1
 
-    if path.suffix.lower() in {".md", ".yml", ".yaml", ".flatfile"}:
+    if path.suffix.lower() in {".md", ".yml", ".yaml"}:
         metadata = load_metadata_pair(path)
         if metadata is None:
             logger.error("No metadata found", filename=str(path))
@@ -168,9 +179,7 @@ def main(argv: Iterable[str] | None = None) -> None:
     update_redis(r, index)
 
     elapsed = time.perf_counter() - start
-    logger.info(
-        "update complete", files=files_scanned, elapsed=f"{elapsed:.2f}s"
-    )
+    logger.info("update complete", files=files_scanned, elapsed=f"{elapsed:.2f}s")
 
 
 if __name__ == "__main__":

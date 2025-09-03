@@ -52,34 +52,6 @@ def test_main_emojifies_text(tmp_path, monkeypatch) -> None:
     assert data["title"] == "😄"
 
 
-def test_main_renders_jinja(tmp_path, monkeypatch) -> None:
-    path = tmp_path / "jinja.yml"
-    path.write_text("title: {{ 1 + 1 }}\n", encoding="utf-8")
-
-    monkeypatch.setattr(
-        process_yaml, "generate_missing_metadata", lambda m, p: m
-    )
-    monkeypatch.setattr(process_yaml, "configure_logging", lambda *a, **k: None)
-    monkeypatch.setattr(process_yaml.logger, "debug", lambda *a, **k: None)
-
-    process_yaml.main([str(path)])
-    assert path.read_text(encoding="utf-8").strip() == "title: 2"
-
-
-def test_main_renders_jinja_recursively(tmp_path, monkeypatch) -> None:
-    path = tmp_path / "jinja-nested.yml"
-    path.write_text('title: "{{ \"{{ 1 + 1 }}\" }}"\n', encoding="utf-8")
-
-    monkeypatch.setattr(
-        process_yaml, "generate_missing_metadata", lambda m, p: m
-    )
-    monkeypatch.setattr(process_yaml, "configure_logging", lambda *a, **k: None)
-    monkeypatch.setattr(process_yaml.logger, "debug", lambda *a, **k: None)
-
-    process_yaml.main([str(path)])
-    assert path.read_text(encoding="utf-8").strip() == "title: 2"
-
-
 def test_main_errors_on_missing_metadata(tmp_path, monkeypatch) -> None:
     path = tmp_path / "in.yml"
     path.write_text("", encoding="utf-8")

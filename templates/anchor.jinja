@@ -1,0 +1,8 @@
+{#--
+  Macro: anchor
+  Outputs a section anchor with an id for headings and links.
+--#}
+{% macro anchor(id) -%}
+<a id="{{ id }}" href="#{{ id }}" class="text-decoration-none text-muted"><small>#</small></a>
+{%- endmacro %}
+

@@ -42,33 +42,8 @@ BUILD_DIR := build
 LOG_DIR   := log
 CFG_DIR   := cfg
 
-# Define the Pandoc command used inside the container
-#       -T: Don't allocate pseudo-tty. Makes parallel builds work.
-# For container setup details, see docs/guides/docker-make.md.
-PANDOC_CMD := pandoc
-PANDOC_TEMPLATE := $(SRC_DIR)/pandoc-template.html
-
-# Options for generating HTML output with Pandoc
-PANDOC_OPTS := \
-	--css '/css/style.css?v=$(BUILD_VER)' \
-	--standalone \
-	-t html \
-	--toc \
-	--toc-depth=2 \
-	--filter pandoc-crossref \
-	--mathjax \
-
-# Options for generating PDF output with Pandoc
-PANDOC_OPTS_PDF := \
-        --css "/css/style.css" \
-        --standalone \
-        -t pdf \
-        --toc \
-        --toc-depth=2 \
-        --number-sections \
-        --pdf-engine=xelatex \
-        --resource-path=$(BUILD_DIR) \
-        --filter pandoc-crossref \
+# Default template used by render-html
+HTML_TEMPLATE := $(SRC_DIR)/template.html.jinja
 
 # Command for minifying HTML files
 MINIFY_CMD := minify
@@ -81,12 +56,10 @@ VPATH := $(SRC_DIR)
 # Find all Markdown files excluding specified directories
 MARKDOWNS := $(shell find $(SRC_DIR)/ -name '*.md')
 YAMLS := $(shell find $(SRC_DIR) -name "*.yml")
-FLATFILES := $(shell find $(SRC_DIR) -name "*.flatfile")
 BUILD_YAMLS := $(patsubst $(SRC_DIR)/%,$(BUILD_DIR)/%,$(YAMLS))
 
-# Define the corresponding HTML and PDF output files
+# Define the corresponding HTML output files
 HTMLS := $(patsubst $(SRC_DIR)/%.md, $(BUILD_DIR)/%.html, $(MARKDOWNS))
-PDFS := $(patsubst $(SRC_DIR)/%.md, $(BUILD_DIR)/%.pdf, $(MARKDOWNS))
 
 # Sort and define build subdirectories based on HTML files
 BUILD_SUBDIRS := $(sort $(dir $(HTMLS))) $(LOG_DIR) $(BUILD_DIR)/static $(BUILD_DIR)/css
@@ -120,11 +93,11 @@ $(BUILD_DIR)/sitemap.xml: $(HTMLS)
 	$(call status,Generate sitemap)
 	$(Q)sitemap $(BUILD_DIR)
 
-$(PERMALINKS_CONF): $(MARKDOWNS) $(YAMLS) $(FLATFILES) | $(BUILD_DIR) $(LOG_DIR)
+$(PERMALINKS_CONF): $(MARKDOWNS) $(YAMLS) | $(BUILD_DIR) $(LOG_DIR)
 	$(call status,Generate permalink redirects)
 	$(Q)nginx-permalinks $(SRC_DIR) -o $@ --log $(LOG_DIR)/nginx-permalinks.txt
 
-$(BUILD_DIR)/.update-index: $(MARKDOWNS) $(YAMLS) $(FLATFILES)
+$(BUILD_DIR)/.update-index: $(MARKDOWNS) $(YAMLS)
 	$(call status,Updating Redis Index)
 	$(Q)update-index --host $(REDIS_HOST) --port $(REDIS_PORT) src
 	$(Q)touch $@
@@ -132,6 +105,7 @@ $(BUILD_DIR)/.update-index: $(MARKDOWNS) $(YAMLS) $(FLATFILES)
 $(BUILD_DIR)/.process-yamls: $(BUILD_YAMLS) | $(BUILD_DIR)
 	$(call status,Process YAML metadata)
 	$(Q)find $(BUILD_DIR) -name '*.yml' -print0 | xargs -0 process-yaml
+	$(Q)update-index --host $(REDIS_HOST) --port $(REDIS_PORT) build
 	$(Q)touch $@
 
 # Target to minify HTML and CSS files
@@ -171,22 +145,10 @@ $(BUILD_DIR)/%.md: %.md | $(BUILD_DIR)
 	$(call status,Preprocess $<)
 	$(Q)preprocess $<
 
-# Generate HTML from processed Markdown using Pandoc
-$(BUILD_DIR)/%.html: $(BUILD_DIR)/%.md $(PANDOC_TEMPLATE) | $(BUILD_DIR)
+# Generate HTML from processed Markdown using render-html
+$(BUILD_DIR)/%.html: $(BUILD_DIR)/%.md $(BUILD_DIR)/%.yml $(HTML_TEMPLATE) $(BUILD_DIR)/.process-yamls | $(BUILD_DIR)
 	$(call status,Generate HTML $@)
-	$(Q)$(PANDOC_CMD) $(PANDOC_OPTS) --template=$(PANDOC_TEMPLATE) -o $@ $<
-
-# Generate PDF from processed Markdown using Pandoc
-# include-filter usage is documented in docs/guides/include-filter.md
-$(BUILD_DIR)/%.pdf: %.md | $(BUILD_DIR)
-	$(call status,Generate PDF $@)
-	$(Q)include-filter $(BUILD_DIR) $< $(BUILD_DIR)/$*.1.md
-	$(Q)include-filter $(BUILD_DIR) $(BUILD_DIR)/$*.1.md $(BUILD_DIR)/$*.2.md
-	$(Q)include-filter $(BUILD_DIR) $(BUILD_DIR)/$*.2.md $(BUILD_DIR)/$*.3.md
-	$(Q)$(PANDOC_CMD) \
-$(PANDOC_OPTS_PDF) \
--o $@ \
-$(BUILD_DIR)/$*.3.md
+	$(Q)render-html --template $(HTML_TEMPLATE) $< $@ -c $(BUILD_DIR)/$*.yml
 
 # Clean the build directory by removing all build artifacts
 .PHONY: clean
@@ -198,7 +160,7 @@ clean:
 # Optionally include user dependencies
 -include src/dep.mk
 
-$(BUILD_DIR)/picasso.mk: $(YAMLS) $(FLATFILES) | $(BUILD_DIR)
+$(BUILD_DIR)/picasso.mk: $(YAMLS) | $(BUILD_DIR)
 	$(call status,Generate picasso rules)
 	$(Q)picasso --src $(SRC_DIR) --build $(BUILD_DIR) > $@
 

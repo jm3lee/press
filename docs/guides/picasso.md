@@ -1,8 +1,8 @@
 # picasso Makefile Generator
 
-`picasso` scans the `src/` directory for metadata files (`.yml`, `.yaml`, and
-`.flatfile`) and emits Makefile rules that convert them to HTML using Pandoc.
-The generated rules are written to `build/picasso.mk` and included by the
+`picasso` scans the `src/` directory for metadata files (`.yml` and `.yaml`) and
+emits Makefile rules that render them to HTML using the `render-html` tool. The
+generated rules are written to `build/picasso.mk` and included by the
 `makefile` during the build. Refer to
 [Metadata Fields](../reference/metadata-fields.md) for the supported metadata
 keys.
@@ -15,8 +15,8 @@ Run the command and redirect its output to `build/picasso.mk`:
 picasso > build/picasso.mk
 ```
 
-This happens automatically in the `makefile` whenever any `.yml`, `.yaml`, or
-`.flatfile` file under `src/` changes.
+This happens automatically in the `makefile` whenever any `.yml` or `.yaml`
+file under `src/` changes.
 
 You can override the source or build directories using `--src` and `--build`:
 
@@ -33,29 +33,26 @@ build/index.yml: src/index.yml
     $(call status,Preprocess $<)
     mkdir -p $(dir build/index.yml)
     cp $< $@
-build/index.html: build/index.md build/index.yml $(PANDOC_TEMPLATE) $(BUILD_DIR)/.process-yamls
+build/index.html: build/index.md build/index.yml $(HTML_TEMPLATE) $(BUILD_DIR)/.process-yamls
     $(call status,Generate HTML $@)
-    $(PANDOC_CMD) $(PANDOC_OPTS) --template=$(PANDOC_TEMPLATE) --metadata-file=build/index.yml -o $@ $<
-    check-bad-jinja-output $@
+    render-html --template $(HTML_TEMPLATE) $< $@ -c build/index.yml
 ```
 
 Each metadata file produces similar targets for preprocessing the metadata and
-rendering the final HTML. Flatfiles are converted to YAML before further
-processing.
+rendering the final HTML.
 
-## Custom Pandoc Templates
+## Custom Templates
 
-`picasso` retrieves per-document metadata from Redis. If a document defines
-`pandoc.template`, that template path is added as a dependency and passed to
-Pandoc's `--template` option when rendering. For example:
+`picasso` retrieves per-document metadata from Redis. If a document defines a
+`template` path, that file is added as a dependency and passed via
+`--template` to `render-html` when rendering. For example:
 
 ```yaml
-pandoc:
-  template: src/blog/pandoc-template.html
+template: src/blog/custom-template.html
 ```
 
 This allows different pages to use specialized templates while falling back to
-`$(PANDOC_TEMPLATE)` when no custom template is provided.
+`$(HTML_TEMPLATE)` when no custom template is provided.
 
 The command also inspects Markdown files for cross-document links and any
 `include-filter` Python blocks.  Links added via Jinja globals such as
@@ -65,5 +62,6 @@ additional Makefile rules so that updates to referenced files trigger a rebuild
 of the including document.
 
 If these dependencies form a cycle, `picasso` logs a warning and drops the
-minimum number of rules required to break the loop. The build continues with the
+minimum number of rules required to break the loop. The build continues with
+the
 remaining rules.

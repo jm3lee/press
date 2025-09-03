@@ -7,23 +7,29 @@ documents provide context for the task‑oriented
 ## Contents
 
 - [architecture.md](architecture.md) – overview of the site's architecture.
-- [link-globals.md](link-globals.md) – global Jinja helpers for link formatting.
+- [link-globals.md](link-globals.md) – global Jinja helpers for link
+formatting.
 - [jinja-globals.md](jinja-globals.md) – global variables exposed to templates.
 - [definition.md](definition.md) – render snippets from the `definition` field.
-- [flatfile.md](flatfile.md) – flatfile format and helper functions.
 - [keyterms.md](keyterms.md) – glossary of important terminology.
 - [link-metadata.md](link-metadata.md) – link metadata format and usage.
-- [metadata-fields.md](metadata-fields.md) – description of common metadata fields referenced in
+- [metadata-fields.md](metadata-fields.md) – description of common metadata
+fields referenced in
   [build-index](../guides/build-index.md).
-- [update-author.md](update-author.md) – refresh the `author` field for existing documents.
+- [update-author.md](update-author.md) – refresh the `author` field for
+existing documents.
 - [update-index.md](update-index.md) – insert index values into Redis.
-- [update-pubdate.md](update-pubdate.md) – update the `pubdate` field for modified files.
+- [update-pubdate.md](update-pubdate.md) – update the `pubdate` field for
+modified files.
 - [update-url.md](update-url.md) – rename files and update URL fields.
-- [update-link-filters.md](update-link-filters.md) – convert legacy `link*` filters into globals.
-- [update-metadata.md](update-metadata.md) – merge YAML data into metadata files.
+- [update-link-filters.md](update-link-filters.md) – convert legacy `link*`
+filters into globals.
+- [update-metadata.md](update-metadata.md) – merge YAML data into metadata
+files.
 - [shell.md](shell.md) – run the project's shell service via docker compose.
 - [sitemap.md](sitemap.md) – generate an XML sitemap with absolute URLs.
-- [standalone-bin-scripts.md](standalone-bin-scripts.md) – rationale for self-contained helper scripts.
+- [standalone-bin-scripts.md](standalone-bin-scripts.md) – rationale for self-
+contained helper scripts.
 
 For step‑by‑step workflows and tutorials, head back to the
 [guides](../guides/README.md).

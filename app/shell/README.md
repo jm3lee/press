@@ -5,7 +5,7 @@ environment for Press.
 
 ## Layout
 
-- `Dockerfile` – base image with build tools like Pandoc and Make.
+- `Dockerfile` – base image with build tools like Python and Make.
 - `mk/` – Makefiles executed inside the container.
 - `bin/` – helper scripts invoked during the build.
 - `py/` – Python utilities and their tests.

@@ -50,16 +50,18 @@ This rule produces `build/keyterms/index.json` from `src/keyterms/index.json`.
 {% endfor %}
 ```
 
-3. **Convert to HTML** – Pandoc converts the preprocessed Markdown into `build/keyterms/index.html`:
+3. **Convert to HTML** – `render-html` converts the preprocessed Markdown into
+`build/keyterms/index.html`:
 
 ```
-build/%.html: build/%.md $(PANDOC_TEMPLATE) | build
-    $(PANDOC_CMD) $(PANDOC_OPTS) -o $@ $<
+build/%.html: build/%.md build/%.yml $(HTML_TEMPLATE) | build
+    render-html --template $(HTML_TEMPLATE) $< $@ -c build/$*.yml
 ```
 
 ## Verification
 
-`tests/test_keyterms_in_html.py` ensures that every term ID from the JSON file appears in the generated HTML:
+`tests/test_keyterms_in_html.py` ensures that every term ID from the JSON
+file appears in the generated HTML:
 
 ```python
 json_path = Path('src/keyterms/index.json')
@@ -68,4 +70,5 @@ for key in json.loads(json_path.read_text()):
     assert soup.find(id=key) is not None
 ```
 
-Together, these steps keep the key term definitions synchronized with the HTML page.
+Together, these steps keep the key term definitions synchronized with the HTML
+page.

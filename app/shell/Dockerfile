@@ -6,8 +6,8 @@
 # containers required to build a site.
 # -------------------------------------------------------------------
 
-# Base image: pandoc with extra scripts on Ubuntu
-FROM pandoc/extra:latest-ubuntu
+# Base image: lightweight Python runtime
+FROM python:3.11-slim
 
 # -------------------------------------------------------------------
 # System preparation
@@ -17,6 +17,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -qq && \
     apt-get install -y --no-install-recommends \
         curl \
+        wget \
         git \
         linkchecker \
         locales \
@@ -42,11 +43,10 @@ ENV LANG=en_US.UTF-8 \
     LC_ALL=en_US.UTF-8
 
 # -------------------------------------------------------------------
-# Python filters and backends
+# Python dependencies
+# -------------------------------------------------------------------
 # Copy Press Python libraries into the image. Users can override by mounting
 # /press/py
-# -------------------------------------------------------------------
-# Install library under development.
 COPY ./py/pie /press/py/pie
 
 RUN pip install --no-cache-dir --break-system-packages \

@@ -1,11 +1,12 @@
 # Press
 
-Press is a static-site generator built on Pandoc and Docker, orchestrated with `docker compose` and `redo.mk`.
+Press is a static-site generator built on Python (`commonmark` and `Jinja2`)
+and Docker, orchestrated with `docker compose` and `redo.mk`.
 
 ## Benefits
 
 - Reproducible builds through containerized services and declarative tasks
-- Flexible content formats processed by Pandoc
+- Flexible content formats rendered with commonmark.py and Jinja2
 - Built-in validation keeps pages consistent and free of broken links
 
 ## Key Features
@@ -16,13 +17,15 @@ Press is a static-site generator built on Pandoc and Docker, orchestrated with `
 
 ## Styling
 
-Site styles live under `src/css/` and are compiled with the Python `libsass` library into
-`build/css/`. Edit `src/css/style.css` or add additional files in that
-directory using SCSS syntax to customize the site appearance.
+Site styles live under `src/css/` and are compiled with the Python `libsass`
+library into `build/css/`. Edit `src/css/style.css` or add additional files in
+that directory using SCSS syntax to customize the site appearance.
 
 ## Documentation
 
-All project documentation lives under [docs/](docs/). Start with the [guides](docs/guides/README.md) for step-by-step workflows and see the [reference](docs/reference/README.md) for technical details.
+All project documentation lives under [docs/](docs/). Start with the
+[guides](docs/guides/README.md) for step-by-step workflows and see the
+[reference](docs/reference/README.md) for technical details.
 
 ## Testing
 

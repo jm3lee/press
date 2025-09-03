@@ -1,6 +1,6 @@
 <section>
 Welcome to the future of blogging! This sample article demonstrates the
-`pandoc` blog template included with Press.
+`Jinja` blog template included with Press.
 </section>
 
 <section>

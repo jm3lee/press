@@ -1,0 +1,13 @@
+## {{get_desc("heading-anchor")["anchor"]}} Test Heading
+
+Demonstrates loading a custom anchor from metadata yaml.
+
+```jinja
+{{'{{get_desc("heading-anchor")["anchor"]}}'}}
+```
+
+## Jump
+
+<div style="min-height: 50vh;"></div>
+
+[Test Heading](#test-heading)

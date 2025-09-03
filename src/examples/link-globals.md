@@ -1,16 +1,3 @@
----
-title: Link Global Examples
-author: Brian Lee
-id: link-globals
-citation: link globals
-breadcrumbs:
-  - title: Home
-    url: /
-  - title: Examples
-    url: /examples/
-  - title: Link Global Examples
----
-
 Press provides custom Jinja globals for formatting links. Each example
 shows the template followed by its rendered result. Globals accept either a
 metadata ID string or a dictionary with at least `citation` and `url`.
@@ -86,3 +73,16 @@ The `link` global combines all the others and is the preferred option:
 Output:
 
 {{ link("quickstart") }}
+
+## Metadata
+
+Jinja globals work inside YAML metadata. The `link-globals.yml` file defines
+`summary` with the `link` global:
+
+```yaml
+{% raw %}summary: '{{ link("quickstart") }}'{% endraw %}
+```
+
+Rendered:
+
+{{ get_desc('link-globals')['summary'] }}

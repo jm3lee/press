@@ -51,14 +51,15 @@ container:
    recorded in the `dragonfly` key-value store. Each document's source paths are
    stored under `<id>.path` and each path maps back to its owning ID. The build
    uses this index to resolve cross references and dependency relationships.
-2. **Pre-processing** – Custom filters convert assets before Pandoc sees them.
-   Examples include `preprocess` for macro expansion, YAML normalization, and
-   rules that turn Mermaid diagrams into SVG. Diagram rendering delegates to the
+2. **Pre-processing** – Custom filters convert assets before rendering. Examples
+   include `preprocess` for macro expansion, YAML normalization, and rules that
+   turn Mermaid diagrams into SVG. Diagram rendering delegates to the
    standalone `mermaid` service, which isolates the third-party CLI from core
    images such as `shell`.
-3. **Pandoc rendering** – Pre-processed Markdown is converted to HTML and PDF
-   using a shared template. The command enables table of contents generation,
-   MathJax rendering, and cross-reference resolution.
+3. **Markdown rendering** – Pre-processed Markdown is converted to HTML using a
+   shared template powered by `commonmark.py` and `Jinja2`. Table of contents
+   generation, MathJax rendering, and cross-reference resolution are handled in
+   Python.
 4. **Asset pipeline** – SCSS stylesheets and other static files are compiled or
    copied into `build/`. The default `src/css/style.css` file supports the full
    SCSS syntax and produces `build/css/style.css`. Additional rules from

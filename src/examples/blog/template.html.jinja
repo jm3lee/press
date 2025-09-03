@@ -3,13 +3,41 @@
   <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>$title$</title>
-    $for(meta)$
-    <meta $if(meta.name)$name="$meta.name$"$endif$$if(meta.property)$ property="$meta.property$"$endif$ content="$meta.content$"/>
-    $endfor$
-    $for(css)$
-    <link rel="stylesheet" href="$css$"/>
-    $endfor$
+    <title>{{ title }}</title>
+    {% if description %}
+    <meta name="description" content="{{ description }}" />
+    {% endif %}
+    {% if og_title %}
+    <meta property="og:title" content="{{ og_title }}" />
+    {% else %}
+    <meta property="og:title" content="{{ title }}" />
+    {% endif %}
+    {% if og_description %}
+    <meta property="og:description" content="{{ og_description }}" />
+    {% elif description %}
+    <meta property="og:description" content="{{ description }}" />
+    {% endif %}
+    {% if og_image %}
+    <meta property="og:image" content="{{ og_image }}" />
+    {% endif %}
+    {% if og_url %}
+    <meta property="og:url" content="{{ og_url }}" />
+    {% elif link.canonical %}
+    <meta property="og:url" content="{{ link.canonical }}" />
+    {% endif %}
+    {% if twitter_card %}
+    <meta name="twitter:card" content="{{ twitter_card }}" />
+    {% else %}
+    <meta name="twitter:card" content="summary_large_image" />
+    {% endif %}
+    {% if twitter_image %}
+    <meta name="twitter:image" content="{{ twitter_image }}" />
+    {% elif og_image %}
+    <meta name="twitter:image" content="{{ og_image }}" />
+    {% endif %}
+    {% for css in css %}
+    <link rel="stylesheet" href="{{ css }}"/>
+    {% endfor %}
     <style>
       :root {
         --accent: #d17b0f;
@@ -95,27 +123,27 @@
   <body>
     <article class="blog-post">
       <header class="fade-in">
-        $if(hero_image)$
-        <div class="hero"><img src="$hero_image$" alt=""/></div>
-        $endif$
-        <h1>$title$</h1>
+        {% if hero_image %}
+        <div class="hero"><img src="{{ hero_image }}" alt=""/></div>
+        {% endif %}
+        <h1>{{ title }}</h1>
         <p class="byline">
-          $if(author)$<span class="author">$author$</span>$endif$
-          $if(pubdate)$ • <time datetime="$pubdate$">$pubdate$</time>$endif$
+          {% if author %}<span class="author">{{ author }}</span>{% endif %}
+          {% if pubdate %} • <time datetime="{{ pubdate }}">{{ pubdate }}</time>{% endif %}
         </p>
-        $if(preamble)$<p class="preamble">$preamble$</p>$endif$
+        {% if preamble %}<p class="preamble">{{ preamble | safe }}</p>{% endif %}
       </header>
       <section class="content">
-        $body$
+        {{ content | safe }}
       </section>
       <footer class="fade-in">
         <hr/>
         <p><small>Enjoyed this article? Share it!</small></p>
       </footer>
     </article>
-    $for(header-includes)$
-    $header-includes$
-    $endfor$
+    {% for header_include in header_includes %}
+    {{ header_include | safe }}
+    {% endfor %}
     <script>
       document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.content > section').forEach(el => el.classList.add('fade-in'));

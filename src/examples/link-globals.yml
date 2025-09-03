@@ -1,0 +1,12 @@
+author: Brian Lee
+breadcrumbs:
+- title: Home
+  url: /
+- title: Examples
+  url: /examples/
+- title: Link Global Examples
+citation: link globals
+id: link-globals
+pubdate: Sep 03, 2025
+summary: '{{ link("quickstart") }}'
+title: Link Global Examples
