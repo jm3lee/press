@@ -1,6 +1,5 @@
 from pie.render import html
 
-
 def test_main_renders_file(tmp_path, monkeypatch):
     md = tmp_path / "page.md"
     md.write_text("---\n---\nHi", encoding="utf-8")
@@ -13,3 +12,15 @@ def test_main_renders_file(tmp_path, monkeypatch):
     html.env = html.create_env()
     html.main([str(md), str(out), "--template", "base.html", "--context", str(ctx)])
     assert "bar" in out.read_text(encoding="utf-8")
+
+
+def test_render_page_expands_jinja_before_markdown(tmp_path, monkeypatch):
+    """Jinja in Markdown is rendered before Markdown conversion."""
+    md = tmp_path / "page.md"
+    md.write_text("---\n---\n{{ text }}", encoding="utf-8")
+    tmpl = tmp_path / "base.html"
+    tmpl.write_text("{{ content }}", encoding="utf-8")
+    monkeypatch.setenv("PIE_DATA_DIR", str(tmp_path))
+    html.env = html.create_env()
+    result = html.render_page(md, "base.html", {"text": "**bold**"})
+    assert "<strong>bold</strong>" in result
