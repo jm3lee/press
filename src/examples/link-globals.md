@@ -73,3 +73,16 @@ The `link` global combines all the others and is the preferred option:
 Output:
 
 {{ link("quickstart") }}
+
+## Metadata
+
+Jinja globals work inside YAML metadata. The `link-globals.yml` file defines
+`summary` with the `link` global:
+
+```yaml
+{% raw %}summary: '{{ link("quickstart") }}'{% endraw %}
+```
+
+Rendered:
+
+{{ summary }}

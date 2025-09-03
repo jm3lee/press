@@ -1,17 +1,8 @@
-Welcome to the demo site for **Press**. Use the links below to explore key
-features.
+Welcome to the demo site for **Press**. The examples index below links to
+key features.
 
-- [Blog Demo](examples/blog/index.md)
-- [Breadcrumb Demo](examples/breadcrumbs/index.md)
-- [Chicago Citation Examples](examples/chicago-citations.md)
-- [Index Tree Demo](examples/indextree/index.md)
-- [Jinja Examples](examples/jinja.md)
-- [Link Global Examples](examples/link-globals.md)
-- [Mermaid Diagram Example](examples/mermaid/index.md)
-- [MagicBar Demo](magicbar/index.md)
-- [Quickstart](quickstart.md)
-- [Quiz Demo](quiz/index.md)
-- [Responsive Image Examples](examples/responsive-images.md)
+<div class="indextree-root" data-src="/static/index/examples.json"></div>
+<script type="module" src="/static/js/indextree.js" defer></script>
 
 ## Emoji Replacement
 
