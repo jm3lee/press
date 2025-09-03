@@ -84,7 +84,7 @@ def _raise_processing_error(path: Path, exc: Exception) -> None:
             line = getattr(getattr(exc, "context_mark", None), "line", None)
         if line is not None:
             kwargs["line"] = line + 1
-    logger.error("Failed to process YAML", **kwargs)
+    logger.error("Failed to process YAML", exc=exc, **kwargs)
     raise SystemExit(1) from exc
 
 
