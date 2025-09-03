@@ -37,7 +37,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "src/index.yml": "index.yml.jinja",
         "src/css/style.css": "style.css.jinja",
         # Base HTML template used by render-html
-        "src/template.html.jinja": "template.html.jinja",
+        "src/templates/template.html.jinja": "template.html.jinja",
         "src/dep.mk": "dep.mk.jinja",
         "src/robots.txt": "robots.txt.jinja",
         "README.md": "README.md.jinja",

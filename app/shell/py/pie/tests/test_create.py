@@ -32,7 +32,7 @@ def test_create_scaffolding(tmp_path: Path) -> None:
     assert (target / "redo.mk").exists()
 
     assert (target / "src/css/style.css").exists()
-    template = target / "src/template.html.jinja"
+    template = target / "src/templates/template.html.jinja"
     assert template.exists()
     assert not (target / "src/template.html").exists()
 

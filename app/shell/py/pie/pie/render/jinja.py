@@ -482,7 +482,9 @@ def create_env():
     env.globals["read_yaml"] = read_yaml
     env.globals["cite"] = cite
     try:
-        env.globals["anchor"] = env.get_template("templates/anchor.jinja").module.anchor
+        env.globals["anchor"] = env.get_template(
+            "src/templates/anchor.jinja"
+        ).module.anchor
     except TemplateNotFound:
         logger.warning("Missing anchor.jinja template")
     return env
