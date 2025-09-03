@@ -7,7 +7,8 @@ file.  Available helper functions include ``include()`` for inserting other
 Markdown files and ``mermaid()`` for converting Mermaid diagrams to images.
 
 Links that end with ``.md`` are rewritten to ``.html`` so the output can be fed
-directly to Pandoc.  The command is primarily driven via ``preprocess`` and the
+directly to downstream rendering.  The command is primarily driven via
+``preprocess`` and the
 repository root ``makefile``.
 """
 
@@ -207,7 +208,7 @@ def main(argv: list[str] | None = None) -> None:
 
     ``include-filter`` is primarily used by the build scripts.  It executes any
     ``python`` fenced blocks in the input and writes the resulting Markdown to
-    ``outfile``.  Links ending in ``.md`` are rewritten so that Pandoc can
+    ``outfile``.  Links ending in ``.md`` are rewritten so the renderer can
     convert the file directly to HTML.
     """
 

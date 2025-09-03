@@ -1,10 +1,10 @@
 # Architecture
 
 ## Overview
-Press is a static-site generator that wraps Pandoc tooling in a
+Press is a static-site generator that wraps Markdown tooling in a
 containerized build and runtime environment. Docker Compose services and
-Makefiles coordinate building Markdown content into HTML or PDF and
-serving the generated site.
+Makefiles coordinate building Markdown content into HTML and serving the
+generated site.
 
 ## Repository Layout
 - `app/` – Dockerfiles, Docker Compose templates, and build scripts used
