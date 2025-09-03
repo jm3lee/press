@@ -1,6 +1,6 @@
 # preprocess Script
 
-`preprocess` prepares Markdown files for Pandoc. It expands includes, renders
+`preprocess` prepares Markdown files for rendering. It expands includes,
 internal links, and emojifies the text. The output mirrors the directory
 structure under `build/` so that `src/foo/bar.md` becomes
 `build/foo/bar.md`.
@@ -30,5 +30,5 @@ build/%.md: %.md | build
 ```
 
 Running `preprocess src/guide/intro.md` will create
-`build/guide/intro.md` ready for Pandoc.
+`build/guide/intro.md` ready for rendering.
 

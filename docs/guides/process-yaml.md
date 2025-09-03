@@ -41,4 +41,4 @@ $(BUILD_DIR)/.process-yamls: $(BUILD_YAMLS)
 ```
 
 Running the script ensures each document has a complete metadata block so
-Pandoc and other tools can rely on fields like `id` or `citation`.
+rendering tools can rely on fields like `id` or `citation`.
