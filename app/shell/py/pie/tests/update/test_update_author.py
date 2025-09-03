@@ -14,6 +14,26 @@ yaml.default_flow_style = False
 from pie.update import author as update_author
 
 
+def test_load_default_author_missing_file(tmp_path: Path) -> None:
+    """Returns empty string when config file is absent."""
+    path = tmp_path / "no-such.yml"
+    assert update_author.load_default_author(path) == ""
+
+
+def test_load_default_author_string(tmp_path: Path) -> None:
+    """String value from config is returned."""
+    cfg = tmp_path / "update-author.yml"
+    cfg.write_text("Brian Lee\n", encoding="utf-8")
+    assert update_author.load_default_author(cfg) == "Brian Lee"
+
+
+def test_load_default_author_other(tmp_path: Path) -> None:
+    """Unsupported config types yield empty string."""
+    cfg = tmp_path / "update-author.yml"
+    cfg.write_text("- 1\n- 2\n", encoding="utf-8")
+    assert update_author.load_default_author(cfg) == ""
+
+
 def test_updates_yaml_from_markdown_change(tmp_path: Path, monkeypatch, capsys) -> None:
     """Changing Markdown updates author in paired YAML."""
     src = tmp_path / "src"
