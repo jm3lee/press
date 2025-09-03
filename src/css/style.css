@@ -3,6 +3,10 @@
  * Defines styles for quiz components and utility classes.
  */
 
+:root {
+    --font-base: var(--bs-body-font-family);
+}
+
 /* Layout */
 body {
   margin: 0;
