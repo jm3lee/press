@@ -37,7 +37,6 @@ setup(
             'indextree-json=pie.indextree_json:main',
             'nginx-permalinks=pie.nginx_permalinks:main',
             'picasso=pie.build.picasso:main',
-            'remove-name=pie.update.remove_name:main',
             'render-html=pie.render.html:main',
             'render-jinja-template=pie.render.jinja:main',
             'render-study-json=pie.render_study_json:main',
