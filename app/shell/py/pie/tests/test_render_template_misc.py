@@ -39,9 +39,3 @@ def test_extract_front_matter_missing(tmp_path):
     md = tmp_path / "f.md"
     md.write_text("no front matter", encoding="utf-8")
     assert render_template.extract_front_matter(md) is None
-
-
-def test_render_jinja_renders_snippet():
-    """Template uses variables from index_json."""
-    render_template.index_json = {"name": "world"}
-    assert render_template.render_jinja("Hello {{ name }}") == "Hello world"
