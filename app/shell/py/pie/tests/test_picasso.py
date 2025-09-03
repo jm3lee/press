@@ -25,6 +25,7 @@ def test_generate_rule_basic(tmp_path, monkeypatch):
         "\t$(Q)check-bad-jinja-output $@"
     )
     assert rule == expected
+    assert "render-html" in rule
 
 
 
@@ -54,6 +55,7 @@ def test_generate_rule_with_template(tmp_path, monkeypatch):
         "\t$(Q)check-bad-jinja-output $@"
     )
     assert rule == expected
+    assert "render-html" in rule
 
 
 def test_main_prints_rules(tmp_path, capsys, monkeypatch):
