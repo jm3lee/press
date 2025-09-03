@@ -7,6 +7,6 @@ breadcrumbs:
 - title: Link Global Examples
 citation: link globals
 id: link-globals
-pubdate: Sep 02, 2025
-title: Link Global Examples
+pubdate: Sep 03, 2025
 summary: '{{ link("quickstart") }}'
+title: Link Global Examples

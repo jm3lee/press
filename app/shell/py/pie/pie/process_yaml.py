@@ -92,7 +92,7 @@ def _process_path(path: Path) -> tuple[dict | None, dict | None, str | None, str
     """Return metadata and intermediate values for ``path``."""
     if path.exists():
         text = path.read_text(encoding="utf-8")
-        rendered = render_jinja.render_jinja(text)
+        rendered = text
         existing = yaml.load(rendered)
         metadata = copy.deepcopy(existing) if existing is not None else None
     else:
