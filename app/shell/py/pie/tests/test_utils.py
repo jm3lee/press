@@ -4,10 +4,13 @@ from pie import utils
 
 
 def test_write_json_roundtrip(tmp_path):
-    data = {"name": "pie", "value": 42}
+    data = {"name": "π", "value": 42}
     path = tmp_path / "data.json"
     utils.write_json(data, str(path))
     assert utils.read_json(str(path)) == data
+    text = path.read_text(encoding="utf-8")
+    assert "π" in text
+    assert "\\u03c0" not in text
 
 
 def test_write_utf8_roundtrip(tmp_path):
