@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 from io import StringIO
 
-from ruamel.yaml import YAML
+from ruamel.yaml import YAML, YAMLError
 from jinja2 import TemplateSyntaxError
 
 yaml = YAML(typ="safe")
@@ -106,9 +106,11 @@ def test_main_reports_yaml_line(tmp_path, monkeypatch) -> None:
         process_yaml.main([str(path)])
 
     assert excinfo.value.code == 1
-    assert errors == [
-        ("Failed to process YAML", {"filename": str(path), "line": 2})
-    ]
+    assert errors[0][0] == "Failed to process YAML"
+    info = errors[0][1]
+    assert info["filename"] == str(path)
+    assert info["line"] == 2
+    assert isinstance(info["exc"], YAMLError)
 
 
 def test_main_reports_jinja_line_macro_and_template(tmp_path, monkeypatch) -> None:
@@ -134,17 +136,13 @@ def test_main_reports_jinja_line_macro_and_template(tmp_path, monkeypatch) -> No
         process_yaml.main([str(path)])
 
     assert excinfo.value.code == 1
-    assert errors == [
-        (
-            "Failed to process YAML",
-            {
-                "filename": str(path),
-                "line": 3,
-                "macro": "foo",
-                "template": "{{ bad syntax }}",
-            },
-        )
-    ]
+    assert errors[0][0] == "Failed to process YAML"
+    info = errors[0][1]
+    assert info["filename"] == str(path)
+    assert info["line"] == 3
+    assert info["macro"] == "foo"
+    assert info["template"] == "{{ bad syntax }}"
+    assert isinstance(info["exc"], TemplateSyntaxError)
 
 
 def test_main_skips_write_when_unchanged(tmp_path, monkeypatch) -> None:
