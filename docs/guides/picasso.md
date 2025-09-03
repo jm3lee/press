@@ -36,7 +36,6 @@ build/index.yml: src/index.yml
 build/index.html: build/index.md build/index.yml $(HTML_TEMPLATE) $(BUILD_DIR)/.process-yamls
     $(call status,Generate HTML $@)
     render-html --template $(HTML_TEMPLATE) $< $@ -c build/index.yml
-    check-bad-jinja-output $@
 ```
 
 Each metadata file produces similar targets for preprocessing the metadata and
