@@ -430,31 +430,8 @@ def get_desc(name):
 
 def render_jinja(snippet):
     """Render a Jinja snippet using the current environment."""
-    try:
-        return env.from_string(snippet).render(**index_json)
-    except TemplateSyntaxError as exc:
-        line = ""
-        if exc.lineno is not None and isinstance(snippet, str):
-            lines = snippet.splitlines()
-            if 0 < exc.lineno <= len(lines):
-                line = lines[exc.lineno - 1].strip()
-        logger.error(
-            "Template syntax error",
-            lineno=exc.lineno,
-            line=line,
-        )
-        raise
-    except TypeError as exc:
-        if isinstance(snippet, str):
-            for lineno, line in enumerate(snippet.splitlines(), start=1):
-                logger.error("{lineno}: {line}", lineno=lineno, line=line)
-        else:
-            logger.error(
-                "Non-string snippet",
-                type=type(snippet).__name__,
-                snippet=snippet,
-            )
-        raise
+    logger.debug("", snippet=snippet)
+    return env.from_string(snippet).render(**index_json)
 
 def to_alpha_index(i):
     """Convert ``0``–``3`` to ``a``–``d``."""
@@ -506,7 +483,7 @@ def create_env():
     env.globals["read_yaml"] = read_yaml
     env.globals["cite"] = cite
     try:
-        env.globals["anchor"] = env.get_template("anchor.jinja").module.anchor
+        env.globals["anchor"] = env.get_template("templates/anchor.jinja").module.anchor
     except TemplateNotFound:
         logger.warning("Missing anchor.jinja template")
     return env

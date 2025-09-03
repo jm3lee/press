@@ -1,0 +1,13 @@
+author: Brian Lee
+breadcrumbs:
+- title: Home
+  url: /
+- title: Examples
+  url: /examples/
+- title: Anchor
+  url: /examples/anchor/
+- title: Index
+id: anchor
+pubdate: Sep 03, 2025
+test-anchor: '{{ anchor("test-anchor") }}'
+title: Anchor Example
