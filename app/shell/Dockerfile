@@ -45,7 +45,7 @@ ENV LANG=en_US.UTF-8 \
 # Python dependencies
 # -------------------------------------------------------------------
 RUN pip install --no-cache-dir --break-system-packages \
-        markdown2 \
+        commonmark \
         jinja2
 
 # Copy Press Python libraries into the image. Users can override by mounting

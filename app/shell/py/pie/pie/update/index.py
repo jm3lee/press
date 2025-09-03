@@ -56,9 +56,10 @@ def flatten_index(index: Mapping[str, Mapping[str, Any]]) -> Iterable[tuple[str,
     """
 
     for doc_id, props in index.items():
+        paths = props.pop("path", None)
         yield from _walk(doc_id, props)
-        paths = props.get("path")
         if isinstance(paths, list):
+            yield f"{doc_id}.path", json.dumps(paths)
             sha1_map: dict[str, str] = {}
             for p in paths:
                 try:
@@ -70,6 +71,7 @@ def flatten_index(index: Mapping[str, Mapping[str, Any]]) -> Iterable[tuple[str,
                 except FileNotFoundError:
                     logger.warning("Source file missing", path=p)
             if sha1_map:
+                yield f"{doc_id}.sha1", json.dumps(sha1_map)
                 yield from _flatten_mapping(f"{doc_id}.sha1", sha1_map)
 
 
