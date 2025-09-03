@@ -57,7 +57,7 @@ container:
    standalone `mermaid` service, which isolates the third-party CLI from core
    images such as `shell`.
 3. **Markdown rendering** – Pre-processed Markdown is converted to HTML using a
-   shared template powered by `markdown2` and `Jinja2`. Table of contents
+   shared template powered by `commonmark.py` and `Jinja2`. Table of contents
    generation, MathJax rendering, and cross-reference resolution are handled in
    Python.
 4. **Asset pipeline** – SCSS stylesheets and other static files are compiled or

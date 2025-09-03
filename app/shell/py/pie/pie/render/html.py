@@ -5,7 +5,7 @@
 The module exposes :func:`render_page` and a small CLI used by the
 ``render-html`` console script. The Markdown source may include YAML front
 matter which is merged into the Jinja context before rendering. The Markdown
-is converted using :mod:`markdown2` with a set of extras to match behaviour
+is converted using :mod:`commonmark` and post-processed to match behaviour
 used across the press tooling.
 """
 
@@ -16,7 +16,8 @@ import re
 from pathlib import Path
 from typing import Any, Mapping
 
-from markdown2 import Markdown
+import commonmark
+from bs4 import BeautifulSoup
 
 from pie.cli import create_parser
 from pie.logging import configure_logging
@@ -24,19 +25,6 @@ from pie.utils import read_utf8, write_utf8
 from pie.yaml import yaml, read_yaml as load_yaml_file
 from .jinja import create_env
 
-MARKDOWN_EXTRAS = [
-    "fenced-code-blocks",
-    "tables",
-    "strike",
-    "footnotes",
-    "header-ids",
-    "smarty-pants",
-    "task_list",
-    "code-friendly",
-    "markdown-in-html",
-]
-
-_markdown = Markdown(extras=MARKDOWN_EXTRAS)
 _front_matter_re = re.compile(r"^---\n(.*?)\n---\n(.*)", re.DOTALL)
 
 env = create_env()
@@ -72,7 +60,8 @@ def render_page(
     metadata, md_text = _parse_markdown(markdown_path)
     ctx = dict(context or {})
     ctx.update(metadata)
-    ctx["content"] = _markdown.convert(md_text)
+    html = commonmark.commonmark(md_text)
+    ctx["content"] = html
     tmpl = env.get_template(template)
     return tmpl.render(**ctx)
 
