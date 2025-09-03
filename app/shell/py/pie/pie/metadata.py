@@ -169,9 +169,11 @@ def generate_missing_metadata(
     _add_empty_if_missing(metadata, 'preamble', filepath)
     _add_empty_if_missing(metadata, 'prev', filepath)
     _add_empty_if_missing(metadata, 'status', filepath)
+    _add_empty_if_missing(metadata, 'toc', filepath)
     _add_empty_if_missing(metadata, 'twitter_card', filepath)
     _add_empty_if_missing(metadata, 'twitter_image', filepath)
-    _add_if_missing(metadata, 'css', '/style.css', filepath)
+    _add_empty_if_missing(metadata, 'pubdate', filepath)
+    _add_if_missing(metadata, 'css', ['/css/style.css'], filepath)
     _add_if_missing(metadata, 'header', {'header':None}, filepath)
     _add_if_missing(metadata, 'header_includes', [], filepath)
     return metadata

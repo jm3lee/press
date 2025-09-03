@@ -4,9 +4,37 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>{{ title }}</title>
-    {% for meta in meta %}
-    <meta {% if meta.name %}name="{{ meta.name }}"{% endif %}{% if meta.property %} property="{{ meta.property }}"{% endif %} content="{{ meta.content }}"/>
-    {% endfor %}
+    {% if description %}
+    <meta name="description" content="{{ description }}" />
+    {% endif %}
+    {% if og_title %}
+    <meta property="og:title" content="{{ og_title }}" />
+    {% else %}
+    <meta property="og:title" content="{{ title }}" />
+    {% endif %}
+    {% if og_description %}
+    <meta property="og:description" content="{{ og_description }}" />
+    {% elif description %}
+    <meta property="og:description" content="{{ description }}" />
+    {% endif %}
+    {% if og_image %}
+    <meta property="og:image" content="{{ og_image }}" />
+    {% endif %}
+    {% if og_url %}
+    <meta property="og:url" content="{{ og_url }}" />
+    {% elif link.canonical %}
+    <meta property="og:url" content="{{ link.canonical }}" />
+    {% endif %}
+    {% if twitter_card %}
+    <meta name="twitter:card" content="{{ twitter_card }}" />
+    {% else %}
+    <meta name="twitter:card" content="summary_large_image" />
+    {% endif %}
+    {% if twitter_image %}
+    <meta name="twitter:image" content="{{ twitter_image }}" />
+    {% elif og_image %}
+    <meta name="twitter:image" content="{{ og_image }}" />
+    {% endif %}
     {% for css in css %}
     <link rel="stylesheet" href="{{ css }}"/>
     {% endfor %}
