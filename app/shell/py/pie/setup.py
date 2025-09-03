@@ -19,7 +19,6 @@ setup(
         'console_scripts': [
             'build-index=pie.build_index:main',
             'check-author=pie.check.author:main',
-            'check-bad-jinja-output=pie.check.bad_jinja_output:main',
             'check-bad-mathjax=pie.check.bad_mathjax:main',
             'check-breadcrumbs=pie.check.breadcrumbs:main',
             'check-canonical=pie.check.canonical:main',
