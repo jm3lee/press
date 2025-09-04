@@ -4,9 +4,9 @@
 
 The module exposes :func:`render_page` and a small CLI used by the
 ``render-html`` console script. The Markdown source may include YAML front
-matter which is merged into the Jinja context before rendering. The Markdown
-is converted using :mod:`commonmark` and post-processed to match behaviour
-used across the press tooling.
+matter which is merged into the Jinja context before rendering. Markdown is
+converted using the :mod:`cmarkgfm` library which supports GitHub Flavored
+Markdown, including tables, to match behaviour used across the press tooling.
 """
 
 from __future__ import annotations
@@ -16,8 +16,7 @@ import re
 from pathlib import Path
 from typing import Any, Mapping
 
-import commonmark
-from bs4 import BeautifulSoup
+import cmarkgfm
 
 from pie.cli import create_parser
 from pie.logging import configure_logging
@@ -60,8 +59,10 @@ def render_page(
     metadata, md_text = _parse_markdown(markdown_path)
     ctx = dict(context or {})
     ctx.update(metadata)
-    html = commonmark.commonmark(render_jinja(md_text))
-    ctx["content"] = html
+    html_text = cmarkgfm.github_flavored_markdown_to_html(
+        render_jinja(md_text)
+    )
+    ctx["content"] = html_text
     tmpl = env.get_template(template)
     return tmpl.render(**ctx)
 
