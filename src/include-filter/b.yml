@@ -1,8 +1,9 @@
-author: Brian Lee
 breadcrumbs:
-  - title: Home
-    url: /
-  - title: include-filter
-    url: /include-filter/
-  - title: b
+- title: Home
+  url: /
+- title: include-filter
+  url: /include-filter/
+- title: b
+doc:
+  author: Brian Lee
 title: b

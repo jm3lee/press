@@ -1,8 +1,9 @@
-title: Quiz
-id: quiz
-author: Brian Lee
-pubdate: Aug 12, 2025
 breadcrumbs:
-  - title: Home
-    url: /
-  - title: Quiz
+- title: Home
+  url: /
+- title: Quiz
+doc:
+  author: Brian Lee
+  pubdate: Aug 12, 2025
+id: quiz
+title: Quiz

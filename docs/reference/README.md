@@ -17,11 +17,13 @@ formatting.
 - [metadata-fields.md](metadata-fields.md) – description of common metadata
 fields referenced in
   [build-index](../guides/build-index.md).
-- [update-author.md](update-author.md) – refresh the `author` field for
+- [update-author.md](update-author.md) – refresh the `doc.author` field for
 existing documents.
 - [update-index.md](update-index.md) – insert index values into Redis.
-- [update-pubdate.md](update-pubdate.md) – update the `pubdate` field for
+- [update-pubdate.md](update-pubdate.md) – update the `doc.pubdate` field for
 modified files.
+- [migrate-metadata.md](migrate-metadata.md) – move legacy fields under
+  `doc`.
 - [update-url.md](update-url.md) – rename files and update URL fields.
 - [update-link-filters.md](update-link-filters.md) – convert legacy `link*`
 filters into globals.

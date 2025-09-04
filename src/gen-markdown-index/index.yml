@@ -1,11 +1,12 @@
-title: gen-markdown-index
+breadcrumbs:
+- title: Home
+  url: /
+- title: gen-markdown-index
+doc:
+  author: Brian Lee
+  pubdate: Aug 12, 2025
 id: dist_gen_markdown_index
 indextree:
   link: false
   show: true
-author: Brian Lee
-pubdate: Aug 12, 2025
-breadcrumbs:
-  - title: Home
-    url: /
-  - title: gen-markdown-index
+title: gen-markdown-index

@@ -16,8 +16,10 @@ Each processed file is:
 
 1. Assigned a random identifier.
 2. Moved to `s3/v2/files/0/<id>`.
-3. Given a YAML metadata file at `src/static/files/<id>.yml` rendered from the `metadata.yml.jinja` template containing
-   `id`, `author`, `pubdate`, and `url` fields. The `url` is built from `{baseurl}/v2/files/0/{file_id}` where `baseurl` comes
-   from the configuration file (defaulting to an empty string).
+3. Given a YAML metadata file at `src/static/files/<id>.yml` rendered from the
+   `metadata.yml.jinja` template containing `id`, `doc.author`, `doc.pubdate`,
+   and `url` fields. The `url` is built from `{baseurl}/v2/files/0/{file_id}`
+   where `baseurl` comes from the configuration file (defaulting to an empty
+   string).
 
 Progress information is logged to the console and can be redirected using the standard `--log` option.

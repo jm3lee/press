@@ -1,0 +1,12 @@
+breadcrumbs:
+- title: Home
+  url: /
+- title: Examples
+  url: /examples/
+- title: Custom Template
+citation: custom template
+doc:
+  author: Brian Lee
+  pubdate: Sep 06, 2025
+id: custom_template
+title: Custom Template

@@ -21,7 +21,7 @@ def test_generate_rule_basic(tmp_path, monkeypatch):
         "\t$(Q)cp $< $@\n"
         "build/foo/bar.html: build/foo/bar.md build/foo/bar.yml $(HTML_TEMPLATE) $(BUILD_DIR)/.process-yamls\n"
         "\t$(call status,Generate HTML $@)\n"
-        "\t$(Q)render-html --template $(HTML_TEMPLATE) $< $@ -c build/foo/bar.yml"
+        "\t$(Q)render-html build/foo/bar.md build/foo/bar.yml $@"
     )
     assert rule == expected
     assert "render-html" in rule
@@ -50,7 +50,7 @@ def test_generate_rule_with_template(tmp_path, monkeypatch):
         "\t$(Q)cp $< $@\n"
         "build/foo/bar.html: build/foo/bar.md build/foo/bar.yml src/templates/blog/template.html.jinja $(BUILD_DIR)/.process-yamls\n"
         "\t$(call status,Generate HTML $@)\n"
-        "\t$(Q)render-html --template src/templates/blog/template.html.jinja $< $@ -c build/foo/bar.yml"
+        "\t$(Q)render-html build/foo/bar.md build/foo/bar.yml $@"
     )
     assert rule == expected
     assert "render-html" in rule

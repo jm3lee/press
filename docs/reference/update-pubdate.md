@@ -1,10 +1,10 @@
 # update-pubdate
 
-Update the `pubdate` field in metadata files for documents modified in git.
+Update the `doc.pubdate` field in metadata files for documents modified in git.
 
 The console script scans `git status --short` for tracked files that have been
 added or changed. For each path it locates the associated Markdown and YAML
-metadata pair using `load_metadata_pair` and ensures the `pubdate` field is
+metadata pair using `load_metadata_pair` and ensures the `doc.pubdate` field is
 present. When a metadata YAML file exists, the field is added or updated there
 and the Markdown file is left untouched. When the field is missing it is added,
 and metadata is created if none exists, using today's date in the format
@@ -30,5 +30,5 @@ keys in alphabetical order.
 When finished, the script reports how many files were checked and how many were
 updated.
 
-If a file under `src` is modified but no `pubdate` field can be updated, a
+If a file under `src` is modified but no `doc.pubdate` field can be updated, a
 warning is logged.

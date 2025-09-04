@@ -4,8 +4,9 @@ Several build scripts provide custom Jinja globals that convert metadata
 descriptions into HTML anchors. Each dictionary is pulled from
 `index.json` and must include a `citation` field which supplies the anchor
 text, along with a `url` field. Optional keys like `icon`,
-`link.tracking`, and `link.class` customize the output.  For an overview of
-these metadata fields, see [Metadata Fields](metadata-fields.md).
+`doc.link.tracking`, and `doc.link.class` customize the output. For an
+overview of these metadata fields, see
+[Metadata Fields](metadata-fields.md).
 
 ## `link`
 
@@ -64,7 +65,7 @@ aborting so templates are more resilient when entries are added concurrently.
 
 ### Link tracking
 
-Metadata may include a nested `link.tracking` field to control referral
+Metadata may include a nested `doc.link.tracking` field to control referral
 behaviour. When this value is `false` the rendered anchor receives `rel` and
 `target` attributes so the link opens in a new tab without sending referrer
 information. Omitting the field or setting it to `true` leaves these
@@ -74,7 +75,7 @@ Example:
 
 ```jinja
 {{ link({"citation": "press.io", "url": "https://press.io",
-         "link": {"tracking": false}}) }}
+         "doc": {"link": {"tracking": false}}}) }}
 ```
 
 renders as:

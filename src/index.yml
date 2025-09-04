@@ -1,10 +1,13 @@
-author: Brian Lee
 breadcrumbs:
 - title: Home
 description: Example home page
+doc:
+  author: Brian Lee
+  pubdate: Sep 06, 2025
 id: home
+indextree:
+  include-js: true
 og_image: /img/home.png
-pubdate: Sep 02, 2025
 title: Home
 toc: false
 url: /

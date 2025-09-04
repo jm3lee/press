@@ -13,7 +13,7 @@ It follows the structure used in
    - `citation` – text used when citing the book.
    - `url` – base URL, e.g. `/books/hull-2016/`.
    - `id` – unique identifier using underscores, e.g. `hull_2016`.
-   - `author`, `pubdate`, `description`.
+   - `doc.author`, `doc.pubdate`, `description`.
 
 See the [metadata reference](../reference/metadata-fields.md) for field
 definitions.
@@ -44,8 +44,9 @@ definitions.
    description: 'Brief plain text summary.'
    id: book_page
    partof: '{{linktitle("<slug>")}}'
-   author: Your Name
-   pubdate: Jun 1, 2024
+   doc:
+     author: Your Name
+     pubdate: Jun 1, 2024
    ```
 
 3. Follow the metadata with Markdown content. Wrap paragraphs at 80 columns.

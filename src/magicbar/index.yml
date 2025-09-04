@@ -1,8 +1,9 @@
-title: MagicBar Demo
-id: magicbar
-author: Brian Lee
-pubdate: Jan 1, 2025
 breadcrumbs:
-  - title: Home
-    url: /
-  - title: MagicBar Demo
+- title: Home
+  url: /
+- title: MagicBar Demo
+doc:
+  author: Brian Lee
+  pubdate: Jan 1, 2025
+id: magicbar
+title: MagicBar Demo
