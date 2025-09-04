@@ -13,6 +13,7 @@ formatting.
 - [definition.md](definition.md) – render snippets from the `definition` field.
 - [keyterms.md](keyterms.md) – glossary of important terminology.
 - [link-metadata.md](link-metadata.md) – link metadata format and usage.
+- [logging.md](logging.md) – centralized logging helpers and configuration.
 - [metadata-fields.md](metadata-fields.md) – description of common metadata
 fields referenced in
   [build-index](../guides/build-index.md).
