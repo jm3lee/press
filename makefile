@@ -43,7 +43,7 @@ LOG_DIR   := log
 CFG_DIR   := cfg
 
 # Default template used by render-html
-HTML_TEMPLATE := $(SRC_DIR)/template.html.jinja
+HTML_TEMPLATE := $(SRC_DIR)/templates/template.html.jinja
 
 # Command for minifying HTML files
 MINIFY_CMD := minify
