@@ -30,3 +30,14 @@ def test_main_renders_table(tmp_path, monkeypatch):
     text = out.read_text(encoding="utf-8")
     assert "<table>" in text
     assert "<td>1</td>" in text
+
+
+def test_render_page_allows_raw_html(tmp_path, monkeypatch):
+    md = tmp_path / "raw.md"
+    md.write_text("---\n---\n<div>raw</div>", encoding="utf-8")
+    tmpl = tmp_path / "base.html"
+    tmpl.write_text("{{ content }}", encoding="utf-8")
+    monkeypatch.setenv("PIE_DATA_DIR", str(tmp_path))
+    html.env = html.create_env()
+    rendered = html.render_page(md, "base.html")
+    assert "<div>raw</div>" in rendered

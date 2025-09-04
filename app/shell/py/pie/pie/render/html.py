@@ -60,7 +60,8 @@ def render_page(
     ctx = dict(context or {})
     ctx.update(metadata)
     html_text = cmarkgfm.github_flavored_markdown_to_html(
-        render_jinja(md_text)
+        render_jinja(md_text),
+        options=cmarkgfm.Options.CMARK_OPT_UNSAFE,
     )
     ctx["content"] = html_text
     tmpl = env.get_template(template)
