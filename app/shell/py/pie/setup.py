@@ -4,7 +4,7 @@ setup(
     name="pie",
     version="0.1.0",
     packages=find_packages(),
-    install_requires=["emoji", "commonmark"],
+    install_requires=["emoji", "markdown"],
     author="Brian Lee",
     author_email="",
     description="",
