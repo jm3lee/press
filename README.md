@@ -1,12 +1,12 @@
 # Press
 
-Press is a static-site generator built on Python (`commonmark` and `Jinja2`)
+Press is a static-site generator built on Python (`cmarkgfm` and `Jinja2`)
 and Docker, orchestrated with `docker compose` and `redo.mk`.
 
 ## Benefits
 
 - Reproducible builds through containerized services and declarative tasks
-- Flexible content formats rendered with commonmark.py and Jinja2
+- Flexible content formats rendered with cmarkgfm and Jinja2
 - Built-in validation keeps pages consistent and free of broken links
 
 ## Key Features
