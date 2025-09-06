@@ -1,7 +1,10 @@
 <!doctype html>
 <html lang="en">
   <body>
-      {% block body %}
-      {% endblock %}
+      {% filter md %}
+          {% block body %}
+          {% endblock %}
+      {% endfilter %}
+<script type="module" src="/static/js/indextree.js" defer></script>
   </body>
 </html>

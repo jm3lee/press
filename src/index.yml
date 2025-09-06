@@ -8,3 +8,5 @@ pubdate: Sep 02, 2025
 title: Home
 toc: false
 url: /
+indextree:
+  include-js: True

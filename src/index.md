@@ -5,7 +5,6 @@ Welcome to the demo site for **Press**. The examples index below links to
 key features.
 
 <div class="indextree-root" data-src="/static/index/examples.json"></div>
-<script type="module" src="/static/js/indextree.js" defer></script>
 
 {{ link("home") }}
 

@@ -58,20 +58,8 @@ def render_page(
     metadata, md_text = _parse_markdown(markdown_path)
     ctx = dict(context or {})
     ctx.update(metadata)
-    #html_text = cmarkgfm.github_flavored_markdown_to_html(
-    #    render_jinja(md_text),
-    #    options=cmarkgfm.Options.CMARK_OPT_UNSAFE,
-    #)
-    ## cmarkgfm's tagfilter escapes <script> tags even with CMARK_OPT_UNSAFE.
-    ## Scripts should be added in templates rather than directly in Markdown.
-    #ctx["content"] = html_text
     tmpl = env.get_template(markdown_path)
-    md_text = tmpl.render(**ctx)
-    print(md_text)
-    html_text = cmarkgfm.github_flavored_markdown_to_html(
-        md_text,
-        options=cmarkgfm.Options.CMARK_OPT_UNSAFE,
-    )
+    html_text = tmpl.render(**ctx)
     return html_text
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -81,6 +69,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("markdown", help="Markdown source file")
     parser.add_argument("context")
+    parser.add_argument("output")
     return parser.parse_args(argv)
 
 def main(argv: list[str] | None = None) -> None:
@@ -89,8 +78,7 @@ def main(argv: list[str] | None = None) -> None:
     configure_logging(args.verbose, args.log)
     ctx = load_yaml_file(args.context) if args.context else {}
     rendered = render_page(args.markdown, ctx)
-    #write_utf8(rendered, args.output)
-    print(rendered)
+    write_utf8(rendered, args.output)
 
 if __name__ == "__main__":
     main()

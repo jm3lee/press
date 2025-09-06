@@ -168,4 +168,4 @@ $(BUILD_DIR)/picasso.mk: $(YAMLS) | $(BUILD_DIR)
 include $(BUILD_DIR)/picasso.mk
 
 build/index.html: src/index.md
-	render-html src/index.md src/index.yml
+	render-html src/index.md src/index.yml $@
