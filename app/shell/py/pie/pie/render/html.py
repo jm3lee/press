@@ -63,6 +63,8 @@ def render_page(
         render_jinja(md_text),
         options=cmarkgfm.Options.CMARK_OPT_UNSAFE,
     )
+    # cmarkgfm's tagfilter escapes <script> tags even with CMARK_OPT_UNSAFE.
+    # Scripts should be added in templates rather than directly in Markdown.
     ctx["content"] = html_text
     tmpl = env.get_template(template)
     return tmpl.render(**ctx)
