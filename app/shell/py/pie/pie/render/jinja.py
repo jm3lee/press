@@ -16,8 +16,14 @@ import time
 from pathlib import Path
 
 import cmarkgfm
-from jinja2 import (Environment, FileSystemLoader, StrictUndefined,
-                    TemplateNotFound, TemplateSyntaxError)
+from jinja2 import (
+    Environment,
+    FileSystemLoader,
+    StrictUndefined,
+    TemplateNotFound,
+    TemplateSyntaxError,
+)
+from markupsafe import Markup
 from pie import metadata
 from pie.cli import create_parser
 from pie.logging import configure_logging, logger
@@ -481,10 +487,13 @@ def load_config(path: str | Path = DEFAULT_CONFIG) -> dict:
 
 
 def render_md(text):
-    return cmarkgfm.github_flavored_markdown_to_html(
-        text,
-        options=cmarkgfm.Options.CMARK_OPT_UNSAFE,
+    return Markup(
+        cmarkgfm.github_flavored_markdown_to_html(
+            text,
+            options=cmarkgfm.Options.CMARK_OPT_UNSAFE,
+        )
     )
+
 
 def create_env():
     """Create and configure the Jinja2 environment."""
