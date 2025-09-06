@@ -1,0 +1,12 @@
+author: Brian Lee
+breadcrumbs:
+- title: Home
+  url: /
+- title: Examples
+  url: /examples/
+- title: Custom Template
+citation: custom template
+id: custom_template
+pubdate: Sep 06, 2025
+title: Custom Template
+template: src/examples/custom-template.html

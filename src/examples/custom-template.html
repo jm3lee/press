@@ -1,0 +1,14 @@
+{% extends "templates/template.html.jinja" %}
+{#--
+  Macro: note
+  Demonstrates Jinja macros. Macros behave like functions and emit reusable
+  HTML snippets. This macro prints a styled note before the default content.
+--#}
+{% macro note(text) -%}
+  <p class="note">{{ text }}</p>
+{%- endmacro %}
+
+{% block content %}
+  {{ note("This page uses a custom template.") }}
+  {{ super() }}
+{% endblock %}
