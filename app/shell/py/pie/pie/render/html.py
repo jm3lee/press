@@ -41,7 +41,6 @@ def _parse_markdown(path: str | Path) -> tuple[dict, str]:
 
 def render_page(
     markdown_path: str | Path,
-    template: str,
     context: Mapping[str, Any] | None = None,
 ) -> str:
     """Return HTML by rendering *markdown_path* into *template*.
@@ -59,15 +58,21 @@ def render_page(
     metadata, md_text = _parse_markdown(markdown_path)
     ctx = dict(context or {})
     ctx.update(metadata)
+    #html_text = cmarkgfm.github_flavored_markdown_to_html(
+    #    render_jinja(md_text),
+    #    options=cmarkgfm.Options.CMARK_OPT_UNSAFE,
+    #)
+    ## cmarkgfm's tagfilter escapes <script> tags even with CMARK_OPT_UNSAFE.
+    ## Scripts should be added in templates rather than directly in Markdown.
+    #ctx["content"] = html_text
+    tmpl = env.get_template(markdown_path)
+    md_text = tmpl.render(**ctx)
+    print(md_text)
     html_text = cmarkgfm.github_flavored_markdown_to_html(
-        render_jinja(md_text),
+        md_text,
         options=cmarkgfm.Options.CMARK_OPT_UNSAFE,
     )
-    # cmarkgfm's tagfilter escapes <script> tags even with CMARK_OPT_UNSAFE.
-    # Scripts should be added in templates rather than directly in Markdown.
-    ctx["content"] = html_text
-    tmpl = env.get_template(template)
-    return tmpl.render(**ctx)
+    return html_text
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
@@ -75,18 +80,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "Render a Markdown file into an HTML template",
     )
     parser.add_argument("markdown", help="Markdown source file")
-    parser.add_argument("output", help="File to write rendered HTML to")
-    parser.add_argument(
-        "--template",
-        "-t",
-        required=True,
-        help="Jinja template file",
-    )
-    parser.add_argument(
-        "-c",
-        "--context",
-        help="Optional YAML file with additional template variables",
-    )
+    parser.add_argument("context")
     return parser.parse_args(argv)
 
 def main(argv: list[str] | None = None) -> None:
@@ -94,8 +88,9 @@ def main(argv: list[str] | None = None) -> None:
     args = parse_args(argv)
     configure_logging(args.verbose, args.log)
     ctx = load_yaml_file(args.context) if args.context else {}
-    rendered = render_page(args.markdown, args.template, ctx)
-    write_utf8(rendered, args.output)
+    rendered = render_page(args.markdown, ctx)
+    #write_utf8(rendered, args.output)
+    print(rendered)
 
 if __name__ == "__main__":
     main()
