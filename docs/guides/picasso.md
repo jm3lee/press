@@ -35,24 +35,11 @@ build/index.yml: src/index.yml
     cp $< $@
 build/index.html: build/index.md build/index.yml $(HTML_TEMPLATE) $(BUILD_DIR)/.process-yamls
     $(call status,Generate HTML $@)
-    render-html --template $(HTML_TEMPLATE) $< $@ -c build/index.yml
+    render-html $< build/index.yml $@
 ```
 
 Each metadata file produces similar targets for preprocessing the metadata and
 rendering the final HTML.
-
-## Custom Templates
-
-`picasso` retrieves per-document metadata from Redis. If a document defines a
-`template` path, that file is added as a dependency and passed via
-`--template` to `render-html` when rendering. For example:
-
-```yaml
-template: src/blog/custom-template.html
-```
-
-This allows different pages to use specialized templates while falling back to
-`$(HTML_TEMPLATE)` when no custom template is provided.
 
 The command also inspects Markdown files for cross-document links and any
 `include-filter` Python blocks.  Links added via Jinja globals such as
@@ -63,5 +50,4 @@ of the including document.
 
 If these dependencies form a cycle, `picasso` logs a warning and drops the
 minimum number of rules required to break the loop. The build continues with
-the
-remaining rules.
+the remaining rules.

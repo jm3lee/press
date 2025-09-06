@@ -19,7 +19,6 @@ missing values are automatically generated.
 - `link.class` – CSS class for rendered links.
 - `link.canonical` – Absolute URL for the page.
 - `name` – **Deprecated.** Former display name used in navigation and indexes.
-- `template` – Optional Jinja template path passed to `render-html`.
 
 ## Auto‑Generated Values
 
