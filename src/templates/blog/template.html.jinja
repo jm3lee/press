@@ -134,7 +134,10 @@
         {% if preamble %}<p class="preamble">{{ preamble | safe }}</p>{% endif %}
       </header>
       <section class="content">
-        {{ content | safe }}
+      {% filter md %}
+          {% block content %}
+          {% endblock %}
+      {% endfilter %}
       </section>
       <footer class="fade-in">
         <hr/>

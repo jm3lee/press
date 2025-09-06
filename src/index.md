@@ -1,6 +1,8 @@
-{% extends "src/templates/template-2.html.jinja" %}
+{% extends "src/templates/template.html.jinja" %}
 
-{% block body %}
+asdf
+
+{% block content %}
 Welcome to the demo site for **Press**. The examples index below links to
 key features.
 

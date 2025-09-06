@@ -181,7 +181,10 @@
       {% endif %}
 
       <!-- Body content generated from Markdown goes here -->
-      {{ content | safe }}
+      {% filter md %}
+          {% block content %}
+          {% endblock %}
+          {% endfilter %}
 
       <!-- prev/next page links -->
       {% if prev %}
@@ -247,6 +250,9 @@
       async
       src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
     ></script>
+    {% endif %}
+    {% if indextree is defined and indextree.get("include-js") %}
+    <script type="module" src="/static/js/indextree.js" defer></script>
     {% endif %}
   </body>
 </html>

@@ -3,10 +3,10 @@ breadcrumbs:
 - title: Home
 description: Example home page
 id: home
+indextree:
+  include-js: true
 og_image: /img/home.png
-pubdate: Sep 02, 2025
+pubdate: Sep 06, 2025
 title: Home
 toc: false
 url: /
-indextree:
-  include-js: True

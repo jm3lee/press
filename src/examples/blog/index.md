@@ -1,3 +1,5 @@
+{% extends "src/templates/blog/template.html.jinja" %}
+{% block content %}
 <section>
 Welcome to the future of blogging! This sample article demonstrates the
 `Jinja` blog template included with Press.
@@ -54,3 +56,4 @@ step getting in the way.
 Share your experiments with the community and keep pushing the template
 forward.
 </section>
+{% endblock %}

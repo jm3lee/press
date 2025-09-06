@@ -166,6 +166,3 @@ $(BUILD_DIR)/picasso.mk: $(YAMLS) | $(BUILD_DIR)
 	$(Q)picasso --src $(SRC_DIR) --build $(BUILD_DIR) > $@
 
 include $(BUILD_DIR)/picasso.mk
-
-build/index.html: src/index.md
-	render-html src/index.md src/index.yml $@
