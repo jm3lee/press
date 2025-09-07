@@ -1,14 +1,14 @@
-schema: v1
 breadcrumbs:
 - title: Home
 description: Example home page
 doc:
   author: Brian Lee
   pubdate: Sep 07, 2025
-id: home
+  title: Home
 header_includes:
-  - '<script type="module" src="/static/js/indextree.js" defer></script>'
+- <script type="module" src="/static/js/indextree.js" defer></script>
+id: home
 og_image: /img/home.png
-title: Home
+schema: v1
 toc: false
 url: /

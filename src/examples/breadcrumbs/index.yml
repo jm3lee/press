@@ -1,4 +1,3 @@
-schema: v1
 breadcrumbs:
 - title: Home
   url: /
@@ -7,7 +6,8 @@ breadcrumbs:
 - title: Breadcrumb Demo
 description: Demonstrates breadcrumb navigation.
 doc:
-  author: Ada Lovelace
-  pubdate: Jan 2, 2025
+  author: Brian Lee
+  pubdate: Sep 07, 2025
+  title: Breadcrumb Demo
 id: breadcrumb_demo
-title: Breadcrumb Demo
+schema: v1

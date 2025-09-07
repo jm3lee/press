@@ -1,4 +1,3 @@
-schema: v1
 breadcrumbs:
 - title: Home
   url: /
@@ -9,5 +8,6 @@ citation: jinja
 doc:
   author: Brian Lee
   pubdate: Sep 07, 2025
+  title: Jinja Examples
 id: jinja
-title: Jinja Examples
+schema: v1

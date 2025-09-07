@@ -1,4 +1,3 @@
-schema: v1
 breadcrumbs:
 - title: Home
   url: /
@@ -6,7 +5,8 @@ breadcrumbs:
 doc:
   author: Brian Lee
   pubdate: Sep 07, 2025
+  title: MagicBar Demo
 header_includes:
 - <script type="module" src="/static/js/magicbar.js" defer></script>
 id: magicbar
-title: MagicBar Demo
+schema: v1

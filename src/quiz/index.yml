@@ -1,4 +1,3 @@
-schema: v1
 breadcrumbs:
 - title: Home
   url: /
@@ -6,7 +5,8 @@ breadcrumbs:
 doc:
   author: Brian Lee
   pubdate: Sep 07, 2025
+  title: Quiz
 header_includes:
 - <script type="module" src="/static/js/quiz.js" defer></script>
 id: quiz
-title: Quiz
+schema: v1

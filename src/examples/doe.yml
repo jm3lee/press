@@ -1,10 +1,10 @@
-schema: v1
 citation:
   author: Doe
   page: 42
   year: 2019
 doc:
   author: Brian Lee
-  pubdate: Aug 10, 2025
-title: Example Book
+  pubdate: Sep 07, 2025
+  title: Example Book
+schema: v1
 url: https://example.com/doe

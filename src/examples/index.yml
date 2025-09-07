@@ -1,4 +1,3 @@
-schema: v1
 breadcrumbs:
 - title: Home
   url: /
@@ -7,9 +6,10 @@ description: Demonstrations of Press features
 doc:
   author: Brian Lee
   pubdate: Sep 07, 2025
+  title: Examples
+header_includes:
+- <script type="module" src="/static/js/indextree.js" defer></script>
 id: examples
 indextree:
   link: true
-header_includes:
-  - '<script type="module" src="/static/js/indextree.js" defer></script>'
-title: Examples
+schema: v1

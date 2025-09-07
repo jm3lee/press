@@ -1,4 +1,3 @@
-schema: v1
 breadcrumbs:
 - title: Home
   url: /
@@ -7,6 +6,7 @@ breadcrumbs:
 - title: f0
 doc:
   author: Brian Lee
-  pubdate: Aug 12, 2025
+  pubdate: Sep 07, 2025
+  title: f0
 id: f0
-title: f0
+schema: v1

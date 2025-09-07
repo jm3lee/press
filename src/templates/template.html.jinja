@@ -3,14 +3,14 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta charset="utf-8" />
-    <title>{{ title }}</title>
+    <title>{{ doc.title }}</title>
     {% if description %}
     <meta name="description" content="{{ description }}" />
     {% endif %}
     {% if og_title %}
     <meta property="og:title" content="{{ og_title }}" />
     {% else %}
-    <meta property="og:title" content="{{ title }}" />
+    <meta property="og:title" content="{{ doc.title }}" />
     {% endif %}
     {% if og_description %}
     <meta property="og:description" content="{{ og_description }}" />
@@ -69,7 +69,7 @@
           text-truncate"
           style="max-width: 16ch"
         >
-          {% if page_heading %} {{ page_heading }} {% else %} {{ title }} {% endif %}
+          {% if page_heading %} {{ page_heading }} {% else %} {{ doc.title }} {% endif %}
         </span>
         <button
           class="navbar-toggler"
@@ -112,7 +112,7 @@
 
       <div class="container-fluid position-relative text-center">
         <h1 class="display-3 fw-bold">
-          {% if page_heading %} {{ page_heading }} {% else %} {{ title }} {% endif %}
+          {% if page_heading %} {{ page_heading }} {% else %} {{ doc.title }} {% endif %}
         </h1>
       </div>
     </header>
@@ -152,9 +152,9 @@
         <ol class="breadcrumb pt-3">
           {% for breadcrumb in breadcrumbs %}
           {% if breadcrumb.get('url') %}
-          <li class="breadcrumb-item"><a href="{{ breadcrumb.url }}">{{ breadcrumb.get('title') }}</a></li>
+          <li class="breadcrumb-item"><a href="{{ breadcrumb.url }}">{{ breadcrumb.get('doc.title') }}</a></li>
           {% else %}
-          <li class="breadcrumb-item active" aria-current="page">{{ breadcrumb.get('title') }}</li>
+          <li class="breadcrumb-item active" aria-current="page">{{ breadcrumb.get('doc.title') }}</li>
           {% endif %}
           {% endfor %}
         </ol>

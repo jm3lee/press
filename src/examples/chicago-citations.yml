@@ -1,4 +1,3 @@
-schema: v1
 breadcrumbs:
 - title: Home
   url: /
@@ -9,5 +8,6 @@ citation: chicago citations
 doc:
   author: Brian Lee
   pubdate: Sep 07, 2025
+  title: Chicago Citation Examples
 id: chicago-citations
-title: Chicago Citation Examples
+schema: v1
