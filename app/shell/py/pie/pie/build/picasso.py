@@ -61,7 +61,7 @@ def generate_rule(
     preprocessed_md = (build_root / relative.with_suffix(".md")).as_posix()
     preprocessed_yml = (build_root / relative.with_suffix(".yml")).as_posix()
 
-    preprocess_cmd = "cp $< $@"
+    preprocess_cmd = "cp $< $@; process-yaml $@"
     metadata = load_metadata_pair(input_path)
     tmpl = metadata.get("template") if metadata else None
     template = Path(tmpl).as_posix() if tmpl else None
