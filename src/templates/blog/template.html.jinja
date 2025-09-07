@@ -22,8 +22,8 @@
     {% endif %}
     {% if og_url %}
     <meta property="og:url" content="{{ og_url }}" />
-    {% elif link.canonical %}
-    <meta property="og:url" content="{{ link.canonical }}" />
+    {% elif doc.link.canonical %}
+    <meta property="og:url" content="{{ doc.link.canonical }}" />
     {% endif %}
     {% if twitter_card %}
     <meta name="twitter:card" content="{{ twitter_card }}" />

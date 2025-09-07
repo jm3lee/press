@@ -1,4 +1,3 @@
-author: Brian Lee
 breadcrumbs:
 - title: Home
   url: /
@@ -6,6 +5,8 @@ breadcrumbs:
   url: /examples/
 - title: Custom Template
 citation: custom template
+doc:
+  author: Brian Lee
+  pubdate: Sep 06, 2025
 id: custom_template
-pubdate: Sep 06, 2025
 title: Custom Template

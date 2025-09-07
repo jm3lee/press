@@ -1,4 +1,3 @@
-author: Brian Lee
 breadcrumbs:
 - title: Home
   url: /
@@ -7,9 +6,11 @@ breadcrumbs:
 - title: Trendy Blog Template Demo
 css:
 - https://cdn.jsdelivr.net/npm/water.css@2/out/water.css
+doc:
+  author: Brian Lee
+  pubdate: Sep 06, 2025
 hero_image: https://via.placeholder.com/1200x400/F4A460/FFFFFF?text=Fall+Hero
 id: trendy_blog_template
 preamble: A short intro shows how you might tease readers into the story.
-pubdate: Sep 06, 2025
 template: src/templates/blog/template.html.jinja
 title: Trendy Blog Template Demo

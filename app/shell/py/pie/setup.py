@@ -47,6 +47,7 @@ setup(
             'update-metadata=pie.update.metadata:main',
             'update-pubdate=pie.update.pubdate:main',
             'update-url=pie.update.url:main',
+            'migrate-metadata=pie.update.migrate_metadata:main',
             'upgrade-indextree=pie.update.indextree:main',
             'process-yaml=pie.process_yaml:main',
             'sitemap=pie.sitemap:main',

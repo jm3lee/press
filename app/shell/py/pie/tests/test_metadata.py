@@ -123,16 +123,23 @@ def test__add_citation_if_missing_from_name():
 
 def test__add_canonical_link_if_missing_existing():
     """Existing canonical link is preserved."""
-    info = {"link": {"canonical": "/x"}}
+    info = {"doc": {"link": {"canonical": "/x"}}}
     metadata._add_canonical_link_if_missing(info, "doc.md")
-    assert info["link"]["canonical"] == "/x"
+    assert info["doc"]["link"]["canonical"] == "/x"
 
 
 def test__add_canonical_link_if_missing_no_url():
     """No url leaves canonical link unset."""
     info: dict[str, str] = {}
     metadata._add_canonical_link_if_missing(info, "doc.md")
-    assert "link" not in info
+    assert "doc" not in info
+
+
+def test__add_canonical_link_if_missing_sets_value():
+    """URL present populates ``doc.link.canonical``."""
+    info = {"url": "/foo"}
+    metadata._add_canonical_link_if_missing(info, "doc.md")
+    assert info["doc"]["link"]["canonical"] == "/foo"
 
 
 def test__get_redis_value_missing_returns_none():

@@ -106,10 +106,13 @@ def _add_id_if_missing(metadata: dict[str, Any], filepath: str) -> None:
 
 
 def _add_canonical_link_if_missing(metadata: dict[str, Any], filepath: str) -> None:
-    """Create ``link.canonical`` from ``url`` when missing."""
+    """Create ``doc.link.canonical`` from ``url`` when missing."""
 
-    if metadata.get("link", {}).get("canonical"):
-        return
+    doc = metadata.get("doc")
+    if isinstance(doc, dict):
+        link = doc.get("link")
+        if isinstance(link, dict) and link.get("canonical"):
+            return
 
     url = metadata.get("url")
     if url is None:
@@ -119,7 +122,7 @@ def _add_canonical_link_if_missing(metadata: dict[str, Any], filepath: str) -> N
     base_url = os.getenv("BASE_URL", "").rstrip("/")
     canonical = urljoin(base_url + "/", url.lstrip("/")) if base_url else url
 
-    metadata.setdefault("link", {})["canonical"] = canonical
+    metadata.setdefault("doc", {}).setdefault("link", {})["canonical"] = canonical
 
 
 def _add_empty_if_missing(metadata: dict[str, Any], field: str, filepath: str) -> None:
