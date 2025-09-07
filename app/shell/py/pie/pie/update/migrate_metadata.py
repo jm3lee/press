@@ -13,7 +13,7 @@ from pie.yaml import YAML_EXTS, yaml, write_yaml
 
 __all__ = ["main"]
 
-FIELDS = ("author", "pubdate", "link", "title")
+FIELDS = ("author", "pubdate", "link", "title", "citation")
 
 
 def _migrate_mapping(data: dict) -> tuple[dict, bool]:
@@ -89,7 +89,7 @@ def walk_files(paths: Iterable[Path]) -> Iterable[Path]:
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = create_parser(
-        "Move top-level author/pubdate/link fields under doc",
+        "Move top-level author/pubdate/link/title/citation fields under doc",
         log_default="log/migrate-metadata.txt",
     )
     parser.add_argument("paths", nargs="+", help="Files or directories to scan")

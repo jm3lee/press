@@ -3,7 +3,7 @@
 {% block content %}
 Press provides custom Jinja globals for formatting links. Each example shows
 the template followed by its rendered result. Globals accept either a
-metadata ID string or a dictionary with at least `citation` and `url`.
+metadata ID string or a dictionary with at least `doc.citation` and `url`.
 
 ## linktitle
 
@@ -18,12 +18,12 @@ Output:
 ## linktitle with anchor
 
 ```jinja
-{% raw %}{{ linktitle({"citation": "home", "url": "/"}, anchor="#example") }}{% endraw %}
+{% raw %}{{ linktitle({"doc": {"citation": "home"}, "url": "/"}, anchor="#example") }}{% endraw %}
 ```
 
 Output:
 
-{{ linktitle({"citation": "home", "url": "/"}, anchor="#example") }}
+{{ linktitle({"doc": {"citation": "home"}, "url": "/"}, anchor="#example") }}
 
 ## linktitle with custom citation
 
@@ -48,22 +48,22 @@ Output:
 ## linkicon
 
 ```jinja
-{% raw %}{{ linkicon({"citation": "Quickstart", "url": "/quickstart.html", "icon": "👉"}) }}{% endraw %}
+{% raw %}{{ linkicon({"doc": {"citation": "Quickstart"}, "url": "/quickstart.html", "icon": "👉"}) }}{% endraw %}
 ```
 
 Output:
 
-{{ linkicon({"citation": "Quickstart", "url": "/quickstart.html", "icon": "👉"}) }}
+{{ linkicon({"doc": {"citation": "Quickstart"}, "url": "/quickstart.html", "icon": "👉"}) }}
 
 ## link_icon_title
 
 ```jinja
-{% raw %}{{ link_icon_title({"citation": "Quickstart", "url": "/quickstart.html", "icon": "👉"}) }}{% endraw %}
+{% raw %}{{ link_icon_title({"doc": {"citation": "Quickstart"}, "url": "/quickstart.html", "icon": "👉"}) }}{% endraw %}
 ```
 
 Output:
 
-{{ link_icon_title({"citation": "Quickstart", "url": "/quickstart.html", "icon": "👉"}) }}
+{{ link_icon_title({"doc": {"citation": "Quickstart"}, "url": "/quickstart.html", "icon": "👉"}) }}
 
 ## link
 

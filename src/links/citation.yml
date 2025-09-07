@@ -1,6 +1,6 @@
-citation:
-  short: short
 doc:
+  citation:
+    short: short
   author: Brian Lee
   pubdate: Sep 07, 2025
   title: citation

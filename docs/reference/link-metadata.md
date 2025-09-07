@@ -6,7 +6,7 @@ the build scripts interpret them. A list of all metadata keys can be found in
 
 ## Creating a Metadata File
 
-Place YAML files under `src/links/`. Each file defines at least a `citation`
+Place YAML files under `src/links/`. Each file defines at least a `doc.citation`
 and a `url` for the destination. Any additional fields become part of the build
 index. When the file does not specify an `id`, it is derived from the
 filename.
@@ -14,12 +14,12 @@ filename.
 Example `src/links/press_io_home.yml`:
 
 ```yaml
-citation: press.io home
-url: https://press.io
 doc:
+  citation: press.io home
   link:
     tracking: false
     class: external-link
+url: https://press.io
 ```
 
 This file generates an entry with the `id` `press_io_home` because the

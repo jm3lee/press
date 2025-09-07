@@ -4,8 +4,8 @@ breadcrumbs:
 - title: Examples
   url: /examples/
 - title: Chicago Citation Examples
-citation: chicago citations
 doc:
+  citation: chicago citations
   author: Brian Lee
   pubdate: Sep 07, 2025
   title: Chicago Citation Examples

@@ -4,8 +4,8 @@ breadcrumbs:
 - title: Examples
   url: /examples/
 - title: Link Global Examples
-citation: link globals
 doc:
+  citation: link globals
   author: Brian Lee
   pubdate: Sep 07, 2025
   title: Link Global Examples

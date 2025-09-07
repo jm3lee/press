@@ -59,11 +59,11 @@ Output:
 Custom globals work the same way. The `link` global turns metadata into an anchor tag:
 
 ```jinja
-{% raw %}{{ link({"citation": "Quickstart", "url": "/quickstart.html"}) }}{% endraw %}
+{% raw %}{{ link({"doc": {"citation": "Quickstart"}, "url": "/quickstart.html"}) }}{% endraw %}
 ```
 
 Output:
 
-{{ link({"citation": "Quickstart", "url": "/quickstart.html"}) }}
+{{ link({"doc": {"citation": "Quickstart"}, "url": "/quickstart.html"}) }}
 
 {% endblock %}

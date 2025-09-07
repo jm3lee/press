@@ -1,8 +1,8 @@
-citation:
-  author: Hull
-  page: 307
-  year: 2016
 doc:
+  citation:
+    author: Hull
+    page: 307
+    year: 2016
   author: Brian Lee
   pubdate: Sep 07, 2025
   title: Options, Futures, and Other Derivatives

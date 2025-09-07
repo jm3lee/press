@@ -4,8 +4,8 @@ breadcrumbs:
 - title: Examples
   url: /examples/
 - title: Responsive Images
-citation: responsive-images
 doc:
+  citation: responsive-images
   author: Brian Lee
   pubdate: Sep 07, 2025
   title: Responsive Images

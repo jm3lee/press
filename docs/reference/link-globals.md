@@ -2,8 +2,8 @@
 
 Several build scripts provide custom Jinja globals that convert metadata
 descriptions into HTML anchors. Each dictionary is pulled from
-`index.json` and must include a `citation` field which supplies the anchor
-text, along with a `url` field. Optional keys like `icon`,
+`index.json` and must include a `doc.citation` field which supplies the
+anchor text, along with a `url` field. Optional keys like `icon`,
 `doc.link.tracking`, and `doc.link.class` customize the output. For an
 overview of these metadata fields, see
 [Metadata Fields](metadata-fields.md).
@@ -19,11 +19,12 @@ accepts a few optional parameters to control the output:
 - `use_icon` – when `True` (default) any `icon` field in the metadata is
   prefixed to the link text.  Set to `False` to suppress icons.
 - `anchor` – appends a fragment identifier (`#anchor`) to the URL when provided.
-- `citation` – selects which citation field to render or overrides the link text.
-  The default `"citation"` uses the main citation value; pass `"short"` to use
-  `citation.short` or provide a custom string to replace the citation entirely.
+- `citation` – selects which citation field to render or overrides the link
+  text. The default `"citation"` uses the main `doc.citation` value; pass
+  `"short"` to use `doc.citation.short` or provide a custom string to replace
+  the citation entirely.
 
-When the `citation` field is itself a mapping with `author`, `year`, and an
+When the `doc.citation` field is itself a mapping with `author`, `year`, and an
 optional `page`, the helper formats the text using Chicago style
 (`"Author Year, Page"`) and encloses it in parentheses, matching the behaviour
 of the `cite` global.
@@ -31,7 +32,7 @@ of the `cite` global.
 Example:
 
 ```jinja
-{{ link({"citation": "deltoid tuberosity", "url": "/humerus.html"},
+{{ link({"doc": {"citation": "deltoid tuberosity"}, "url": "/humerus.html"},
          style="title", anchor="deltoid_tuberosity") }}
 ```
 
@@ -50,7 +51,8 @@ You can also override the citation text:
 Bibliographic citations render similarly:
 
 ```jinja
-{{ link({"citation": {"author": "hull", "year": 2016, "page": 307}, "url": "/hull"}) }}
+{{ link({"doc": {"citation": {"author": "hull", "year": 2016, "page": 307}},
+         "url": "/hull"}) }}
 ```
 
 produces:
@@ -74,8 +76,8 @@ attributes off.
 Example:
 
 ```jinja
-{{ link({"citation": "press.io", "url": "https://press.io",
-         "doc": {"link": {"tracking": false}}}) }}
+{{ link({"url": "https://press.io", "doc": {"citation": "press.io",
+         "link": {"tracking": false}}}) }}
 ```
 
 renders as:
@@ -94,8 +96,8 @@ wrappers around `link`.  They will be removed in a future release.
 Example:
 
 ```jinja
-{{ linktitle({"citation": "deltoid tuberosity", "url": "/humerus.html"},
-             anchor="deltoid_tuberosity") }}
+{{ linktitle({"doc": {"citation": "deltoid tuberosity"},
+             "url": "/humerus.html"}, anchor="deltoid_tuberosity") }}
 ```
 
 renders as:

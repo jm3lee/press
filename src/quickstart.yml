@@ -2,8 +2,8 @@ breadcrumbs:
 - title: Home
   url: /
 - title: Quickstart
-citation: quickstart
 doc:
+  citation: quickstart
   author: Brian Lee
   pubdate: Sep 07, 2025
   title: Quickstart

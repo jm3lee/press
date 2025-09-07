@@ -4,8 +4,8 @@ breadcrumbs:
 - title: Examples
   url: /examples/
 - title: Custom Template
-citation: custom template
 doc:
+  citation: custom template
   author: Brian Lee
   pubdate: Sep 07, 2025
   title: Custom Template

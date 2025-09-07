@@ -1,7 +1,8 @@
 # migrate-metadata
 
-Move legacy top-level `author`, `pubdate`, `link`, and `title` fields under the
-`doc` mapping. This script scans the provided files or directories and rewrites
+Move legacy top-level `author`, `pubdate`, `link`, `title`, and `citation`
+fields under the `doc` mapping. This script scans the provided files or
+directories and rewrites
 Markdown front matter and YAML metadata in place.
 
 ```bash

@@ -79,18 +79,19 @@ def _add_url_if_missing(metadata: dict[str, Any], filepath: str) -> None:
 
 
 def _add_citation_if_missing(metadata: dict[str, Any], filepath: str) -> None:
-    """Derive ``citation`` from ``title`` or deprecated ``name``."""
+    """Derive ``doc.citation`` from ``doc.title`` or deprecated ``name``."""
 
-    if "citation" not in metadata:
-        title = metadata.get("title")
+    doc = metadata.setdefault("doc", {})
+    if "citation" not in doc:
+        title = doc.get("title") or metadata.get("title")
         if title:
-            metadata["citation"] = title.lower()
+            doc["citation"] = title.lower()
         elif "name" in metadata:
             logger.warning(
                 "'name' field is deprecated; use 'title' instead",
                 filename=filepath,
             )
-            metadata["citation"] = metadata["name"].lower()
+            doc["citation"] = metadata["name"].lower()
 
 
 def _add_id_if_missing(metadata: dict[str, Any], filepath: str) -> None:

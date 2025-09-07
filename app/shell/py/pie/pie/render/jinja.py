@@ -100,7 +100,7 @@ def get_link_class(desc):
 def _resolve_citation(desc: dict, selector: str) -> tuple[str, bool]:
     """Return citation text and whether it requires parentheses."""
 
-    citation_val = desc["citation"]
+    citation_val = desc["doc"]["citation"]
     needs_parens = False
 
     if selector not in {"citation", "short"} and not (
@@ -140,12 +140,13 @@ def render_link(
     """Return a formatted HTML anchor for ``desc``.
 
     ``desc`` may be either a metadata dictionary or a string id which will be
-    looked up via :func:`get_cached_metadata`.  ``style`` controls how the
-    citation text is capitalised: ``"plain"`` leaves it untouched, ``"title"``
-    applies title‑case, and ``"cap"`` capitalises only the first character.
-    When ``use_icon`` is ``True`` any ``icon`` field is prefixed to the
-    citation. ``citation`` selects which citation field to use or overrides the
-    citation text entirely; pass ``"short"`` to use ``citation["short"]``.
+    looked up via :func:`get_cached_metadata`. ``style`` controls how the
+    citation text is capitalised: ``"plain"`` leaves it untouched,
+    ``"title"`` applies title‑case, and ``"cap"`` capitalises only the first
+    character. When ``use_icon`` is ``True`` any ``icon`` field is prefixed to
+    the citation. ``citation`` selects which field under ``doc.citation`` to use
+    or overrides the citation text entirely; pass ``"short"`` to use
+    ``doc.citation["short"]``.
     """
 
     if isinstance(desc, str):
@@ -331,10 +332,10 @@ def definition(desc):
 def cite(*names: str) -> str:
     """Return Chicago style citation links for ``names``.
 
-    Each ``name`` is looked up using :func:`get_cached_metadata`. ``citation`` may be a
-    simple string (legacy format) or a mapping with ``author``, ``year`` and
-    ``page`` keys.  When multiple references share the same author, year and
-    URL their page numbers are combined.
+    Each ``name`` is looked up using :func:`get_cached_metadata`.
+    ``doc.citation`` may be a simple string (legacy format) or a mapping with
+    ``author``, ``year`` and ``page`` keys. When multiple references share the
+    same author, year and URL their page numbers are combined.
 
     When a single reference is provided the parentheses are included inside the
     returned anchor.  Multiple references are separated by ``;`` with the outer
@@ -345,7 +346,7 @@ def cite(*names: str) -> str:
 
     groups: list[dict] = []
     for d in descs:
-        cit = d.get("citation")
+        cit = d.get("doc", {}).get("citation")
         if isinstance(cit, dict):
             author = str(cit.get("author", "")).title()
             year = cit.get("year")
@@ -372,6 +373,8 @@ def cite(*names: str) -> str:
     single = len(groups) == 1
     for g in groups:
         desc = dict(g["desc"])
+        doc = dict(desc.get("doc", {}))
+        desc["doc"] = doc
         if "text" in g:
             text = g["text"]
         else:
@@ -380,9 +383,9 @@ def cite(*names: str) -> str:
             if pages:
                 text += f", {pages}"
         if single:
-            desc["citation"] = f"({text})"
+            doc["citation"] = f"({text})"
             return render_link(desc, use_icon=False)
-        desc["citation"] = text
+        doc["citation"] = text
         parts.append(render_link(desc, use_icon=False))
 
     return "(" + "; ".join(parts) + ")"

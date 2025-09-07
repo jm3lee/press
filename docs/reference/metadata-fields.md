@@ -30,21 +30,21 @@ several fields when they are missing:
 | ---------- | ---------------------------------------------- |
 | `schema`   | Current metadata schema version (`"v1"`)       |
 | `id`       | Filename without the extension                 |
-| `citation` | Lowercase form of the `title` value            |
+| `doc.citation` | Lowercase form of the `title` value            |
 | `url`      | Derived from the source path (e.g. `src/foo.md` → `/foo.html`) |
 | `doc.link.canonical` | Absolute form of the `url` value          |
 
-The `citation` value is used as the anchor text when other pages link to this
-document using Jinja globals such as `linktitle`. The helper that assigns these
-defaults lives in `generate_missing_metadata` within `pie.metadata`.
+The `doc.citation` value is used as the anchor text when other pages link to
+this document using Jinja globals such as `linktitle`. The helper that assigns
+these defaults lives in `generate_missing_metadata` within `pie.metadata`.
 
 The canonical URL is recorded under `doc.link.canonical`, replacing the legacy
 top-level `link.canonical` field.
 
-For bibliographic references the `citation` field may instead be a mapping with
-`author`, `year`, and `page` keys. This structure is consumed by the `cite`
-Jinja global and by the link-formatting helpers to render Chicago style text in
-parentheses.
+For bibliographic references the `doc.citation` field may instead be a mapping
+with `author`, `year`, and `page` keys. This structure is consumed by the
+`cite` Jinja global and by the link-formatting helpers to render Chicago style
+text in parentheses.
 
 `doc.link.tracking` defaults to `true`, meaning links open in the same tab.
 `doc.link.class` defaults to `internal-link`.

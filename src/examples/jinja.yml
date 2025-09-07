@@ -4,8 +4,8 @@ breadcrumbs:
 - title: Examples
   url: /examples/
 - title: Jinja Examples
-citation: jinja
 doc:
+  citation: jinja
   author: Brian Lee
   pubdate: Sep 07, 2025
   title: Jinja Examples
