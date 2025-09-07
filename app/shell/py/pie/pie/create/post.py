@@ -6,6 +6,7 @@ from typing import Sequence
 
 from pie.cli import create_parser
 from pie.logging import configure_logging, logger
+from pie.metadata import CURRENT_SCHEMA
 from pie.utils import get_pubdate, write_yaml
 
 
@@ -52,6 +53,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
     breadcrumbs.append({"title": _title_from_slug(rel_parts[-1])})
     metadata = {
+        "schema": CURRENT_SCHEMA,
         "author": "",
         "pubdate": get_pubdate(),
         "title": "",

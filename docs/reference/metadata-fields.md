@@ -6,6 +6,7 @@ missing values are automatically generated.
 ## Required
 
 - `title` – Heading shown in the rendered page.
+- `schema` – Schema version string, currently `v1`.
 
 ## Optional Fields
 
@@ -31,6 +32,7 @@ several fields when they are missing:
 | `citation` | Lowercase form of the `title` value            |
 | `url`      | Derived from the source path (e.g. `src/foo.md` → `/foo.html`) |
 | `link.canonical` | Absolute form of the `url` value              |
+| `schema`   | `v1`                                           |
 
 The `citation` value is used as the anchor text when other pages link to this
 document using Jinja globals such as `linktitle`. The helper that assigns these
