@@ -152,9 +152,9 @@
         <ol class="breadcrumb pt-3">
           {% for breadcrumb in breadcrumbs %}
           {% if breadcrumb.get('url') %}
-          <li class="breadcrumb-item"><a href="{{ breadcrumb.url }}">{{ breadcrumb.get('doc.title') }}</a></li>
+          <li class="breadcrumb-item"><a href="{{ breadcrumb.url }}">{{ breadcrumb.get('title') }}</a></li>
           {% else %}
-          <li class="breadcrumb-item active" aria-current="page">{{ breadcrumb.get('doc.title') }}</li>
+          <li class="breadcrumb-item active" aria-current="page">{{ breadcrumb.get('title') }}</li>
           {% endif %}
           {% endfor %}
         </ol>
