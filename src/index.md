@@ -1,14 +1,10 @@
 {% extends "src/templates/template.html.jinja" %}
 
-asdf
-
 {% block content %}
 Welcome to the demo site for **Press**. The examples index below links to
 key features.
 
 <div class="indextree-root" data-src="/static/index/examples.json"></div>
-
-{{ link("home") }}
 
 ## Emoji Replacement
 
