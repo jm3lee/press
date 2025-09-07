@@ -21,12 +21,12 @@ def process_dir(directory: Path, tag: str | None = None) -> Iterator[dict]:
     logger.debug("Scanning directory", directory=directory)
     entries = list(walk(directory))
     for meta, path in entries:
-        if "title" not in meta:
+        if "title" not in meta["doc"]:
             raise ValueError(f"Missing 'title' in {path}")
     sort_entries(entries)
     for meta, path in entries:
         entry_id = meta["id"]
-        entry_title = meta["title"]
+        entry_title = meta["doc"]["title"]
         entry_url = meta.get("url")
         entry_link = getopt_link(meta)
         entry_show = getopt_show(meta)

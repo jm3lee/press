@@ -93,6 +93,6 @@ def sort_entries(entries: list[tuple[Mapping[str, Any], Path]]) -> None:
         name = path.stem if path.is_file() else path.name
         if name.isdigit():
             return (1, int(name))
-        return (2, meta["title"].lower())
+        return (2, meta["doc"]["title"].lower())
 
     entries.sort(key=sort_key)
