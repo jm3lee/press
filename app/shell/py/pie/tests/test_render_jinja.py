@@ -86,3 +86,14 @@ def test_parse_args_parses_values():
     assert args.output == "out"
     assert args.index == "i.json"
     assert args.config == "cfg.yml"
+
+
+def test_render_press_replaces_alias():
+    html = jinja.render_press("Hi :smile:")
+    assert str(html) == "<p>Hi 😄</p>\n"
+
+
+def test_render_press_ignores_unknown_alias():
+    html = jinja.render_press("Hi :does_not_exist:")
+    assert str(html) == "<p>Hi :does_not_exist:</p>\n"
+
