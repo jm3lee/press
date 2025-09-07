@@ -12,4 +12,3 @@ doc:
   title: Anchor Example
 id: anchor
 schema: v1
-test-anchor: '{{ anchor("test-anchor") }}'
