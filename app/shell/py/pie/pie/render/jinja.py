@@ -503,7 +503,6 @@ def create_env():
         loader=FileSystemLoader(data_dir),
         undefined=StrictUndefined,
         autoescape=False,
-        trim_blocks=True,
         lstrip_blocks=True,
     )
     env.globals["link"] = render_link
