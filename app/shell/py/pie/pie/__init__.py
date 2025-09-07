@@ -6,7 +6,6 @@ through console scripts and are also importable for use in other Python code.
 
 The most commonly used modules are:
 
-* :mod:`build_index` – scan Markdown and YAML files and produce a site index.
 * :mod:`update.index` – update an existing index file with new entries.
 * :mod:`filter.include` – preprocess Markdown and expand custom ``include``
   directives.
@@ -25,7 +24,6 @@ modules.
 """
 
 __all__ = [
-    "build_index",
     "filter",
     "metadata",
     "render",
