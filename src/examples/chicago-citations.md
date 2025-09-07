@@ -1,11 +1,13 @@
-Demonstrates Chicago-style citations using the `cite` and `link`
-globals.
+{% extends "src/templates/template.html.jinja" %}
+
+{% block content %}
+Demonstrates Chicago-style citations using the `cite` and `link` globals.
 
 ## Creating citation metadata
 
 Each source is stored in a small YAML file that includes the title,
-citation details, and URL.  Save the file somewhere under `src/` so it
-gets indexed during the build.
+citation details, and URL. Save the file somewhere under `src/` so it gets
+indexed during the build.
 
 Example metadata file:
 
@@ -95,4 +97,5 @@ Passing an ID fetches the metadata automatically:
 ```
 
 {{ link("doe") }}
+{% endblock %}
 

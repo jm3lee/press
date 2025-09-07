@@ -1,5 +1,8 @@
-Press provides custom Jinja globals for formatting links. Each example
-shows the template followed by its rendered result. Globals accept either a
+{% extends "src/templates/template.html.jinja" %}
+
+{% block content %}
+Press provides custom Jinja globals for formatting links. Each example shows
+the template followed by its rendered result. Globals accept either a
 metadata ID string or a dictionary with at least `citation` and `url`.
 
 ## linktitle
@@ -86,3 +89,4 @@ Jinja globals work inside YAML metadata. The `link-globals.yml` file defines
 Rendered:
 
 {{ get_desc('link-globals')['summary'] }}
+{% endblock %}
