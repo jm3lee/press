@@ -45,8 +45,11 @@ def test_sort_entries_order_priority():
     """Explicit ``indextree.order`` is prioritized in sorting."""
 
     entries = [
-        ({"title": "B", "indextree": {"order": 1}}, Path("b")),
-        ({"title": "A"}, Path("a")),
+        (
+            {"title": "B", "doc": {"title": "B"}, "indextree": {"order": 1}},
+            Path("b"),
+        ),
+        ({"title": "A", "doc": {"title": "A"}}, Path("a")),
     ]
 
     index_tree.sort_entries(entries)

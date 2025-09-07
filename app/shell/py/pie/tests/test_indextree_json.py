@@ -42,9 +42,24 @@ def test_process_dir_builds_tree(tmp_path, monkeypatch):
     fake = fakeredis.FakeRedis(decode_responses=True)
     monkeypatch.setattr(metadata, "redis_conn", fake)
 
-    save_meta(fake, "src/alpha/index.yml", "alpha", {"title": "Alpha", "url": "/alpha/index.html"})
-    save_meta(fake, "src/alpha/beta.yml", "beta", {"title": "Beta", "url": "/alpha/beta.html"})
-    save_meta(fake, "src/gamma.yml", "gamma", {"title": "Gamma", "url": "/gamma.html"})
+    save_meta(
+        fake,
+        "src/alpha/index.yml",
+        "alpha",
+        {"doc": {"title": "Alpha"}, "url": "/alpha/index.html"},
+    )
+    save_meta(
+        fake,
+        "src/alpha/beta.yml",
+        "beta",
+        {"doc": {"title": "Beta"}, "url": "/alpha/beta.html"},
+    )
+    save_meta(
+        fake,
+        "src/gamma.yml",
+        "gamma",
+        {"doc": {"title": "Gamma"}, "url": "/gamma.html"},
+    )
 
     os.chdir(tmp_path)
     try:
@@ -82,26 +97,48 @@ def test_process_dir_honours_show_and_link(tmp_path, monkeypatch):
     fake = fakeredis.FakeRedis(decode_responses=True)
     monkeypatch.setattr(metadata, "redis_conn", fake)
 
-    save_meta(fake, "src/alpha/index.yml", "alpha", {"title": "Alpha", "url": "/alpha/index.html"})
+    save_meta(
+        fake,
+        "src/alpha/index.yml",
+        "alpha",
+        {"doc": {"title": "Alpha"}, "url": "/alpha/index.html"},
+    )
     save_meta(
         fake,
         "src/alpha/beta.yml",
         "beta",
-        {"title": "Beta", "url": "/alpha/beta.html", "indextree": {"link": False}},
+        {
+            "doc": {"title": "Beta"},
+            "url": "/alpha/beta.html",
+            "indextree": {"link": False},
+        },
     )
     save_meta(
         fake,
         "src/gamma.yml",
         "gamma",
-        {"title": "Gamma", "url": "/gamma.html", "indextree": {"show": False}},
+        {
+            "doc": {"title": "Gamma"},
+            "url": "/gamma.html",
+            "indextree": {"show": False},
+        },
     )
     save_meta(
         fake,
         "src/delta/index.yml",
         "delta",
-        {"title": "Delta", "url": "/delta/index.html", "indextree": {"show": False}},
+        {
+            "doc": {"title": "Delta"},
+            "url": "/delta/index.html",
+            "indextree": {"show": False},
+        },
     )
-    save_meta(fake, "src/delta/epsilon.yml", "epsilon", {"title": "Epsilon", "url": "/delta/epsilon.html"})
+    save_meta(
+        fake,
+        "src/delta/epsilon.yml",
+        "epsilon",
+        {"doc": {"title": "Epsilon"}, "url": "/delta/epsilon.html"},
+    )
 
     os.chdir(tmp_path)
     try:
@@ -130,8 +167,8 @@ def test_process_dir_sorts_by_numeric_filename(tmp_path, monkeypatch):
     fake = fakeredis.FakeRedis(decode_responses=True)
     monkeypatch.setattr(metadata, "redis_conn", fake)
 
-    save_meta(fake, "src/1.yml", "one", {"title": "Beta"})
-    save_meta(fake, "src/2.yml", "two", {"title": "Alpha"})
+    save_meta(fake, "src/1.yml", "one", {"doc": {"title": "Beta"}})
+    save_meta(fake, "src/2.yml", "two", {"doc": {"title": "Alpha"}})
 
     os.chdir(tmp_path)
     try:
@@ -154,18 +191,31 @@ def test_process_dir_filters_by_tag(tmp_path, monkeypatch):
     fake = fakeredis.FakeRedis(decode_responses=True)
     monkeypatch.setattr(metadata, "redis_conn", fake)
 
-    save_meta(fake, "src/alpha/index.yml", "alpha", {"title": "Alpha", "url": "/alpha/index.html"})
+    save_meta(
+        fake,
+        "src/alpha/index.yml",
+        "alpha",
+        {"doc": {"title": "Alpha"}, "url": "/alpha/index.html"},
+    )
     save_meta(
         fake,
         "src/alpha/beta.yml",
         "beta",
-        {"title": "Beta", "url": "/alpha/beta.html", "tags": ["foo"]},
+        {
+            "doc": {"title": "Beta"},
+            "url": "/alpha/beta.html",
+            "tags": ["foo"],
+        },
     )
     save_meta(
         fake,
         "src/gamma.yml",
         "gamma",
-        {"title": "Gamma", "url": "/gamma.html", "tags": ["bar"]},
+        {
+            "doc": {"title": "Gamma"},
+            "url": "/gamma.html",
+            "tags": ["bar"],
+        },
     )
 
     os.chdir(tmp_path)
@@ -194,7 +244,12 @@ def test_main_writes_output_file(tmp_path, monkeypatch, capsys):
 
     fake = fakeredis.FakeRedis(decode_responses=True)
     monkeypatch.setattr(metadata, "redis_conn", fake)
-    save_meta(fake, "src/alpha.yml", "alpha", {"title": "Alpha", "url": "/alpha.html"})
+    save_meta(
+        fake,
+        "src/alpha.yml",
+        "alpha",
+        {"doc": {"title": "Alpha"}, "url": "/alpha.html"},
+    )
 
     output_path = tmp_path / "tree.json"
 
@@ -222,7 +277,12 @@ def test_main_reports_missing_title(tmp_path, monkeypatch):
 
     fake = fakeredis.FakeRedis(decode_responses=True)
     monkeypatch.setattr(metadata, "redis_conn", fake)
-    save_meta(fake, "src/alpha.yml", "alpha", {"url": "/alpha.html"})
+    save_meta(
+        fake,
+        "src/alpha.yml",
+        "alpha",
+        {"doc": {"author": "Anon"}, "url": "/alpha.html"},
+    )
 
     log_output = io.StringIO()
     handler_id = logger.add(log_output, level="ERROR")
