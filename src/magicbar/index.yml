@@ -6,7 +6,8 @@ doc:
   author: Brian Lee
   pubdate: Sep 07, 2025
   title: MagicBar Demo
-header_includes:
-- <script type="module" src="/static/js/magicbar.js" defer></script>
+html:
+  extras:
+  - <script type="module" src="/static/js/magicbar.js" defer></script>
 id: magicbar
 schema: v1

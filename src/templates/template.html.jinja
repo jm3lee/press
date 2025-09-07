@@ -221,8 +221,8 @@
       </p>
     </footer>
 
-    {% for header_include in header_includes %}
-    {{ header_include | safe }}
+    {% for extra in html.extras %}
+    {{ extra | safe }}
     {% endfor %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>

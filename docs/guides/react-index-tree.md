@@ -70,8 +70,8 @@ indextree-json docs doc-tree.json
 
 Any element with the `indextree-root` class marks where a tree renders. Add as
 many as needed on the same page, each with a `data-src` attribute pointing to
-its JSON file. Load `indextree.js` through the page's `header_includes`
-metadata; Markdown escapes `<script>` tags to prevent XSS.
+its JSON file. Load `indextree.js` through the page's `html.extras` metadata;
+Markdown escapes `<script>` tags to prevent XSS.
 
 ## Usage
 

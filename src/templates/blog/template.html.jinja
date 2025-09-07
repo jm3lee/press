@@ -143,8 +143,8 @@
         <p><small>Enjoyed this article? Share it!</small></p>
       </footer>
     </article>
-    {% for header_include in header_includes %}
-    {{ header_include | safe }}
+    {% for extra in html.extras %}
+    {{ extra | safe }}
     {% endfor %}
     <script>
       document.addEventListener('DOMContentLoaded', () => {
