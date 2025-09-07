@@ -99,16 +99,9 @@ $(PERMALINKS_CONF): $(MARKDOWNS) $(YAMLS) | $(BUILD_DIR) $(LOG_DIR)
 	$(call status,Generate permalink redirects)
 	$(Q)nginx-permalinks $(SRC_DIR) -o $@ --log $(LOG_DIR)/nginx-permalinks.txt
 
-$(BUILD_DIR)/.update-index: $(MARKDOWNS) $(YAMLS)
+$(BUILD_DIR)/.update-index: $(YAMLS)
 	$(call status,Updating Redis Index)
 	$(Q)update-index --host $(REDIS_HOST) --port $(REDIS_PORT) src
-	$(Q)touch $@
-
-$(BUILD_DIR)/.process-yamls: $(BUILD_YAMLS) | $(BUILD_DIR)
-	$(call status,Process YAML metadata)
-	$(Q)find $(BUILD_DIR) -name '*.yml' -print0 | xargs -0 process-yaml
-	$(call status,Updating Redis Index)
-	$(Q)update-index --host $(REDIS_HOST) --port $(REDIS_PORT) build
 	$(Q)touch $@
 
 # Target to minify HTML and CSS files
@@ -149,9 +142,9 @@ $(BUILD_DIR)/%.md: %.md | $(BUILD_DIR)
 	$(Q)cp $< $@
 
 # Generate HTML from processed Markdown using render-html
-$(BUILD_DIR)/%.html: $(BUILD_DIR)/%.md $(BUILD_DIR)/%.yml $(HTML_TEMPLATE) | $(BUILD_DIR)
+$(BUILD_DIR)/%.html: $(BUILD_DIR)/%.md $(BUILD_DIR)/%.yml $(HTML_TEMPLATE) | $(BUILD_DIR)/.update-index $(BUILD_DIR)
 	$(call status,Generate HTML $@)
-	$(Q)render-html $(BUILD_DIR)/%.md $< $@
+	$(Q)render-html --template $(HTML_TEMPLATE) $< $@ -c $(BUILD_DIR)/$*.yml
 
 # Clean the build directory by removing all build artifacts
 .PHONY: clean
