@@ -10,4 +10,6 @@ doc:
 header_includes:
 - <script type="module" src="/static/js/indextree.js" defer></script>
 id: indextree-demo
+header_includes:
+  - '<script type="module" src="/static/js/indextree.js" defer></script>'
 title: IndexTree Demo

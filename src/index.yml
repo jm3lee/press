@@ -5,8 +5,8 @@ doc:
   author: Brian Lee
   pubdate: Sep 07, 2025
 id: home
-indextree:
-  include-js: true
+header_includes:
+  - '<script type="module" src="/static/js/indextree.js" defer></script>'
 og_image: /img/home.png
 title: Home
 toc: false
