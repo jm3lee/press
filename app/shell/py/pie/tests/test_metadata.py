@@ -7,11 +7,6 @@ import ruamel.yaml as yaml
 from pie import metadata
 
 
-def test_metadata_schema_default():
-    model = metadata.MetadataSchema()
-    assert model.schema == metadata.CURRENT_SCHEMA
-
-
 def test_get_url_from_src_md(tmp_path):
     """'src/foo.md' -> '/foo.html'."""
     path = tmp_path / "src" / "foo.md"
@@ -52,7 +47,6 @@ def test__read_from_markdown_generates_fields(tmp_path):
     assert data["url"] == "/doc.html"
     assert data["citation"] == "t"
     assert data["id"] == "doc"
-    assert data["schema"] == metadata.CURRENT_SCHEMA
 
 
 def test_read_from_yaml_generates_fields(tmp_path):
@@ -71,7 +65,6 @@ def test_read_from_yaml_generates_fields(tmp_path):
     assert data["url"] == "/item.html"
     assert data["citation"] == "foo"
     assert data["id"] == "item"
-    assert data["schema"] == metadata.CURRENT_SCHEMA
 
 
 def test_load_metadata_pair_conflict_shows_path(tmp_path, monkeypatch):

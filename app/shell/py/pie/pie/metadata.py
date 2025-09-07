@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import json
 import os
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Mapping, Optional
 from urllib.parse import urljoin
@@ -15,16 +14,6 @@ from flatten_dict import unflatten
 from pie.logging import logger
 from pie.yaml import YAML_EXTS, read_yaml, yaml
 from ruamel.yaml import YAMLError
-
-
-CURRENT_SCHEMA = "v1"
-
-
-@dataclass
-class MetadataSchema:
-    """Model describing the metadata schema version."""
-
-    schema: str = CURRENT_SCHEMA
 
 
 def get_url(filename: str) -> Optional[str]:
@@ -167,7 +156,6 @@ def generate_missing_metadata(
     _add_canonical_link_if_missing(metadata, filepath)
     _add_citation_if_missing(metadata, filepath)
     _add_id_if_missing(metadata, filepath)
-    _add_if_missing(metadata, 'schema', CURRENT_SCHEMA, filepath)
     _add_empty_if_missing(metadata, 'breadcrumbs', filepath)
     _add_empty_if_missing(metadata, 'description', filepath)
     _add_empty_if_missing(metadata, 'mathjax', filepath)
