@@ -14,6 +14,7 @@ from flatten_dict import unflatten
 from pie.logging import logger
 from pie.yaml import YAML_EXTS, read_yaml, yaml
 from ruamel.yaml import YAMLError
+from pie.schema import DEFAULT_SCHEMA
 
 
 def get_url(filename: str) -> Optional[str]:
@@ -176,6 +177,7 @@ def generate_missing_metadata(
     _add_empty_if_missing(metadata, 'twitter_card', filepath)
     _add_empty_if_missing(metadata, 'twitter_image', filepath)
     _add_empty_if_missing(metadata, 'pubdate', filepath)
+    _add_if_missing(metadata, 'schema', DEFAULT_SCHEMA, filepath)
     _add_if_missing(metadata, 'css', ['/css/style.css'], filepath)
     _add_if_missing(metadata, 'header', {'header':None}, filepath)
     _add_if_missing(metadata, 'header_includes', [], filepath)

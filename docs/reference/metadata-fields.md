@@ -28,6 +28,7 @@ several fields when they are missing:
 
 | Field      | Default value                                  |
 | ---------- | ---------------------------------------------- |
+| `schema`   | Current metadata schema version (`"v1"`)       |
 | `id`       | Filename without the extension                 |
 | `citation` | Lowercase form of the `title` value            |
 | `url`      | Derived from the source path (e.g. `src/foo.md` → `/foo.html`) |

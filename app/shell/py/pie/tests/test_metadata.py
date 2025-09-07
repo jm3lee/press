@@ -47,6 +47,7 @@ def test__read_from_markdown_generates_fields(tmp_path):
     assert data["url"] == "/doc.html"
     assert data["citation"] == "t"
     assert data["id"] == "doc"
+    assert data["schema"] == "v1"
 
 
 def test_read_from_yaml_generates_fields(tmp_path):
@@ -65,6 +66,14 @@ def test_read_from_yaml_generates_fields(tmp_path):
     assert data["url"] == "/item.html"
     assert data["citation"] == "foo"
     assert data["id"] == "item"
+    assert data["schema"] == "v1"
+
+
+def test_schema_default():
+    """Schema dataclass defaults to current version."""
+    from pie.schema import Schema
+
+    assert Schema().schema == "v1"
 
 
 def test_load_metadata_pair_conflict_shows_path(tmp_path, monkeypatch):
