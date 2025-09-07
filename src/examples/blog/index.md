@@ -1,11 +1,14 @@
 {% extends "src/templates/blog/template.html.jinja" %}
 {% block content %}
 <section>
+{% filter md %}
 Welcome to the future of blogging! This sample article demonstrates the
 `Jinja` blog template included with Press.
+{% endfilter %}
 </section>
 
 <section>
+{% filter md %}
 ## Eye-catching content
 
 Because the template uses a full-width hero image and clean typography,
@@ -18,9 +21,11 @@ CSS features so the page remains lightweight and accessible.
 
 Even long-form articles stay readable thanks to the comfortable
 line-height and responsive layout.
+{% endfilter %}
 </section>
 
 <section>
+{% filter md %}
 ## Easy to style
 
 Add your own CSS in the metadata to match your site's branding. The
@@ -33,9 +38,11 @@ improving performance on slower devices.
 
 Water.css provides a clean base, while the template's variables make it
 simple to tweak the look.
+{% endfilter %}
 </section>
 
 <section>
+{% filter md %}
 ## Mobile first
 
 Spacing and typographic scale adapt to smaller screens, so the article
@@ -44,9 +51,11 @@ layout in action.
 
 The hero image scales gracefully and the byline tucks beneath the title
 to save vertical space without sacrificing style.
+{% endfilter %}
 </section>
 
 <section>
+{% filter md %}
 ## Inspiration
 
 Feeling creative? Duplicate this folder and start writing. Because the
@@ -55,5 +64,6 @@ step getting in the way.
 
 Share your experiments with the community and keep pushing the template
 forward.
+{% endfilter %}
 </section>
 {% endblock %}
