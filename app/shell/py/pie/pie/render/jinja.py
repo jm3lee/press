@@ -16,6 +16,7 @@ import time
 from pathlib import Path
 
 import cmarkgfm
+import emoji
 from jinja2 import (
     Environment,
     FileSystemLoader,
@@ -486,7 +487,8 @@ def load_config(path: str | Path = DEFAULT_CONFIG) -> dict:
         raise SystemExit(1)
 
 
-def render_md(text):
+def render_press(text):
+    text = emoji.emojize(text, language='alias')
     return Markup(
         cmarkgfm.github_flavored_markdown_to_html(
             text,
@@ -519,7 +521,7 @@ def create_env():
     env.globals["read_json"] = read_json
     env.globals["read_yaml"] = read_yaml
     env.globals["cite"] = cite
-    env.filters["md"] = render_md
+    env.filters["press"] = render_press
     try:
         env.globals["anchor"] = env.get_template(
             "src/templates/anchor.jinja"

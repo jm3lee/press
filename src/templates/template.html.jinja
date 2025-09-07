@@ -181,10 +181,10 @@
       {% endif %}
 
       <!-- Body content generated from Markdown goes here -->
-      {% filter md %}
+      {% filter press %}
           {% block content %}
           {% endblock %}
-          {% endfilter %}
+      {% endfilter %}
 
       <!-- prev/next page links -->
       {% if prev %}

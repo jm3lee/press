@@ -1,14 +1,14 @@
 {% extends "src/templates/blog/template.html.jinja" %}
 {% block content %}
 <section>
-{% filter md %}
+{% filter press %}
 Welcome to the future of blogging! This sample article demonstrates the
 `Jinja` blog template included with Press.
 {% endfilter %}
 </section>
 
 <section>
-{% filter md %}
+{% filter press %}
 ## Eye-catching content
 
 Because the template uses a full-width hero image and clean typography,
@@ -25,7 +25,7 @@ line-height and responsive layout.
 </section>
 
 <section>
-{% filter md %}
+{% filter press %}
 ## Easy to style
 
 Add your own CSS in the metadata to match your site's branding. The
@@ -42,7 +42,7 @@ simple to tweak the look.
 </section>
 
 <section>
-{% filter md %}
+{% filter press %}
 ## Mobile first
 
 Spacing and typographic scale adapt to smaller screens, so the article
@@ -55,7 +55,7 @@ to save vertical space without sacrificing style.
 </section>
 
 <section>
-{% filter md %}
+{% filter press %}
 ## Inspiration
 
 Feeling creative? Duplicate this folder and start writing. Because the
