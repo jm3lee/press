@@ -209,7 +209,7 @@ def test_main_processes_markdown(tmp_path):
     in_md = tmp_path / "in.md"
     out_md = tmp_path / "out.md"
     in_md.write_text(
-        "# Heading\n```python\nprint('py', file=outfile)\n```\n[link](doc.md)\n",
+        "# Heading\n```python-exec\nprint('py', file=outfile)\n```\n[link](doc.md)\n",
         encoding="utf-8",
     )
     argv = ["include.py", tmp_path.as_posix(), in_md.as_posix(), out_md.as_posix()]
@@ -222,3 +222,37 @@ def test_main_processes_markdown(tmp_path):
         sys.argv = old_argv
         globals()["include_filter"] = importlib.import_module("pie.filter.include")
     assert out_md.read_text() == "# Heading\npy\n[link](doc.html)\n"
+
+
+def test_python_fence_highlighted_not_executed(tmp_path, monkeypatch):
+    """A ``python`` fence is highlighted and the code is not executed."""
+
+    in_md = tmp_path / "in.md"
+    out_md = tmp_path / "out.md"
+    in_md.write_text(
+        "```python\nprint('py', file=outfile)\n```\n",
+        encoding="utf-8",
+    )
+
+    executed: list[bool] = []
+    highlighted: list[str] = []
+
+    def fake_exec(lines):
+        executed.append(True)
+
+    def fake_highlight(lines, lang):
+        highlighted.append(lang)
+        include_filter.outfile.write(f"```{lang}\n")
+        for line in lines:
+            include_filter.outfile.write(line)
+        include_filter.outfile.write("```\n")
+
+    monkeypatch.setattr(include_filter, "execute_python_block", fake_exec)
+    monkeypatch.setattr(include_filter, "highlight_block", fake_highlight)
+
+    argv = [tmp_path.as_posix(), in_md.as_posix(), out_md.as_posix()]
+    include_filter.main(argv)
+
+    assert executed == []
+    assert highlighted == ["python"]
+    assert out_md.read_text() == "```python\nprint('py', file=outfile)\n```\n"

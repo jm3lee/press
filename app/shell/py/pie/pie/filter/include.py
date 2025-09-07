@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """Expand Python directives inside Markdown files.
 
-The ``include-filter`` command reads a source Markdown document, executes any
-fenced ``python`` code blocks, and writes the transformed output to another
-file.  Available helper functions include ``include()`` for inserting other
-Markdown files and ``mermaid()`` for converting Mermaid diagrams to images.
+The ``include-filter`` command reads a source Markdown document, executes
+``python`` blocks marked with an ``exec`` modifier, and writes the transformed
+output to another file.  Unmodified ``python`` fences are preserved and
+highlighted.  Available helper functions include ``include()`` for inserting
+other Markdown files and ``mermaid()`` for converting Mermaid diagrams to
+images.
 
-Links that end with ``.md`` are rewritten to ``.html`` so the output can be fed
-directly to downstream rendering.  The command is primarily driven via
-``preprocess`` and the
-repository root ``makefile``.
+Links that end with ``.md`` are rewritten to ``.html`` so the output can be
+fed directly to downstream rendering.  The command is primarily driven via
+``preprocess`` and the repository root ``makefile``.
 """
 
 from __future__ import annotations
@@ -152,6 +153,15 @@ def execute_python_block(lines: Iterable[str]) -> None:
     exec(code, globals())
 
 
+def highlight_block(lines: Iterable[str], lang: str) -> None:
+    """Write ``lines`` as a fenced code block using ``lang`` for highlighting."""
+
+    print(f"```{lang}", file=outfile)
+    for line in lines:
+        print(line, end="", file=outfile)
+    print("```", file=outfile)
+
+
 def new_filestem(stem: str) -> str:
     """Return *stem* with a numeric suffix that doesn't clash with existing files."""
 
@@ -207,9 +217,11 @@ def main(argv: list[str] | None = None) -> None:
     """Process a Markdown file and expand custom directives.
 
     ``include-filter`` is primarily used by the build scripts.  It executes any
-    ``python`` fenced blocks in the input and writes the resulting Markdown to
-    ``outfile``.  Links ending in ``.md`` are rewritten so the renderer can
-    convert the file directly to HTML.
+    ``python`` fenced blocks tagged with an ``exec`` modifier in the input and
+    writes the resulting Markdown to ``outfile``.  Other fences, including
+    ordinary ``python`` blocks, are echoed for syntax highlighting.  Links
+    ending in ``.md`` are rewritten so the renderer can convert the file
+    directly to HTML.
     """
 
     global outdir, infilename, outfilename, infile, outfile, heading_level
@@ -226,8 +238,24 @@ def main(argv: list[str] | None = None) -> None:
         outfilename, "w", encoding="utf-8"
     ) as outfile:
         for line in infile:
-            if line.strip() == "```python":
-                execute_python_block(yield_lines(infile))
+            stripped = line.strip()
+            if stripped.startswith("```"):
+                fence = stripped[3:].strip()
+                lang = ""
+                modifier = None
+                if fence:
+                    parts = fence.split()
+                    lang = parts[0]
+                    if len(parts) > 1:
+                        modifier = parts[1]
+                    if "-" in lang:
+                        lang, mod = lang.split("-", 1)
+                        modifier = modifier or mod
+                lines = yield_lines(infile)
+                if modifier == "exec":
+                    execute_python_block(lines)
+                else:
+                    highlight_block(lines, lang)
             else:
                 if line.startswith("#"):
                     parts = line.split(" ")

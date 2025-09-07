@@ -1,6 +1,8 @@
 # include-filter Utility
 
 `include-filter` processes Markdown files and expands inline Python directives.
+Standard `````python````` fences are highlighted. To execute inline Python, use
+a ``python-exec`` fence (`````python exec````` also works).
 
 Typical usage chains the command multiple times in the project `makefile` to
 resolve nested includes before rendering.
@@ -42,7 +44,7 @@ document.
 ### Example
 
 ```markdown
-```python
+```python-exec
 include("src/include-filter/a.md")
 ```
 ```
@@ -65,7 +67,7 @@ See `src/include-filter/index.md` for a complete example.
 
 ```markdown
 <dl>
-```python
+```python-exec
 # combine entries from two directories using include_deflist_filter
 include_deflist_entry(
     "src/include-filter",
@@ -84,7 +86,7 @@ image link.
 ### Example
 
 ```markdown
-```python
+```python-exec
 mermaid("src/examples/diagram.mmd", "Example diagram", "diagram")
 ```
 ```
