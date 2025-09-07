@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify that metadata files define an author."""
+"""Verify that metadata files define ``doc.author``."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ DEFAULT_LOG = "log/check-author.txt"
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
     parser = create_parser(
-        "Check that metadata files include an author field.",
+        "Check that metadata files include a doc.author field.",
         log_default=DEFAULT_LOG,
     )
     parser.add_argument(
@@ -63,12 +63,12 @@ def main(argv: list[str] | None = None) -> int:
     root = Path(args.directory)
     ok = True
     for paths, meta in _iter_metadata(root):
-        author = meta.get("author") if meta else None
+        author = meta.get("doc", {}).get("author") if meta else None
         for path in paths:
             if author:
-                logger.debug("Found author", path=str(path), author=author)
+                logger.debug("Found doc.author", path=str(path), author=author)
             else:
-                logger.error("Missing author", path=str(path))
+                logger.error("Missing doc.author", path=str(path))
                 ok = False
     return 0 if ok else 1
 
