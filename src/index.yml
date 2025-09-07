@@ -3,7 +3,7 @@ breadcrumbs:
 description: Example home page
 doc:
   author: Brian Lee
-  pubdate: Sep 06, 2025
+  pubdate: Sep 07, 2025
 id: home
 indextree:
   include-js: true

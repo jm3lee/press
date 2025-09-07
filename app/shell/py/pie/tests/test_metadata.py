@@ -135,11 +135,12 @@ def test__add_canonical_link_if_missing_no_url():
     assert "doc" not in info
 
 
-def test__add_canonical_link_if_missing_sets_value():
-    """URL present populates ``doc.link.canonical``."""
+def test__add_canonical_link_if_missing_sets_value(monkeypatch):
+    """URL present populates ``doc.link.canonical`` using ``BASE_URL``."""
+    monkeypatch.setenv("BASE_URL", "http://press.io")
     info = {"url": "/foo"}
     metadata._add_canonical_link_if_missing(info, "doc.md")
-    assert info["doc"]["link"]["canonical"] == "/foo"
+    assert info["doc"]["link"]["canonical"] == "http://press.io/foo"
 
 
 def test__get_redis_value_missing_returns_none():

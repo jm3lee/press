@@ -73,12 +73,14 @@ PERMALINKS_CONF := $(BUILD_DIR)/permalinks.conf
 # Define the default target to build everything
 .PHONY: everything
 everything: | $(BUILD_DIR) $(BUILD_SUBDIRS)
+	$(Q)START_TIME=$$(date +%s); export START_TIME
 	$(call status,Updating author)
 	$(Q)update-author --sort-keys
 	$(call status,Updating pubdate)
 	$(Q)update-pubdate --sort-keys
 	$(Q)$(MAKE) -s $(BUILD_DIR)/.update-index VERBOSE=$(VERBOSE)
 	$(Q)$(MAKE) -s all VERBOSE=$(VERBOSE)
+	$(Q)END_TIME=$$(date +%s); ELAPSED=$$((END_TIME - START_TIME)); echo "==> Total execution time: $$ELAPSED seconds"
 
 all: $(HTMLS)
 all: $(CSS)
