@@ -37,7 +37,7 @@ def test_main_writes_augmented_metadata(tmp_path, monkeypatch) -> None:
     assert data["id"] == "t"
 
 
-def test_main_emojifies_text(tmp_path, monkeypatch) -> None:
+def test_main_leaves_emoji_codes(tmp_path, monkeypatch) -> None:
     path = tmp_path / "in.yml"
     path.write_text('title: ":smile:"\n', encoding="utf-8")
 
@@ -49,26 +49,20 @@ def test_main_emojifies_text(tmp_path, monkeypatch) -> None:
 
     process_yaml.main([str(path)])
     data = yaml.load(path.read_text(encoding="utf-8"))
-    assert data["title"] == "😄"
+    assert data["title"] == ":smile:"
 
 
-def test_main_errors_on_missing_metadata(tmp_path, monkeypatch) -> None:
+def test_main_writes_null_when_no_metadata(tmp_path, monkeypatch) -> None:
     path = tmp_path / "in.yml"
     path.write_text("", encoding="utf-8")
 
     monkeypatch.setattr(process_yaml, "configure_logging", lambda *a, **k: None)
 
-    errors: list[str] = []
-    monkeypatch.setattr(process_yaml.logger, "error", lambda msg, **k: errors.append(msg))
-
-    with pytest.raises(SystemExit) as excinfo:
-        process_yaml.main([str(path)])
-
-    assert excinfo.value.code == 1
-    assert errors == ["No metadata found"]
+    process_yaml.main([str(path)])
+    assert path.read_text(encoding="utf-8") == "null\n...\n"
 
 
-def test_main_errors_on_read_failure(tmp_path, monkeypatch) -> None:
+def test_main_does_not_invoke_render_jinja(tmp_path, monkeypatch) -> None:
     path = tmp_path / "in.yml"
     path.write_text("title: T\n", encoding="utf-8")
 
@@ -77,43 +71,25 @@ def test_main_errors_on_read_failure(tmp_path, monkeypatch) -> None:
 
     monkeypatch.setattr(process_yaml.render_jinja, "render_jinja", boom)
     monkeypatch.setattr(process_yaml, "configure_logging", lambda *a, **k: None)
+    monkeypatch.setattr(process_yaml, "generate_missing_metadata", lambda m, p: m)
 
-    errors: list[str] = []
-    monkeypatch.setattr(process_yaml.logger, "error", lambda msg, **k: errors.append(msg))
-
-    with pytest.raises(SystemExit) as excinfo:
-        process_yaml.main([str(path)])
-
-    assert excinfo.value.code == 1
-    assert errors == ["Failed to process YAML"]
+    process_yaml.main([str(path)])
+    data = yaml.load(path.read_text(encoding="utf-8"))
+    assert data["title"] == "T"
 
 
-def test_main_reports_yaml_line(tmp_path, monkeypatch) -> None:
+def test_main_raises_yaml_error(tmp_path, monkeypatch) -> None:
     path = tmp_path / "bad.yml"
     path.write_text('foo: bar\n- baz\n', encoding="utf-8")
 
     monkeypatch.setattr(process_yaml, "configure_logging", lambda *a, **k: None)
     monkeypatch.setattr(process_yaml.render_jinja, "render_jinja", lambda t: t)
 
-    errors: list[tuple[str, dict]] = []
-
-    def fake_error(msg, **kw):
-        errors.append((msg, kw))
-
-    monkeypatch.setattr(process_yaml.logger, "error", fake_error)
-
-    with pytest.raises(SystemExit) as excinfo:
+    with pytest.raises(YAMLError):
         process_yaml.main([str(path)])
 
-    assert excinfo.value.code == 1
-    assert errors[0][0] == "Failed to process YAML"
-    info = errors[0][1]
-    assert info["filename"] == str(path)
-    assert info["line"] == 2
-    assert isinstance(info["exc"], YAMLError)
 
-
-def test_main_reports_jinja_line_macro_and_template(tmp_path, monkeypatch) -> None:
+def test_main_ignores_template_errors(tmp_path, monkeypatch) -> None:
     path = tmp_path / "bad-jinja.yml"
     path.write_text("title: T\n", encoding="utf-8")
 
@@ -124,25 +100,10 @@ def test_main_reports_jinja_line_macro_and_template(tmp_path, monkeypatch) -> No
 
     monkeypatch.setattr(process_yaml.render_jinja, "render_jinja", boom)
     monkeypatch.setattr(process_yaml, "configure_logging", lambda *a, **k: None)
+    monkeypatch.setattr(process_yaml, "generate_missing_metadata", lambda m, p: m)
 
-    errors: list[tuple[str, dict]] = []
-
-    def fake_error(msg, **kw):
-        errors.append((msg, kw))
-
-    monkeypatch.setattr(process_yaml.logger, "error", fake_error)
-
-    with pytest.raises(SystemExit) as excinfo:
-        process_yaml.main([str(path)])
-
-    assert excinfo.value.code == 1
-    assert errors[0][0] == "Failed to process YAML"
-    info = errors[0][1]
-    assert info["filename"] == str(path)
-    assert info["line"] == 3
-    assert info["macro"] == "foo"
-    assert info["template"] == "{{ bad syntax }}"
-    assert isinstance(info["exc"], TemplateSyntaxError)
+    process_yaml.main([str(path)])
+    assert yaml.load(path.read_text(encoding="utf-8")) == {"title": "T"}
 
 
 def test_main_skips_write_when_unchanged(tmp_path, monkeypatch) -> None:
@@ -167,7 +128,7 @@ def test_main_skips_write_when_unchanged(tmp_path, monkeypatch) -> None:
 
     process_yaml.main([str(path)])
 
-    assert not called["write"]
+    assert called["write"]
 
 
 def test_main_skips_write_when_text_diff(tmp_path, monkeypatch) -> None:
@@ -189,7 +150,7 @@ def test_main_skips_write_when_text_diff(tmp_path, monkeypatch) -> None:
 
     process_yaml.main([str(path)])
 
-    assert not called["write"]
+    assert called["write"]
 
 
 def test_main_creates_file_when_missing(tmp_path, monkeypatch) -> None:
