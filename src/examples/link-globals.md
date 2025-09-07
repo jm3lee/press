@@ -88,5 +88,5 @@ Jinja globals work inside YAML metadata. The `link-globals.yml` file defines
 
 Rendered:
 
-{{ get_desc('link-globals')['summary'] }}
+{{ render_jinja(summary) }}
 {% endblock %}
