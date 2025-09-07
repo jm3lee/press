@@ -4,6 +4,8 @@ breadcrumbs:
 - title: Quiz
 doc:
   author: Brian Lee
-  pubdate: Aug 12, 2025
+  pubdate: Sep 07, 2025
+header_includes:
+- <script type="module" src="/static/js/quiz.js" defer></script>
 id: quiz
 title: Quiz
