@@ -13,7 +13,7 @@ from pie.yaml import YAML_EXTS, yaml, write_yaml
 
 __all__ = ["main"]
 
-FIELDS = ("author", "pubdate", "link")
+FIELDS = ("author", "pubdate", "link", "title")
 
 
 def _migrate_mapping(data: dict) -> tuple[dict, bool]:
