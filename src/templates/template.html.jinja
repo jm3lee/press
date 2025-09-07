@@ -161,9 +161,9 @@
       </nav>
       {% endif %}
       <div class="metablock">
-        {% if author %} {{ author }}<br />
+        {% if doc.author %} {{ doc.author }}<br />
         {% endif %}
-    {% if pubdate %} {{ pubdate }}<br />
+    {% if pubdate %} {{ doc.pubdate }}<br />
         {% endif %}
     {% if status %} {{ status }} {% endif %}
     {% if partof %} Part of: {{ partof }}

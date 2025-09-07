@@ -128,8 +128,8 @@
         {% endif %}
         <h1>{{ title }}</h1>
         <p class="byline">
-          {% if author %}<span class="author">{{ author }}</span>{% endif %}
-          {% if pubdate %} • <time datetime="{{ pubdate }}">{{ pubdate }}</time>{% endif %}
+          {% if doc.author %}<span class="author">{{ doc.author }}</span>{% endif %}
+          {% if doc.pubdate %} • <time datetime="{{ doc.pubdate }}">{{ doc.pubdate }}</time>{% endif %}
         </p>
         {% if preamble %}<p class="preamble">{{ preamble | safe }}</p>{% endif %}
       </header>
