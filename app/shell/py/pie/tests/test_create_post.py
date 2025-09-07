@@ -8,6 +8,7 @@ yaml = YAML(typ="safe")
 
 from pie.create import post
 from pie.utils import get_pubdate
+from pie.metadata import CURRENT_SCHEMA
 
 
 def test_create_post_creates_files(tmp_path: Path, monkeypatch) -> None:
@@ -22,7 +23,8 @@ def test_create_post_creates_files(tmp_path: Path, monkeypatch) -> None:
     assert yml_file.exists(), "YAML file should be created"
 
     data = yaml.load(yml_file.read_text(encoding="utf-8"))
-    assert set(data) == {"author", "pubdate", "title", "breadcrumbs"}
+    assert set(data) == {"schema", "author", "pubdate", "title", "breadcrumbs"}
+    assert data["schema"] == CURRENT_SCHEMA
     assert data["pubdate"] == get_pubdate()
     assert data["breadcrumbs"] == [
         {"title": "Home", "url": "/"},
