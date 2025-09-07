@@ -80,7 +80,11 @@ everything: | $(BUILD_DIR) $(BUILD_SUBDIRS)
 	$(Q)update-pubdate --sort-keys
 	$(Q)$(MAKE) -s $(BUILD_DIR)/.update-index VERBOSE=$(VERBOSE)
 	$(Q)$(MAKE) -s all VERBOSE=$(VERBOSE)
-	$(Q)END_TIME=$$(date +%s); ELAPSED=$$((END_TIME - START_TIME)); echo "==> Total execution time: $$ELAPSED seconds"
+	$(Q)END_TIME=$$(date +%s); \
+	ELAPSED=$$((END_TIME - START_TIME)); \
+	MIN=$$((ELAPSED / 60)); \
+	SEC=$$((ELAPSED % 60)); \
+	printf "==> Total execution time: %dm %ds\n" $$MIN $$SEC
 
 all: $(HTMLS)
 all: $(CSS)
