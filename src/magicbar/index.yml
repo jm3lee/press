@@ -4,6 +4,8 @@ breadcrumbs:
 - title: MagicBar Demo
 doc:
   author: Brian Lee
-  pubdate: Jan 1, 2025
+  pubdate: Sep 07, 2025
+header_includes:
+- <script type="module" src="/static/js/magicbar.js" defer></script>
 id: magicbar
 title: MagicBar Demo

@@ -6,6 +6,8 @@ breadcrumbs:
 - title: IndexTree Demo
 doc:
   author: Brian Lee
-  pubdate: Aug 27, 2025
+  pubdate: Sep 07, 2025
+header_includes:
+- <script type="module" src="/static/js/indextree.js" defer></script>
 id: indextree-demo
 title: IndexTree Demo
