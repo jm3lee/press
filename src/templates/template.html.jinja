@@ -212,8 +212,6 @@
       </nav>
       {% endif %}
 
-      <!-- Optional scripts and footers can be included similarly -->
-      {% for header_include in header_includes %} {{ header_include | safe }} {% endfor %}
     </main>
 
     <footer class="footer p-5 bg-dark text-white text-center">
@@ -222,6 +220,10 @@
         <small>Published using Press</small>
       </p>
     </footer>
+
+    {% for header_include in header_includes %}
+    {{ header_include | safe }}
+    {% endfor %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -250,9 +252,6 @@
       async
       src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
     ></script>
-    {% endif %}
-    {% if indextree is defined and indextree.get("include-js") %}
-    <script type="module" src="/static/js/indextree.js" defer></script>
     {% endif %}
   </body>
 </html>

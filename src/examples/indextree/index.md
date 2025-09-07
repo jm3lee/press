@@ -20,5 +20,4 @@ indextree-json -t demo files tagged.json
 
 ## Tagged
 <div class="indextree-root" data-src="/examples/indextree/tagged.json"></div>
-<script type="module" src="/static/js/indextree.js" defer></script>
 {% endblock %}

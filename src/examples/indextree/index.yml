@@ -8,4 +8,6 @@ doc:
   author: Brian Lee
   pubdate: Aug 27, 2025
 id: indextree-demo
+header_includes:
+  - '<script type="module" src="/static/js/indextree.js" defer></script>'
 title: IndexTree Demo

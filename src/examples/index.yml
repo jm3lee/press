@@ -8,6 +8,7 @@ doc:
   pubdate: Sep 07, 2025
 id: examples
 indextree:
-  include-js: true
   link: true
+header_includes:
+  - '<script type="module" src="/static/js/indextree.js" defer></script>'
 title: Examples
