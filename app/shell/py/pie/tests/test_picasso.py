@@ -19,7 +19,8 @@ def test_generate_rule_basic(tmp_path, monkeypatch):
         "\t$(call status,Preprocess $<)\n"
         "\t$(Q)mkdir -p $(dir build/foo/bar.yml)\n"
         "\t$(Q)cp $< $@; process-yaml $@\n"
-        "build/foo/bar.html: build/foo/bar.md build/foo/bar.yml $(HTML_TEMPLATE)\n"
+        "build/foo/bar.html: build/foo/bar.md build/foo/bar.yml "
+        "$(HTML_TEMPLATE) | $(BUILD_DIR)/.update-index\n"
         "\t$(call status,Generate HTML $@)\n"
         "\t$(Q)render-html build/foo/bar.md build/foo/bar.yml $@"
     )
@@ -49,7 +50,8 @@ def test_generate_rule_with_template(tmp_path, monkeypatch):
         "\t$(Q)mkdir -p $(dir build/foo/bar.yml)\n"
         "\t$(Q)cp $< $@; process-yaml $@\n"
         "build/foo/bar.html: build/foo/bar.md build/foo/bar.yml "
-        "src/templates/blog/template.html.jinja\n"
+        "src/templates/blog/template.html.jinja | "
+        "$(BUILD_DIR)/.update-index\n"
         "\t$(call status,Generate HTML $@)\n"
         "\t$(Q)render-html build/foo/bar.md build/foo/bar.yml $@"
     )
