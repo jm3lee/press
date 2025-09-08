@@ -6,7 +6,8 @@ doc:
   author: Brian Lee
   pubdate: Sep 07, 2025
   title: Quiz
-header_includes:
-- <script type="module" src="/static/js/quiz.js" defer></script>
+html:
+  scripts:
+  - <script type="module" src="/static/js/quiz.js" defer></script>
 id: quiz
 schema: v1

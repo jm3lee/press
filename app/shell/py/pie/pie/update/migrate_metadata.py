@@ -1,4 +1,4 @@
-"""Move legacy metadata fields under ``doc``."""
+"""Move legacy metadata fields under ``doc`` and ``html.scripts``."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ FIELDS = ("author", "pubdate", "link", "title", "citation")
 
 
 def _migrate_mapping(data: dict) -> tuple[dict, bool]:
-    """Move legacy fields into ``doc`` and return ``(data, changed)``."""
+    """Move legacy fields into ``doc`` and ``html.scripts``."""
     changed = False
     doc = data.get("doc")
     if not isinstance(doc, dict):
@@ -31,6 +31,27 @@ def _migrate_mapping(data: dict) -> tuple[dict, bool]:
     if doc:
         if data.get("doc") != doc:
             data["doc"] = doc
+            changed = True
+    if "header_includes" in data:
+        html = data.get("html")
+        if not isinstance(html, dict):
+            html = {}
+        else:
+            html = dict(html)
+        scripts = html.get("scripts")
+        if scripts is None:
+            scripts = []
+        else:
+            scripts = list(scripts)
+        header_includes = data.pop("header_includes")
+        if not isinstance(header_includes, list):
+            header_includes = [header_includes]
+        scripts.extend(header_includes)
+        if html.get("scripts") != scripts:
+            html["scripts"] = scripts
+            changed = True
+        if data.get("html") != html:
+            data["html"] = html
             changed = True
     return data, changed
 
@@ -89,7 +110,8 @@ def walk_files(paths: Iterable[Path]) -> Iterable[Path]:
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = create_parser(
-        "Move top-level author/pubdate/link/title/citation fields under doc",
+        "Move top-level author/pubdate/link/title/citation fields under doc "
+        "and header_includes under html.scripts",
         log_default="log/migrate-metadata.txt",
     )
     parser.add_argument("paths", nargs="+", help="Files or directories to scan")

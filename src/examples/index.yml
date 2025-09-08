@@ -7,8 +7,9 @@ doc:
   author: Brian Lee
   pubdate: Sep 07, 2025
   title: Examples
-header_includes:
-- <script type="module" src="/static/js/indextree.js" defer></script>
+html:
+  scripts:
+  - <script type="module" src="/static/js/indextree.js" defer></script>
 id: examples
 indextree:
   link: true

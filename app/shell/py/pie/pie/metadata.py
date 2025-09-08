@@ -180,8 +180,7 @@ def generate_missing_metadata(
     _add_empty_if_missing(metadata, 'pubdate', filepath)
     _add_if_missing(metadata, 'schema', DEFAULT_SCHEMA, filepath)
     _add_if_missing(metadata, 'css', ['/css/style.css'], filepath)
-    _add_if_missing(metadata, 'header', {'header':None}, filepath)
-    _add_if_missing(metadata, 'header_includes', [], filepath)
+    _add_if_missing(metadata, 'header', {'header': None}, filepath)
     logger.debug("returning", metadata=metadata)
     return metadata
 

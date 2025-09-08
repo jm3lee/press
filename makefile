@@ -147,9 +147,9 @@ $(BUILD_DIR)/%.md: %.md | $(BUILD_DIR)
 	$(Q)cp $< $@
 
 # Generate HTML from processed Markdown using render-html
-$(BUILD_DIR)/%.html: $(BUILD_DIR)/%.md $(BUILD_DIR)/%.yml $(HTML_TEMPLATE) | $(BUILD_DIR)/.update-index $(BUILD_DIR)
+$(BUILD_DIR)/%.html: $(BUILD_DIR)/%.md $(BUILD_DIR)/%.yml $(HTML_TEMPLATE) | $(BUILD_DIR)
 	$(call status,Generate HTML $@)
-	$(Q)render-html --template $(HTML_TEMPLATE) $< $@ -c $(BUILD_DIR)/$*.yml
+	$(Q)render-html $(BUILD_DIR)/%.md $< $@
 
 # Clean the build directory by removing all build artifacts
 .PHONY: clean
