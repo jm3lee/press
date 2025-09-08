@@ -46,6 +46,7 @@ def test__read_from_markdown_generates_fields(tmp_path):
     assert data["title"] == "T"
     assert data["url"] == "/doc.html"
     assert data["doc"]["citation"] == "t"
+    assert data["doc"]["mathjax"] is False
     assert data["id"] == "doc"
     assert data["schema"] == "v1"
 
@@ -65,6 +66,7 @@ def test_read_from_yaml_generates_fields(tmp_path):
     assert data["title"] == "Foo"
     assert data["url"] == "/item.html"
     assert data["doc"]["citation"] == "foo"
+    assert data["doc"]["mathjax"] is False
     assert data["id"] == "item"
     assert data["schema"] == "v1"
 
@@ -150,6 +152,13 @@ def test__add_canonical_link_if_missing_sets_value(monkeypatch):
     info = {"url": "/foo"}
     metadata._add_canonical_link_if_missing(info, "doc.md")
     assert info["doc"]["link"]["canonical"] == "http://press.io/foo"
+
+
+def test__add_if_missing_nested_key():
+    """Nested dotted keys are created when missing."""
+    info: dict[str, str] = {}
+    metadata._add_if_missing(info, "foo.bar", "baz", "doc.md")
+    assert info["foo"]["bar"] == "baz"
 
 
 def test__get_redis_value_missing_returns_none():

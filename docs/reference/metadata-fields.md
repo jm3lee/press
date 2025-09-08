@@ -11,6 +11,7 @@ missing values are automatically generated.
 
 - `doc.author` – Author string used in metadata.
 - `doc.pubdate` – Publication date used for document listings.
+- `doc.mathjax` – Enable MathJax support when set to `true`.
 - `definition` – Markdown snippet rendered through the `definition` global
   and used for meta tags.
 - `og_image` – OpenGraph image path.
@@ -33,6 +34,7 @@ several fields when they are missing:
 | `doc.citation` | Lowercase form of the `title` value            |
 | `url`      | Derived from the source path (e.g. `src/foo.md` → `/foo.html`) |
 | `doc.link.canonical` | Absolute form of the `url` value          |
+| `doc.mathjax` | `false` — MathJax is disabled by default        |
 
 The `doc.citation` value is used as the anchor text when other pages link to
 this document using Jinja globals such as `linktitle`. The helper that assigns
@@ -48,4 +50,5 @@ text in parentheses.
 
 `doc.link.tracking` defaults to `true`, meaning links open in the same tab.
 `doc.link.class` defaults to `internal-link`.
+`doc.mathjax` defaults to `false`, so MathJax is not loaded by default.
 
