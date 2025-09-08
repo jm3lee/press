@@ -495,7 +495,10 @@ def render_press(text):
     return Markup(
         cmarkgfm.github_flavored_markdown_to_html(
             text,
-            options=cmarkgfm.Options.CMARK_OPT_UNSAFE,
+            options=(
+                cmarkgfm.Options.CMARK_OPT_UNSAFE
+                | cmarkgfm.Options.CMARK_OPT_FOOTNOTES
+            ),
         )
     )
 
