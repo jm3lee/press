@@ -181,6 +181,7 @@ def generate_missing_metadata(
     _add_if_missing(metadata, 'schema', DEFAULT_SCHEMA, filepath)
     _add_if_missing(metadata, 'css', ['/css/style.css'], filepath)
     _add_if_missing(metadata, 'header', {'header': None}, filepath)
+    _add_if_missing(metadata, 'html', {'scripts':[]}, filepath)
     logger.debug("returning", metadata=metadata)
     return metadata
 
