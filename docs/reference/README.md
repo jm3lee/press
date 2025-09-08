@@ -22,7 +22,7 @@ existing documents.
 - [update-pubdate.md](update-pubdate.md) – update the `doc.pubdate` field for
 modified files.
 - [migrate-metadata.md](migrate-metadata.md) – move legacy fields under
-  `doc`.
+  `doc` and header includes under `html.scripts`.
 - [update-url.md](update-url.md) – rename files and update URL fields.
 - [update-link-filters.md](update-link-filters.md) – convert legacy `link*`
 filters into globals.

@@ -5,8 +5,9 @@ doc:
   author: Brian Lee
   pubdate: Sep 07, 2025
   title: Home
-header_includes:
-- <script type="module" src="/static/js/indextree.js" defer></script>
+html:
+  scripts:
+  - <script type="module" src="/static/js/indextree.js" defer></script>
 id: home
 og_image: /img/home.png
 schema: v1

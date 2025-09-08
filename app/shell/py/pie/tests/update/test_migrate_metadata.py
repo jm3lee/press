@@ -53,3 +53,30 @@ def test_moves_fields_under_doc(tmp_path: Path, capsys) -> None:
     assert f"{md}: migrated" in out_lines
     assert "2 files checked" in out_lines[-2]
     assert "2 files changed" in out_lines[-1]
+
+
+def test_moves_header_includes_to_html_scripts(
+    tmp_path: Path, capsys
+) -> None:
+    """`header_includes` moves under `html.scripts`."""
+    src = tmp_path / "src"
+    src.mkdir()
+
+    yml = src / "doc.yml"
+    yml.write_text(
+        "header_includes:\n- <script src=\"app.js\"></script>\n",
+        encoding="utf-8",
+    )
+
+    migrate_metadata.main([str(src)])
+
+    data = yaml.load(yml.read_text(encoding="utf-8"))
+    assert data["html"]["scripts"] == [
+        "<script src=\"app.js\"></script>"
+    ]
+    assert "header_includes" not in data
+
+    out_lines = capsys.readouterr().out.strip().splitlines()
+    assert f"{yml}: migrated" in out_lines
+    assert "1 file checked" in out_lines[-2]
+    assert "1 file changed" in out_lines[-1]
