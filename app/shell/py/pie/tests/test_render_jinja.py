@@ -97,3 +97,9 @@ def test_render_press_ignores_unknown_alias():
     html = jinja.render_press("Hi :does_not_exist:")
     assert str(html) == "<p>Hi :does_not_exist:</p>\n"
 
+
+def test_render_press_renders_footnotes():
+    text = "Note.[^1]\n\n[^1]: Footnote"
+    html = jinja.render_press(text)
+    assert '<section class="footnotes"' in str(html)
+
