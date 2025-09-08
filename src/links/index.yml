@@ -1,8 +1,10 @@
-author: Brian Lee
 breadcrumbs:
 - title: Home
   url: /
 - title: Links
+doc:
+  author: Brian Lee
+  pubdate: Sep 07, 2025
+  title: Links
 id: links
-pubdate: Sep 02, 2025
-title: Links
+schema: v1

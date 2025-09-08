@@ -32,7 +32,7 @@ def test_get_url_invalid_raises(tmp_path):
 
 
 def test__read_from_markdown_generates_fields(tmp_path):
-    """Frontmatter {'title': 'T'} -> url/id/citation added."""
+    """Frontmatter {'title': 'T'} -> url/id/doc.citation added."""
     md = tmp_path / "src" / "doc.md"
     md.parent.mkdir(parents=True)
     md.write_text("---\n{\"title\": \"T\"}\n---\nbody")
@@ -45,12 +45,13 @@ def test__read_from_markdown_generates_fields(tmp_path):
         os.chdir("/tmp")
     assert data["title"] == "T"
     assert data["url"] == "/doc.html"
-    assert data["citation"] == "t"
+    assert data["doc"]["citation"] == "t"
     assert data["id"] == "doc"
+    assert data["schema"] == "v1"
 
 
 def test_read_from_yaml_generates_fields(tmp_path):
-    """YAML {'title': 'Foo'} -> metadata with url/id/citation."""
+    """YAML {'title': 'Foo'} -> metadata with url/id/doc.citation."""
     yml = tmp_path / "src" / "item.yml"
     yml.parent.mkdir(parents=True)
     yml.write_text('{"title": "Foo"}')
@@ -63,8 +64,16 @@ def test_read_from_yaml_generates_fields(tmp_path):
         os.chdir("/tmp")
     assert data["title"] == "Foo"
     assert data["url"] == "/item.html"
-    assert data["citation"] == "foo"
+    assert data["doc"]["citation"] == "foo"
     assert data["id"] == "item"
+    assert data["schema"] == "v1"
+
+
+def test_schema_default():
+    """Schema dataclass defaults to current version."""
+    from pie.schema import Schema
+
+    assert Schema().schema == "v1"
 
 
 def test_load_metadata_pair_conflict_shows_path(tmp_path, monkeypatch):
@@ -115,24 +124,32 @@ def test_get_url_from_build_md(tmp_path):
 
 
 def test__add_citation_if_missing_from_name():
-    """Deprecated 'name' populates 'citation'."""
+    """Deprecated 'name' populates 'doc.citation'."""
     info = {"name": "Example"}
     metadata._add_citation_if_missing(info, "doc.md")
-    assert info["citation"] == "example"
+    assert info["doc"]["citation"] == "example"
 
 
 def test__add_canonical_link_if_missing_existing():
     """Existing canonical link is preserved."""
-    info = {"link": {"canonical": "/x"}}
+    info = {"doc": {"link": {"canonical": "/x"}}}
     metadata._add_canonical_link_if_missing(info, "doc.md")
-    assert info["link"]["canonical"] == "/x"
+    assert info["doc"]["link"]["canonical"] == "/x"
 
 
 def test__add_canonical_link_if_missing_no_url():
     """No url leaves canonical link unset."""
     info: dict[str, str] = {}
     metadata._add_canonical_link_if_missing(info, "doc.md")
-    assert "link" not in info
+    assert "doc" not in info
+
+
+def test__add_canonical_link_if_missing_sets_value(monkeypatch):
+    """URL present populates ``doc.link.canonical`` using ``BASE_URL``."""
+    monkeypatch.setenv("BASE_URL", "http://press.io")
+    info = {"url": "/foo"}
+    metadata._add_canonical_link_if_missing(info, "doc.md")
+    assert info["doc"]["link"]["canonical"] == "http://press.io/foo"
 
 
 def test__get_redis_value_missing_returns_none():

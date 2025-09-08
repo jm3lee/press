@@ -14,6 +14,7 @@ from flatten_dict import unflatten
 from pie.logging import logger
 from pie.yaml import YAML_EXTS, read_yaml, yaml
 from ruamel.yaml import YAMLError
+from pie.schema import DEFAULT_SCHEMA
 
 
 def get_url(filename: str) -> Optional[str]:
@@ -78,18 +79,19 @@ def _add_url_if_missing(metadata: dict[str, Any], filepath: str) -> None:
 
 
 def _add_citation_if_missing(metadata: dict[str, Any], filepath: str) -> None:
-    """Derive ``citation`` from ``title`` or deprecated ``name``."""
+    """Derive ``doc.citation`` from ``doc.title`` or deprecated ``name``."""
 
-    if "citation" not in metadata:
-        title = metadata.get("title")
+    doc = metadata.setdefault("doc", {})
+    if "citation" not in doc:
+        title = doc.get("title") or metadata.get("title")
         if title:
-            metadata["citation"] = title.lower()
+            doc["citation"] = title.lower()
         elif "name" in metadata:
             logger.warning(
                 "'name' field is deprecated; use 'title' instead",
                 filename=filepath,
             )
-            metadata["citation"] = metadata["name"].lower()
+            doc["citation"] = metadata["name"].lower()
 
 
 def _add_id_if_missing(metadata: dict[str, Any], filepath: str) -> None:
@@ -106,10 +108,13 @@ def _add_id_if_missing(metadata: dict[str, Any], filepath: str) -> None:
 
 
 def _add_canonical_link_if_missing(metadata: dict[str, Any], filepath: str) -> None:
-    """Create ``link.canonical`` from ``url`` when missing."""
+    """Create ``doc.link.canonical`` from ``url`` when missing."""
 
-    if metadata.get("link", {}).get("canonical"):
-        return
+    doc = metadata.get("doc")
+    if isinstance(doc, dict):
+        link = doc.get("link")
+        if isinstance(link, dict) and link.get("canonical"):
+            return
 
     url = metadata.get("url")
     if url is None:
@@ -119,7 +124,7 @@ def _add_canonical_link_if_missing(metadata: dict[str, Any], filepath: str) -> N
     base_url = os.getenv("BASE_URL", "").rstrip("/")
     canonical = urljoin(base_url + "/", url.lstrip("/")) if base_url else url
 
-    metadata.setdefault("link", {})["canonical"] = canonical
+    metadata.setdefault("doc", {}).setdefault("link", {})["canonical"] = canonical
 
 
 def _add_empty_if_missing(metadata: dict[str, Any], field: str, filepath: str) -> None:
@@ -173,9 +178,11 @@ def generate_missing_metadata(
     _add_empty_if_missing(metadata, 'twitter_card', filepath)
     _add_empty_if_missing(metadata, 'twitter_image', filepath)
     _add_empty_if_missing(metadata, 'pubdate', filepath)
+    _add_if_missing(metadata, 'schema', DEFAULT_SCHEMA, filepath)
     _add_if_missing(metadata, 'css', ['/css/style.css'], filepath)
     _add_if_missing(metadata, 'header', {'header':None}, filepath)
     _add_if_missing(metadata, 'header_includes', [], filepath)
+    logger.debug("returning", metadata=metadata)
     return metadata
 
 

@@ -1,11 +1,13 @@
-author: Brian Lee
 breadcrumbs:
 - title: Home
   url: /
 - title: Examples
   url: /examples/
 - title: Responsive Images
-citation: responsive-images
+doc:
+  citation: responsive-images
+  author: Brian Lee
+  pubdate: Sep 07, 2025
+  title: Responsive Images
 id: responsive-images
-pubdate: Sep 02, 2025
-title: Responsive Images
+schema: v1

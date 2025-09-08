@@ -92,20 +92,15 @@ def _process_path(path: Path) -> tuple[dict | None, dict | None, str | None, str
     """Return metadata and intermediate values for ``path``."""
     if path.exists():
         text = path.read_text(encoding="utf-8")
-        rendered = text
-        existing = yaml.load(rendered)
+        existing = yaml.load(text)
         metadata = copy.deepcopy(existing) if existing is not None else None
     else:
         existing = None
-        text = rendered = None
+        text = None
         metadata = {}
     if metadata is not None:
-        render_jinja.index_json = metadata
-        metadata = _render_templates(metadata)
         metadata = generate_missing_metadata(metadata, str(path))
-        metadata = _render_templates(metadata)
-        metadata = _emojify(metadata)
-    return metadata, existing, rendered, text
+    return metadata
 
 
 def _unchanged(
@@ -133,19 +128,7 @@ def main(argv: Iterable[str] | None = None) -> None:
 
     for path_str in args.paths:
         path = Path(path_str)
-        try:
-            metadata, existing, rendered, text = _process_path(path)
-        except Exception as exc:  # pragma: no cover - pass through message
-            _raise_processing_error(path, exc)
-
-        if metadata is None:
-            logger.error("No metadata found", filename=str(path))
-            sys.exit(1)
-
-        if _unchanged(existing, metadata, rendered, text):
-            logger.debug("Processed YAML unchanged", path=str(path))
-            continue
-
+        metadata = _process_path(path)
         write_yaml(metadata, str(path))
         logger.debug("Processed YAML written", path=str(path))
 

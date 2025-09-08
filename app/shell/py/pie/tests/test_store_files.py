@@ -48,8 +48,8 @@ def test_process_file_moves_and_creates_metadata(tmp_path: Path, monkeypatch) ->
     meta_data = yaml.load(expected_yaml)
     assert meta_data["id"] == "fixedid"
     assert meta_data["url"] == "/v2/files/0/fixedid"
-    assert meta_data["author"] == ""
-    assert meta_data["pubdate"] == ""
+    assert meta_data["doc"]["author"] == ""
+    assert meta_data["doc"]["pubdate"] == ""
     assert not src.exists()
 
 

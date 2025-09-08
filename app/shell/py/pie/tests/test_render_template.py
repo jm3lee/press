@@ -5,14 +5,14 @@ from pie import metadata
 
 
 def test_default_class():
-    desc = {"citation": "foo", "url": "/f"}
+    desc = {"doc": {"citation": "foo"}, "url": "/f"}
     html = render_template.render_link(desc, style="title")
     assert 'class="internal-link"' in html
 
 
 def test_override_class():
     """link.class overrides default."""
-    desc = {"citation": "foo", "url": "/f", "link": {"class": "external"}}
+    desc = {"doc": {"citation": "foo"}, "url": "/f", "link": {"class": "external"}}
     html = render_template.render_link(desc, style="title")
     assert 'class="external"' in html
 
@@ -33,7 +33,7 @@ def test_tracking_true_returns_empty():
 
 def test_no_link_returns_empty():
     """No link section -> empty options."""
-    desc = {"citation": "foo"}
+    desc = {"doc": {"citation": "foo"}}
     opts = render_template.get_tracking_options(desc)
     assert opts == ""
 
@@ -48,7 +48,7 @@ def test_missing_tracking_returns_empty():
 def test_linktitle_uses_redis(monkeypatch):
     """Redis provides citation and url."""
     fake = fakeredis.FakeRedis(decode_responses=True)
-    fake.set("item.citation", "Item")
+    fake.set("item.doc.citation", "Item")
     fake.set("item.url", "/i")
     monkeypatch.setattr(metadata, "redis_conn", fake)
     render_template.index_json = {}
@@ -70,7 +70,7 @@ def test_linktitle_missing_raises(monkeypatch):
 
 def test_linktitle_skips_small_words():
     """Title style capitalizes but skips small words."""
-    desc = {"citation": "movement in a circle", "url": "/c"}
+    desc = {"doc": {"citation": "movement in a circle"}, "url": "/c"}
     html = render_template.render_link(desc, style="title")
     assert ">Movement in a Circle<" in html
 
@@ -78,7 +78,7 @@ def test_linktitle_skips_small_words():
 def test_link_uses_redis_tracking_and_ignores_icon(monkeypatch):
     """Redis data with tracking adds attrs, icon skipped."""
     fake = fakeredis.FakeRedis(decode_responses=True)
-    fake.set("entry.citation", "link text")
+    fake.set("entry.doc.citation", "link text")
     fake.set("entry.url", "/link")
     fake.set("entry.icon", "ICON")
     fake.set("entry.link.tracking", "false")
@@ -96,7 +96,7 @@ def test_link_uses_redis_tracking_and_ignores_icon(monkeypatch):
 def test_linkcap_includes_icon_and_capitalizes(monkeypatch):
     """style='cap' prepends icon and capitalizes first word."""
     fake = fakeredis.FakeRedis(decode_responses=True)
-    fake.set("entry.citation", "foo bar")
+    fake.set("entry.doc.citation", "foo bar")
     fake.set("entry.url", "/link")
     fake.set("entry.icon", "ICON")
     fake.set("entry.link.tracking", "false")
@@ -113,7 +113,7 @@ def test_linkcap_includes_icon_and_capitalizes(monkeypatch):
 def test_linkicon_includes_icon_without_capitalization(monkeypatch):
     """Default style shows icon; citation unchanged."""
     fake = fakeredis.FakeRedis(decode_responses=True)
-    fake.set("entry.citation", "foo bar")
+    fake.set("entry.doc.citation", "foo bar")
     fake.set("entry.url", "/link")
     fake.set("entry.icon", "ICON")
     fake.set("entry.link.tracking", "false")
@@ -130,7 +130,7 @@ def test_linkicon_includes_icon_without_capitalization(monkeypatch):
 def test_link_icon_title_capitalizes_each_word_and_includes_icon(monkeypatch):
     """style='title' capitalizes all words and shows icon."""
     fake = fakeredis.FakeRedis(decode_responses=True)
-    fake.set("entry.citation", "foo bar")
+    fake.set("entry.doc.citation", "foo bar")
     fake.set("entry.url", "/link")
     fake.set("entry.icon", "ICON")
     fake.set("entry.link.tracking", "false")
@@ -146,7 +146,7 @@ def test_link_icon_title_capitalizes_each_word_and_includes_icon(monkeypatch):
 def test_linkshort_uses_short_citation_and_ignores_icon(monkeypatch):
     """citation='short' uses short text without icon."""
     fake = fakeredis.FakeRedis(decode_responses=True)
-    fake.set("entry.citation.short", "Short")
+    fake.set("entry.doc.citation.short", "Short")
     fake.set("entry.url", "/link")
     fake.set("entry.icon", "ICON")
     fake.set("entry.link.tracking", "false")
@@ -162,9 +162,9 @@ def test_linkshort_uses_short_citation_and_ignores_icon(monkeypatch):
 def test_link_handles_citation_metadata(monkeypatch):
     """Bibliographic citation dict -> formatted text."""
     fake = fakeredis.FakeRedis(decode_responses=True)
-    fake.set("hull.citation.author", "hull")
-    fake.set("hull.citation.year", "2016")
-    fake.set("hull.citation.page", "307")
+    fake.set("hull.doc.citation.author", "hull")
+    fake.set("hull.doc.citation.year", "2016")
+    fake.set("hull.doc.citation.page", "307")
     fake.set("hull.url", "/hull")
     monkeypatch.setattr(metadata, "redis_conn", fake)
     render_template.index_json = {}
@@ -175,7 +175,7 @@ def test_link_handles_citation_metadata(monkeypatch):
 
 def test_render_link_with_anchor():
     """anchor='bar' -> href endswith '#bar'."""
-    desc = {"citation": "foo", "url": "/f"}
+    desc = {"doc": {"citation": "foo"}, "url": "/f"}
     html = render_template.render_link(desc, anchor="bar")
     assert '<a href="/f#bar"' in html
 
@@ -183,7 +183,7 @@ def test_render_link_with_anchor():
 def test_wrapper_accepts_anchor(monkeypatch):
     """link() adds anchor to href."""
     fake = fakeredis.FakeRedis(decode_responses=True)
-    fake.set("entry.citation", "Foo")
+    fake.set("entry.doc.citation", "Foo")
     fake.set("entry.url", "/link")
     monkeypatch.setattr(metadata, "redis_conn", fake)
     render_template.index_json = {}
@@ -195,9 +195,9 @@ def test_wrapper_accepts_anchor(monkeypatch):
 def test_cite_single(monkeypatch):
     """Single citation renders with parentheses inside the link."""
     fake = fakeredis.FakeRedis(decode_responses=True)
-    fake.set("hull.citation.author", "hull")
-    fake.set("hull.citation.year", "2016")
-    fake.set("hull.citation.page", "307")
+    fake.set("hull.doc.citation.author", "hull")
+    fake.set("hull.doc.citation.year", "2016")
+    fake.set("hull.doc.citation.page", "307")
     fake.set("hull.url", "/hull")
     monkeypatch.setattr(metadata, "redis_conn", fake)
     render_template.index_json = {}
@@ -210,13 +210,13 @@ def test_cite_single(monkeypatch):
 def test_cite_combines_pages(monkeypatch):
     """Multiple pages for same source are grouped into one link."""
     fake = fakeredis.FakeRedis(decode_responses=True)
-    fake.set("hull1.citation.author", "hull")
-    fake.set("hull1.citation.year", "2016")
-    fake.set("hull1.citation.page", "307")
+    fake.set("hull1.doc.citation.author", "hull")
+    fake.set("hull1.doc.citation.year", "2016")
+    fake.set("hull1.doc.citation.page", "307")
     fake.set("hull1.url", "/hull")
-    fake.set("hull2.citation.author", "hull")
-    fake.set("hull2.citation.year", "2016")
-    fake.set("hull2.citation.page", "311")
+    fake.set("hull2.doc.citation.author", "hull")
+    fake.set("hull2.doc.citation.year", "2016")
+    fake.set("hull2.doc.citation.page", "311")
     fake.set("hull2.url", "/hull")
     monkeypatch.setattr(metadata, "redis_conn", fake)
     render_template.index_json = {}
@@ -229,13 +229,13 @@ def test_cite_combines_pages(monkeypatch):
 def test_cite_multiple_sources(monkeypatch):
     """Different sources produce multiple links separated by ';'."""
     fake = fakeredis.FakeRedis(decode_responses=True)
-    fake.set("hull.citation.author", "hull")
-    fake.set("hull.citation.year", "2016")
-    fake.set("hull.citation.page", "307")
+    fake.set("hull.doc.citation.author", "hull")
+    fake.set("hull.doc.citation.year", "2016")
+    fake.set("hull.doc.citation.page", "307")
     fake.set("hull.url", "/hull")
-    fake.set("x.citation.author", "x")
-    fake.set("x.citation.year", "2016")
-    fake.set("x.citation.page", "311")
+    fake.set("x.doc.citation.author", "x")
+    fake.set("x.doc.citation.year", "2016")
+    fake.set("x.doc.citation.page", "311")
     fake.set("x.url", "/x")
     monkeypatch.setattr(metadata, "redis_conn", fake)
     render_template.index_json = {}

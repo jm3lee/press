@@ -1,8 +1,12 @@
-title: MagicBar Demo
-id: magicbar
-author: Brian Lee
-pubdate: Jan 1, 2025
 breadcrumbs:
-  - title: Home
-    url: /
-  - title: MagicBar Demo
+- title: Home
+  url: /
+- title: MagicBar Demo
+doc:
+  author: Brian Lee
+  pubdate: Sep 07, 2025
+  title: MagicBar Demo
+header_includes:
+- <script type="module" src="/static/js/magicbar.js" defer></script>
+id: magicbar
+schema: v1

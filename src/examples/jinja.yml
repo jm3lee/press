@@ -1,10 +1,13 @@
-author: Brian Lee
 breadcrumbs:
-  - title: Home
-    url: /
-  - title: Examples
-    url: /examples/
-  - title: Jinja Examples
-citation: jinja
+- title: Home
+  url: /
+- title: Examples
+  url: /examples/
+- title: Jinja Examples
+doc:
+  citation: jinja
+  author: Brian Lee
+  pubdate: Sep 07, 2025
+  title: Jinja Examples
 id: jinja
-title: Jinja Examples
+schema: v1

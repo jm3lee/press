@@ -2,6 +2,6 @@
 	$(call status,Preprocess $<)
 	$(Q)mkdir -p $(dir {preprocessed_yml})
 	$(Q){preprocess_cmd}
-{output_html}: {preprocessed_md} {preprocessed_yml} {template_dep} $(BUILD_DIR)/.process-yamls
+{output_html}: {preprocessed_md} {preprocessed_yml} {template_dep} | $(BUILD_DIR)/.update-index
 	$(call status,Generate HTML $@)
-	$(Q)render-html --template {template_dep} $< $@ -c {preprocessed_yml}
+	$(Q)render-html {preprocessed_md} {preprocessed_yml} $@

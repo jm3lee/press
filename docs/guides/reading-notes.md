@@ -10,10 +10,10 @@ It follows the structure used in
 2. Create `src/books/<slug>` and switch into it.
 3. Add an `index.yml` file with metadata:
    - `title` – full book title.
-   - `citation` – text used when citing the book.
+   - `doc.citation` – text used when citing the book.
    - `url` – base URL, e.g. `/books/hull-2016/`.
    - `id` – unique identifier using underscores, e.g. `hull_2016`.
-   - `author`, `pubdate`, `description`.
+   - `doc.author`, `doc.pubdate`, `description`.
 
 See the [metadata reference](../reference/metadata-fields.md) for field
 definitions.
@@ -40,12 +40,13 @@ definitions.
 
    ```yaml
    title: Topic (Book, page)
-   citation: (Book, page)
    description: 'Brief plain text summary.'
    id: book_page
    partof: '{{linktitle("<slug>")}}'
-   author: Your Name
-   pubdate: Jun 1, 2024
+   doc:
+     citation: (Book, page)
+     author: Your Name
+     pubdate: Jun 1, 2024
    ```
 
 3. Follow the metadata with Markdown content. Wrap paragraphs at 80 columns.

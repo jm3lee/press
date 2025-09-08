@@ -1,8 +1,10 @@
+{% extends "src/templates/template.html.jinja" %}
+
+{% block content %}
 Welcome to the demo site for **Press**. The examples index below links to
 key features.
 
 <div class="indextree-root" data-src="/static/index/examples.json"></div>
-<script type="module" src="/static/js/indextree.js" defer></script>
 
 ## Emoji Replacement
 
@@ -24,3 +26,4 @@ links using different helpers.
 ## Quiz Demo
 
 An interactive quiz lives on the [quiz page](quiz/index.md).
+{% endblock %}

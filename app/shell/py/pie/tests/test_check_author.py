@@ -6,7 +6,7 @@ from pie.check import author as check_author
 
 
 def test_main_reports_missing(tmp_path: Path, monkeypatch) -> None:
-    """YAML without author -> exit code 1."""
+    """YAML without doc.author -> exit code 1."""
     src = tmp_path / "src"
     src.mkdir()
     yml = src / "doc.yml"
@@ -21,15 +21,20 @@ def test_main_reports_missing(tmp_path: Path, monkeypatch) -> None:
 
 
 def test_main_passes_and_logs(tmp_path: Path, monkeypatch) -> None:
-    """YAML with author -> exit 0 and write log."""
+    """YAML with doc.author -> exit 0 and write log."""
     src = tmp_path / "src"
     src.mkdir()
     yml = src / "doc.yml"
-    yml.write_text("title: Test\nauthor: Jane Doe\n", encoding="utf-8")
+    yml.write_text("title: Test\ndoc:\n  author: Jane Doe\n", encoding="utf-8")
     md = src / "doc.md"
-    md.write_text("---\ntitle: Test\nauthor: Jane Doe\n---\n", encoding="utf-8")
+    md.write_text(
+        "---\ntitle: Test\ndoc:\n  author: Jane Doe\n---\n",
+        encoding="utf-8",
+    )
     yaml_file = src / "other.yaml"
-    yaml_file.write_text("title: Other\nauthor: Jane Doe\n", encoding="utf-8")
+    yaml_file.write_text(
+        "title: Other\ndoc:\n  author: Jane Doe\n", encoding="utf-8"
+    )
     log = tmp_path / "log.txt"
     monkeypatch.chdir(tmp_path)
     rc = check_author.main(["-l", str(log)])

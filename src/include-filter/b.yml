@@ -1,8 +1,11 @@
-author: Brian Lee
 breadcrumbs:
-  - title: Home
-    url: /
-  - title: include-filter
-    url: /include-filter/
-  - title: b
-title: b
+- title: Home
+  url: /
+- title: include-filter
+  url: /include-filter/
+- title: b
+doc:
+  author: Brian Lee
+  pubdate: Sep 07, 2025
+  title: b
+schema: v1

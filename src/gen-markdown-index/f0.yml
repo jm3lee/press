@@ -1,10 +1,12 @@
-title: f0
-id: f0
-author: Brian Lee
-pubdate: Aug 12, 2025
 breadcrumbs:
-  - title: Home
-    url: /
-  - title: gen-markdown-index
-    url: /gen-markdown-index/
-  - title: f0
+- title: Home
+  url: /
+- title: gen-markdown-index
+  url: /gen-markdown-index/
+- title: f0
+doc:
+  author: Brian Lee
+  pubdate: Sep 07, 2025
+  title: f0
+id: f0
+schema: v1

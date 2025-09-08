@@ -1,8 +1,10 @@
-citation: press.io home
-title: press.io home
+doc:
+  citation: press.io home
+  author: Brian Lee
+  link:
+    class: external-link
+    tracking: false
+  pubdate: Sep 07, 2025
+  title: press.io home
+schema: v1
 url: https://press.io
-link:
-  tracking: false
-  class: external-link
-author: Brian Lee
-pubdate: Aug 10, 2025

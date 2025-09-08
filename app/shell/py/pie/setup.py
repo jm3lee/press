@@ -4,7 +4,7 @@ setup(
     name="pie",
     version="0.1.0",
     packages=find_packages(),
-    install_requires=["emoji", "commonmark"],
+    install_requires=["emoji", "markdown"],
     author="Brian Lee",
     author_email="",
     description="",
@@ -17,7 +17,6 @@ setup(
     python_requires='>=3.6',
     entry_points={
         'console_scripts': [
-            'build-index=pie.build_index:main',
             'check-author=pie.check.author:main',
             'check-bad-mathjax=pie.check.bad_mathjax:main',
             'check-breadcrumbs=pie.check.breadcrumbs:main',
@@ -47,6 +46,7 @@ setup(
             'update-metadata=pie.update.metadata:main',
             'update-pubdate=pie.update.pubdate:main',
             'update-url=pie.update.url:main',
+            'migrate-metadata=pie.update.migrate_metadata:main',
             'upgrade-indextree=pie.update.indextree:main',
             'process-yaml=pie.process_yaml:main',
             'sitemap=pie.sitemap:main',

@@ -1,8 +1,12 @@
-title: Quiz
-id: quiz
-author: Brian Lee
-pubdate: Aug 12, 2025
 breadcrumbs:
-  - title: Home
-    url: /
-  - title: Quiz
+- title: Home
+  url: /
+- title: Quiz
+doc:
+  author: Brian Lee
+  pubdate: Sep 07, 2025
+  title: Quiz
+header_includes:
+- <script type="module" src="/static/js/quiz.js" defer></script>
+id: quiz
+schema: v1

@@ -15,19 +15,23 @@ import sys
 import time
 from pathlib import Path
 
-from ruamel.yaml import YAMLError
+import cmarkgfm
+import emoji
 from jinja2 import (
     Environment,
     FileSystemLoader,
     StrictUndefined,
-    TemplateSyntaxError,
     TemplateNotFound,
+    TemplateSyntaxError,
 )
-from pie.cli import create_parser
-from pie.logging import logger, configure_logging
-from pie.utils import read_json, read_utf8, write_utf8
-from pie.yaml import read_yaml as load_yaml_file, yaml
+from markupsafe import Markup
 from pie import metadata
+from pie.cli import create_parser
+from pie.logging import configure_logging, logger
+from pie.utils import read_json, read_utf8, write_utf8
+from pie.yaml import read_yaml as load_yaml_file
+from pie.yaml import yaml
+from ruamel.yaml import YAMLError
 
 DEFAULT_CONFIG = Path("cfg/render-jinja-template.yml")
 
@@ -35,12 +39,15 @@ config = {}
 
 _whitespace_word_pattern = re.compile(r"(\S+)")
 
+
 def _get_metadata(name: str) -> dict | None:
     """Return metadata dictionary for ``name`` from Redis."""
 
     return metadata.build_from_redis(f"{name}.")
 
+
 _metadata_cache: dict[str, dict] = {}
+
 
 def get_cached_metadata(key: str) -> dict:
     """Return cached metadata for ``key``.
@@ -62,6 +69,7 @@ def get_cached_metadata(key: str) -> dict:
         _metadata_cache[key] = data
     return _metadata_cache[key]
 
+
 def get_tracking_options(desc):
     """Return HTML attributes for link tracking behaviour.
 
@@ -78,6 +86,7 @@ def get_tracking_options(desc):
             return 'rel="noopener noreferrer" target="_blank"'
     return ""
 
+
 def get_link_class(desc):
     """Return the CSS class to use for a link."""
 
@@ -87,15 +96,15 @@ def get_link_class(desc):
             return link_options["class"]
     return "internal-link"
 
+
 def _resolve_citation(desc: dict, selector: str) -> tuple[str, bool]:
     """Return citation text and whether it requires parentheses."""
 
-    citation_val = desc["citation"]
+    citation_val = desc["doc"]["citation"]
     needs_parens = False
 
-    if (
-        selector not in {"citation", "short"}
-        and not (isinstance(citation_val, dict) and selector in citation_val)
+    if selector not in {"citation", "short"} and not (
+        isinstance(citation_val, dict) and selector in citation_val
     ):
         return selector, needs_parens
 
@@ -131,12 +140,13 @@ def render_link(
     """Return a formatted HTML anchor for ``desc``.
 
     ``desc`` may be either a metadata dictionary or a string id which will be
-    looked up via :func:`get_cached_metadata`.  ``style`` controls how the
-    citation text is capitalised: ``"plain"`` leaves it untouched, ``"title"``
-    applies title‑case, and ``"cap"`` capitalises only the first character.
-    When ``use_icon`` is ``True`` any ``icon`` field is prefixed to the
-    citation. ``citation`` selects which citation field to use or overrides the
-    citation text entirely; pass ``"short"`` to use ``citation["short"]``.
+    looked up via :func:`get_cached_metadata`. ``style`` controls how the
+    citation text is capitalised: ``"plain"`` leaves it untouched,
+    ``"title"`` applies title‑case, and ``"cap"`` capitalises only the first
+    character. When ``use_icon`` is ``True`` any ``icon`` field is prefixed to
+    the citation. ``citation`` selects which field under ``doc.citation`` to use
+    or overrides the citation text entirely; pass ``"short"`` to use
+    ``doc.citation["short"]``.
     """
 
     if isinstance(desc, str):
@@ -149,6 +159,7 @@ def render_link(
 
     # Apply requested capitalisation style
     if style == "title":
+
         def cap_match(m):
             word = m.group(1)
             if word.lower() in {"of", "in", "a", "an", "to", "on"}:
@@ -172,10 +183,12 @@ def render_link(
         return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{icon} {citation_text}</a>"""
     return f"""<a href="{url}" class="{get_link_class(desc)}" {a_attribs}>{citation_text}</a>"""
 
+
 def linktitle(desc, anchor: str | None = None, citation: str | None = None):
     if citation is None:
         return render_link(desc, style="title", anchor=anchor)
     return render_link(desc, style="title", anchor=anchor, citation=citation)
+
 
 def link_icon_title(desc, anchor: str | None = None, citation: str | None = None):
     if citation is None:
@@ -184,20 +197,24 @@ def link_icon_title(desc, anchor: str | None = None, citation: str | None = None
         desc, style="title", use_icon=True, anchor=anchor, citation=citation
     )
 
+
 def linkcap(desc, anchor: str | None = None, citation: str | None = None):
     if citation is None:
         return render_link(desc, style="cap", anchor=anchor)
     return render_link(desc, style="cap", anchor=anchor, citation=citation)
+
 
 def linkicon(desc, anchor: str | None = None, citation: str | None = None):
     if citation is None:
         return render_link(desc, use_icon=True, anchor=anchor)
     return render_link(desc, use_icon=True, anchor=anchor, citation=citation)
 
+
 def link(desc, anchor: str | None = None, citation: str | None = None):
     if citation is None:
         return render_link(desc, use_icon=False, anchor=anchor)
     return render_link(desc, use_icon=False, anchor=anchor, citation=citation)
+
 
 def linkshort(desc, anchor: str | None = None, citation: str | None = None):
     if citation is None:
@@ -311,13 +328,14 @@ def definition(desc):
 
     return render_jinja(snippet)
 
+
 def cite(*names: str) -> str:
     """Return Chicago style citation links for ``names``.
 
-    Each ``name`` is looked up using :func:`get_cached_metadata`. ``citation`` may be a
-    simple string (legacy format) or a mapping with ``author``, ``year`` and
-    ``page`` keys.  When multiple references share the same author, year and
-    URL their page numbers are combined.
+    Each ``name`` is looked up using :func:`get_cached_metadata`.
+    ``doc.citation`` may be a simple string (legacy format) or a mapping with
+    ``author``, ``year`` and ``page`` keys. When multiple references share the
+    same author, year and URL their page numbers are combined.
 
     When a single reference is provided the parentheses are included inside the
     returned anchor.  Multiple references are separated by ``;`` with the outer
@@ -328,7 +346,7 @@ def cite(*names: str) -> str:
 
     groups: list[dict] = []
     for d in descs:
-        cit = d.get("citation")
+        cit = d.get("doc", {}).get("citation")
         if isinstance(cit, dict):
             author = str(cit.get("author", "")).title()
             year = cit.get("year")
@@ -339,13 +357,15 @@ def cite(*names: str) -> str:
                     g["pages"].append(page)
                     break
             else:
-                groups.append({
-                    "key": key,
-                    "author": author,
-                    "year": year,
-                    "pages": [page],
-                    "desc": d,
-                })
+                groups.append(
+                    {
+                        "key": key,
+                        "author": author,
+                        "year": year,
+                        "pages": [page],
+                        "desc": d,
+                    }
+                )
         else:
             groups.append({"text": cit, "desc": d})
 
@@ -353,6 +373,8 @@ def cite(*names: str) -> str:
     single = len(groups) == 1
     for g in groups:
         desc = dict(g["desc"])
+        doc = dict(desc.get("doc", {}))
+        desc["doc"] = doc
         if "text" in g:
             text = g["text"]
         else:
@@ -361,12 +383,13 @@ def cite(*names: str) -> str:
             if pages:
                 text += f", {pages}"
         if single:
-            desc["citation"] = f"({text})"
+            doc["citation"] = f"({text})"
             return render_link(desc, use_icon=False)
-        desc["citation"] = text
+        doc["citation"] = text
         parts.append(render_link(desc, use_icon=False))
 
     return "(" + "; ".join(parts) + ")"
+
 
 def extract_front_matter(file_path: str) -> dict | None:
     """
@@ -394,6 +417,7 @@ def extract_front_matter(file_path: str) -> dict | None:
             return None
     return None
 
+
 def process_directory(root_dir: str) -> None:
     """
     Walk `root_dir` recursively, find all .md files, and:
@@ -418,6 +442,7 @@ def process_directory(root_dir: str) -> None:
             else:
                 logger.warning("No front matter or title", file=full_path)
 
+
 def get_desc(name):
     """Return the metadata entry for ``name`` from Redis."""
 
@@ -427,21 +452,25 @@ def get_desc(name):
         raise SystemExit(1)
     return d
 
+
 def render_jinja(snippet):
     """Render a Jinja snippet using the current environment."""
     logger.debug("", snippet=snippet)
     return env.from_string(snippet).render()
+
 
 def to_alpha_index(i):
     """Convert ``0``–``3`` to ``a``–``d``."""
 
     return ("a", "b", "c", "d")[i]
 
+
 def read_yaml(filename):
     """Read ``filename`` as YAML and yield the ``toc`` sequence."""
 
     y = yaml.load(read_utf8(filename))
     yield from y["toc"]
+
 
 def load_config(path: str | Path = DEFAULT_CONFIG) -> dict:
     """Load configuration from *path* and return a dict."""
@@ -460,12 +489,26 @@ def load_config(path: str | Path = DEFAULT_CONFIG) -> dict:
         )
         raise SystemExit(1)
 
+
+def render_press(text):
+    text = emoji.emojize(text, language='alias')
+    return Markup(
+        cmarkgfm.github_flavored_markdown_to_html(
+            text,
+            options=cmarkgfm.Options.CMARK_OPT_UNSAFE,
+        )
+    )
+
+
 def create_env():
     """Create and configure the Jinja2 environment."""
 
     data_dir = os.environ.get("PIE_DATA_DIR", "/data")
     env = Environment(
-        loader=FileSystemLoader(data_dir), undefined=StrictUndefined
+        loader=FileSystemLoader(data_dir),
+        undefined=StrictUndefined,
+        autoescape=False,
+        lstrip_blocks=True,
     )
     env.globals["link"] = render_link
     env.globals["linktitle"] = linktitle
@@ -481,6 +524,7 @@ def create_env():
     env.globals["read_json"] = read_json
     env.globals["read_yaml"] = read_yaml
     env.globals["cite"] = cite
+    env.filters["press"] = render_press
     try:
         env.globals["anchor"] = env.get_template(
             "src/templates/anchor.jinja"
@@ -489,7 +533,9 @@ def create_env():
         logger.warning("Missing anchor.jinja template")
     return env
 
+
 env = create_env()
+
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
@@ -512,6 +558,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     return parser.parse_args(argv)
 
+
 def main(argv: list[str] | None = None) -> None:
     """Render the specified template using Redis and an optional ``index.json``."""
 
@@ -524,6 +571,7 @@ def main(argv: list[str] | None = None) -> None:
     template = env.get_template(args.template)
     rendered = template.render()
     write_utf8(rendered, args.output)
+
 
 if __name__ == "__main__":
     main()
