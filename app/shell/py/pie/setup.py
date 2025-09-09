@@ -18,7 +18,6 @@ setup(
     entry_points={
         'console_scripts': [
             'check-author=pie.check.author:main',
-            'check-bad-mathjax=pie.check.bad_mathjax:main',
             'check-breadcrumbs=pie.check.breadcrumbs:main',
             'check-canonical=pie.check.canonical:main',
             'check-unescaped-dollar=pie.check.unescaped_dollar:main',

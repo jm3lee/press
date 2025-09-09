@@ -8,7 +8,6 @@ from typing import Callable, Iterable
 
 from pie.check import (
     author,
-    bad_mathjax,
     unescaped_dollar,
     page_title,
     breadcrumbs,
@@ -26,7 +25,6 @@ OUTPUT_PATH = Path("log/report.html")
 
 CHECKS: Iterable[tuple[str, CheckFunc]] = (
     ("Check metadata authors", lambda: author.main(["src"])),
-    ("Check for bad MathJax", lambda: bad_mathjax.main(["src"])),
     (
         "Check for unescaped dollar signs",
         lambda: unescaped_dollar.main(["src"]),
