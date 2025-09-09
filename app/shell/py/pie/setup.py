@@ -20,7 +20,6 @@ setup(
             'check-author=pie.check.author:main',
             'check-breadcrumbs=pie.check.breadcrumbs:main',
             'check-canonical=pie.check.canonical:main',
-            'check-unescaped-dollar=pie.check.unescaped_dollar:main',
             'check-page-title=pie.check.page_title:main',
             'check-post-build=pie.check.post_build:main',
             'check-sitemap-hostname=pie.check.sitemap_hostname:main',
