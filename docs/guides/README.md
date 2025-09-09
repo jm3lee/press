@@ -20,8 +20,6 @@ concepts and data formats, see the
   internal URLs that contain underscores.
 - [check-post-build](../pie/check/check-post-build.md) – verify build
   artifacts.
-- [check-unescaped-dollar](../pie/check/check-unescaped-dollar.md) – detect
-  unescaped dollar signs.
 - [tests.md](tests.md) – run the automated test suite.
 
 ## Services and utilities

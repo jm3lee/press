@@ -40,7 +40,6 @@ def test_run_as_script(monkeypatch) -> None:
     monkeypatch.setitem(sys.modules, "pie.check", check_pkg)
     for name in [
         "author",
-        "unescaped_dollar",
         "page_title",
         "breadcrumbs",
         "post_build",
