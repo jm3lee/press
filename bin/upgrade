@@ -32,6 +32,7 @@ run_make() {
 cleanup() {
   "${DOCKER_COMPOSE[@]}" down --remove-orphans
   docker system prune -f
+  rm -f build/.update-index
 }
 trap cleanup EXIT
 
