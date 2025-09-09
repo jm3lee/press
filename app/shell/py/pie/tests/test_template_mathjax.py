@@ -5,8 +5,7 @@ from jinja2 import Undefined
 from pie.render import html
 
 def _setup_template(tmp_path, monkeypatch):
-    root = Path(__file__).resolve().parents[5]
-    template = (root / "src/templates/template.html.jinja").read_text(
+    template = Path("/data/src/templates/template.html.jinja").read_text(
         encoding="utf-8"
     )
     tmpl_dir = tmp_path / "src" / "templates"
