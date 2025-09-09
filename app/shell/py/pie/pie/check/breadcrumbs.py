@@ -85,7 +85,7 @@ def main(argv: list[str] | None = None) -> int:
         for path in paths:
             if path in exclude:
                 continue
-            if breadcrumbs:
+            if breadcrumbs is not None:
                 logger.debug("Found breadcrumbs", path=str(path))
             else:
                 logger.error("Missing breadcrumbs", path=str(path))
