@@ -37,6 +37,7 @@ setup(
             'render-html=pie.render.html:main',
             'render-jinja-template=pie.render.jinja:main',
             'render-study-json=pie.render_study_json:main',
+            'report-static-links=pie.report.static_links:main',
             'store-files=pie.store_files:main',
             'update-author=pie.update.author:main',
             'update-index=pie.update.index:main',

@@ -113,8 +113,13 @@ $(BUILD_DIR)/.update-index: $(YAMLS)
 # Modifies file timestamps. The preserve option doesn't seem to work.
 # No touch at the end. Minify should always execute.
 $(BUILD_DIR)/.minify:
-	$(call status,Minify HTML and CSS)
-	$(Q)cd $(BUILD_DIR); $(MINIFY_CMD) -a -v -r -o . .
+        $(call status,Minify HTML and CSS)
+        $(Q)cd $(BUILD_DIR); $(MINIFY_CMD) -a -v -r -o . .
+
+.PHONY: report-static-links
+report-static-links: $(BUILD_DIR)/.minify
+	$(call status,Generate static links report)
+	$(Q)report-static-links
 
 .PHONY: test
 # Triggered by the test target; see docs/guides/redo-mk.md.
@@ -123,7 +128,7 @@ test: $(BUILD_DIR)/.minify check | $(LOG_DIR)
 	$(Q)$(CHECKLINKS_CMD) $(TEST_HOST_URL)
 
 .PHONY: check
-check:
+check: report-static-links
 	$(call status,Run checks)
 	$(Q)check-all
 
