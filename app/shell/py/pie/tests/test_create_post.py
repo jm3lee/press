@@ -21,6 +21,7 @@ def test_create_post_creates_files(tmp_path: Path, monkeypatch) -> None:
 
     assert md_file.exists(), "Markdown file should be created"
     assert yml_file.exists(), "YAML file should be created"
+    assert md_file.read_text(encoding="utf-8") == post.DEFAULT_MD
 
     data = yaml.load(yml_file.read_text(encoding="utf-8"))
     assert set(data) == {"breadcrumbs", "doc", "id", "schema"}
