@@ -19,7 +19,7 @@ def test_updates_yaml_from_markdown_change(tmp_path: Path, monkeypatch, capsys) 
     md.write_text("---\ntitle: Test\n---\n", encoding="utf-8")
     yml = src / "doc.yml"
     yml.write_text(
-        "title: Test\npubdate: Jan 01, 2000\n",
+        "title: Test\ndoc:\n  pubdate: Jan 01, 2000\n",
         encoding="utf-8",
     )
 
@@ -43,7 +43,7 @@ def test_updates_markdown_frontmatter(tmp_path: Path, monkeypatch, capsys) -> No
     src.mkdir()
     md = src / "doc.md"
     md.write_text(
-        "---\ntitle: Test\npubdate: Jan 01, 2000\n---\nbody\n",
+        "---\ntitle: Test\ndoc:\n  pubdate: Jan 01, 2000\n---\nbody\n",
         encoding="utf-8",
     )
 
@@ -66,7 +66,10 @@ def test_adds_frontmatter_when_pubdate_in_body(tmp_path: Path, monkeypatch, caps
     src = tmp_path / "src"
     src.mkdir()
     md = src / "doc.md"
-    md.write_text("---\ntitle: Test\n---\nbody\npubdate: Jan 01, 2000\n", encoding="utf-8")
+    md.write_text(
+        "---\ntitle: Test\n---\nbody\npubdate: Jan 01, 2000\n",
+        encoding="utf-8",
+    )
 
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(update_pubdate, "get_changed_files", lambda: [Path("src/doc.md")])
@@ -103,7 +106,7 @@ def test_pubdate_with_special_characters_is_escaped(
 
     front = md.read_text(encoding="utf-8").split("---\n")[1]
     data = yaml.load(front)
-    assert data["pubdate"] == special
+    assert data["doc"]["pubdate"] == special
 
 
 def test_sort_keys_option_sorts_yaml(tmp_path: Path, monkeypatch, capsys) -> None:
@@ -111,7 +114,7 @@ def test_sort_keys_option_sorts_yaml(tmp_path: Path, monkeypatch, capsys) -> Non
     src = tmp_path / "src"
     src.mkdir()
     yml = src / "doc.yml"
-    yml.write_text("z: 1\npubdate: Jan 01, 2000\na: 2\n", encoding="utf-8")
+    yml.write_text("z: 1\ndoc:\n  pubdate: Jan 01, 2000\na: 2\n", encoding="utf-8")
 
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(update_pubdate, "get_changed_files", lambda: [Path("src/doc.yml")])
@@ -119,7 +122,10 @@ def test_sort_keys_option_sorts_yaml(tmp_path: Path, monkeypatch, capsys) -> Non
 
     update_pubdate.main(["--sort-keys"])
 
-    assert yml.read_text(encoding="utf-8") == "a: 2\npubdate: Jan 02, 2000\nz: 1\n"
+    assert (
+        yml.read_text(encoding="utf-8")
+        == "a: 2\ndoc:\n  pubdate: Jan 02, 2000\nz: 1\n"
+    )
     captured = capsys.readouterr()
     assert captured.out == ""
     log_text = (tmp_path / "log/update-pubdate.txt").read_text(encoding="utf-8")

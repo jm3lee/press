@@ -1,10 +1,12 @@
-author: Brian Lee
-id: mermaid-example
-pubdate: Aug 22, 2025
-title: Mermaid Diagram Example
 breadcrumbs:
-  - title: Home
-    url: /
-  - title: Examples
-    url: /examples/
-  - title: Mermaid Diagram Example
+- title: Home
+  url: /
+- title: Examples
+  url: /examples/
+- title: Mermaid Diagram Example
+doc:
+  author: Brian Lee
+  pubdate: Sep 07, 2025
+  title: Mermaid Diagram Example
+id: mermaid-example
+schema: v1

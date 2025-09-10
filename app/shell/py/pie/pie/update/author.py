@@ -26,6 +26,8 @@ def load_default_author(cfg_path: Path | None = None) -> str:
     except FileNotFoundError:
         return ""
     if isinstance(data, dict):
+        if isinstance(data.get("doc"), dict) and "author" in data["doc"]:
+            return str(data["doc"]["author"])
         return str(data.get("author", ""))
     if isinstance(data, str):
         return data
@@ -71,7 +73,7 @@ def update_files(
     were examined. When ``sort_keys`` is true YAML mappings are serialized with
     keys in sorted order.
     """
-    return common_update_files(paths, "author", author, sort_keys=sort_keys)
+    return common_update_files(paths, "doc.author", author, sort_keys=sort_keys)
 
 
 def main(argv: Sequence[str] | None = None) -> int:

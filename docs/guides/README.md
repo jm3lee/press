@@ -7,8 +7,6 @@ concepts and data formats, see the
 ## Build process
 - [create-site.md](create-site.md) – scaffold a new Press project.
 - [build-process.md](build-process.md) – overview of the build pipeline for new engineers.
-- [build-index.md](build-index.md) – generate a JSON index of document
-  metadata. See the [metadata fields reference](../reference/metadata-fields.md).
 - [picasso.md](picasso.md) – create Makefile rules from metadata files.
 - [preprocess.md](preprocess.md) – run custom pre‑processing steps.
 - [update-index.md](update-index.md) – keep the index in sync after edits.
@@ -22,10 +20,6 @@ concepts and data formats, see the
   internal URLs that contain underscores.
 - [check-post-build](../pie/check/check-post-build.md) – verify build
   artifacts.
-- [check-bad-mathjax](../pie/check/check-bad-mathjax.md) – detect old
-  MathJax delimiters.
-- [check-unescaped-dollar](../pie/check/check-unescaped-dollar.md) – detect
-  unescaped dollar signs.
 - [tests.md](tests.md) – run the automated test suite.
 
 ## Services and utilities

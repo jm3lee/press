@@ -27,6 +27,13 @@ def test_load_default_author_string(tmp_path: Path) -> None:
     assert update_author.load_default_author(cfg) == "Brian Lee"
 
 
+def test_load_default_author_doc_mapping(tmp_path: Path) -> None:
+    """doc.author value from config mapping is returned."""
+    cfg = tmp_path / "update-author.yml"
+    cfg.write_text("doc:\n  author: Brian Lee\n", encoding="utf-8")
+    assert update_author.load_default_author(cfg) == "Brian Lee"
+
+
 def test_load_default_author_other(tmp_path: Path) -> None:
     """Unsupported config types yield empty string."""
     cfg = tmp_path / "update-author.yml"
@@ -42,13 +49,15 @@ def test_updates_yaml_from_markdown_change(tmp_path: Path, monkeypatch, capsys) 
     md.write_text("---\ntitle: Test\n---\n", encoding="utf-8")
     yml = src / "doc.yml"
     yml.write_text(
-        "title: Test\nauthor: Jane Doe\n",
+        "title: Test\ndoc:\n  author: Jane Doe\n",
         encoding="utf-8",
     )
 
     cfg = tmp_path / "cfg"
     cfg.mkdir()
-    (cfg / "update-author.yml").write_text("author: Brian Lee\n", encoding="utf-8")
+    (cfg / "update-author.yml").write_text(
+        "doc:\n  author: Brian Lee\n", encoding="utf-8"
+    )
 
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(update_author, "get_changed_files", lambda: [Path("src/doc.md")])
@@ -73,13 +82,15 @@ def test_updates_markdown_frontmatter(tmp_path: Path, monkeypatch, capsys) -> No
     src.mkdir()
     md = src / "doc.md"
     md.write_text(
-        "---\ntitle: Test\nauthor: Jane Doe\n---\nbody\n",
+        "---\ntitle: Test\ndoc:\n  author: Jane Doe\n---\nbody\n",
         encoding="utf-8",
     )
 
     cfg = tmp_path / "cfg"
     cfg.mkdir()
-    (cfg / "update-author.yml").write_text("author: Brian Lee\n", encoding="utf-8")
+    (cfg / "update-author.yml").write_text(
+        "doc:\n  author: Brian Lee\n", encoding="utf-8"
+    )
 
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(update_author, "get_changed_files", lambda: [Path("src/doc.md")])
@@ -102,11 +113,16 @@ def test_adds_frontmatter_when_author_in_body(tmp_path: Path, monkeypatch, capsy
     src = tmp_path / "src"
     src.mkdir()
     md = src / "doc.md"
-    md.write_text("---\ntitle: Test\n---\nbody\nauthor: Jane Doe\n", encoding="utf-8")
+    md.write_text(
+        "---\ntitle: Test\n---\nbody\nauthor: Jane Doe\n",
+        encoding="utf-8",
+    )
 
     cfg = tmp_path / "cfg"
     cfg.mkdir()
-    (cfg / "update-author.yml").write_text("author: Brian Lee\n", encoding="utf-8")
+    (cfg / "update-author.yml").write_text(
+        "doc:\n  author: Brian Lee\n", encoding="utf-8"
+    )
 
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(update_author, "get_changed_files", lambda: [Path("src/doc.md")])
@@ -133,13 +149,17 @@ def test_adds_metadata_when_missing(tmp_path: Path, monkeypatch, capsys) -> None
 
     cfg = tmp_path / "cfg"
     cfg.mkdir()
-    (cfg / "update-author.yml").write_text("author: Brian Lee\n", encoding="utf-8")
+    (cfg / "update-author.yml").write_text(
+        "doc:\n  author: Brian Lee\n", encoding="utf-8"
+    )
 
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(update_author, "get_changed_files", lambda: [Path("src/doc.md")])
 
     update_author.main([])
-    assert md.read_text(encoding="utf-8").startswith("---\nauthor: Brian Lee\n---\n")
+    assert md.read_text(encoding="utf-8").startswith(
+        "---\ndoc:\n  author: Brian Lee\n---\n"
+    )
     captured = capsys.readouterr()
     assert captured.out.strip().splitlines() == [
         "src/doc.md: undefined -> Brian Lee",
@@ -161,7 +181,7 @@ def test_author_with_special_characters_is_escaped(
     cfg.mkdir()
     special = "Jane: Doe #1"
     buf = StringIO()
-    yaml.dump({"author": special}, buf)
+    yaml.dump({"doc": {"author": special}}, buf)
     (cfg / "update-author.yml").write_text(buf.getvalue(), encoding="utf-8")
 
     monkeypatch.chdir(tmp_path)
@@ -173,7 +193,7 @@ def test_author_with_special_characters_is_escaped(
 
     front = md.read_text(encoding="utf-8").split("---\n")[1]
     data = yaml.load(front)
-    assert data["author"] == special
+    assert data["doc"]["author"] == special
 
 
 def test_scans_directory(tmp_path: Path, monkeypatch, capsys) -> None:
@@ -183,13 +203,15 @@ def test_scans_directory(tmp_path: Path, monkeypatch, capsys) -> None:
     md = src / "doc.md"
     md.write_text("---\ntitle: Test\n---\n", encoding="utf-8")
     yml = src / "doc.yml"
-    yml.write_text("title: Test\nauthor: Jane Doe\n", encoding="utf-8")
+    yml.write_text("title: Test\ndoc:\n  author: Jane Doe\n", encoding="utf-8")
     yaml_file = src / "other.yaml"
-    yaml_file.write_text("title: Test\nauthor: Jane Doe\n", encoding="utf-8")
+    yaml_file.write_text("title: Test\ndoc:\n  author: Jane Doe\n", encoding="utf-8")
 
     cfg = tmp_path / "cfg"
     cfg.mkdir()
-    (cfg / "update-author.yml").write_text("author: Brian Lee\n", encoding="utf-8")
+    (cfg / "update-author.yml").write_text(
+        "doc:\n  author: Brian Lee\n", encoding="utf-8"
+    )
 
     monkeypatch.chdir(tmp_path)
 
@@ -216,11 +238,13 @@ def test_scans_file(tmp_path: Path, monkeypatch, capsys) -> None:
     md = src / "doc.md"
     md.write_text("---\ntitle: Test\n---\n", encoding="utf-8")
     yml = src / "doc.yml"
-    yml.write_text("title: Test\nauthor: Jane Doe\n", encoding="utf-8")
+    yml.write_text("title: Test\ndoc:\n  author: Jane Doe\n", encoding="utf-8")
 
     cfg = tmp_path / "cfg"
     cfg.mkdir()
-    (cfg / "update-author.yml").write_text("author: Brian Lee\n", encoding="utf-8")
+    (cfg / "update-author.yml").write_text(
+        "doc:\n  author: Brian Lee\n", encoding="utf-8"
+    )
 
     monkeypatch.chdir(tmp_path)
 
@@ -244,11 +268,13 @@ def test_overrides_author_argument(tmp_path: Path, monkeypatch, capsys) -> None:
     md = src / "doc.md"
     md.write_text("---\ntitle: Test\n---\n", encoding="utf-8")
     yml = src / "doc.yml"
-    yml.write_text("title: Test\nauthor: Jane Doe\n", encoding="utf-8")
+    yml.write_text("title: Test\ndoc:\n  author: Jane Doe\n", encoding="utf-8")
 
     cfg = tmp_path / "cfg"
     cfg.mkdir()
-    (cfg / "update-author.yml").write_text("author: Brian Lee\n", encoding="utf-8")
+    (cfg / "update-author.yml").write_text(
+        "doc:\n  author: Brian Lee\n", encoding="utf-8"
+    )
 
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(update_author, "get_changed_files", lambda: [Path("src/doc.md")])
@@ -271,11 +297,15 @@ def test_verbose_enables_debug_logging(tmp_path: Path, monkeypatch) -> None:
     src = tmp_path / "src"
     src.mkdir()
     (src / "doc.md").write_text("---\ntitle: Test\n---\n", encoding="utf-8")
-    (src / "doc.yml").write_text("title: Test\nauthor: Jane Doe\n", encoding="utf-8")
+    (src / "doc.yml").write_text(
+        "title: Test\ndoc:\n  author: Jane Doe\n", encoding="utf-8"
+    )
 
     cfg = tmp_path / "cfg"
     cfg.mkdir()
-    (cfg / "update-author.yml").write_text("author: Brian Lee\n", encoding="utf-8")
+    (cfg / "update-author.yml").write_text(
+        "doc:\n  author: Brian Lee\n", encoding="utf-8"
+    )
 
     monkeypatch.chdir(tmp_path)
 
@@ -303,18 +333,23 @@ def test_sort_keys_option_sorts_yaml(tmp_path: Path, monkeypatch, capsys) -> Non
     src = tmp_path / "src"
     src.mkdir()
     yml = src / "doc.yml"
-    yml.write_text("z: 1\nauthor: Jane Doe\na: 2\n", encoding="utf-8")
+    yml.write_text("z: 1\ndoc:\n  author: Jane Doe\na: 2\n", encoding="utf-8")
 
     cfg = tmp_path / "cfg"
     cfg.mkdir()
-    (cfg / "update-author.yml").write_text("author: Brian Lee\n", encoding="utf-8")
+    (cfg / "update-author.yml").write_text(
+        "doc:\n  author: Brian Lee\n", encoding="utf-8"
+    )
 
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(update_author, "get_changed_files", lambda: [Path("src/doc.yml")])
 
     update_author.main(["--sort-keys"])
 
-    assert yml.read_text(encoding="utf-8") == "a: 2\nauthor: Brian Lee\nz: 1\n"
+    assert (
+        yml.read_text(encoding="utf-8")
+        == "a: 2\ndoc:\n  author: Brian Lee\nz: 1\n"
+    )
     captured = capsys.readouterr()
     assert captured.out.strip().splitlines() == [
         "src/doc.yml: Jane Doe -> Brian Lee",
@@ -329,20 +364,28 @@ def test_scans_multiple_paths(tmp_path: Path, monkeypatch, capsys) -> None:
     (src / "a").mkdir(parents=True)
     (src / "b").mkdir(parents=True)
     (src / "a" / "doc.md").write_text("---\ntitle: A\n---\n", encoding="utf-8")
-    (src / "a" / "doc.yml").write_text("title: A\nauthor: Jane Doe\n", encoding="utf-8")
+    (src / "a" / "doc.yml").write_text(
+        "title: A\ndoc:\n  author: Jane Doe\n", encoding="utf-8"
+    )
     (src / "b" / "doc.md").write_text("---\ntitle: B\n---\n", encoding="utf-8")
-    (src / "b" / "doc.yml").write_text("title: B\nauthor: Jane Doe\n", encoding="utf-8")
+    (src / "b" / "doc.yml").write_text(
+        "title: B\ndoc:\n  author: Jane Doe\n", encoding="utf-8"
+    )
 
     cfg = tmp_path / "cfg"
     cfg.mkdir()
-    (cfg / "update-author.yml").write_text("author: Brian Lee\n", encoding="utf-8")
+    (cfg / "update-author.yml").write_text(
+        "doc:\n  author: Brian Lee\n", encoding="utf-8"
+    )
 
     monkeypatch.chdir(tmp_path)
 
     update_author.main(["src/a", "src/b/doc.md"])
 
     for part in ["a", "b"]:
-        assert "author: Brian Lee" in (src / part / "doc.yml").read_text(encoding="utf-8")
+        assert "author: Brian Lee" in (
+            (src / part / "doc.yml").read_text(encoding="utf-8")
+        )
         assert "author:" not in (src / part / "doc.md").read_text(encoding="utf-8")
 
     lines = capsys.readouterr().out.strip().splitlines()
@@ -361,19 +404,23 @@ def test_accepts_glob_patterns(tmp_path: Path, monkeypatch, capsys) -> None:
     for part in ["a1", "a2"]:
         (src / part / "doc.md").write_text("---\ntitle: Test\n---\n", encoding="utf-8")
         (src / part / "doc.yml").write_text(
-            "title: Test\nauthor: Jane Doe\n", encoding="utf-8"
+            "title: Test\ndoc:\n  author: Jane Doe\n", encoding="utf-8"
         )
 
     cfg = tmp_path / "cfg"
     cfg.mkdir()
-    (cfg / "update-author.yml").write_text("author: Brian Lee\n", encoding="utf-8")
+    (cfg / "update-author.yml").write_text(
+        "doc:\n  author: Brian Lee\n", encoding="utf-8"
+    )
 
     monkeypatch.chdir(tmp_path)
 
     update_author.main(["src/a*/doc.md"])
 
     for part in ["a1", "a2"]:
-        assert "author: Brian Lee" in (src / part / "doc.yml").read_text(encoding="utf-8")
+        assert "author: Brian Lee" in (
+            (src / part / "doc.yml").read_text(encoding="utf-8")
+        )
         assert "author:" not in (src / part / "doc.md").read_text(encoding="utf-8")
 
     lines = capsys.readouterr().out.strip().splitlines()
@@ -389,11 +436,15 @@ def test_verbose_enables_debug_logging(tmp_path: Path, monkeypatch) -> None:
     src = tmp_path / "src"
     src.mkdir()
     (src / "doc.md").write_text("---\ntitle: Test\n---\n", encoding="utf-8")
-    (src / "doc.yml").write_text("title: Test\nauthor: Jane Doe\n", encoding="utf-8")
+    (src / "doc.yml").write_text(
+        "title: Test\ndoc:\n  author: Jane Doe\n", encoding="utf-8"
+    )
 
     cfg = tmp_path / "cfg"
     cfg.mkdir()
-    (cfg / "update-author.yml").write_text("author: Brian Lee\n", encoding="utf-8")
+    (cfg / "update-author.yml").write_text(
+        "doc:\n  author: Brian Lee\n", encoding="utf-8"
+    )
 
     monkeypatch.chdir(tmp_path)
 

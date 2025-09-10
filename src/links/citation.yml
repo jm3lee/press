@@ -1,6 +1,8 @@
-author: Brian Lee
-citation:
-  short: short
+doc:
+  citation:
+    short: short
+  author: Brian Lee
+  pubdate: Sep 07, 2025
+  title: citation
 id: citation_1
-pubdate: Sep 02, 2025
-title: citation
+schema: v1

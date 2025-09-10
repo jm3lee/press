@@ -1,4 +1,3 @@
-author: Brian Lee
 breadcrumbs:
 - title: Home
   url: /
@@ -7,7 +6,9 @@ breadcrumbs:
 - title: Anchor
   url: /examples/anchor/
 - title: Index
+doc:
+  author: Brian Lee
+  pubdate: Sep 07, 2025
+  title: Anchor Example
 id: anchor
-pubdate: Sep 03, 2025
-test-anchor: '{{ anchor("test-anchor") }}'
-title: Anchor Example
+schema: v1

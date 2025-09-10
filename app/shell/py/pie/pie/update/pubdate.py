@@ -37,7 +37,7 @@ def update_files(
     were examined. When ``sort_keys`` is true YAML mappings are serialized with
     keys in sorted order.
     """
-    return common_update_files(paths, "pubdate", pubdate, sort_keys=sort_keys)
+    return common_update_files(paths, "doc.pubdate", pubdate, sort_keys=sort_keys)
 
 
 def main(argv: Sequence[str] | None = None) -> int:

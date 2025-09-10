@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+#
+# Description:
+#   Start the nginx-test service and run the project's test suite.
+#   The container is removed when the script exits.
+#
+# Usage:
+#   bin/nginx-test
+#
+# Environment variables:
+#   VERBOSE   - Passed to make (default: 0)
+#   SRC_DIR   - Source directory (default: src)
+#   BUILD_DIR - Build directory (default: build)
+
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+
+VERBOSE="${VERBOSE:-0}"
+SRC_DIR="${SRC_DIR:-src}"
+BUILD_DIR="${BUILD_DIR:-build}"
+
+COMPOSE_FILE="docker-compose.yml"
+
+DOCKER_COMPOSE=(docker compose -f "$COMPOSE_FILE")
+
+MAKE_ARGS=(-f redo.mk VERBOSE="$VERBOSE" SRC_DIR="$SRC_DIR" BUILD_DIR="$BUILD_DIR")
+
+run_make() {
+  make "${MAKE_ARGS[@]}" "$@"
+}
+
+cleanup() {
+  "${DOCKER_COMPOSE[@]}" down --remove-orphans nginx-test
+}
+trap cleanup EXIT
+
+echo "Starting nginx-test..."
+"${DOCKER_COMPOSE[@]}" up -d --build --remove-orphans nginx-test
+echo "Running make test..."
+run_make test

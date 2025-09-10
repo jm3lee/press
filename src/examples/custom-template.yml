@@ -3,11 +3,11 @@ breadcrumbs:
   url: /
 - title: Examples
   url: /examples/
-- title: Chicago Citation Examples
+- title: Custom Template
 doc:
-  citation: chicago citations
+  citation: custom template
   author: Brian Lee
   pubdate: Sep 07, 2025
-  title: Chicago Citation Examples
-id: chicago-citations
+  title: Custom Template
+id: custom_template
 schema: v1

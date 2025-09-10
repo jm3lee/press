@@ -106,10 +106,13 @@ def collect_paths(patterns: Iterable[str]) -> list[Path]:
 def replace_field(
     fp: Path, field: str, value: str, sort_keys: bool = False
 ) -> tuple[bool, str | None]:
-    """Replace ``field`` in *fp* and return (changed, old_value).
+    """Replace ``field`` in *fp* and return ``(changed, old_value)``.
 
-    When ``sort_keys`` is true YAML mappings are written with keys in
-    sorted order.
+    ``field`` may reference nested mappings using dot notation, for example
+    ``doc.author``.
+
+    When ``sort_keys`` is true YAML mappings are written with keys in sorted
+    order.
     """
     text = fp.read_text(encoding="utf-8")
     if fp.suffix in YAML_EXTS:
@@ -124,12 +127,11 @@ def _replace_yaml_field(
 ) -> tuple[bool, str | None]:
     """Update ``field`` in YAML *fp*, optionally sorting keys."""
     data = yaml.load(text) or {}
-    old = data.get(field)
-    if old != value:
-        data[field] = value
+    changed, old = _set_nested(data, field.split("."), value)
+    if changed:
         yaml.sort_keys = sort_keys
         write_yaml(data, fp)
-        return True, old if old is not None else "undefined"
+        return True, old
     return True, None
 
 
@@ -138,15 +140,18 @@ def _replace_markdown_field(
 ) -> tuple[bool, str | None]:
     """Update ``field`` in Markdown frontmatter of *fp*.
 
-    When ``sort_keys`` is true the frontmatter mapping is written with
-    keys in sorted order.
+    When ``sort_keys`` is true the frontmatter mapping is written with keys in
+    sorted order.
     """
     lines = text.splitlines(keepends=True)
+    keys = field.split(".")
     if not lines or not lines[0].startswith("---"):
         # no frontmatter, add a new block with the field
         buf = StringIO()
+        data: dict[str, object] = {}
+        _set_nested(data, keys, value)
         yaml.sort_keys = sort_keys
-        yaml.dump({field: value}, buf)
+        yaml.dump(data, buf)
         dumped = buf.getvalue()
         new_lines = ["---\n", dumped, "---\n"] + lines
         fp.write_text("".join(new_lines), encoding="utf-8")
@@ -160,17 +165,36 @@ def _replace_markdown_field(
         return False, None
     frontmatter = "".join(lines[1:end])
     data = yaml.load(frontmatter) or {}
-    old = data.get(field)
-    if old != value:
-        data[field] = value
+    changed, old = _set_nested(data, keys, value)
+    if changed:
         buf = StringIO()
         yaml.sort_keys = sort_keys
         yaml.dump(data, buf)
         dumped = buf.getvalue()
         lines[1:end] = [dumped]
         fp.write_text("".join(lines), encoding="utf-8")
-        return True, old if old is not None else "undefined"
+        return True, old
     return True, None
+
+
+def _set_nested(data: dict, keys: list[str], value: str) -> tuple[bool, str | None]:
+    """Set ``value`` at ``keys`` within ``data``.
+
+    Returns ``(changed, old_value)`` where ``old_value`` is ``"undefined"`` when
+    no prior value existed.
+    """
+    cur = data
+    for key in keys[:-1]:
+        child = cur.get(key)
+        if not isinstance(child, dict):
+            child = {}
+            cur[key] = child
+        cur = child
+    old = cur.get(keys[-1])
+    if old != value:
+        cur[keys[-1]] = value
+        return True, old if old is not None else "undefined"
+    return False, None
 
 
 

@@ -43,14 +43,14 @@ def test_get_redis_value_error(monkeypatch):
 def test_build_from_redis_initialises(monkeypatch):
     """_build_from_redis lazy-loads connection."""
     fake = fakeredis.FakeRedis(decode_responses=True)
-    fake.set("entry.citation", '"Foo"')
+    fake.set("entry.doc.citation", '"Foo"')
     fake.set("entry.url", '"/foo"')
     monkeypatch.setattr(metadata, "redis_conn", None)
     monkeypatch.setattr(
         metadata.redis, "Redis", lambda host, port, decode_responses: fake
     )
     assert metadata.build_from_redis("entry.") == {
-        "citation": "Foo",
+        "doc": {"citation": "Foo"},
         "url": "/foo",
     }
 
@@ -78,26 +78,26 @@ def test_get_cached_metadata_caches(monkeypatch):
 
 def test_render_link_uses_citation_dict():
     """citation dict with 'alt' renders that text."""
-    desc = {"citation": {"citation": "Foo", "alt": "Alt"}, "url": "/f"}
+    desc = {"doc": {"citation": {"citation": "Foo", "alt": "Alt"}}, "url": "/f"}
     html = render_template.render_link(desc, citation="alt", use_icon=False)
     assert ">Alt<" in html
 
 
 def test_render_link_handles_citation_metadata():
     """citation with author/year/page formats like cite."""
-    desc = {"citation": {"author": "hull", "year": "2016", "page": "307"}, "url": "/h"}
+    desc = {"doc": {"citation": {"author": "hull", "year": "2016", "page": "307"}}, "url": "/h"}
     html = render_template.render_link(desc, use_icon=False)
     assert ">(Hull 2016, 307)<" in html
 
 
 def test_wrapper_functions():
     """Wrapper helpers render variants of links."""
-    desc = {"citation": "foo bar", "url": "/f", "icon": "I"}
+    desc = {"doc": {"citation": "foo bar"}, "url": "/f", "icon": "I"}
     assert "Foo Bar" in render_template.linktitle(desc)
     assert "I Foo Bar" in render_template.link_icon_title(desc)
     assert "Foo bar" in render_template.linkcap(desc)
     assert "I foo bar" in render_template.linkicon(desc)
-    short_desc = {"citation": {"short": "S"}, "url": "/s", "icon": "I"}
+    short_desc = {"doc": {"citation": {"short": "S"}}, "url": "/s", "icon": "I"}
     html = render_template.linkshort(short_desc)
     assert ">S<" in html and "I" not in html
 
@@ -114,7 +114,7 @@ def test_wrapper_functions():
     ],
 )
 def test_wrapper_functions_override_citation(func, expected):
-    desc = {"citation": "ignored", "url": "/f", "icon": "I"}
+    desc = {"doc": {"citation": "ignored"}, "url": "/f", "icon": "I"}
     html = func(desc, citation="custom citation")
     assert expected in html
     assert "ignored" not in html

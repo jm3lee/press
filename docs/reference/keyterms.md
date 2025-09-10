@@ -1,10 +1,14 @@
 # Key Terms Data Flow
 
-This document explains how the `keyterms.json` file is transformed into the final `keyterms.html` page. See [Metadata Fields](metadata-fields.md) for a description of the metadata associated with each term.
+This document explains how the `keyterms.json` file is transformed into the
+final `keyterms.html` page. See
+[Metadata Fields](metadata-fields.md) for a description of the metadata
+associated with each term.
 
 ## Source JSON
 
-The canonical list of terms lives at `src/keyterms/index.json`. Each entry maps an identifier to metadata about the term:
+The canonical list of terms lives at `src/keyterms/index.json`. Each entry maps
+an identifier to metadata about the term:
 
 ```json
 {
@@ -28,7 +32,8 @@ build/%.json: %.json
 
 This rule produces `build/keyterms/index.json` from `src/keyterms/index.json`.
 
-2. **Render Markdown** – The Markdown file `src/keyterms/index.md` loads the JSON data with `read_json` and iterates over each term:
+2. **Render Markdown** – The Markdown file `src/keyterms/index.md` loads the
+JSON data with `read_json` and iterates over each term:
 
 ```
 {% set keyterms = read_json("build/keyterms/index.json") %}
@@ -55,7 +60,7 @@ This rule produces `build/keyterms/index.json` from `src/keyterms/index.json`.
 
 ```
 build/%.html: build/%.md build/%.yml $(HTML_TEMPLATE) | build
-    render-html --template $(HTML_TEMPLATE) $< $@ -c build/$*.yml
+    render-html $< build/$*.yml $@
 ```
 
 ## Verification

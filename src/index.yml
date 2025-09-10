@@ -1,10 +1,15 @@
-author: Brian Lee
 breadcrumbs:
 - title: Home
 description: Example home page
+doc:
+  author: Brian Lee
+  pubdate: Sep 07, 2025
+  title: Home
+html:
+  scripts:
+  - <script type="module" src="/static/js/indextree.js" defer></script>
 id: home
 og_image: /img/home.png
-pubdate: Sep 02, 2025
-title: Home
+schema: v1
 toc: false
 url: /

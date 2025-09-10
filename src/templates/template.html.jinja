@@ -3,14 +3,14 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta charset="utf-8" />
-    <title>{{ title }}</title>
+    <title>{{ doc.title }}</title>
     {% if description %}
     <meta name="description" content="{{ description }}" />
     {% endif %}
     {% if og_title %}
     <meta property="og:title" content="{{ og_title }}" />
     {% else %}
-    <meta property="og:title" content="{{ title }}" />
+    <meta property="og:title" content="{{ doc.title }}" />
     {% endif %}
     {% if og_description %}
     <meta property="og:description" content="{{ og_description }}" />
@@ -22,8 +22,8 @@
     {% endif %}
     {% if og_url %}
     <meta property="og:url" content="{{ og_url }}" />
-    {% elif link.canonical %}
-    <meta property="og:url" content="{{ link.canonical }}" />
+    {% elif doc.link.canonical %}
+    <meta property="og:url" content="{{ doc.link.canonical }}" />
     {% endif %}
     {% if twitter_card %}
     <meta name="twitter:card" content="{{ twitter_card }}" />
@@ -35,8 +35,8 @@
     {% elif og_image %}
     <meta name="twitter:image" content="{{ og_image }}" />
     {% endif %}
-    {% if link.canonical %}
-    <link rel="canonical" href="{{ link.canonical }}" />
+    {% if doc.link.canonical %}
+    <link rel="canonical" href="{{ doc.link.canonical }}" />
     {% endif %}
     {% if prev %}
     <link rel="prev" href="{{ prev }}" />
@@ -69,7 +69,7 @@
           text-truncate"
           style="max-width: 16ch"
         >
-          {% if page_heading %} {{ page_heading }} {% else %} {{ title }} {% endif %}
+          {% if page_heading %} {{ page_heading }} {% else %} {{ doc.title }} {% endif %}
         </span>
         <button
           class="navbar-toggler"
@@ -112,7 +112,7 @@
 
       <div class="container-fluid position-relative text-center">
         <h1 class="display-3 fw-bold">
-          {% if page_heading %} {{ page_heading }} {% else %} {{ title }} {% endif %}
+          {% if page_heading %} {{ page_heading }} {% else %} {{ doc.title }} {% endif %}
         </h1>
       </div>
     </header>
@@ -161,9 +161,9 @@
       </nav>
       {% endif %}
       <div class="metablock">
-        {% if author %} {{ author }}<br />
+        {% if doc.author %} {{ doc.author }}<br />
         {% endif %}
-    {% if pubdate %} {{ pubdate }}<br />
+    {% if pubdate %} {{ doc.pubdate }}<br />
         {% endif %}
     {% if status %} {{ status }} {% endif %}
     {% if partof %} Part of: {{ partof }}
@@ -181,7 +181,10 @@
       {% endif %}
 
       <!-- Body content generated from Markdown goes here -->
-      {{ content | safe }}
+      {% filter press %}
+          {% block content %}
+          {% endblock %}
+      {% endfilter %}
 
       <!-- prev/next page links -->
       {% if prev %}
@@ -209,8 +212,6 @@
       </nav>
       {% endif %}
 
-      <!-- Optional scripts and footers can be included similarly -->
-      {% for header_include in header_includes %} {{ header_include | safe }} {% endfor %}
     </main>
 
     <footer class="footer p-5 bg-dark text-white text-center">
@@ -219,6 +220,10 @@
         <small>Published using Press</small>
       </p>
     </footer>
+
+    {% for script in html.scripts %}
+    {{ script | safe }}
+    {% endfor %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -239,7 +244,7 @@
         observer.observe(hero);
       });
     </script>
-    {% if mathjax %}
+    {% if doc.mathjax %}
     <!-- MATHJAX SUPPORT -->
     <script
       type="text/javascript"

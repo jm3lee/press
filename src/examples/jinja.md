@@ -1,3 +1,6 @@
+{% extends "src/templates/template.html.jinja" %}
+
+{% block content %}
 This tutorial introduces the basics of embedding Jinja in Markdown. Each
 snippet shows the template followed by its rendered output.
 
@@ -56,9 +59,11 @@ Output:
 Custom globals work the same way. The `link` global turns metadata into an anchor tag:
 
 ```jinja
-{% raw %}{{ link({"citation": "Quickstart", "url": "/quickstart.html"}) }}{% endraw %}
+{% raw %}{{ link({"doc": {"citation": "Quickstart"}, "url": "/quickstart.html"}) }}{% endraw %}
 ```
 
 Output:
 
-{{ link({"citation": "Quickstart", "url": "/quickstart.html"}) }}
+{{ link({"doc": {"citation": "Quickstart"}, "url": "/quickstart.html"}) }}
+
+{% endblock %}

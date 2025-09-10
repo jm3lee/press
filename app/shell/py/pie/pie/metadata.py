@@ -14,6 +14,7 @@ from flatten_dict import unflatten
 from pie.logging import logger
 from pie.yaml import YAML_EXTS, read_yaml, yaml
 from ruamel.yaml import YAMLError
+from pie.schema import DEFAULT_SCHEMA
 
 
 def get_url(filename: str) -> Optional[str]:
@@ -78,18 +79,19 @@ def _add_url_if_missing(metadata: dict[str, Any], filepath: str) -> None:
 
 
 def _add_citation_if_missing(metadata: dict[str, Any], filepath: str) -> None:
-    """Derive ``citation`` from ``title`` or deprecated ``name``."""
+    """Derive ``doc.citation`` from ``doc.title`` or deprecated ``name``."""
 
-    if "citation" not in metadata:
-        title = metadata.get("title")
+    doc = metadata.setdefault("doc", {})
+    if "citation" not in doc:
+        title = doc.get("title") or metadata.get("title")
         if title:
-            metadata["citation"] = title.lower()
+            doc["citation"] = title.lower()
         elif "name" in metadata:
             logger.warning(
                 "'name' field is deprecated; use 'title' instead",
                 filename=filepath,
             )
-            metadata["citation"] = metadata["name"].lower()
+            doc["citation"] = metadata["name"].lower()
 
 
 def _add_id_if_missing(metadata: dict[str, Any], filepath: str) -> None:
@@ -106,10 +108,13 @@ def _add_id_if_missing(metadata: dict[str, Any], filepath: str) -> None:
 
 
 def _add_canonical_link_if_missing(metadata: dict[str, Any], filepath: str) -> None:
-    """Create ``link.canonical`` from ``url`` when missing."""
+    """Create ``doc.link.canonical`` from ``url`` when missing."""
 
-    if metadata.get("link", {}).get("canonical"):
-        return
+    doc = metadata.get("doc")
+    if isinstance(doc, dict):
+        link = doc.get("link")
+        if isinstance(link, dict) and link.get("canonical"):
+            return
 
     url = metadata.get("url")
     if url is None:
@@ -119,33 +124,34 @@ def _add_canonical_link_if_missing(metadata: dict[str, Any], filepath: str) -> N
     base_url = os.getenv("BASE_URL", "").rstrip("/")
     canonical = urljoin(base_url + "/", url.lstrip("/")) if base_url else url
 
-    metadata.setdefault("link", {})["canonical"] = canonical
+    metadata.setdefault("doc", {}).setdefault("link", {})["canonical"] = canonical
 
 
-def _add_empty_if_missing(metadata: dict[str, Any], field: str, filepath: str) -> None:
-    """Generate an ``id`` based on ``filepath`` if absent."""
+def _add_if_missing(
+    metadata: dict[str, Any], field: str, value: Any, filepath: str
+) -> None:
+    """Assign ``value`` to ``field`` when it is missing.
 
-    if field not in metadata:
-        metadata[field] = None
+    ``field`` may be a dotted path such as ``foo.bar``.
+    """
+
+    parts = field.split(".")
+    obj: dict[str, Any] = metadata
+    for part in parts[:-1]:
+        sub = obj.get(part)
+        if not isinstance(sub, dict):
+            sub = {}
+            obj[part] = sub
+        obj = sub
+    last = parts[-1]
+    if last not in obj:
+        obj[last] = value
         logger.debug(
             "Generated",
-            id=metadata["id"],
+            id=metadata.get("id"),
             field=field,
             filename=str(Path(filepath).resolve().relative_to(Path.cwd())),
         )
-
-def _add_if_missing(metadata: dict[str, Any], field: str, value, filepath: str) -> None:
-    """Generate an ``id`` based on ``filepath`` if absent."""
-
-    if field not in metadata:
-        metadata[field] = value
-        logger.debug(
-            "Generated",
-            id=metadata["id"],
-            field=field,
-            filename=str(Path(filepath).resolve().relative_to(Path.cwd())),
-        )
-
 
 def generate_missing_metadata(
     metadata: dict[str, Any], filepath: str
@@ -156,26 +162,28 @@ def generate_missing_metadata(
     _add_canonical_link_if_missing(metadata, filepath)
     _add_citation_if_missing(metadata, filepath)
     _add_id_if_missing(metadata, filepath)
-    _add_empty_if_missing(metadata, 'breadcrumbs', filepath)
-    _add_empty_if_missing(metadata, 'description', filepath)
-    _add_empty_if_missing(metadata, 'mathjax', filepath)
-    _add_empty_if_missing(metadata, 'next', filepath)
-    _add_empty_if_missing(metadata, 'og_description', filepath)
-    _add_empty_if_missing(metadata, 'og_image', filepath)
-    _add_empty_if_missing(metadata, 'og_title', filepath)
-    _add_empty_if_missing(metadata, 'og_url', filepath)
-    _add_empty_if_missing(metadata, 'page_heading', filepath)
-    _add_empty_if_missing(metadata, 'partof', filepath)
-    _add_empty_if_missing(metadata, 'preamble', filepath)
-    _add_empty_if_missing(metadata, 'prev', filepath)
-    _add_empty_if_missing(metadata, 'status', filepath)
-    _add_empty_if_missing(metadata, 'toc', filepath)
-    _add_empty_if_missing(metadata, 'twitter_card', filepath)
-    _add_empty_if_missing(metadata, 'twitter_image', filepath)
-    _add_empty_if_missing(metadata, 'pubdate', filepath)
+    _add_if_missing(metadata, 'breadcrumbs', None, filepath)
     _add_if_missing(metadata, 'css', ['/css/style.css'], filepath)
-    _add_if_missing(metadata, 'header', {'header':None}, filepath)
-    _add_if_missing(metadata, 'header_includes', [], filepath)
+    _add_if_missing(metadata, 'description', None, filepath)
+    _add_if_missing(metadata, 'doc.mathjax', False, filepath)
+    _add_if_missing(metadata, 'header', {'header': None}, filepath)
+    _add_if_missing(metadata, 'html', {'scripts': []}, filepath)
+    _add_if_missing(metadata, 'next', None, filepath)
+    _add_if_missing(metadata, 'og_description', None, filepath)
+    _add_if_missing(metadata, 'og_image', None, filepath)
+    _add_if_missing(metadata, 'og_title', None, filepath)
+    _add_if_missing(metadata, 'og_url', None, filepath)
+    _add_if_missing(metadata, 'page_heading', None, filepath)
+    _add_if_missing(metadata, 'partof', None, filepath)
+    _add_if_missing(metadata, 'preamble', None, filepath)
+    _add_if_missing(metadata, 'prev', None, filepath)
+    _add_if_missing(metadata, 'pubdate', None, filepath)
+    _add_if_missing(metadata, 'schema', DEFAULT_SCHEMA, filepath)
+    _add_if_missing(metadata, 'status', None, filepath)
+    _add_if_missing(metadata, 'toc', None, filepath)
+    _add_if_missing(metadata, 'twitter_card', None, filepath)
+    _add_if_missing(metadata, 'twitter_image', None, filepath)
+    logger.debug("returning", metadata=metadata)
     return metadata
 
 

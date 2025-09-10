@@ -1,10 +1,12 @@
-author: Brian Lee
-citation: quickstart
+breadcrumbs:
+- title: Home
+  url: /
+- title: Quickstart
+doc:
+  citation: quickstart
+  author: Brian Lee
+  pubdate: Sep 07, 2025
+  title: Quickstart
 id: quickstart
 permalink: /q
-pubdate: Aug 15, 2025
-title: Quickstart
-breadcrumbs:
-  - title: Home
-    url: /
-  - title: Quickstart
+schema: v1

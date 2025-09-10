@@ -1,6 +1,10 @@
+{% extends "src/templates/template.html.jinja" %}
+
+{% block content %}
 ## Start Server
 
-Build pages and run a development nginx server, run this on `bash` and alike.
+Build pages and run a development nginx server, run this on `bash` and
+alike.
 
 ```
 alias r=make -f redo.mk
@@ -16,3 +20,4 @@ To shutdown the server,
 ```
 r down
 ```
+{% endblock %}

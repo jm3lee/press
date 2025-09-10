@@ -108,6 +108,7 @@ upd: ## Start development containers in detached mode
 down: ## Stop and remove the compose stack
 	$(call status,Stop compose stack)
 	$(Q)$(DOCKER_COMPOSE) down --remove-orphans
+	$(Q)-rm -f $(BUILD_DIR)/.update-index
 
 # Clean the build directory by removing all build artifacts
 .PHONY: clean

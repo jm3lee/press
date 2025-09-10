@@ -3,14 +3,14 @@
   <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>{{ title }}</title>
+    <title>{{ doc.title }}</title>
     {% if description %}
     <meta name="description" content="{{ description }}" />
     {% endif %}
     {% if og_title %}
     <meta property="og:title" content="{{ og_title }}" />
     {% else %}
-    <meta property="og:title" content="{{ title }}" />
+    <meta property="og:title" content="{{ doc.title }}" />
     {% endif %}
     {% if og_description %}
     <meta property="og:description" content="{{ og_description }}" />
@@ -22,8 +22,8 @@
     {% endif %}
     {% if og_url %}
     <meta property="og:url" content="{{ og_url }}" />
-    {% elif link.canonical %}
-    <meta property="og:url" content="{{ link.canonical }}" />
+    {% elif doc.link.canonical %}
+    <meta property="og:url" content="{{ doc.link.canonical }}" />
     {% endif %}
     {% if twitter_card %}
     <meta name="twitter:card" content="{{ twitter_card }}" />
@@ -126,23 +126,25 @@
         {% if hero_image %}
         <div class="hero"><img src="{{ hero_image }}" alt=""/></div>
         {% endif %}
-        <h1>{{ title }}</h1>
+        <h1>{{ doc.title }}</h1>
         <p class="byline">
-          {% if author %}<span class="author">{{ author }}</span>{% endif %}
-          {% if pubdate %} • <time datetime="{{ pubdate }}">{{ pubdate }}</time>{% endif %}
+          {% if doc.author %}<span class="author">{{ doc.author }}</span>{% endif %}
+          {% if doc.pubdate %} • <time datetime="{{ doc.pubdate }}">{{ doc.pubdate }}</time>{% endif %}
         </p>
         {% if preamble %}<p class="preamble">{{ preamble | safe }}</p>{% endif %}
       </header>
       <section class="content">
-        {{ content | safe }}
+      {% filter press %}
+          {% block content %}
+          {% endblock %}
+      {% endfilter %}
       </section>
       <footer class="fade-in">
-        <hr/>
         <p><small>Enjoyed this article? Share it!</small></p>
       </footer>
     </article>
-    {% for header_include in header_includes %}
-    {{ header_include | safe }}
+    {% for script in html.scripts %}
+    {{ script | safe }}
     {% endfor %}
     <script>
       document.addEventListener('DOMContentLoaded', () => {

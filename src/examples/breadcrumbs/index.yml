@@ -1,11 +1,13 @@
-title: Breadcrumb Demo
-author: Ada Lovelace
-id: breadcrumb_demo
-pubdate: Jan 2, 2025
-description: Demonstrates breadcrumb navigation.
 breadcrumbs:
-  - title: Home
-    url: /
-  - title: Examples
-    url: /examples/
-  - title: Breadcrumb Demo
+- title: Home
+  url: /
+- title: Examples
+  url: /examples/
+- title: Breadcrumb Demo
+description: Demonstrates breadcrumb navigation.
+doc:
+  author: Brian Lee
+  pubdate: Sep 07, 2025
+  title: Breadcrumb Demo
+id: breadcrumb_demo
+schema: v1

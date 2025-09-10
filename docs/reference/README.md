@@ -15,18 +15,20 @@ formatting.
 - [link-metadata.md](link-metadata.md) – link metadata format and usage.
 - [logging.md](logging.md) – centralized logging helpers and configuration.
 - [metadata-fields.md](metadata-fields.md) – description of common metadata
-fields referenced in
-  [build-index](../guides/build-index.md).
-- [update-author.md](update-author.md) – refresh the `author` field for
+fields used throughout the project.
+- [update-author.md](update-author.md) – refresh the `doc.author` field for
 existing documents.
 - [update-index.md](update-index.md) – insert index values into Redis.
-- [update-pubdate.md](update-pubdate.md) – update the `pubdate` field for
+- [update-pubdate.md](update-pubdate.md) – update the `doc.pubdate` field for
 modified files.
+- [migrate-metadata.md](migrate-metadata.md) – move legacy fields under
+  `doc` and header includes under `html.scripts`.
 - [update-url.md](update-url.md) – rename files and update URL fields.
 - [update-link-filters.md](update-link-filters.md) – convert legacy `link*`
 filters into globals.
 - [update-metadata.md](update-metadata.md) – merge YAML data into metadata
 files.
+- [nginx-test.md](nginx-test.md) – start the nginx-test service and run tests.
 - [shell.md](shell.md) – run the project's shell service via docker compose.
 - [sitemap.md](sitemap.md) – generate an XML sitemap with absolute URLs.
 - [standalone-bin-scripts.md](standalone-bin-scripts.md) – rationale for self-

@@ -1,15 +1,17 @@
-title: Trendy Blog Template Demo
-author: Ada Lovelace
-id: trendy_blog_template
-pubdate: Jan 1, 2025
-hero_image: https://via.placeholder.com/1200x400/F4A460/FFFFFF?text=Fall+Hero
-preamble: A short intro shows how you might tease readers into the story.
-template: src/templates/blog/template.html.jinja
-css:
-  - https://cdn.jsdelivr.net/npm/water.css@2/out/water.css
 breadcrumbs:
-  - title: Home
-    url: /
-  - title: Examples
-    url: /examples/
-  - title: Trendy Blog Template Demo
+- title: Home
+  url: /
+- title: Examples
+  url: /examples/
+- title: Trendy Blog Template Demo
+css:
+- https://cdn.jsdelivr.net/npm/water.css@2/out/water.css
+doc:
+  author: Brian Lee
+  pubdate: Sep 07, 2025
+  title: Trendy Blog Template Demo
+hero_image: https://via.placeholder.com/1200x400/F4A460/FFFFFF?text=Fall+Hero
+id: trendy_blog_template
+preamble: A short intro shows how you might tease readers into the story.
+schema: v1
+template: src/templates/blog/template.html.jinja

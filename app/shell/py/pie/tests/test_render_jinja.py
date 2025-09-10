@@ -10,7 +10,7 @@ from jinja2 import FileSystemLoader, TemplateSyntaxError
 from pie.render import jinja
 
 def test_resolve_citation_pages_list():
-    desc = {"citation": {"author": "smith", "year": 1999, "page": [1, 2]}}
+    desc = {"doc": {"citation": {"author": "smith", "year": 1999, "page": [1, 2]}}}
     text, needs_parens = jinja._resolve_citation(desc, "citation")
     assert text == "Smith 1999, 1, 2"
     assert needs_parens is True
@@ -69,7 +69,7 @@ def test_definition_missing_snippet_returns_empty():
     assert jinja.definition({}) == ""
 
 def test_cite_with_simple_string_citation(monkeypatch):
-    desc = {"citation": "Simple", "url": "u", "title": "T"}
+    desc = {"doc": {"citation": "Simple"}, "url": "u", "title": "T"}
 
     def fake_get(name: str):
         return desc
@@ -86,3 +86,20 @@ def test_parse_args_parses_values():
     assert args.output == "out"
     assert args.index == "i.json"
     assert args.config == "cfg.yml"
+
+
+def test_render_press_replaces_alias():
+    html = jinja.render_press("Hi :smile:")
+    assert str(html) == "<p>Hi 😄</p>\n"
+
+
+def test_render_press_ignores_unknown_alias():
+    html = jinja.render_press("Hi :does_not_exist:")
+    assert str(html) == "<p>Hi :does_not_exist:</p>\n"
+
+
+def test_render_press_renders_footnotes():
+    text = "Note.[^1]\n\n[^1]: Footnote"
+    html = jinja.render_press(text)
+    assert '<section class="footnotes"' in str(html)
+

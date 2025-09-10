@@ -1,13 +1,15 @@
-title: Nested Breadcrumb Demo
-author: Ada Lovelace
-id: nested_breadcrumb_demo
-pubdate: Jan 3, 2025
-description: Demonstrates a three-level breadcrumb trail.
 breadcrumbs:
-  - title: Home
-    url: /
-  - title: Examples
-    url: /examples/
-  - title: Breadcrumb Demo
-    url: /examples/breadcrumbs/
-  - title: Nested Demo
+- title: Home
+  url: /
+- title: Examples
+  url: /examples/
+- title: Breadcrumb Demo
+  url: /examples/breadcrumbs/
+- title: Nested Demo
+description: Demonstrates a three-level breadcrumb trail.
+doc:
+  author: Brian Lee
+  pubdate: Sep 07, 2025
+  title: Nested Breadcrumb Demo
+id: nested_breadcrumb_demo
+schema: v1
