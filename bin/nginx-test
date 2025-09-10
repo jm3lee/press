@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
-# Run after git pull to rebuild everything required for development.
-# Use -p to run bin/pull after distclean.
-set -euo pipefail
+#
+# Description:
+#   Start the nginx-test service and run the project's test suite.
+#   The container is removed when the script exits.
+#
+# Usage:
+#   bin/nginx-test
+#
+# Environment variables:
+#   VERBOSE   - Passed to make (default: 0)
+#   SRC_DIR   - Source directory (default: src)
+#   BUILD_DIR - Build directory (default: build)
 
-RUN_PULL=0
-while getopts "p" opt; do
-  case "$opt" in
-    p) RUN_PULL=1 ;;
-    *) echo "Usage: $0 [-p]" >&2; exit 1 ;;
-  esac
-done
-shift $((OPTIND - 1))
+set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"

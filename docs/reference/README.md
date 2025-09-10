@@ -28,6 +28,7 @@ modified files.
 filters into globals.
 - [update-metadata.md](update-metadata.md) – merge YAML data into metadata
 files.
+- [nginx-test.md](nginx-test.md) – start the nginx-test service and run tests.
 - [shell.md](shell.md) – run the project's shell service via docker compose.
 - [sitemap.md](sitemap.md) – generate an XML sitemap with absolute URLs.
 - [standalone-bin-scripts.md](standalone-bin-scripts.md) – rationale for self-
