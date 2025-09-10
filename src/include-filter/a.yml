@@ -1,11 +1,11 @@
-breadcrumbs:
-- title: Home
-  url: /
-- title: include-filter
-  url: /include-filter/
-- title: a
 doc:
   author: Brian Lee
+  breadcrumbs:
+  - title: Home
+    url: /
+  - title: include-filter
+    url: /include-filter/
+  - title: a
   pubdate: Sep 07, 2025
   title: a
 schema: v1

@@ -1,7 +1,7 @@
 # check-breadcrumbs
 
 `check-breadcrumbs` verifies that each metadata file under `src/` defines a
-`breadcrumbs` array. It exits with a non-zero status when a file lacks the
+`doc.breadcrumbs` array. It exits with a non-zero status when a file lacks the
 field. Messages are logged to `stderr` and written to
 `log/check-breadcrumbs.txt`.
 

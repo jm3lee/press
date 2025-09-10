@@ -1,13 +1,13 @@
-breadcrumbs:
-- title: Home
-  url: /
-- title: Examples
-  url: /examples/
-- title: Trendy Blog Template Demo
 css:
 - https://cdn.jsdelivr.net/npm/water.css@2/out/water.css
 doc:
   author: Brian Lee
+  breadcrumbs:
+  - title: Home
+    url: /
+  - title: Examples
+    url: /examples/
+  - title: Trendy Blog Template Demo
   pubdate: Sep 07, 2025
   title: Trendy Blog Template Demo
 hero_image: https://via.placeholder.com/1200x400/F4A460/FFFFFF?text=Fall+Hero

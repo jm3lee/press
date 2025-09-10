@@ -1,8 +1,8 @@
-breadcrumbs:
-- title: Home
 description: Example home page
 doc:
   author: Brian Lee
+  breadcrumbs:
+  - title: Home
   pubdate: Sep 07, 2025
   title: Home
 html:

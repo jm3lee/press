@@ -31,14 +31,16 @@ class Doc:
     author: str
     pubdate: str
     title: str
+    breadcrumbs: List[Breadcrumb] = field(default_factory=list)
 
-    def to_dict(self) -> dict[str, str]:
+    def to_dict(self) -> dict[str, Any]:
         """Return dictionary representation for serialization."""
 
         return {
             "author": self.author,
             "pubdate": self.pubdate,
             "title": self.title,
+            "breadcrumbs": [b.to_dict() for b in self.breadcrumbs],
         }
 
 
@@ -48,7 +50,6 @@ class Metadata:
 
     id: str
     doc: Doc
-    breadcrumbs: List[Breadcrumb] = field(default_factory=list)
     schema: str = DEFAULT_SCHEMA
     description: Optional[str] = None
 
@@ -56,7 +57,6 @@ class Metadata:
         """Return dictionary representation for serialization."""
 
         data = {
-            "breadcrumbs": [b.to_dict() for b in self.breadcrumbs],
             "doc": self.doc.to_dict(),
             "id": self.id,
             "schema": self.schema,

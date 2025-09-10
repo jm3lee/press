@@ -67,8 +67,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     breadcrumbs.append(Breadcrumb(_title_from_slug(slug)))
     metadata = Metadata(
         id=_id_from_slug(slug),
-        doc=Doc(author="", pubdate=get_pubdate(), title=""),
-        breadcrumbs=breadcrumbs,
+        doc=Doc(
+            author="",
+            pubdate=get_pubdate(),
+            title="",
+            breadcrumbs=breadcrumbs,
+        ),
     )
     write_yaml(metadata.to_dict(), str(yml_path))
     

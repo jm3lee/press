@@ -1,10 +1,10 @@
-breadcrumbs:
-- title: Home
-  url: /
-- title: Quickstart
 doc:
-  citation: quickstart
   author: Brian Lee
+  breadcrumbs:
+  - title: Home
+    url: /
+  - title: Quickstart
+  citation: quickstart
   pubdate: Sep 07, 2025
   title: Quickstart
 id: quickstart

@@ -1,13 +1,13 @@
-breadcrumbs:
-- title: Home
-  url: /
-- title: Examples
-  url: /examples/
-- title: Anchor
-  url: /examples/anchor/
-- title: Index
 doc:
   author: Brian Lee
+  breadcrumbs:
+  - title: Home
+    url: /
+  - title: Examples
+    url: /examples/
+  - title: Anchor
+    url: /examples/anchor/
+  - title: Index
   pubdate: Sep 07, 2025
   title: Anchor Example
 id: anchor

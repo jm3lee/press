@@ -1,11 +1,11 @@
-breadcrumbs:
-- title: Home
-  url: /
-- title: gen-markdown-index
-  url: /gen-markdown-index/
-- title: d1
 doc:
   author: Brian Lee
+  breadcrumbs:
+  - title: Home
+    url: /
+  - title: gen-markdown-index
+    url: /gen-markdown-index/
+  - title: d1
   pubdate: Sep 07, 2025
   title: d1
 id: d1

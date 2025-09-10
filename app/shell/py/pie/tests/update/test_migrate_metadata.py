@@ -13,7 +13,8 @@ def test_moves_fields_under_doc(tmp_path: Path, capsys) -> None:
     yml.write_text(
         "title: T\nauthor: A\npubdate: Jan 1, 2020\n"
         "link:\n  class: x\n"
-        "citation: C\n",
+        "citation: C\n"
+        "breadcrumbs:\n  - title: Home\n",
         encoding="utf-8",
     )
 
@@ -21,7 +22,8 @@ def test_moves_fields_under_doc(tmp_path: Path, capsys) -> None:
     md.write_text(
         "---\ntitle: T\nauthor: A\npubdate: Jan 1, 2020\n"
         "link:\n  tracking: false\n"
-        "citation: C\n---\n",
+        "citation: C\n"
+        "breadcrumbs:\n  - title: Home\n---\n",
         encoding="utf-8",
     )
 
@@ -33,11 +35,13 @@ def test_moves_fields_under_doc(tmp_path: Path, capsys) -> None:
     assert data["doc"]["pubdate"] == "Jan 1, 2020"
     assert data["doc"]["link"] == {"class": "x"}
     assert data["doc"]["citation"] == "C"
+    assert data["doc"]["breadcrumbs"] == [{"title": "Home"}]
     assert "title" not in data
     assert "author" not in data
     assert "pubdate" not in data
     assert "link" not in data
     assert "citation" not in data
+    assert "breadcrumbs" not in data
 
     md_data = yaml.load(md.read_text(encoding="utf-8").split("---\n", 2)[1])
     assert md_data["doc"]["title"] == "T"
@@ -45,8 +49,10 @@ def test_moves_fields_under_doc(tmp_path: Path, capsys) -> None:
     assert md_data["doc"]["pubdate"] == "Jan 1, 2020"
     assert md_data["doc"]["link"] == {"tracking": False}
     assert md_data["doc"]["citation"] == "C"
+    assert md_data["doc"]["breadcrumbs"] == [{"title": "Home"}]
     assert "title" not in md_data
     assert "citation" not in md_data
+    assert "breadcrumbs" not in md_data
 
     out_lines = capsys.readouterr().out.strip().splitlines()
     assert f"{yml}: migrated" in out_lines

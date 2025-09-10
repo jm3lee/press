@@ -1,10 +1,10 @@
-breadcrumbs:
-- title: Home
-  url: /
-- title: Examples
 description: Demonstrations of Press features
 doc:
   author: Brian Lee
+  breadcrumbs:
+  - title: Home
+    url: /
+  - title: Examples
   pubdate: Sep 07, 2025
   title: Examples
 html:
