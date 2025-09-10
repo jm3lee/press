@@ -1,14 +1,14 @@
-breadcrumbs:
-- title: Home
-  url: /
-- title: Examples
-  url: /examples/
-- title: Breadcrumb Demo
-  url: /examples/breadcrumbs/
-- title: Nested Demo
 description: Demonstrates a three-level breadcrumb trail.
 doc:
   author: Brian Lee
+  breadcrumbs:
+  - title: Home
+    url: /
+  - title: Examples
+    url: /examples/
+  - title: Breadcrumb Demo
+    url: /examples/breadcrumbs/
+  - title: Nested Demo
   pubdate: Sep 07, 2025
   title: Nested Breadcrumb Demo
 id: nested_breadcrumb_demo

@@ -9,5 +9,5 @@ Documentation for Pie's validation scripts.
 - [check-post-build](check-post-build.md) – verify build artifacts after
   rendering.
 - [check-breadcrumbs](check-breadcrumbs.md) – ensure metadata defines
-  breadcrumbs.
+  `doc.breadcrumbs`.
 

@@ -1,9 +1,9 @@
-breadcrumbs:
-- title: Home
-  url: /
-- title: Links
 doc:
   author: Brian Lee
+  breadcrumbs:
+  - title: Home
+    url: /
+  - title: Links
   pubdate: Sep 07, 2025
   title: Links
 id: links

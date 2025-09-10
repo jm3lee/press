@@ -1,7 +1,8 @@
 # migrate-metadata
 
-Move legacy top-level `author`, `pubdate`, `link`, `title`, `citation`, and
-`header_includes` fields under the `doc` mapping and `html.scripts`.
+Move legacy top-level `author`, `pubdate`, `link`, `title`, `citation`,
+`breadcrumbs`, and `header_includes` fields under the `doc` mapping and
+`html.scripts`.
 This script scans the provided files or directories and rewrites Markdown
 front matter and YAML metadata in place.
 

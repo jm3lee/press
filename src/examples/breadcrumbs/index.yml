@@ -1,12 +1,12 @@
-breadcrumbs:
-- title: Home
-  url: /
-- title: Examples
-  url: /examples/
-- title: Breadcrumb Demo
 description: Demonstrates breadcrumb navigation.
 doc:
   author: Brian Lee
+  breadcrumbs:
+  - title: Home
+    url: /
+  - title: Examples
+    url: /examples/
+  - title: Breadcrumb Demo
   pubdate: Sep 07, 2025
   title: Breadcrumb Demo
 id: breadcrumb_demo

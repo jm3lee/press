@@ -1,15 +1,15 @@
-schema: v1
-breadcrumbs:
-- title: Home
-  url: /
-- title: Examples
-  url: /examples/
-- title: IndexTree Demo
 doc:
   author: Brian Lee
+  breadcrumbs:
+  - title: Home
+    url: /
+  - title: Examples
+    url: /examples/
+  - title: IndexTree Demo
   pubdate: Sep 07, 2025
   title: IndexTree Demo
 html:
   scripts:
   - <script type="module" src="/static/js/indextree.js" defer></script>
 id: indextree-demo
+schema: v1

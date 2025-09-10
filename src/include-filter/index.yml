@@ -1,9 +1,9 @@
-breadcrumbs:
-- title: Home
-  url: /
-- title: include-filter
 doc:
   author: Brian Lee
+  breadcrumbs:
+  - title: Home
+    url: /
+  - title: include-filter
   pubdate: Sep 07, 2025
   title: include-filter
 id: dist_include_filter

@@ -1,12 +1,12 @@
-breadcrumbs:
-- title: Home
-  url: /
-- title: Examples
-  url: /examples/
-- title: Responsive Images
 doc:
-  citation: responsive-images
   author: Brian Lee
+  breadcrumbs:
+  - title: Home
+    url: /
+  - title: Examples
+    url: /examples/
+  - title: Responsive Images
+  citation: responsive-images
   pubdate: Sep 07, 2025
   title: Responsive Images
 id: responsive-images

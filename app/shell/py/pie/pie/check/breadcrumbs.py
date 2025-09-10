@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify that metadata files define breadcrumbs."""
+"""Verify that metadata files define ``doc.breadcrumbs``."""
 
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ DEFAULT_EXCLUDE = Path("cfg/check-breadcrumbs-exclude.yml")
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
     parser = create_parser(
-        "Check that metadata files include a breadcrumbs array.",
+        "Check that metadata files include a doc.breadcrumbs array.",
         log_default=DEFAULT_LOG,
     )
     parser.add_argument(
@@ -81,7 +81,8 @@ def main(argv: list[str] | None = None) -> int:
 
     ok = True
     for paths, meta in _iter_metadata(root):
-        breadcrumbs = meta.get("breadcrumbs") if meta else None
+        doc = meta.get("doc") if meta else None
+        breadcrumbs = doc.get("breadcrumbs") if isinstance(doc, dict) else None
         for path in paths:
             if path in exclude:
                 continue

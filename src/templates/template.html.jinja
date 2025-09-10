@@ -147,10 +147,10 @@
     </style>
 
     <main class="container mb-5" style="max-width: 65ch">
-      {% if breadcrumbs %}
+      {% if doc.breadcrumbs %}
       <nav style="--bs-breadcrumb-divider: '>'" aria-label="breadcrumb">
         <ol class="breadcrumb pt-3">
-          {% for breadcrumb in breadcrumbs %}
+          {% for breadcrumb in doc.breadcrumbs %}
           {% if breadcrumb.get('url') %}
           <li class="breadcrumb-item"><a href="{{ breadcrumb.url }}">{{ breadcrumb.get('title') }}</a></li>
           {% else %}
