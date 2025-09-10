@@ -10,6 +10,12 @@ from pie.logging import configure_logging, logger
 from pie.utils import get_pubdate, write_yaml
 
 
+DEFAULT_MD = (
+    "{% extends 'src/templates/template.html.jinja' %}\n"
+    "{% block content %}\n\n"
+    "{% endblock %}\n"
+)
+
 __all__ = ["main"]
 
 
@@ -42,7 +48,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     md_path = base.with_suffix(".md")
     yml_path = base.with_suffix(".yml")
 
-    md_path.touch()
+    md_path.write_text(DEFAULT_MD, encoding="utf-8")
     try:
         rel_parts = base.resolve().relative_to(Path("src").resolve()).parts
     except ValueError:
