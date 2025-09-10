@@ -1,63 +1,6 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta charset="utf-8" />
-    <title>{{ doc.title }}</title>
-    {% if description %}
-    <meta name="description" content="{{ description }}" />
-    {% endif %}
-    {% if og_title %}
-    <meta property="og:title" content="{{ og_title }}" />
-    {% else %}
-    <meta property="og:title" content="{{ doc.title }}" />
-    {% endif %}
-    {% if og_description %}
-    <meta property="og:description" content="{{ og_description }}" />
-    {% elif description %}
-    <meta property="og:description" content="{{ description }}" />
-    {% endif %}
-    {% if og_image %}
-    <meta property="og:image" content="{{ og_image }}" />
-    {% endif %}
-    {% if og_url %}
-    <meta property="og:url" content="{{ og_url }}" />
-    {% elif doc.link.canonical %}
-    <meta property="og:url" content="{{ doc.link.canonical }}" />
-    {% endif %}
-    {% if twitter_card %}
-    <meta name="twitter:card" content="{{ twitter_card }}" />
-    {% else %}
-    <meta name="twitter:card" content="summary_large_image" />
-    {% endif %}
-    {% if twitter_image %}
-    <meta name="twitter:image" content="{{ twitter_image }}" />
-    {% elif og_image %}
-    <meta name="twitter:image" content="{{ og_image }}" />
-    {% endif %}
-    {% if doc.link.canonical %}
-    <link rel="canonical" href="{{ doc.link.canonical }}" />
-    {% endif %}
-    {% if prev %}
-    <link rel="prev" href="{{ prev }}" />
-    {% endif %}
-    {% if next %}
-    <link rel="next" href="{{ next }}" />
-    {% endif %}
-
-    <!-- If you supply multiple CSS files via metadata -->
-    <!-- The main stylesheet has to be included here because mobile browsers
-            don't seem to apply the stylesheet otherwise, and fonts are too
-            small. -->
-    {% for css in css %}
-    <link rel="stylesheet" href="{{ css }}" />
-    {% endfor %}
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
-    />
-  </head>
-
+  {% include "src/templates/head.html.jinja" %}
   <body class="fs-5 lh-lg">
     <!-- site nav -->
     <nav class="navbar navbar-expand-lg bg-body-tertiary fixed-top">
