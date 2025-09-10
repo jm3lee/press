@@ -4,13 +4,20 @@ from bs4 import BeautifulSoup
 from jinja2 import Undefined
 from pie.render import html
 
+
 def _setup_template(tmp_path, monkeypatch):
-    template = Path("/data/src/templates/template.html.jinja").read_text(
+    template_dir = (
+        Path(__file__).resolve().parents[5] / "src" / "templates"
+    )
+    template = (template_dir / "template.html.jinja").read_text(
         encoding="utf-8"
     )
+    head = (template_dir / "head.html.jinja").read_text(encoding="utf-8")
+
     tmpl_dir = tmp_path / "src" / "templates"
     tmpl_dir.mkdir(parents=True)
     (tmpl_dir / "template.html.jinja").write_text(template, encoding="utf-8")
+    (tmpl_dir / "head.html.jinja").write_text(head, encoding="utf-8")
     md = tmp_path / "page.md"
     md.write_text(
         "{% extends \"src/templates/template.html.jinja\" %}\n"
