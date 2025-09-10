@@ -9,7 +9,8 @@
   - `id`: use `_` instead of `-` when modifying
 - Math: always use `$ ... $` or `$$ ... $$`  
   (never `\(`, `\)`, `\[`, `\]`)
-- Makefiles: **indent with tabs**, not spaces
+- Makefiles: **indent with real tab characters** for recipe lines.
+  Leading spaces will break Makefile syntax. Never replace tabs with spaces.
 - Documentation: write as an **expert engineer**.  
   Provide enough detail for new team members.
 
