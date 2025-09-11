@@ -3,6 +3,7 @@ import os
 import fakeredis
 import pytest
 import ruamel.yaml as yaml
+from pathlib import Path
 
 from pie import metadata
 
@@ -98,6 +99,20 @@ def test_load_metadata_pair_conflict_shows_path(tmp_path, monkeypatch):
         assert any("dir/post.yml" in m for m in messages)
     finally:
         os.chdir("/tmp")
+
+
+def test_load_metadata_pair_accepts_mdi(tmp_path):
+    """'.mdi' files are treated like '.md'."""
+    mdi = tmp_path / "src" / "post.mdi"
+    mdi.parent.mkdir(parents=True)
+    mdi.write_text("---\ntitle: MDI\n---\n")
+    os.chdir(tmp_path)
+    try:
+        data = metadata.load_metadata_pair(Path("src/post.mdi"))
+    finally:
+        os.chdir("/tmp")
+    assert data["title"] == "MDI"
+    assert data["path"] == ["src/post.mdi"]
 
 
 def test_read_from_yaml_error_logs_path(tmp_path):
