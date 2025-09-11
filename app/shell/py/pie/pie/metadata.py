@@ -324,20 +324,13 @@ def get_metadata_by_path(filepath: str, keypath: str) -> Any | None:
 
     The function first looks up the document ``id`` stored under ``filepath``
     in Redis and then retrieves ``<id>.<keypath>``.
-
-    Example
-    -------
-    >>> conn = _get_conn()
-    >>> conn.mset({"doc.md": "123", "123.title": '"Doc"'})
-    True
-    >>> get_metadata_by_path("doc.md", "title")
-    'Doc'
     """
 
     conn = _get_conn()
 
     doc_id = conn.get(filepath)
     if not doc_id:
+        logger.warning("unknown metadata", filepath=filepath, keypath=keypath)
         return None
     return conn.get(f"{doc_id}.{keypath}")
 

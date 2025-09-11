@@ -32,6 +32,7 @@ from pie.utils import read_json, read_utf8, write_utf8
 from pie.yaml import read_yaml as load_yaml_file
 from pie.yaml import yaml
 from ruamel.yaml import YAMLError
+from pie.filter.include import include_deflist_entry
 
 DEFAULT_CONFIG = Path("cfg/render-jinja-template.yml")
 
@@ -502,6 +503,8 @@ def render_press(text):
         )
     )
 
+def _include_deflist_entry_wrapper(*args, **kwargs):
+    return "".join(include_deflist_entry(*args, **kwargs))
 
 def create_env():
     """Create and configure the Jinja2 environment."""
@@ -513,20 +516,21 @@ def create_env():
         autoescape=False,
         lstrip_blocks=True,
     )
-    env.globals["link"] = render_link
-    env.globals["linktitle"] = linktitle
-    env.globals["linkcap"] = linkcap
-    env.globals["link_icon_title"] = link_icon_title
-    env.globals["linkicon"] = linkicon
-    env.globals["linkshort"] = linkshort
-    env.globals["figure"] = figure
+    env.globals["cite"] = cite
     env.globals["definition"] = definition
+    env.globals["figure"] = figure
     env.globals["get_desc"] = get_desc
-    env.globals["render_jinja"] = render_jinja
-    env.globals["to_alpha_index"] = to_alpha_index
+    env.globals["include_deflist_entry"] = _include_deflist_entry_wrapper
+    env.globals["linkcap"] = linkcap
+    env.globals["linkicon"] = linkicon
+    env.globals["link_icon_title"] = link_icon_title
+    env.globals["link"] = render_link
+    env.globals["linkshort"] = linkshort
+    env.globals["linktitle"] = linktitle
     env.globals["read_json"] = read_json
     env.globals["read_yaml"] = read_yaml
-    env.globals["cite"] = cite
+    env.globals["render_jinja"] = render_jinja
+    env.globals["to_alpha_index"] = to_alpha_index
     env.filters["press"] = render_press
     try:
         env.globals["anchor"] = env.get_template(

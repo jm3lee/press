@@ -19,10 +19,10 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import IO, Iterable, Callable
+from typing import IO, Callable, Iterable
 
 from pie.cli import create_parser
-from pie.logging import logger, configure_logging
+from pie.logging import configure_logging, logger
 from pie.metadata import get_metadata_by_path
 from pie.yaml import yaml
 
@@ -87,7 +87,9 @@ def include(filename: str) -> None:
 
 
 def include_deflist_entry(
-    *paths: str, glob: str = "*", sort_fn: Callable[[Iterable[Path]], Iterable[Path]] | None = None
+    *paths: str,
+    glob: str = "*",
+    sort_fn: Callable[[Iterable[Path]], Iterable[Path]] | None = None,
 ) -> None:
     """Insert contents of Markdown files as definition list entries.
 
@@ -114,7 +116,7 @@ def include_deflist_entry(
         logger.debug("include_deflist_entry", filename=str(filename))
         with open(filename, "r", encoding="utf-8") as f:
             rel = os.path.relpath(Path(filename).resolve(), Path.cwd())
-            title = get_metadata_by_path(rel, "title")
+            title = get_metadata_by_path(rel, "doc.title")
             url = get_metadata_by_path(rel, "url")
             if title:
                 if url:
@@ -123,17 +125,16 @@ def include_deflist_entry(
                         if url.startswith(("http://", "https://"))
                         else ' class="internal-link"'
                     )
-                    print(
-                        f"<dt><a href=\"{url}\"{cls}>{title}</a></dt>",
-                        file=outfile,
-                    )
+                    yield f'<dt><a href="{url}"{cls}>{title}</a></dt>'
                 else:
-                    print(f"<dt>{title}</dt>", file=outfile)
-            print("<dd>", file=outfile)
+                    yield f"<dt>{title}</dt>"
+            else:
+                raise Exception()
+            yield "<dd>"
             _skip_front_matter(f)
             for line in f:
-                print(line, end="", file=outfile)
-            print("</dd>", file=outfile)
+                yield line
+            yield "</dd>"
 
 
 def yield_lines(infile: IO[str]) -> Iterable[str]:
