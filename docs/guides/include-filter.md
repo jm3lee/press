@@ -22,10 +22,11 @@ include-filter <output-dir> <input> <output>
 
 Repository examples:
 
-- `src/include-filter/index.md` demonstrates `include_deflist_entry` gathering
-  entries from multiple directories.
+- `src/examples/include-filter/index.md` demonstrates `include_deflist_entry`
+  gathering entries from multiple directories.
 - `src/examples/diagram.mmd` contains a Mermaid block rendered by the filter.
-- `src/include-filter/a.md` is a simple file you can pull in with `include()`.
+- `src/examples/include-filter/a.md` is a simple file you can pull in with
+  `include()`.
 
 ## Functions
 
@@ -43,7 +44,7 @@ document.
 
 ```markdown
 ```python
-include("src/include-filter/a.md")
+include("src/examples/include-filter/a.md")
 ```
 ```
 
@@ -59,7 +60,7 @@ Directories are searched recursively for files matching `glob` and processed in
 alphabetical order by default.
 A custom `sort_fn` can be provided to override the ordering.
 
-See `src/include-filter/index.md` for a complete example.
+See `src/examples/include-filter/index.md` for a complete example.
 
 ### Example
 
@@ -68,7 +69,7 @@ See `src/include-filter/index.md` for a complete example.
 ```python
 # combine entries from two directories using include_deflist_filter
 include_deflist_entry(
-    "src/include-filter",
+    "src/examples/include-filter",
     "docs/reference",
     glob="*.md",
 )
