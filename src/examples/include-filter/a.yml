@@ -3,8 +3,11 @@ doc:
   breadcrumbs:
   - title: Home
     url: /
+  - title: Examples
+    url: /examples/
   - title: include-filter
+    url: /examples/include-filter/
+  - title: a
   pubdate: Sep 07, 2025
-  title: include-filter
-id: dist_include_filter
+  title: a
 schema: v1
