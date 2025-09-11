@@ -23,6 +23,8 @@ from pie.cli import create_parser
 from pie.logging import configure_logging, logger
 from pie.metadata import load_metadata_pair
 
+METADATA_EXTS = {".md", ".yml", ".yaml"}
+
 
 def load_index(path: str | Path) -> Mapping[str, Mapping[str, Any]]:
     """Return the parsed JSON index from *path*."""
@@ -114,13 +116,12 @@ def load_directory_index(path: Path) -> tuple[dict[str, dict[str, Any]], int]:
 
     processed: set[Path] = set()
     paths: list[Path] = []
-    exts = {".md", ".yml", ".yaml"}
 
     for root, _, files in os.walk(path):
         root_path = Path(root)
         for name in files:
             p = root_path / name
-            if p.suffix.lower() not in exts:
+            if p.suffix.lower() not in METADATA_EXTS:
                 continue
             base = p.with_suffix("")
             if base in processed:
@@ -147,7 +148,7 @@ def load_index_from_path(path: Path) -> tuple[dict[str, dict[str, Any]], int]:
     if path.suffix.lower() == ".json":
         return load_index(path), 1
 
-    if path.suffix.lower() in {".md", ".yml", ".yaml"}:
+    if path.suffix.lower() in METADATA_EXTS:
         metadata = load_metadata_pair(path)
         if metadata is None:
             logger.error("No metadata found", filename=str(path))
