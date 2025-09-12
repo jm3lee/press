@@ -116,20 +116,9 @@ def include_deflist_entry(
         logger.debug("include_deflist_entry", filename=str(filename))
         with open(filename, "r", encoding="utf-8") as f:
             rel = os.path.relpath(Path(filename).resolve(), Path.cwd())
+            doc_id = get_metadata_by_path(rel, "id")
             title = get_metadata_by_path(rel, "doc.title")
-            url = get_metadata_by_path(rel, "url")
-            if title:
-                if url:
-                    cls = (
-                        ""
-                        if url.startswith(("http://", "https://"))
-                        else ' class="internal-link"'
-                    )
-                    yield f'<dt><a href="{url}"{cls}>{title}</a></dt>'
-                else:
-                    yield f"<dt>{title}</dt>"
-            else:
-                raise Exception()
+            yield f'<dt id="{doc_id}">{title} <a href="#{doc_id}"><small>#</small></a></dt>'
             yield "<dd>"
             _skip_front_matter(f)
             for line in f:
