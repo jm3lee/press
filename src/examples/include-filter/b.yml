@@ -8,6 +8,8 @@ doc:
   - title: include-filter
     url: /examples/include-filter/
   - title: b
-  pubdate: Sep 11, 2025
+  pubdate: Sep 12, 2025
   title: b
+indextree:
+  show: false
 schema: v1
