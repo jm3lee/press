@@ -235,8 +235,21 @@ main figure img {
   height: auto;
 }
 
+/* Definition lists */
+main dl {
+  margin-bottom: 2rem;
+}
+
+main dt {
+  font-weight: 600;
+}
+
+main dd {
+  margin-left: 1.5rem;
+}
+
 main dd + dt {
-    margin-top: 2rem;
+  margin-top: 2rem;
 }
 
 /* Tables */
