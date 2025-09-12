@@ -59,8 +59,8 @@ def test_include_inserts_title_and_adjusts_headings(tmp_path):
         include_filter.heading_level = 0
 
 
-def test_include_deflist_entry_writes_entries(tmp_path, monkeypatch):
-    """include_deflist_entry inserts dt/dd pairs for files."""
+def test_include_deflist_entry_returns_entries(tmp_path, monkeypatch):
+    """include_deflist_entry yields dt/dd pairs for files."""
     a = tmp_path / "a.md"
     a.write_text("---\nskip: yes\n---\nA\n", encoding="utf-8")
     b = tmp_path / "b.md"
@@ -68,49 +68,43 @@ def test_include_deflist_entry_writes_entries(tmp_path, monkeypatch):
 
     monkeypatch.chdir(tmp_path)
 
-    include_filter.outfile = StringIO()
-
     def fake_meta(path: str, key: str):
         data = {
-            "a.md": {"title": "Title A", "url": "http://a"},
-            "b.md": {"title": "Title B", "url": None},
+            "a.md": {"doc.title": "Title A", "id": "id_a"},
+            "b.md": {"doc.title": "Title B", "id": "id_b"},
         }
         return data.get(path, {}).get(key)
 
     with patch("pie.filter.include.get_metadata_by_path", side_effect=fake_meta):
-        include_filter.include_deflist_entry("a.md", "b.md")
-    try:
-        assert (
-            include_filter.outfile.getvalue()
-            == '<dt><a href="http://a">Title A</a></dt>\n<dd>\nA\n</dd>\n'
-            + '<dt>Title B</dt>\n<dd>\nB\n</dd>\n'
-        )
-    finally:
-        include_filter.outfile = None
+        result = "".join(include_filter.include_deflist_entry("a.md", "b.md"))
+
+    assert result == (
+        '<dt id="id_a">Title A <a href="#id_a"><small>#</small></a></dt>'
+        '<dd>A\n</dd>'
+        '<dt id="id_b">Title B <a href="#id_b"><small>#</small></a></dt>'
+        '<dd>B\n</dd>'
+    )
 
 
-def test_include_deflist_entry_adds_internal_class(tmp_path, monkeypatch):
-    """Internal links receive the internal-link class."""
+def test_include_deflist_entry_adds_anchor(tmp_path, monkeypatch):
+    """Each definition term includes an anchor link to its id."""
     c = tmp_path / "c.md"
     c.write_text("C\n", encoding="utf-8")
 
     monkeypatch.chdir(tmp_path)
 
-    include_filter.outfile = StringIO()
-
     def fake_meta(path: str, key: str):
-        data = {"c.md": {"title": "Title C", "url": "/c"}}
+        data = {"c.md": {"doc.title": "Title C", "id": "id_c"}}
         return data.get(path, {}).get(key)
 
     with patch("pie.filter.include.get_metadata_by_path", side_effect=fake_meta):
-        include_filter.include_deflist_entry("c.md")
-    try:
-        assert (
-            include_filter.outfile.getvalue()
-            == '<dt><a href="/c" class="internal-link">Title C</a></dt>\n<dd>\nC\n</dd>\n'
-        )
-    finally:
-        include_filter.outfile = None
+        result = "".join(include_filter.include_deflist_entry("c.md"))
+
+    assert (
+        result
+        == '<dt id="id_c">Title C <a href="#id_c"><small>#</small></a></dt>'
+        '<dd>C\n</dd>'
+    )
 
 
 def test_yield_lines_stops_at_code_fence():
@@ -167,21 +161,27 @@ def test_include_deflist_entry_from_directory_and_custom_sort(tmp_path, monkeypa
     (tmp_path / "a.md").write_text("A\n", encoding="utf-8")
     (tmp_path / "b.md").write_text("B\n", encoding="utf-8")
     monkeypatch.chdir(tmp_path)
-    include_filter.outfile = StringIO()
-
+    
     def fake_meta(path: str, key: str):
-        data = {"a.md": {"title": "Title A"}, "b.md": {"title": "Title B"}}
+        data = {
+            "a.md": {"doc.title": "Title A", "id": "id_a"},
+            "b.md": {"doc.title": "Title B", "id": "id_b"},
+        }
         return data.get(path, {}).get(key)
 
     with patch("pie.filter.include.get_metadata_by_path", side_effect=fake_meta):
-        include_filter.include_deflist_entry(
-            tmp_path.as_posix(),
-            sort_fn=lambda files: sorted(files, key=lambda p: p.name, reverse=True),
+        result = "".join(
+            include_filter.include_deflist_entry(
+                tmp_path.as_posix(),
+                sort_fn=lambda files: sorted(
+                    files, key=lambda p: p.name, reverse=True
+                ),
+            )
         )
-    try:
-        assert include_filter.outfile.getvalue().startswith("<dt>Title B")
-    finally:
-        include_filter.outfile = None
+
+    assert result.startswith(
+        '<dt id="id_b">Title B <a href="#id_b"><small>#</small></a></dt>'
+    )
 
 
 def test_mermaid_writes_image_reference(tmp_path, monkeypatch):

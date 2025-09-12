@@ -50,9 +50,10 @@ include("src/examples/include-filter/a.md")
 
 ## include_deflist_entry
 
-Insert Markdown files as definition list entries using their `title` metadata.
-Metadata is retrieved from Redis via `get_metadata_by_path()` and the resulting
-title is followed by a `#` that links to the entry's `url` when available.
+Insert Markdown files as definition list entries using their `doc.title`
+metadata. Each term receives the document's `id` and a small `#` anchor that
+links to that identifier. The function yields `<dt>`/`<dd>` pairs that callers
+can join and embed in the output.
 
 Each argument may be a file or directory.
 Multiple paths can be provided to gather entries from different locations.
