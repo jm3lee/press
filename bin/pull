@@ -1,5 +1,5 @@
 #!/bin/bash
 
 git fetch --all --prune --prune-tags
-git pull --rebase
+git pull --autostash --rebase
 git submodule update --init --recursive --remote

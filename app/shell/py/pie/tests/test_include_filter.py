@@ -59,60 +59,6 @@ def test_include_inserts_title_and_adjusts_headings(tmp_path):
         include_filter.heading_level = 0
 
 
-def test_include_deflist_entry_writes_entries(tmp_path, monkeypatch):
-    """include_deflist_entry inserts dt/dd pairs for files."""
-    a = tmp_path / "a.md"
-    a.write_text("---\nskip: yes\n---\nA\n", encoding="utf-8")
-    b = tmp_path / "b.md"
-    b.write_text("B\n", encoding="utf-8")
-
-    monkeypatch.chdir(tmp_path)
-
-    include_filter.outfile = StringIO()
-
-    def fake_meta(path: str, key: str):
-        data = {
-            "a.md": {"title": "Title A", "url": "http://a"},
-            "b.md": {"title": "Title B", "url": None},
-        }
-        return data.get(path, {}).get(key)
-
-    with patch("pie.filter.include.get_metadata_by_path", side_effect=fake_meta):
-        include_filter.include_deflist_entry("a.md", "b.md")
-    try:
-        assert (
-            include_filter.outfile.getvalue()
-            == '<dt><a href="http://a">Title A</a></dt>\n<dd>\nA\n</dd>\n'
-            + '<dt>Title B</dt>\n<dd>\nB\n</dd>\n'
-        )
-    finally:
-        include_filter.outfile = None
-
-
-def test_include_deflist_entry_adds_internal_class(tmp_path, monkeypatch):
-    """Internal links receive the internal-link class."""
-    c = tmp_path / "c.md"
-    c.write_text("C\n", encoding="utf-8")
-
-    monkeypatch.chdir(tmp_path)
-
-    include_filter.outfile = StringIO()
-
-    def fake_meta(path: str, key: str):
-        data = {"c.md": {"title": "Title C", "url": "/c"}}
-        return data.get(path, {}).get(key)
-
-    with patch("pie.filter.include.get_metadata_by_path", side_effect=fake_meta):
-        include_filter.include_deflist_entry("c.md")
-    try:
-        assert (
-            include_filter.outfile.getvalue()
-            == '<dt><a href="/c" class="internal-link">Title C</a></dt>\n<dd>\nC\n</dd>\n'
-        )
-    finally:
-        include_filter.outfile = None
-
-
 def test_yield_lines_stops_at_code_fence():
     """yield_lines stops when encountering a closing fence."""
     f = StringIO("a\nb\n```\nrest\n")
@@ -160,28 +106,6 @@ def test_parse_args_parses_positions():
     """parse_args returns expected positional arguments."""
     args = include_filter.parse_args(["out", "in.md", "out.md"])
     assert (args.outdir, args.infile, args.outfile) == ("out", "in.md", "out.md")
-
-
-def test_include_deflist_entry_from_directory_and_custom_sort(tmp_path, monkeypatch):
-    """Directories and custom sorting are handled in include_deflist_entry."""
-    (tmp_path / "a.md").write_text("A\n", encoding="utf-8")
-    (tmp_path / "b.md").write_text("B\n", encoding="utf-8")
-    monkeypatch.chdir(tmp_path)
-    include_filter.outfile = StringIO()
-
-    def fake_meta(path: str, key: str):
-        data = {"a.md": {"title": "Title A"}, "b.md": {"title": "Title B"}}
-        return data.get(path, {}).get(key)
-
-    with patch("pie.filter.include.get_metadata_by_path", side_effect=fake_meta):
-        include_filter.include_deflist_entry(
-            tmp_path.as_posix(),
-            sort_fn=lambda files: sorted(files, key=lambda p: p.name, reverse=True),
-        )
-    try:
-        assert include_filter.outfile.getvalue().startswith("<dt>Title B")
-    finally:
-        include_filter.outfile = None
 
 
 def test_mermaid_writes_image_reference(tmp_path, monkeypatch):

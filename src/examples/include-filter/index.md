@@ -1,9 +1,5 @@
 {% extends "src/templates/template.html.jinja" %}
-
+{% from "src/templates/macros.jinja" import deflist %}
 {% block content %}
-<dl>
-```python
-include_deflist_entry("src/examples/include-filter", glob="[a-z].md")
-```
-</dl>
+{{ deflist(["include-filter-a", "include-filter-b"]) }}
 {% endblock %}

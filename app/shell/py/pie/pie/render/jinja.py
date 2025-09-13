@@ -502,38 +502,35 @@ def render_press(text):
         )
     )
 
-
 def create_env():
     """Create and configure the Jinja2 environment."""
 
     data_dir = os.environ.get("PIE_DATA_DIR", "/data")
     env = Environment(
-        loader=FileSystemLoader(data_dir),
+        loader=FileSystemLoader([data_dir, "/press/templates"]),
         undefined=StrictUndefined,
         autoescape=False,
         lstrip_blocks=True,
     )
-    env.globals["link"] = render_link
-    env.globals["linktitle"] = linktitle
-    env.globals["linkcap"] = linkcap
-    env.globals["link_icon_title"] = link_icon_title
-    env.globals["linkicon"] = linkicon
-    env.globals["linkshort"] = linkshort
-    env.globals["figure"] = figure
+    env.globals["cite"] = cite
     env.globals["definition"] = definition
+    env.globals["figure"] = figure
     env.globals["get_desc"] = get_desc
-    env.globals["render_jinja"] = render_jinja
-    env.globals["to_alpha_index"] = to_alpha_index
+    env.globals["linkcap"] = linkcap
+    env.globals["linkicon"] = linkicon
+    env.globals["link_icon_title"] = link_icon_title
+    env.globals["link"] = render_link
+    env.globals["linkshort"] = linkshort
+    env.globals["linktitle"] = linktitle
+    env.globals["metadata"] = metadata
     env.globals["read_json"] = read_json
     env.globals["read_yaml"] = read_yaml
-    env.globals["cite"] = cite
+    env.globals["render_jinja"] = render_jinja
+    env.globals["to_alpha_index"] = to_alpha_index
     env.filters["press"] = render_press
-    try:
-        env.globals["anchor"] = env.get_template(
-            "src/templates/anchor.jinja"
-        ).module.anchor
-    except TemplateNotFound:
-        logger.warning("Missing anchor.jinja template")
+    env.globals["anchor"] = env.get_template(
+        "macros.jinja"
+    ).module.anchor
     return env
 
 

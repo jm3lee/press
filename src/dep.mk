@@ -16,4 +16,5 @@ include app/magicbar/dep.mk
 all: build/static/index/examples.json
 
 build/static/index/examples.json: $(shell find src/examples -name '*.yml') | build/static/index
-	indextree-json src/examples > $@
+	$(call status,Indexing src/examples)
+	$(Q)indextree-json src/examples > $@

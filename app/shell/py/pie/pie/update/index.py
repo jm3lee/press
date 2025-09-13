@@ -23,7 +23,7 @@ from pie.cli import create_parser
 from pie.logging import configure_logging, logger
 from pie.metadata import load_metadata_pair
 
-METADATA_EXTS = {".md", ".yml", ".yaml"}
+METADATA_EXTS = {".md", ".mdi", ".yml", ".yaml"}
 
 
 def load_index(path: str | Path) -> Mapping[str, Mapping[str, Any]]:

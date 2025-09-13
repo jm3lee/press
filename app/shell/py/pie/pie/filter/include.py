@@ -19,10 +19,10 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import IO, Iterable, Callable
+from typing import IO, Iterable
 
 from pie.cli import create_parser
-from pie.logging import logger, configure_logging
+from pie.logging import configure_logging, logger
 from pie.metadata import get_metadata_by_path
 from pie.yaml import yaml
 
@@ -85,55 +85,6 @@ def include(filename: str) -> None:
                 line = "#" * heading_level + line
             print(line, end="", file=outfile)
 
-
-def include_deflist_entry(
-    *paths: str, glob: str = "*", sort_fn: Callable[[Iterable[Path]], Iterable[Path]] | None = None
-) -> None:
-    """Insert contents of Markdown files as definition list entries.
-
-    Each argument in ``paths`` may be a file or directory.  Directories are
-    scanned recursively for files matching ``glob``.  All discovered
-    files are processed in alphabetical order by default, but a custom
-    ``sort_fn`` can be supplied to override the ordering.
-    """
-
-    files: list[Path] = []
-    for p in paths:
-        path = Path(p)
-        if path.is_dir():
-            files.extend(f for f in path.rglob(glob) if f.is_file())
-        else:
-            files.append(path)
-
-    if sort_fn is None:
-        files = sorted(files, key=lambda p: p.name)
-    else:
-        files = list(sort_fn(files))
-
-    for filename in files:
-        logger.debug("include_deflist_entry", filename=str(filename))
-        with open(filename, "r", encoding="utf-8") as f:
-            rel = os.path.relpath(Path(filename).resolve(), Path.cwd())
-            title = get_metadata_by_path(rel, "title")
-            url = get_metadata_by_path(rel, "url")
-            if title:
-                if url:
-                    cls = (
-                        ""
-                        if url.startswith(("http://", "https://"))
-                        else ' class="internal-link"'
-                    )
-                    print(
-                        f"<dt><a href=\"{url}\"{cls}>{title}</a></dt>",
-                        file=outfile,
-                    )
-                else:
-                    print(f"<dt>{title}</dt>", file=outfile)
-            print("<dd>", file=outfile)
-            _skip_front_matter(f)
-            for line in f:
-                print(line, end="", file=outfile)
-            print("</dd>", file=outfile)
 
 
 def yield_lines(infile: IO[str]) -> Iterable[str]:

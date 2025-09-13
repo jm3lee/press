@@ -37,14 +37,14 @@ def get_url(filename: str) -> Optional[str]:
     if filename.startswith(prefix):
         relative_path = filename[len(prefix) :]
         base, ext = os.path.splitext(relative_path)
-        if ext.lower() in {".md"} | YAML_EXTS:
+        if ext.lower() in {".md", ".mdi"} | YAML_EXTS:
             html_path = base + ".html"
             return "/" + html_path
     prefix = "build" + os.sep
     if filename.startswith(prefix):
         relative_path = filename[len(prefix) :]
         base, ext = os.path.splitext(relative_path)
-        if ext.lower() in {".md"} | YAML_EXTS:
+        if ext.lower() in {".md", ".mdi"} | YAML_EXTS:
             html_path = base + ".html"
             return "/" + html_path
     logger.warning("Can't create a url.", filename=filename)
@@ -324,20 +324,13 @@ def get_metadata_by_path(filepath: str, keypath: str) -> Any | None:
 
     The function first looks up the document ``id`` stored under ``filepath``
     in Redis and then retrieves ``<id>.<keypath>``.
-
-    Example
-    -------
-    >>> conn = _get_conn()
-    >>> conn.mset({"doc.md": "123", "123.title": '"Doc"'})
-    True
-    >>> get_metadata_by_path("doc.md", "title")
-    'Doc'
     """
 
     conn = _get_conn()
 
     doc_id = conn.get(filepath)
     if not doc_id:
+        logger.warning("unknown metadata", filepath=filepath, keypath=keypath)
         return None
     return conn.get(f"{doc_id}.{keypath}")
 
@@ -345,10 +338,10 @@ def get_metadata_by_path(filepath: str, keypath: str) -> Any | None:
 def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
     """Load metadata from ``path`` and a sibling Markdown or metadata file.
 
-    If both a ``.md`` and ``.yml``/``.yaml`` exist for the same base name, the
-    metadata from each file is combined. Values from YAML override those from
-    Markdown when keys conflict and a :class:`UserWarning` is emitted. Returns
-    ``None`` if neither file contains metadata.
+    If both a ``.md``/``.mdi`` and ``.yml``/``.yaml`` exist for the same base
+    name, the metadata from each file is combined. Values from YAML override
+    those from Markdown when keys conflict and a :class:`UserWarning` is
+    emitted. Returns ``None`` if neither file contains metadata.
 
     Example
     -------
@@ -362,12 +355,18 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
 
     base = path.with_suffix("")
     md_path = base.with_suffix(".md")
+    mdi_path = base.with_suffix(".mdi")
     yml_path = base.with_suffix(".yml")
     yaml_path = base.with_suffix(".yaml")
 
     md_data = None
+    markdown_file: Path | None = None
     if md_path.exists():
-        md_data = _read_from_markdown(str(md_path))
+        markdown_file = md_path
+    elif mdi_path.exists():
+        markdown_file = mdi_path
+    if markdown_file:
+        md_data = _read_from_markdown(str(markdown_file))
 
     meta_data = None
     meta_file: Path | None = None
@@ -397,13 +396,15 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
     files: list[Path] = []
     if meta_file:
         files.append(meta_file)
-    if md_path.exists():
-        files.append(md_path)
+    if markdown_file:
+        files.append(markdown_file)
 
     if files:
-        combined["path"] = [str(p.resolve().relative_to(Path.cwd())) for p in files]
+        combined["path"] = [
+            str(p.resolve().relative_to(Path.cwd())) for p in files
+        ]
     # Populate any missing metadata fields based on the source path.
-    source = md_path if md_path.exists() else meta_file or path
+    source = markdown_file or meta_file or path
     combined = generate_missing_metadata(combined, str(source))
 
     logger.debug("returning", combined=combined)

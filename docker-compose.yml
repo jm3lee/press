@@ -84,7 +84,7 @@ services:
       - ./app/shell/bin:/app/bin
       - ./app/shell/py/pie/pie:/press/py/pie/pie
       - ./app/shell/py/pie/tests:/press/py/pie/tests
-
+      - ./src/templates/:/press/templates/
 
   release:
     image: press-release

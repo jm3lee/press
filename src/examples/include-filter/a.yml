@@ -8,6 +8,13 @@ doc:
   - title: include-filter
     url: /examples/include-filter/
   - title: a
-  pubdate: Sep 07, 2025
+  pubdate: Sep 13, 2025
   title: a
+indextree:
+  show: false
+id: include-filter-a
 schema: v1
+deflist:
+  src: src/examples/include-filter/a.mdi
+  anchor: a
+url: /examples/include-filter/#a

@@ -1,0 +1,25 @@
+{#--
+  Macro: deflist
+  Render a definition list from a sequence of identifiers.
+  Each identifier resolves via `get_desc` to a description template.
+
+  Args:
+    ids: Sequence of identifiers to render.
+--#}
+{% macro deflist(ids) %}
+<dl>
+{% for id in ids %}
+{% set desc = get_desc(id) %}
+<dt id="{{ desc.deflist.anchor }}">{{ desc.doc.title }} <a href="#{{ desc.deflist.anchor }}"><small>#</small></a></dt>
+<dd>{% filter press %}{% include desc.deflist.src %}{% endfilter %}</dd>
+{% endfor %}
+</dl>
+{% endmacro %}
+
+{#--
+  Macro: anchor
+  Outputs a section anchor with an id for headings and links.
+--#}
+{% macro anchor(id) -%}
+<a id="{{ id }}" href="#{{ id }}" class="text-decoration-none text-muted"><small>#</small></a>
+{%- endmacro %}
