@@ -1,3 +1,6 @@
+deflist:
+  src: src/examples/include-filter/b.mdi
+  anchor: b
 doc:
   author: Brian Lee
   breadcrumbs:
@@ -8,8 +11,10 @@ doc:
   - title: include-filter
     url: /examples/include-filter/
   - title: b
-  pubdate: Sep 12, 2025
+  pubdate: Sep 13, 2025
   title: b
 indextree:
   show: false
 schema: v1
+id: include-filter-b
+url: /examples/include-filter/#b

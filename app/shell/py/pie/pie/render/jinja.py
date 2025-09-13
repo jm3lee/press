@@ -527,6 +527,7 @@ def create_env():
     env.globals["link"] = render_link
     env.globals["linkshort"] = linkshort
     env.globals["linktitle"] = linktitle
+    env.globals["metadata"] = metadata
     env.globals["read_json"] = read_json
     env.globals["read_yaml"] = read_yaml
     env.globals["render_jinja"] = render_jinja
