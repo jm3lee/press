@@ -19,7 +19,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import IO, Callable, Iterable
+from typing import IO, Iterable
 
 from pie.cli import create_parser
 from pie.logging import configure_logging, logger
@@ -85,45 +85,6 @@ def include(filename: str) -> None:
                 line = "#" * heading_level + line
             print(line, end="", file=outfile)
 
-
-def include_deflist_entry(
-    *paths: str,
-    glob: str = "*",
-    sort_fn: Callable[[Iterable[Path]], Iterable[Path]] | None = None,
-) -> None:
-    """Insert contents of Markdown files as definition list entries.
-
-    Each argument in ``paths`` may be a file or directory.  Directories are
-    scanned recursively for files matching ``glob``.  All discovered
-    files are processed in alphabetical order by default, but a custom
-    ``sort_fn`` can be supplied to override the ordering.
-    """
-
-    files: list[Path] = []
-    for p in paths:
-        path = Path(p)
-        if path.is_dir():
-            files.extend(f for f in path.rglob(glob) if f.is_file())
-        else:
-            files.append(path)
-
-    if sort_fn is None:
-        files = sorted(files, key=lambda p: p.name)
-    else:
-        files = list(sort_fn(files))
-
-    for filename in files:
-        logger.debug("include_deflist_entry", filename=str(filename))
-        with open(filename, "r", encoding="utf-8") as f:
-            rel = os.path.relpath(Path(filename).resolve(), Path.cwd())
-            doc_id = get_metadata_by_path(rel, "id")
-            title = get_metadata_by_path(rel, "doc.title")
-            yield f'<dt id="{doc_id}">{title} <a href="#{doc_id}"><small>#</small></a></dt>'
-            yield "<dd>"
-            _skip_front_matter(f)
-            for line in f:
-                yield line
-            yield "</dd>"
 
 
 def yield_lines(infile: IO[str]) -> Iterable[str]:

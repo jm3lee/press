@@ -23,12 +23,7 @@ definitions.
 1. Create `index.md` with two sections:
    - **Bibliography** – cite the book. The hull example embeds a link to the
      Amazon listing stored in `hull-2016-amzn.yml`.
-   - **Reading Notes** – add a `<dl>` block containing an
-     `include_deflist_entry` call that pulls in note pages:
-
-   ```python
-   include_deflist_entry("src/books/<slug>", glob="p*.md")
-   ```
+   - **Reading Notes** – add a `<dl>` block linking to each note page.
 
 2. Add a sidecar file like `hull-2016-amzn.yml` if you want to link to an
    external resource.
