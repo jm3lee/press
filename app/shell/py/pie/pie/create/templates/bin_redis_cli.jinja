@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Run redis-cli inside the dragonfly service.
+# Any arguments provided are forwarded to redis-cli.
+
+docker compose exec dragonfly redis-cli "$@"

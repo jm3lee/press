@@ -102,6 +102,12 @@ def test_generated_files_have_content(scaffold: Path) -> None:
     assert "docker compose" in shell_text
     assert shell_script.stat().st_mode & 0o111
 
+    redis_cli = scaffold / "bin/redis-cli"
+    assert redis_cli.exists()
+    redis_text = redis_cli.read_text(encoding="utf-8")
+    assert "docker compose exec dragonfly redis-cli" in redis_text
+    assert redis_cli.stat().st_mode & 0o111
+
     upgrade_script = scaffold / "bin/upgrade"
     assert upgrade_script.exists()
     upgrade_text = upgrade_script.read_text(encoding="utf-8")
