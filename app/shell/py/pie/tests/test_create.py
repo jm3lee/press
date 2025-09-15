@@ -31,7 +31,10 @@ def test_generated_files_have_content(scaffold: Path) -> None:
 
     dep_mk = scaffold / "src/dep.mk"
     assert dep_mk.exists()
-    assert dep_mk.read_text(encoding="utf-8") == ""
+    dep_text = dep_mk.read_text(encoding="utf-8")
+    assert "include app/indextree/dep.mk" in dep_text
+    assert "pages.json" in dep_text
+    assert "indextree-json src" in dep_text
 
     robots = scaffold / "src/robots.txt"
     assert robots.exists()
@@ -80,11 +83,13 @@ def test_generated_files_have_content(scaffold: Path) -> None:
     md_text = index_md.read_text(encoding="utf-8")
     assert "Welcome" in md_text
     assert "view it locally" in md_text
+    assert "indextree-root" in md_text
 
     index_yml = scaffold / "src/index.yml"
     assert index_yml.exists()
     yml_text = index_yml.read_text(encoding="utf-8")
     assert "title:" in yml_text
+    assert "static/js/indextree.js" in yml_text
 
     readme = scaffold / "README.md"
     assert readme.exists(), "README should be created"

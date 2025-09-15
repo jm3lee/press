@@ -1,0 +1,14 @@
+# Generate the IndexTree bundle and JSON data used by the home page.
+include app/indextree/dep.mk
+
+INDEX_DIR := build/static/index
+SITE_TREE := $(INDEX_DIR)/pages.json
+
+all: $(SITE_TREE)
+
+$(INDEX_DIR):
+	mkdir -p $@
+
+$(SITE_TREE): $(shell find src -name '*.yml') | $(INDEX_DIR)
+	$(call status,Indexing src/)
+	$(Q)indextree-json src > $@
