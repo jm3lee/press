@@ -75,6 +75,11 @@ def test_generated_files_have_content(scaffold: Path) -> None:
     readme_text = readme.read_text(encoding="utf-8")
     assert "docker-compose build" in readme_text
 
+    update_author = scaffold / "cfg/update-author.yml"
+    assert update_author.exists()
+    update_author_text = update_author.read_text(encoding="utf-8")
+    assert update_author_text == "doc:\n  author: unknown\n"
+
     shell_script = scaffold / "bin/shell"
     assert shell_script.exists()
     shell_text = shell_script.read_text(encoding="utf-8")
