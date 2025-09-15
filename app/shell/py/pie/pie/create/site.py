@@ -44,7 +44,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         "app/shell/Dockerfile": "shell.Dockerfile.jinja",
         "makefile": "makefile.jinja",
         "redo.mk": "redo.mk.jinja",
+        "bin/shell": "bin_shell.jinja",
+        "bin/upgrade": "bin_upgrade.jinja",
     }
+
+    executable_files = {"bin/shell", "bin/upgrade"}
 
     for rel_path, template_name in files.items():
         target = root / rel_path
@@ -58,6 +62,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         else:
             content = env.from_string(template_text).render()
         target.write_text(content, encoding="utf-8")
+        if rel_path in executable_files:
+            target.chmod(target.stat().st_mode | 0o111)
 
     logger.info("Created project scaffolding", path=str(root))
     return 0
