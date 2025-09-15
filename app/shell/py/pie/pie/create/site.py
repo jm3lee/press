@@ -42,6 +42,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "src/robots.txt": "robots.txt.jinja",
         "README.md": "README.md.jinja",
         "app/shell/Dockerfile": "shell.Dockerfile.jinja",
+        "makefile": "makefile.jinja",
         "redo.mk": "redo.mk.jinja",
     }
 

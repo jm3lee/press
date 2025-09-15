@@ -1,23 +1,106 @@
 services:
   nginx:
-    image: nginx:latest
-    ports:
-      - "80:80"
+    build:
+      context: .
+      dockerfile: ./app/nginx/Dockerfile
+      args:
+        NGINX_CONF: app/nginx/prod.conf
+    restart: unless-stopped
+
+  # No ports are exposed so we can use a private instance to check for broken
+  # links. All scripts are executed within a container.
+  nginx-test:
+    build:
+      context: .
+      dockerfile: ./app/nginx/Dockerfile
 
   nginx-dev:
-    image: nginx:latest
+    build:
+      context: .
+      dockerfile: ./app/nginx/Dockerfile
     ports:
       - "80:80"
     volumes:
       - ./build:/usr/share/nginx/html
+    restart: unless-stopped
 
-  dragonfly:
-    image: docker.dragonflydb.io/dragonflydb/dragonfly
+  sync:
+    build: ./app/s3
+    container_name: press-sync
+    entrypoint: ["/app/bin/sync"]
+    environment:
+      S3_BUCKET_PATH: ${S3_BUCKET_PATH:-s3://press}
+      S3CFG_PATH: ${S3CFG_PATH:-/root/.s3cfg}
+    volumes:
+      - ../s3:/s3
 
-  shell:
-    build: app/shell
-    working_dir: /data
-    entrypoint: ["bash"]
+  seed:
+    build: ./app/s3
+    container_name: press-seed
+    entrypoint: ["/app/bin/seed"]
+    environment:
+      S3_BUCKET_PATH: ${S3_BUCKET_PATH:-s3://press}
+      S3CFG_PATH: ${S3CFG_PATH:-/root/.s3cfg}
+    volumes:
+      - ../s3:/s3
 
+  webp:
+    build: ./app/webp
+    container_name: press-webp
+    entrypoint: ["/app/bin/service"]
+    volumes:
+      - ./app/webp/input:/app/input
+      - ./app/webp/output:/app/output
+      - ../log:/app/log
+
+  mermaid:
+    image: minlag/mermaid-cli
+    container_name: press-mermaid
     volumes:
       - ./:/data
+
+  # Default port is 6379. Not exposed to the host to avoid port conflicts.
+  # You can run redis-cli within this container.
+  #   docker compose exec dragonfly redis-cli
+  dragonfly:
+    image: docker.dragonflydb.io/dragonflydb/dragonfly
+    # Useful in avoiding conflicts from multiple active instances of press projects.
+    container_name: press-dragonfly
+
+  shell:
+    image: press-shell
+    build: ./app/shell
+    container_name: press-shell
+    working_dir: /data
+    entrypoint: ["bash"]
+    environment:
+      OPENAI_API_KEY: "${OPENAI_API_KEY}"
+      REDIS_HOST: dragonfly
+      REDIS_PORT: 6379
+      TEST_HOST_URL: ${TEST_HOST_URL:-http://nginx-test}
+      BASE_URL: ${BASE_URL:-http://press.io}
+    volumes:
+      - ./:/data
+      - ./app/shell/bin:/app/bin
+      - ./app/shell/py/pie/pie:/press/py/pie/pie
+      - ./app/shell/py/pie/tests:/press/py/pie/tests
+      - ./src/templates/:/press/templates/
+
+  release:
+    image: press-release
+    build:
+      context: .
+      dockerfile: ./app/release/Dockerfile
+    depends_on:
+      - shell
+
+  pdoc:
+    build:
+      context: .
+      dockerfile: ./app/pdoc/Dockerfile
+    command: pdoc -h 0.0.0.0 -p 8080
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./app/shell/py/pie:/pie
+    profiles: ["pdoc"]

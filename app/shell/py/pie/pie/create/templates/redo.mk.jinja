@@ -21,7 +21,12 @@ VPATH := $(SRC_DIR)
 COMPOSE_FILE := docker-compose.yml
 DOCKER_COMPOSE := docker compose -f $(COMPOSE_FILE)
 
-MAKE_CMD := $(DOCKER_COMPOSE) run --rm --entrypoint make -u $(shell id -u) -T shell -C /data
+UID := $(shell id -u)
+GID := $(shell id -g)
+
+COMPOSE_RUN := $(DOCKER_COMPOSE) run --build --rm -T
+PYTEST_CMD  := $(DOCKER_COMPOSE) run --rm --user $(UID):$(GID) --entrypoint pytest shell
+RUN_MAKE   := $(DOCKER_COMPOSE) run --rm --user $(UID):$(GID) --entrypoint make shell
 
 # Verbosity control
 VERBOSE ?= 0
@@ -30,6 +35,9 @@ Q :=
 else
 Q := @
 endif
+
+# Git version for cache busting
+BUILD_VER := $(shell git rev-parse --short HEAD)
 
 # Helper to print status messages
 status = @echo "==> $(1)"
@@ -42,11 +50,21 @@ status = @echo "==> $(1)"
 all: ## Build the site using the shell service
 	$(call status,Build site)
 	$(Q)$(DOCKER_COMPOSE) up -d --remove-orphans dragonfly
-	$(Q)$(MAKE_CMD) VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR)
+	$(Q)$(RUN_MAKE) VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) BUILD_VER=$(BUILD_VER)
 
 $(BUILD_DIR): ## Helper target used by other rules
 	$(call status,Prepare build directory $@)
 	$(Q)mkdir -p $@
+
+all: build/examples/mermaid/diagram.svg | build/examples/mermaid
+
+build/examples/mermaid:
+	mkdir -p $@
+
+# Generate SVG diagrams from Mermaid source files
+$(BUILD_DIR)/%.svg: $(SRC_DIR)/%.mmd | $(dir $(BUILD_DIR)/%.svg)
+	$(call status,Render Mermaid $<)
+	$(Q)$(COMPOSE_RUN) -u `id -u` mermaid -i $< -o $@
 
 # Docker-related targets
 # Initialize Docker authentication and build the Nginx image
@@ -68,7 +86,12 @@ docker: test ## Build and push the Nginx image after running test
 .PHONY: test
 test: ## Restart nginx-dev and run tests
 	$(call status,Run tests)
-	$(Q)$(MAKE_CMD) VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) test
+	$(Q)$(RUN_MAKE) VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) test
+
+.PHONY: check
+check:
+	$(call status,Run checks)
+	$(Q)$(RUN_MAKE) VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) check
 
 # Target to bring up the development Nginx container
 .PHONY: up
@@ -85,20 +108,21 @@ upd: ## Start development containers in detached mode
 down: ## Stop and remove the compose stack
 	$(call status,Stop compose stack)
 	$(Q)$(DOCKER_COMPOSE) down --remove-orphans
+	$(Q)-rm -f $(BUILD_DIR)/.update-index
 
 # Clean the build directory by removing all build artifacts
 .PHONY: clean
 clean: ## Remove everything under build/
-	$(call status,Remove build artifacts)
-	$(Q)-rm -rf $(BUILD_DIR)/*
-	$(Q)-rm -f $(BUILD_DIR)/.update-index
+	$(Q)$(RUN_MAKE) VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) clean
 
 .PHONY: distclean
 distclean: clean ## Remove .init markers and clear Dragonfly index cache
 	$(call status,Remove .init)
 	$(Q)-rm -f `find app/ -name .init`
 	$(call status,Empty Index Cache)
-	$(Q)./bin/redis-cli flushall
+	$(Q)-./bin/redis-cli flushall
+	$(call status,Clearing log/)
+	$(Q)-rm -rf log/*
 
 .PHONY: prune
 prune: ## Run docker system prune -f to clean unused resources
@@ -116,22 +140,22 @@ setup: ## Prepare app/webp directories and build all services
 .PHONY: seed
 seed: ## Run the seed container to populate initial data
 	$(call status,Seed database)
-	$(Q)$(DOCKER_COMPOSE) run --build --rm -T seed
+	$(Q)$(COMPOSE_RUN) seed
 
 .PHONY: sync
 sync: ## Upload site files to S3 using the sync container
 	$(call status,Run sync container)
-	$(Q)$(DOCKER_COMPOSE) run --build --rm -T sync
+	$(Q)$(COMPOSE_RUN) sync
 
 .PHONY: webp
 webp: ## Convert images to webp format
 	$(call status,Convert images to webp)
-	$(Q)$(DOCKER_COMPOSE) run --build --rm -T webp
+	$(Q)$(COMPOSE_RUN) webp
 
 .PHONY: shell
 shell: ## Open an interactive shell container
 	$(call status,Open shell)
-	$(Q)$(DOCKER_COMPOSE) run --rm --build shell
+	$(Q)./bin/shell
 
 .PHONY: rmi
 rmi: ## Remove Docker images matching press-*
@@ -141,6 +165,7 @@ rmi: ## Remove Docker images matching press-*
 .PHONY: help
 help: ## List available tasks
 	@grep -E '^[a-zA-Z0-9_-]+:.*##' $(MAKEFILE_LIST) | \
+	sort | \
 	awk -F ':.*##' '{printf "%-10s %s\n", $$1, $$2}'
 
 .PHONY: buildx
@@ -153,18 +178,19 @@ buildx: ## Run Docker buildx
 pytest:
 	# Add option -s to see stdout.
 	$(call status,Run pytest)
-	$(Q)$(DOCKER_COMPOSE) run --entrypoint pytest --rm shell /press/py/pie/tests
+	$(Q)$(PYTEST_CMD) /press/py/pie/tests
 
 .PHONY: cov
 cov:
 	$(call status,Run coverage)
 	$(Q)mkdir -p log/cov
-	$(Q)$(DOCKER_COMPOSE) run --entrypoint pytest --rm shell --cov=pie --cov-report=term-missing --cov-report=html:/data/log/cov /press/py/pie/tests
+	$(Q)$(PYTEST_CMD) --cov=pie --cov-report=term-missing --cov-report=html:/data/log/cov /press/py/pie/tests
+
 .PHONY: t
 t: ## Restart nginx-dev and run tests, ansi colors
 	$(call status,Run tests with colors)
-	$(Q)$(DOCKER_COMPOSE) run --entrypoint make --rm shell -C /data VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) test
-	$(Q)$(DOCKER_COMPOSE) run --entrypoint pytest --rm shell /press/py/pie/tests
+	$(Q)./bin/nginx-test VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) test
+	$(Q)$(PYTEST_CMD) /press/py/pie/tests
 
 .PHONY: redis
 redis: ## Open redis-cli on the dragonfly service
@@ -175,6 +201,5 @@ tags:
 	$(Q)ctags -R app/shell/py
 
 .PHONY: release
-release: all test
-	$(Q)$(DOCKER_COMPOSE) build shell
-	$(Q)$(DOCKER_COMPOSE) build release
+release:
+	$(Q)VERBOSE=$(VERBOSE) SRC_DIR=$(SRC_DIR) BUILD_DIR=$(BUILD_DIR) ./bin/release
