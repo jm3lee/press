@@ -1,7 +1,305 @@
-/* Minimal stylesheet */
-body {
-  font-family: sans-serif;
-  margin: 1em auto;
-  max-width: 40em;
+/*! 
+ * Custom styles supplementing Bootstrap.
+ * Defines styles for quiz components and utility classes.
+ */
+
+:root {
+    --font-base: var(--bs-body-font-family);
 }
 
+/* Layout */
+html {
+  scroll-padding-top: calc(80px + env(safe-area-inset-top)); /* same as navbar height */
+}
+
+/* Layout */
+body {
+  margin: 0;
+  padding-top: calc(56px + env(safe-area-inset-top));
+}
+
+/* Quiz */
+.quiz-container {
+  max-width: 600px;
+  margin: 2rem auto;
+}
+
+.question-block {
+  margin-bottom: 2rem;
+}
+
+.question {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.choices {
+  list-style: none;
+  padding: 0;
+}
+
+.choice {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  margin-bottom: 0.3rem;
+  cursor: pointer;
+  border-radius: 4px;
+  user-select: none;
+}
+
+.choice:hover {
+  background-color: #f5f5f5;
+}
+
+.choice.selected {
+  background-color: #e0f7fa;
+}
+
+.choice.correct {
+  background-color: #c8f7c5;
+  border-color: #27ae60;
+}
+
+.choice.incorrect {
+  background-color: #f7c5c5;
+  border-color: #e74c3c;
+}
+
+.explanation {
+  background: #f9f9f9;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  border-left: 3px solid #ccc;
+}
+
+/* Buttons */
+.opcalc-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1rem auto;
+  padding: 0.5rem 1.25rem;
+  background-color: #1976d2;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02857em;
+  box-shadow:
+    0px 2px 4px -1px rgba(0, 0, 0, 0.2),
+    0px 4px 5px 0px rgba(0, 0, 0, 0.14),
+    0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+  transition: background-color 0.3s, box-shadow 0.3s;
+  max-width: fit-content;
+}
+
+.opcalc-btn:hover,
+.opcalc-btn:focus {
+  background-color: #1565c0;
+  box-shadow:
+    0px 3px 5px -1px rgba(0, 0, 0, 0.2),
+    0px 5px 8px 0px rgba(0, 0, 0, 0.14),
+    0px 1px 14px 0px rgba(0, 0, 0, 0.12);
+}
+
+@media (max-width: 600px) {
+  .opcalc-btn {
+    width: 100%;
+    padding: 0.75rem;
+  }
+}
+
+.submit-btn {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+/* Misc */
+.my-comment {
+  font-style: italic;
+}
+
+.preamble {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Table of Contents */
+#TOC {
+  margin-bottom: 2rem;
+}
+
+main li + li {
+  margin-top: 0.5rem;
+}
+
+main nav li + li {
+  margin-top: 0 !important;
+}
+
+.image-container {
+  position: relative;
+  display: inline-block;
+}
+
+.magnify-icon {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  padding: 6px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.citation {
+  border: thin solid black;
+  border-radius: 3px;
+  padding: 2px;
+}
+
+.emoji {
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+ol + details.answer {
+  margin-top: 15px;
+}
+
+/* Metadata block */
+.metablock {
+  background-color: #f8f9fa;
+  border-left: 4px solid #6c757d;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  border-radius: 0.25rem;
+}
+
+/* Headings and section layout */
+main h1,
+main h2,
+main h3,
+main h4,
+main h5,
+main h6 {
+  margin-top: 3rem;
+  margin-bottom: 2rem;
+}
+
+main h2 {
+  padding-top: 1rem;
+  border-top: 2px solid #e9ecef;
+}
+
+h1 + p,
+h2 + p,
+h3 + p,
+h4 + p,
+h5 + p,
+h6 + p {
+  margin-top: 2rem;
+}
+
+main section {
+  margin-bottom: 3rem;
+  padding: 2.5rem;
+  background-color: #f8f9fa;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Paragraph spacing and indentation */
+main > p,
+main section > p {
+  margin-bottom: 2rem;
+}
+
+main > p:first-of-type,
+main section > p:first-of-type {
+}
+
+/* Figures */
+main figure {
+  max-width: 100%;
+  margin: 0 auto 2rem;
+}
+
+main figure img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Definition lists */
+main dl {
+  margin-bottom: 2rem;
+}
+
+main dt {
+  font-weight: 600;
+}
+
+main dd {
+  margin-left: 1.5rem;
+}
+
+main dd + dt {
+  margin-top: 2rem;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 2rem;
+}
+
+th,
+td {
+  border: 1px solid #dee2e6;
+  padding: 0.5rem;
+}
+
+th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  text-align: left;
+}
+
+tbody tr:nth-of-type(even) {
+  background-color: #f2f2f2;
+}
+
+/* Code blocks */
+pre,
+code {
+  font-family: var(--bs-font-monospace);
+}
+
+pre {
+  padding: 1rem;
+  background-color: var(--bs-light);
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  overflow-x: auto;
+}
+
+code {
+  padding: 0.2rem 0.4rem;
+  font-size: 1em;
+  color: var(--bs-code-color);
+  background-color: var(--bs-light);
+  border-radius: var(--bs-border-radius);
+}
+
+pre code {
+  padding: 0;
+  color: inherit;
+  background-color: transparent;
+  border: 0;
+}
