@@ -59,6 +59,22 @@ def test_generated_files_have_content(scaffold: Path) -> None:
     docker_text = shell_dockerfile.read_text(encoding="utf-8")
     assert docker_text.startswith("FROM press-release")
 
+    nginx_dir = scaffold / "app/nginx"
+    nginx_dockerfile = nginx_dir / "Dockerfile"
+    assert nginx_dockerfile.exists()
+    nginx_docker_text = nginx_dockerfile.read_text(encoding="utf-8")
+    assert nginx_docker_text.startswith("FROM nginx:alpine-slim")
+
+    dev_conf = nginx_dir / "default.conf"
+    assert dev_conf.exists()
+    dev_conf_text = dev_conf.read_text(encoding="utf-8")
+    assert "include /usr/share/nginx/html/permalinks.conf;" in dev_conf_text
+
+    prod_conf = nginx_dir / "prod.conf"
+    assert prod_conf.exists()
+    prod_conf_text = prod_conf.read_text(encoding="utf-8")
+    assert "server {" in prod_conf_text
+
     index_md = scaffold / "src/index.md"
     assert index_md.exists()
     md_text = index_md.read_text(encoding="utf-8")
