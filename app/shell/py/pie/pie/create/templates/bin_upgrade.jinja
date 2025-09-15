@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+# Run after git pull to rebuild everything required for development.
+# Use -p to run bin/pull after distclean.
+set -euo pipefail
+
+RUN_PULL=0
+while getopts "p" opt; do
+  case "$opt" in
+    p) RUN_PULL=1 ;;
+    *) echo "Usage: $0 [-p]" >&2; exit 1 ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+
+VERBOSE="${VERBOSE:-0}"
+SRC_DIR="${SRC_DIR:-src}"
+BUILD_DIR="${BUILD_DIR:-build}"
+
+COMPOSE_FILE="docker-compose.yml"
+
+DOCKER_COMPOSE=(docker compose -f "$COMPOSE_FILE")
+
+MAKE_ARGS=(-f redo.mk VERBOSE="$VERBOSE" SRC_DIR="$SRC_DIR" BUILD_DIR="$BUILD_DIR")
+
+run_make() {
+  make "${MAKE_ARGS[@]}" "$@"
+}
+
+cleanup() {
+  "${DOCKER_COMPOSE[@]}" down --remove-orphans
+  docker system prune -f
+  rm -f build/.update-index
+}
+trap cleanup EXIT
+
+echo "Starting upgrade build..."
+
+echo "Stopping existing containers..."
+"${DOCKER_COMPOSE[@]}" down --remove-orphans >/dev/null 2>&1 || true
+echo "Building shell image..."
+"${DOCKER_COMPOSE[@]}" build shell
+echo "Starting dragonfly..."
+"${DOCKER_COMPOSE[@]}" up -d --remove-orphans dragonfly
+echo "Running distclean..."
+run_make distclean
+if [ "$RUN_PULL" -eq 1 ]; then
+  echo "Running pull..."
+  bin/pull
+  # Dockerfile for shell may have been updated.
+  echo "Building shell image..."
+  "${DOCKER_COMPOSE[@]}" build shell
+fi
+echo "Running make..."
+run_make
+echo "Starting nginx-test..."
+"${DOCKER_COMPOSE[@]}" up -d --build --remove-orphans nginx-test
+echo "Running make test..."
+run_make test
+echo "Running pytest..."
+run_make pytest
+
+echo "Upgrade Build Successful"
