@@ -1,0 +1,21 @@
+## Production Nginx configuration
+#
+# Nearly identical to the development version but proxies API calls to the
+# production quant service container.
+
+server {
+    listen 80;                   # Accept HTTP traffic on port 80
+    server_name localhost;       # Replace with real domain when deployed
+
+    # Directory containing the built static site
+    root /usr/share/nginx/html;
+    index index.html;            # Default file to serve
+    etag on;                     # Enable ETag headers
+
+    # Serve static files and return 404 for missing paths
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    include /usr/share/nginx/html/permalinks.conf;
+}

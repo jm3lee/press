@@ -1,0 +1,21 @@
+## Development Nginx configuration
+#
+# Serves the static site from the container and forwards API requests for
+# the American option calculator to the quant service.
+
+server {
+    listen 80;                   # Accept HTTP traffic on port 80
+    server_name localhost;       # Respond only to localhost requests
+
+    # Directory containing the built site
+    root /usr/share/nginx/html;
+    index index.html;            # Default file to serve
+    etag on;                     # Enable ETag headers
+
+    # Serve static files and return 404 for missing paths
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    include /usr/share/nginx/html/permalinks.conf;
+}
