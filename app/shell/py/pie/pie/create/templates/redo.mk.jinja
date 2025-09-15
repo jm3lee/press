@@ -56,11 +56,6 @@ $(BUILD_DIR): ## Helper target used by other rules
 	$(call status,Prepare build directory $@)
 	$(Q)mkdir -p $@
 
-all: build/examples/mermaid/diagram.svg | build/examples/mermaid
-
-build/examples/mermaid:
-	mkdir -p $@
-
 # Generate SVG diagrams from Mermaid source files
 $(BUILD_DIR)/%.svg: $(SRC_DIR)/%.mmd | $(dir $(BUILD_DIR)/%.svg)
 	$(call status,Render Mermaid $<)
