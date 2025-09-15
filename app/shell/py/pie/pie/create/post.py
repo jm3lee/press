@@ -5,9 +5,9 @@ from pathlib import Path
 from typing import Sequence
 
 from pie.cli import create_parser
-from pie.model import Breadcrumb, Doc, Metadata
+from pie.model import Breadcrumb, Doc, Metadata, PubDate
 from pie.logging import configure_logging, logger
-from pie.utils import get_pubdate, write_yaml
+from pie.utils import write_yaml
 
 
 DEFAULT_MD = (
@@ -69,7 +69,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         id=_id_from_slug(slug),
         doc=Doc(
             author="",
-            pubdate=get_pubdate(),
+            pubdate=PubDate(),
             title="",
             breadcrumbs=breadcrumbs,
         ),

@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Any, List, Optional
 
 from pie.schema import DEFAULT_SCHEMA
+from pie.utils import get_pubdate
 
-__all__ = ["Breadcrumb", "Doc", "Metadata"]
+__all__ = ["Breadcrumb", "Doc", "Metadata", "PubDate"]
 
 
 @dataclass
@@ -29,19 +31,43 @@ class Doc:
     """Document specific metadata."""
 
     author: str
-    pubdate: str
+    pubdate: PubDate | str | datetime | None
     title: str
     breadcrumbs: List[Breadcrumb] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        """Normalise ``pubdate`` to :class:`PubDate`."""
+
+        if not isinstance(self.pubdate, PubDate):
+            self.pubdate = PubDate(self.pubdate)
 
     def to_dict(self) -> dict[str, Any]:
         """Return dictionary representation for serialization."""
 
         return {
             "author": self.author,
-            "pubdate": self.pubdate,
+            "pubdate": str(self.pubdate),
             "title": self.title,
             "breadcrumbs": [b.to_dict() for b in self.breadcrumbs],
         }
+
+
+@dataclass
+class PubDate:
+    """Model representing ``doc.pubdate`` values."""
+
+    value: str | datetime | None = field(default_factory=get_pubdate)
+
+    def __post_init__(self) -> None:
+        if isinstance(self.value, PubDate):
+            self.value = str(self.value)
+        elif isinstance(self.value, datetime) or self.value is None:
+            self.value = get_pubdate(self.value)
+        elif not isinstance(self.value, str):
+            self.value = str(self.value)
+
+    def __str__(self) -> str:
+        return str(self.value)
 
 
 @dataclass
