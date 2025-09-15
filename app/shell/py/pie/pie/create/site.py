@@ -49,10 +49,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         "makefile": "makefile.jinja",
         "redo.mk": "redo.mk.jinja",
         "bin/shell": "bin_shell.jinja",
+        "bin/redis-cli": "bin_redis_cli.jinja",
         "bin/upgrade": "bin_upgrade.jinja",
     }
 
-    executable_files = {"bin/shell", "bin/upgrade"}
+    executable_files = {"bin/shell", "bin/redis-cli", "bin/upgrade"}
 
     for rel_path, template_name in files.items():
         target = root / rel_path
