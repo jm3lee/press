@@ -41,3 +41,14 @@ Range interpretation:
 
 - Use `radon`/`xenon` in CI
 - Fail builds if thresholds are exceeded
+
+### Testing
+
+- In tests, always ensure the following is executed before accessing templates:
+
+  ```python
+  os.environ.setdefault(
+      "PIE_DATA_DIR",
+      "/data/src/templates",
+  )
+  ```
