@@ -35,6 +35,7 @@ setup(
             'nginx-permalinks=pie.nginx_permalinks:main',
             'picasso=pie.build.picasso:main',
             'render-html=pie.render.html:main',
+            'render-press=pie.render.press:main',
             'render-jinja-template=pie.render.jinja:main',
             'render-study-json=pie.render_study_json:main',
             'report-static-links=pie.report.static_links:main',
