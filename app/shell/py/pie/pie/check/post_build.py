@@ -42,7 +42,14 @@ def main(argv: list[str] | None = None) -> int:
     Path(args.log).parent.mkdir(parents=True, exist_ok=True)
     configure_logging(args.verbose, args.log)
 
-    required = read_yaml(args.config) or []
+    try:
+        required = read_yaml(args.config) or []
+    except FileNotFoundError:
+        logger.info(
+            "Missing configuration; assuming no required artifacts",
+            path=str(args.config),
+        )
+        required = []
 
     base = Path(args.directory)
     missing = False
