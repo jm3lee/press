@@ -46,6 +46,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "app/nginx/default.conf": "nginx.default.conf.jinja",
         "app/nginx/prod.conf": "nginx.prod.conf.jinja",
         "cfg/update-author.yml": "update-author.yml.jinja",
+        "cfg/check-page-title-exclude.yml": None,
         "makefile": "makefile.jinja",
         "redo.mk": "redo.mk.jinja",
         "bin/shell": "bin_shell.jinja",
@@ -58,14 +59,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     for rel_path, template_name in files.items():
         target = root / rel_path
         target.parent.mkdir(parents=True, exist_ok=True)
-        template_text = (template_dir / template_name).read_text(
-            encoding="utf-8"
-        )
-        if rel_path.endswith(".jinja"):
-            # Preserve Jinja templates without rendering
-            content = template_text
+        if template_name is None:
+            content = ""
         else:
-            content = env.from_string(template_text).render()
+            template_text = (template_dir / template_name).read_text(
+                encoding="utf-8"
+            )
+            if rel_path.endswith(".jinja"):
+                # Preserve Jinja templates without rendering
+                content = template_text
+            else:
+                content = env.from_string(template_text).render()
         target.write_text(content, encoding="utf-8")
         if rel_path in executable_files:
             target.chmod(target.stat().st_mode | 0o111)
