@@ -101,6 +101,10 @@ def test_generated_files_have_content(scaffold: Path) -> None:
     update_author_text = update_author.read_text(encoding="utf-8")
     assert update_author_text == "doc:\n  author: unknown\n"
 
+    page_title_exclude = scaffold / "cfg/check-page-title-exclude.yml"
+    assert page_title_exclude.exists()
+    assert page_title_exclude.read_text(encoding="utf-8") == ""
+
     shell_script = scaffold / "bin/shell"
     assert shell_script.exists()
     shell_text = shell_script.read_text(encoding="utf-8")
