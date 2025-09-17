@@ -1,5 +1,3 @@
-{% extends "src/templates/blog/template.html.jinja" %}
-{% block content %}
 <section>
 {% filter press %}
 Welcome to the future of blogging! This sample article demonstrates the
@@ -66,4 +64,3 @@ Share your experiments with the community and keep pushing the template
 forward.
 {% endfilter %}
 </section>
-{% endblock %}

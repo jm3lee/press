@@ -1,6 +1,4 @@
-{% extends "src/templates/template.html.jinja" %}
 
-{% block content %}
 ## Start Server
 
 Build pages and run a development nginx server, run this on `bash` and
@@ -20,4 +18,3 @@ To shutdown the server,
 ```
 r down
 ```
-{% endblock %}

@@ -1,6 +1,4 @@
-{% extends "src/templates/template.html.jinja" %}
 
-{% block content %}
 This tutorial introduces the basics of embedding Jinja in Markdown. Each
 snippet shows the template followed by its rendered output.
 
@@ -66,4 +64,3 @@ Output:
 
 {{ link({"doc": {"citation": "Quickstart"}, "url": "/quickstart.html"}) }}
 
-{% endblock %}
