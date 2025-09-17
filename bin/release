@@ -21,6 +21,36 @@
 #
 set -euo pipefail
 
+usage() {
+  cat <<'EOF'
+Usage: bin/release [-k]
+
+Options:
+  -k  Ignore test errors and continue building the release image.
+EOF
+}
+
+IGNORE_TEST_ERRORS=0
+
+while getopts ":k" opt; do
+  case "$opt" in
+    k)
+      IGNORE_TEST_ERRORS=1
+      ;;
+    *)
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
+shift $((OPTIND - 1))
+
+if [[ $# -ne 0 ]]; then
+  usage >&2
+  exit 1
+fi
+
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
@@ -58,9 +88,21 @@ run_make
 echo "Starting nginx-test..."
 "${DOCKER_COMPOSE[@]}" up -d --build --remove-orphans nginx-test
 echo "Running make test..."
-run_make test
+if ! run_make test; then
+  if (( IGNORE_TEST_ERRORS )); then
+    echo "Warning: make test failed, continuing because -k was specified." >&2
+  else
+    exit 1
+  fi
+fi
 echo "Running pytest..."
-run_make pytest
+if ! run_make pytest; then
+  if (( IGNORE_TEST_ERRORS )); then
+    echo "Warning: pytest failed, continuing because -k was specified." >&2
+  else
+    exit 1
+  fi
+fi
 echo "Building release image..."
 "${DOCKER_COMPOSE[@]}" build release
 
