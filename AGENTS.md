@@ -18,9 +18,11 @@
 
 ### Dependencies
 
-- `pytest` dependencies: see  
+- `pytest` dependencies: see
   [`app/shell/py/pie/requirements.txt`](app/shell/py/pie/requirements.txt)
 - `pie.logging.logger`: instance of `loguru.Logger`
+- Prefer structured logging (e.g., `logger.bind(...)`) to capture context with
+  Loguru; avoid plain string interpolation.
 
 ### Cyclomatic Complexity
 
