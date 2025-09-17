@@ -135,8 +135,7 @@
       </header>
       <section class="content">
       {% filter press %}
-          {% block content %}
-          {% endblock %}
+      {% include markdown_path with context %}
       {% endfilter %}
       </section>
       <footer class="fade-in">
