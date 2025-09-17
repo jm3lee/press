@@ -27,6 +27,20 @@ def test_main_passes_and_logs(tmp_path):
     assert log.exists()
 
 
+def test_main_allows_missing_config(tmp_path):
+    """Missing configuration file -> exit 0."""
+    rc = check_post_build.main(
+        [
+            str(tmp_path / "build"),
+            "-c",
+            str(tmp_path / "missing.yml"),
+            "-l",
+            str(tmp_path / "log.txt"),
+        ]
+    )
+    assert rc == 0
+
+
 def test_parse_args_defaults():
     """parse_args returns default paths."""
     args = check_post_build.parse_args([])
