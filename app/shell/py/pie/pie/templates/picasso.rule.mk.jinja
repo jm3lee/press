@@ -4,4 +4,4 @@
 	$(Q){preprocess_cmd}
 {output_html}: {preprocessed_md} {preprocessed_yml} {template_dep} | $(BUILD_DIR)/.update-index
 	$(call status,Generate HTML $@)
-	$(Q)render-html {preprocessed_md} {preprocessed_yml} $@
+	$(Q)render-html {template_dep} {preprocessed_md} {preprocessed_yml} $@
