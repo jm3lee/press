@@ -34,7 +34,9 @@ from pie.yaml import read_yaml as load_yaml_file
 from pie.yaml import yaml
 from ruamel.yaml import YAMLError
 
-from .figure import render as figure
+from .figure import render as render_figure
+
+figure = render_figure
 
 DEFAULT_CONFIG = Path("cfg/render-jinja-template.yml")
 
@@ -193,91 +195,6 @@ def linkshort(desc, anchor: str | None = None, citation: str | None = None):
     if citation is None:
         return render_link(desc, use_icon=False, citation="short", anchor=anchor)
     return render_link(desc, use_icon=False, citation=citation, anchor=anchor)
-
-
-def figure(desc):
-    """Return an HTML ``<figure>`` block for ``desc``.
-
-    ``desc`` may be either a metadata dictionary or a string key which will be
-    resolved via :func:`get_cached_metadata`.
-
-    The figure uses ``desc['url']`` as the fallback ``src`` attribute and the
-    ``title`` as the ``alt`` text. ``desc['figure']`` may further define
-    responsive image data:
-
-    ``urls``
-        Explicit list of sources for the ``srcset`` attribute. Each entry may
-        be a string URL or a mapping with ``url`` and ``width`` keys.
-
-    ``widths`` / ``pattern``
-        Generate a ``srcset`` by formatting ``pattern`` for each width in the
-        sequence. When ``pattern`` is omitted ``desc['url']`` must contain a
-        ``{width}`` placeholder which is used instead.
-
-    ``sizes``
-        Optional value for the ``sizes`` attribute.
-
-    The caption is taken from ``desc['figure']['caption']`` when provided and
-    otherwise falls back to ``title``. Images are marked with
-    ``loading="lazy"``.
-    """
-
-    if isinstance(desc, str):
-        desc = get_cached_metadata(desc)
-    elif not isinstance(desc, dict):
-        logger.error("Invalid descriptor type", type=str(type(desc)))
-        raise SystemExit(1)
-
-    title = desc.get("title", "")
-    fig = desc.get("figure", {})
-    caption = fig.get("caption", title)
-    src = desc.get("url")
-
-    srcset_parts: list[str] = []
-
-    urls = fig.get("urls")
-    if urls:
-        if isinstance(urls, (list, tuple)):
-            for u in urls:
-                if isinstance(u, dict):
-                    url = u.get("url")
-                    width = u.get("width")
-                    descriptor = f" {width}w" if width else ""
-                    srcset_parts.append(f"{url}{descriptor}")
-                else:
-                    srcset_parts.append(str(u))
-        else:
-            # Single mapping or string
-            if isinstance(urls, dict):
-                url = urls.get("url")
-                width = urls.get("width")
-                descriptor = f" {width}w" if width else ""
-                srcset_parts.append(f"{url}{descriptor}")
-            else:
-                srcset_parts.append(str(urls))
-    else:
-        widths = fig.get("widths")
-        if widths:
-            pattern = fig.get("pattern")
-            if not pattern:
-                if src and "{width}" in src:
-                    pattern = src
-                else:
-                    pattern = re.sub(r"\d+", "{width}", src or "", count=1)
-            for w in widths:
-                srcset_parts.append(f"{pattern.format(width=w)} {w}w")
-            if not src:
-                src = pattern.format(width=widths[0])
-
-    srcset_attr = f' srcset="{", ".join(srcset_parts)}"' if srcset_parts else ""
-
-    sizes = fig.get("sizes")
-    sizes_attr = f' sizes="{sizes}"' if sizes and srcset_parts else ""
-
-    return (
-        f'<figure><img src="{src}"{srcset_attr}{sizes_attr} alt="{title}" '
-        f'loading="lazy"/><figcaption>{caption}</figcaption></figure>'
-    )
 
 
 def definition(desc):
