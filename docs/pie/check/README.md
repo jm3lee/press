@@ -10,4 +10,5 @@ Documentation for Pie's validation scripts.
   rendering.
 - [check-breadcrumbs](check-breadcrumbs.md) – ensure metadata defines
   `doc.breadcrumbs`.
+- [check-author](check-author.md) – confirm metadata provides `doc.author`.
 
