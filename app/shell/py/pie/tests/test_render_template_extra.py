@@ -69,10 +69,10 @@ def test_get_cached_metadata_caches(monkeypatch):
         calls.append(key)
         return {"id": key}
 
-    monkeypatch.setattr(render_template, "_get_metadata", fake_get)
-    monkeypatch.setattr(render_template, "_metadata_cache", {})
-    assert render_template.get_cached_metadata("x") == {"id": "x"}
-    assert render_template.get_cached_metadata("x") == {"id": "x"}
+    monkeypatch.setattr(metadata, "get_metadata", fake_get)
+    metadata.clear_cached_metadata()
+    assert metadata.get_cached_metadata("x") == {"id": "x"}
+    assert metadata.get_cached_metadata("x") == {"id": "x"}
     assert calls == ["x"]
 
 

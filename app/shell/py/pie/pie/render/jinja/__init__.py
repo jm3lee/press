@@ -3,7 +3,7 @@
 """Helper filters and globals for rendering Jinja templates.
 
 This module exposes a set of Jinja2 filters and global functions used by the
-press build scripts.  It can also be executed as a small CLI to render a
+press build scripts. It can also be executed as a small CLI to render a
 template. Metadata is loaded from Redis and an optional ``index.json`` file.
 """
 
@@ -12,11 +12,12 @@ import json
 import os
 import re
 import sys
-import time
 from pathlib import Path
 
 import cmarkgfm
 import emoji
+import pie
+import pie.metadata as metadata_module
 from jinja2 import (
     Environment,
     FileSystemLoader,
@@ -25,50 +26,23 @@ from jinja2 import (
     TemplateSyntaxError,
 )
 from markupsafe import Markup
-from pie import metadata
+from pie.metadata import get_cached_metadata, get_metadata
 from pie.cli import create_parser
 from pie.logging import configure_logging, logger
 from pie.utils import read_json, read_utf8, write_utf8
 from pie.yaml import read_yaml as load_yaml_file
 from pie.yaml import yaml
 from ruamel.yaml import YAMLError
-import pie
+
+from .figure import render as render_figure
+
+figure = render_figure
 
 DEFAULT_CONFIG = Path("cfg/render-jinja-template.yml")
 
 config = {}
 
 _whitespace_word_pattern = re.compile(r"(\S+)")
-
-
-def _get_metadata(name: str) -> dict | None:
-    """Return metadata dictionary for ``name`` from Redis."""
-
-    return metadata.build_from_redis(f"{name}.")
-
-
-_metadata_cache: dict[str, dict] = {}
-
-
-def get_cached_metadata(key: str) -> dict:
-    """Return cached metadata for ``key``.
-
-    Metadata is looked up from Redis on the first request and stored in a
-    module‑level cache. Subsequent lookups reuse the cached value.
-    """
-
-    if key not in _metadata_cache:
-        data = None
-        for _ in range(3):
-            data = _get_metadata(key)
-            if data is not None:
-                break
-            time.sleep(0.5)
-        if data is None:
-            logger.error("Missing metadata", id=key)
-            raise SystemExit(1)
-        _metadata_cache[key] = data
-    return _metadata_cache[key]
 
 
 def get_tracking_options(desc):
@@ -223,91 +197,6 @@ def linkshort(desc, anchor: str | None = None, citation: str | None = None):
     return render_link(desc, use_icon=False, citation=citation, anchor=anchor)
 
 
-def figure(desc):
-    """Return an HTML ``<figure>`` block for ``desc``.
-
-    ``desc`` may be either a metadata dictionary or a string key which will be
-    resolved via :func:`get_cached_metadata`.
-
-    The figure uses ``desc['url']`` as the fallback ``src`` attribute and the
-    ``title`` as the ``alt`` text. ``desc['figure']`` may further define
-    responsive image data:
-
-    ``urls``
-        Explicit list of sources for the ``srcset`` attribute. Each entry may
-        be a string URL or a mapping with ``url`` and ``width`` keys.
-
-    ``widths`` / ``pattern``
-        Generate a ``srcset`` by formatting ``pattern`` for each width in the
-        sequence. When ``pattern`` is omitted ``desc['url']`` must contain a
-        ``{width}`` placeholder which is used instead.
-
-    ``sizes``
-        Optional value for the ``sizes`` attribute.
-
-    The caption is taken from ``desc['figure']['caption']`` when provided and
-    otherwise falls back to ``title``. Images are marked with
-    ``loading="lazy"``.
-    """
-
-    if isinstance(desc, str):
-        desc = get_cached_metadata(desc)
-    elif not isinstance(desc, dict):
-        logger.error("Invalid descriptor type", type=str(type(desc)))
-        raise SystemExit(1)
-
-    title = desc.get("title", "")
-    fig = desc.get("figure", {})
-    caption = fig.get("caption", title)
-    src = desc.get("url")
-
-    srcset_parts: list[str] = []
-
-    urls = fig.get("urls")
-    if urls:
-        if isinstance(urls, (list, tuple)):
-            for u in urls:
-                if isinstance(u, dict):
-                    url = u.get("url")
-                    width = u.get("width")
-                    descriptor = f" {width}w" if width else ""
-                    srcset_parts.append(f"{url}{descriptor}")
-                else:
-                    srcset_parts.append(str(u))
-        else:
-            # Single mapping or string
-            if isinstance(urls, dict):
-                url = urls.get("url")
-                width = urls.get("width")
-                descriptor = f" {width}w" if width else ""
-                srcset_parts.append(f"{url}{descriptor}")
-            else:
-                srcset_parts.append(str(urls))
-    else:
-        widths = fig.get("widths")
-        if widths:
-            pattern = fig.get("pattern")
-            if not pattern:
-                if src and "{width}" in src:
-                    pattern = src
-                else:
-                    pattern = re.sub(r"\d+", "{width}", src or "", count=1)
-            for w in widths:
-                srcset_parts.append(f"{pattern.format(width=w)} {w}w")
-            if not src:
-                src = pattern.format(width=widths[0])
-
-    srcset_attr = f' srcset="{", ".join(srcset_parts)}"' if srcset_parts else ""
-
-    sizes = fig.get("sizes")
-    sizes_attr = f' sizes="{sizes}"' if sizes and srcset_parts else ""
-
-    return (
-        f'<figure><img src="{src}"{srcset_attr}{sizes_attr} alt="{title}" '
-        f'loading="lazy"/><figcaption>{caption}</figcaption></figure>'
-    )
-
-
 def definition(desc):
     """Return the rendered ``definition`` for ``desc``.
 
@@ -447,7 +336,7 @@ def process_directory(root_dir: str) -> None:
 def get_desc(name):
     """Return the metadata entry for ``name`` from Redis."""
 
-    d = _get_metadata(name)
+    d = get_metadata(name)
     if d is None:
         logger.error("Metadata not found", id=name)
         raise SystemExit(1)
@@ -523,10 +412,10 @@ def create_env():
     env.globals["link"] = render_link
     env.globals["linkshort"] = linkshort
     env.globals["linktitle"] = linktitle
-    env.globals["metadata"] = metadata
+    env.globals["metadata"] = metadata_module
     env.globals["read_json"] = read_json
     env.globals["read_yaml"] = read_yaml
-    env.globals["pie"] = {"yaml":pie.yaml}
+    env.globals["pie"] = {"yaml": pie.yaml}
     env.globals["render_jinja"] = render_jinja
     env.globals["to_alpha_index"] = to_alpha_index
     env.filters["press"] = render_press

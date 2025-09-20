@@ -23,7 +23,9 @@ for details on the structure of this metadata.
   uses `desc['url']` as a fallback `src` while optional responsive sources may
   be supplied via `desc['figure']['urls']` or a `widths`/`pattern` pair to
   populate `srcset` and `sizes`. The caption defaults to
-  `desc['figure']['caption']` when present, otherwise the entry's `title`.
+  `desc['figure']['caption']` when present, otherwise the entry's `title`. The
+  wrapper, `<img>`, and `<figcaption>` receive Bootstrap classes (`figure`,
+  `figure-img img-fluid rounded`, and `figure-caption tex-center`).
 - `definition(desc)` – expand the `definition` metadata field as Markdown.
   See [definition.md](definition.md) for details.
 
@@ -33,6 +35,7 @@ Example:
 {{ cite("hull", "doe") }}
 ```
 
-These helpers live in `app/shell/py/pie/pie/render/jinja.py` and are
-registered with the Jinja environment by `create_env()`.
+These helpers live in `app/shell/py/pie/pie/render/jinja/__init__.py` and are
+registered with the Jinja environment by `create_env()`. Figure rendering is
+implemented in `app/shell/py/pie/pie/render/jinja/figure/render.py`.
 

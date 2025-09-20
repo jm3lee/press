@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from pathlib import Path
 from typing import Any, Dict, Mapping, Optional
 from urllib.parse import urljoin
@@ -317,6 +318,42 @@ def build_from_redis(prefix: str) -> dict | list | None:
 
     data = unflatten(flat, splitter="dot")
     return _convert_lists(data)
+
+
+_metadata_cache: dict[str, dict[str, Any]] = {}
+
+
+def get_metadata(name: str) -> dict[str, Any] | None:
+    """Return metadata dictionary for ``name`` from Redis."""
+
+    return build_from_redis(f"{name}.")
+
+
+def get_cached_metadata(key: str) -> dict[str, Any]:
+    """Return cached metadata for ``key``.
+
+    Metadata is looked up from Redis on the first request and stored in a
+    module-level cache. Subsequent lookups reuse the cached value.
+    """
+
+    if key not in _metadata_cache:
+        data: dict[str, Any] | None = None
+        for _ in range(3):
+            data = get_metadata(key)
+            if data is not None:
+                break
+            time.sleep(0.5)
+        if data is None:
+            logger.error("Missing metadata", id=key)
+            raise SystemExit(1)
+        _metadata_cache[key] = data
+    return _metadata_cache[key]
+
+
+def clear_cached_metadata() -> None:
+    """Reset the metadata cache used by :func:`get_cached_metadata`."""
+
+    _metadata_cache.clear()
 
 
 def get_metadata_by_path(filepath: str, keypath: str) -> Any | None:

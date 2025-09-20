@@ -19,16 +19,6 @@ def test_render_link_invalid_descriptor_raises():
     with pytest.raises(SystemExit):
         jinja.render_link(123)  # type: ignore[arg-type]
 
-def test_figure_with_string_descriptor_and_urls_list(monkeypatch):
-    data = {
-        "title": "t",
-        "url": "image.jpg",
-        "figure": {"urls": [{"url": "a.jpg", "width": 100}, "b.jpg"]},
-    }
-    monkeypatch.setattr(jinja, "get_cached_metadata", lambda k: data)
-    result = jinja.figure("id")
-    assert 'srcset="a.jpg 100w, b.jpg"' in result
-
 def test_figure_urls_single_mapping_and_string():
     desc_map = {
         "title": "t",

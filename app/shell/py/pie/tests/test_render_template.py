@@ -83,7 +83,7 @@ def test_link_uses_redis_tracking_and_ignores_icon(monkeypatch):
     fake.set("entry.icon", "ICON")
     fake.set("entry.link.tracking", "false")
     monkeypatch.setattr(metadata, "redis_conn", fake)
-    monkeypatch.setattr(render_template, "_metadata_cache", {})
+    monkeypatch.setattr(metadata, "_metadata_cache", {})
     render_template.index_json = {}
 
     html = render_template.render_link("entry", use_icon=False)
@@ -101,7 +101,7 @@ def test_linkcap_includes_icon_and_capitalizes(monkeypatch):
     fake.set("entry.icon", "ICON")
     fake.set("entry.link.tracking", "false")
     monkeypatch.setattr(metadata, "redis_conn", fake)
-    monkeypatch.setattr(render_template, "_metadata_cache", {})
+    monkeypatch.setattr(metadata, "_metadata_cache", {})
     render_template.index_json = {}
 
     html = render_template.render_link("entry", style="cap")
@@ -118,7 +118,7 @@ def test_linkicon_includes_icon_without_capitalization(monkeypatch):
     fake.set("entry.icon", "ICON")
     fake.set("entry.link.tracking", "false")
     monkeypatch.setattr(metadata, "redis_conn", fake)
-    monkeypatch.setattr(render_template, "_metadata_cache", {})
+    monkeypatch.setattr(metadata, "_metadata_cache", {})
     render_template.index_json = {}
 
     html = render_template.render_link("entry")
@@ -135,7 +135,7 @@ def test_link_icon_title_capitalizes_each_word_and_includes_icon(monkeypatch):
     fake.set("entry.icon", "ICON")
     fake.set("entry.link.tracking", "false")
     monkeypatch.setattr(metadata, "redis_conn", fake)
-    monkeypatch.setattr(render_template, "_metadata_cache", {})
+    monkeypatch.setattr(metadata, "_metadata_cache", {})
     render_template.index_json = {}
 
     html = render_template.render_link("entry", style="title")
