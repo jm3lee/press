@@ -3,31 +3,11 @@
 from __future__ import annotations
 
 import re
-from collections.abc import Callable, Iterable
+from collections.abc import Iterable
 from typing import Any
 
 from pie.logging import logger
-
-MetadataResolver = Callable[[str], dict[str, Any]]
-
-_metadata_resolver: MetadataResolver | None = None
-
-
-def set_metadata_resolver(resolver: MetadataResolver | None) -> None:
-    """Configure the callable used to resolve metadata ids."""
-
-    global _metadata_resolver
-    _metadata_resolver = resolver
-
-
-def _get_cached_metadata(key: str) -> dict[str, Any]:
-    """Return metadata for ``key`` using the configured resolver."""
-
-    if _metadata_resolver is None:
-        from pie.metadata import get_cached_metadata as default_resolver
-
-        return default_resolver(key)
-    return _metadata_resolver(key)
+from pie.metadata import get_cached_metadata
 
 
 def _extend_srcset(parts: list[str], urls: Iterable[Any]) -> None:
@@ -51,7 +31,7 @@ def render(desc: str | dict[str, Any]) -> str:
     """
 
     if isinstance(desc, str):
-        desc = _get_cached_metadata(desc)
+        desc = get_cached_metadata(desc)
     elif not isinstance(desc, dict):
         logger.error("Invalid descriptor type", type=str(type(desc)))
         raise SystemExit(1)
@@ -100,4 +80,4 @@ def render(desc: str | dict[str, Any]) -> str:
     )
 
 
-__all__ = ["render", "set_metadata_resolver"]
+__all__ = ["render"]

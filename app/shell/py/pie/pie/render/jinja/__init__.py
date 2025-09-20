@@ -13,7 +13,6 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Any
 
 import cmarkgfm
 import emoji
@@ -27,11 +26,7 @@ from jinja2 import (
     TemplateSyntaxError,
 )
 from markupsafe import Markup
-from pie.metadata import (
-    clear_cached_metadata as _clear_cached_metadata,
-    get_cached_metadata,
-    get_metadata,
-)
+from pie.metadata import get_cached_metadata, get_metadata
 from pie.cli import create_parser
 from pie.logging import configure_logging, logger
 from pie.utils import read_json, read_utf8, write_utf8
@@ -39,21 +34,7 @@ from pie.yaml import read_yaml as load_yaml_file
 from pie.yaml import yaml
 from ruamel.yaml import YAMLError
 
-from .figure import (
-    render as render_figure,
-    set_metadata_resolver as set_figure_metadata_resolver,
-)
-
-_metadata_cache = metadata_module._metadata_cache
-_get_metadata = get_metadata
-clear_cached_metadata = _clear_cached_metadata
-
-
-def _resolve_metadata(key: str) -> dict[str, Any]:
-    return globals()["get_cached_metadata"](key)
-
-
-set_figure_metadata_resolver(_resolve_metadata)
+from .figure import render as render_figure
 
 figure = render_figure
 
