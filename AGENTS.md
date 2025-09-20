@@ -2,7 +2,7 @@
 
 ## General Formatting
 
-- Wrap **paragraph text** at 80 characters.  
+- Wrap **paragraph text** at 80 characters.
   (Code, tables, and lists are exempt.)
 - Metadata:
   - `description`: plain text only
@@ -11,8 +11,14 @@
   (never `\(`, `\)`, `\[`, `\]`)
 - Makefiles: **indent with real tab characters** for recipe lines.
   Leading spaces will break Makefile syntax. Never replace tabs with spaces.
-- Documentation: write as an **expert engineer**.  
+- Documentation: write as an **expert engineer**.
   Provide enough detail for new team members.
+
+## Checker Scripts
+
+- When generating Codex checker scripts, always include ExcludeList support.
+  Ensure the script accepts an `--exclude` argument that reads from an
+  `ExcludeList` file and skips matching paths.
 
 ## Python
 
