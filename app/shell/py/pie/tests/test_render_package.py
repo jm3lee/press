@@ -3,7 +3,7 @@ from pathlib import Path
 
 os.environ.setdefault(
     "PIE_DATA_DIR",
-    str(Path(__file__).resolve().parents[5] / "src" / "templates"),
+    "/data/src/templates",
 )
 
 import pie.render as render_pkg

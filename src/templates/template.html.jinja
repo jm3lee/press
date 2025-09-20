@@ -125,8 +125,7 @@
 
       <!-- Body content generated from Markdown goes here -->
       {% filter press %}
-          {% block content %}
-          {% endblock %}
+      {% include markdown_path with context %}
       {% endfilter %}
 
       <!-- prev/next page links -->

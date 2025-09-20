@@ -40,6 +40,7 @@ def _parse_markdown(path: str | Path) -> tuple[dict, str]:
     return metadata, body
 
 def render_page(
+    template_path: str | Path,
     markdown_path: str | Path,
     context: Mapping[str, Any] | None = None,
 ) -> str:
@@ -58,7 +59,8 @@ def render_page(
     metadata, md_text = _parse_markdown(markdown_path)
     ctx = dict(context or {})
     ctx.update(metadata)
-    tmpl = env.get_template(markdown_path)
+    ctx['markdown_path'] = markdown_path
+    tmpl = env.get_template(template_path)
     html_text = tmpl.render(**ctx)
     return html_text
 
@@ -67,7 +69,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = create_parser(
         "Render a Markdown file into an HTML template",
     )
-    parser.add_argument("markdown", help="Markdown source file")
+    parser.add_argument("template_path", help="Jinja template file")
+    parser.add_argument("markdown_path", help="Markdown source file")
     parser.add_argument("context")
     parser.add_argument("output")
     return parser.parse_args(argv)
@@ -77,7 +80,7 @@ def main(argv: list[str] | None = None) -> None:
     args = parse_args(argv)
     configure_logging(args.verbose, args.log)
     ctx = load_yaml_file(args.context) if args.context else {}
-    rendered = render_page(args.markdown, ctx)
+    rendered = render_page(args.template_path, args.markdown_path, ctx)
     write_utf8(rendered, args.output)
 
 if __name__ == "__main__":

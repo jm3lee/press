@@ -1,6 +1,4 @@
-{% extends "src/templates/template.html.jinja" %}
 
-{% block content %}
 This example shows how to build a responsive image using the `figure` Jinja
 macro.
 
@@ -21,5 +19,4 @@ renders as:
     "sizes": "(max-width: 640px) 100vw, 640px",
     "alt": "Placeholder"
 }) }}
-{% endblock %}
 

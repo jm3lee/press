@@ -32,6 +32,7 @@ from pie.utils import read_json, read_utf8, write_utf8
 from pie.yaml import read_yaml as load_yaml_file
 from pie.yaml import yaml
 from ruamel.yaml import YAMLError
+import pie
 
 DEFAULT_CONFIG = Path("cfg/render-jinja-template.yml")
 
@@ -525,6 +526,7 @@ def create_env():
     env.globals["metadata"] = metadata
     env.globals["read_json"] = read_json
     env.globals["read_yaml"] = read_yaml
+    env.globals["pie"] = {"yaml":pie.yaml}
     env.globals["render_jinja"] = render_jinja
     env.globals["to_alpha_index"] = to_alpha_index
     env.filters["press"] = render_press

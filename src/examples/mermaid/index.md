@@ -1,6 +1,4 @@
-{% extends "src/templates/template.html.jinja" %}
 
-{% block content %}
 Mermaid converts text descriptions into diagrams. This example demonstrates
 how to generate a diagram with Press.
 
@@ -42,4 +40,3 @@ sequenceDiagram
 ```
 
 Explore [Mermaid's docs](https://mermaid.js.org/) for more examples.
-{% endblock %}

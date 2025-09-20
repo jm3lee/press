@@ -1,6 +1,3 @@
-{% extends "src/templates/template.html.jinja" %}
-
-{% block content %}
 Welcome to the demo site for **Press**. The examples index below links to
 key features.
 
@@ -26,4 +23,3 @@ links using different helpers.
 ## Quiz Demo
 
 An interactive quiz lives on the [quiz page](quiz/index.md).
-{% endblock %}

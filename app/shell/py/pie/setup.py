@@ -41,6 +41,7 @@ setup(
             'report-static-links=pie.report.static_links:main',
             'store-files=pie.store_files:main',
             'update-author=pie.update.author:main',
+            'update-breadcrumbs=pie.update.breadcrumbs:main',
             'update-index=pie.update.index:main',
             'update-link-filters=pie.update.link_filters:main',
             'update-metadata=pie.update.metadata:main',

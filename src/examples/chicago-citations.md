@@ -1,6 +1,4 @@
-{% extends "src/templates/template.html.jinja" %}
 
-{% block content %}
 Demonstrates Chicago-style citations using the `cite` and `link` globals.
 
 ## Creating citation metadata
@@ -89,5 +87,4 @@ Passing an ID fetches the metadata automatically:
 ```
 
 {{ link("doe") }}
-{% endblock %}
 
