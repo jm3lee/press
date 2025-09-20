@@ -3,7 +3,7 @@
 """Helper filters and globals for rendering Jinja templates.
 
 This module exposes a set of Jinja2 filters and global functions used by the
-press build scripts.  It can also be executed as a small CLI to render a
+press build scripts. It can also be executed as a small CLI to render a
 template. Metadata is loaded from Redis and an optional ``index.json`` file.
 """
 
@@ -12,11 +12,12 @@ import json
 import os
 import re
 import sys
-import time
 from pathlib import Path
 
 import cmarkgfm
 import emoji
+import pie
+import pie.metadata as metadata_module
 from jinja2 import (
     Environment,
     FileSystemLoader,
@@ -25,50 +26,21 @@ from jinja2 import (
     TemplateSyntaxError,
 )
 from markupsafe import Markup
-from pie import metadata
+from pie.metadata import get_cached_metadata, get_metadata
 from pie.cli import create_parser
 from pie.logging import configure_logging, logger
 from pie.utils import read_json, read_utf8, write_utf8
 from pie.yaml import read_yaml as load_yaml_file
 from pie.yaml import yaml
 from ruamel.yaml import YAMLError
-import pie
+
+from .figure import render as figure
 
 DEFAULT_CONFIG = Path("cfg/render-jinja-template.yml")
 
 config = {}
 
 _whitespace_word_pattern = re.compile(r"(\S+)")
-
-
-def _get_metadata(name: str) -> dict | None:
-    """Return metadata dictionary for ``name`` from Redis."""
-
-    return metadata.build_from_redis(f"{name}.")
-
-
-_metadata_cache: dict[str, dict] = {}
-
-
-def get_cached_metadata(key: str) -> dict:
-    """Return cached metadata for ``key``.
-
-    Metadata is looked up from Redis on the first request and stored in a
-    module‑level cache. Subsequent lookups reuse the cached value.
-    """
-
-    if key not in _metadata_cache:
-        data = None
-        for _ in range(3):
-            data = _get_metadata(key)
-            if data is not None:
-                break
-            time.sleep(0.5)
-        if data is None:
-            logger.error("Missing metadata", id=key)
-            raise SystemExit(1)
-        _metadata_cache[key] = data
-    return _metadata_cache[key]
 
 
 def get_tracking_options(desc):
@@ -447,7 +419,7 @@ def process_directory(root_dir: str) -> None:
 def get_desc(name):
     """Return the metadata entry for ``name`` from Redis."""
 
-    d = _get_metadata(name)
+    d = get_metadata(name)
     if d is None:
         logger.error("Metadata not found", id=name)
         raise SystemExit(1)
@@ -523,10 +495,10 @@ def create_env():
     env.globals["link"] = render_link
     env.globals["linkshort"] = linkshort
     env.globals["linktitle"] = linktitle
-    env.globals["metadata"] = metadata
+    env.globals["metadata"] = metadata_module
     env.globals["read_json"] = read_json
     env.globals["read_yaml"] = read_yaml
-    env.globals["pie"] = {"yaml":pie.yaml}
+    env.globals["pie"] = {"yaml": pie.yaml}
     env.globals["render_jinja"] = render_jinja
     env.globals["to_alpha_index"] = to_alpha_index
     env.filters["press"] = render_press

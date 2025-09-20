@@ -28,6 +28,9 @@ def test_figure_with_string_descriptor_and_urls_list(monkeypatch):
     monkeypatch.setattr(jinja, "get_cached_metadata", lambda k: data)
     result = jinja.figure("id")
     assert 'srcset="a.jpg 100w, b.jpg"' in result
+    assert result.startswith('<figure class="figure">')
+    assert 'class="figure-img img-fluid rounded"' in result
+    assert 'class="figure-caption tex-center"' in result
 
 def test_figure_urls_single_mapping_and_string():
     desc_map = {
