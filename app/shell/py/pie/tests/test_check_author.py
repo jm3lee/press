@@ -47,3 +47,40 @@ def test_parse_args_defaults() -> None:
     args = check_author.parse_args([])
     assert args.directory == "src"
     assert args.log == "log/check-author.txt"
+    assert args.exclude is None
+
+
+def test_parse_args_accepts_exclude_file() -> None:
+    """``--exclude`` stores the provided filename."""
+
+    args = check_author.parse_args(["--exclude", "foo.yml"])
+    assert args.exclude == "foo.yml"
+
+
+def test_main_skips_excluded_paths(tmp_path: Path, monkeypatch) -> None:
+    """Files under excluded directories do not trigger failures."""
+
+    src = tmp_path / "src"
+    skip = src / "skip"
+    keep = src / "keep"
+    skip.mkdir(parents=True)
+    keep.mkdir()
+
+    (skip / "doc.yml").write_text("title: Test\n", encoding="utf-8")
+    (skip / "doc.md").write_text("---\ntitle: Test\n---\n", encoding="utf-8")
+
+    (keep / "doc.yml").write_text(
+        "title: Other\ndoc:\n  author: Jane Doe\n",
+        encoding="utf-8",
+    )
+    (keep / "doc.md").write_text(
+        "---\ntitle: Other\ndoc:\n  author: Jane Doe\n---\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.chdir(tmp_path)
+    exclude = tmp_path / "exclude.yml"
+    exclude.write_text("- skip/*\n", encoding="utf-8")
+
+    rc = check_author.main(["--exclude", str(exclude)])
+    assert rc == 0
