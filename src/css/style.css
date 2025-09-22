@@ -303,3 +303,8 @@ pre code {
   background-color: transparent;
   border: 0;
 }
+
+.max-h-50vh {
+  max-height: 50vh !important;
+  height: auto !important;
+}

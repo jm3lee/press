@@ -74,7 +74,7 @@ def render(desc: str | dict[str, Any]) -> str:
     return (
         '<figure class="figure">'
         f'<img src="{src}"{srcset_attr}{sizes_attr} alt="{title}" '
-        'class="figure-img img-fluid rounded" loading="lazy"/>'
+        'class="figure-img img-fluid rounded max-h-50vh" loading="lazy"/>'
         f'<figcaption class="figure-caption tex-center">{caption}</figcaption>'
         "</figure>"
     )
