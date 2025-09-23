@@ -108,7 +108,7 @@ def render_link(
     desc,
     *,
     style: str = "plain",
-    use_icon: bool = True,
+    use_icon: bool = False,
     citation: str = "citation",
     anchor: str | None = None,
 ):
@@ -118,10 +118,10 @@ def render_link(
     looked up via :func:`get_cached_metadata`. ``style`` controls how the
     citation text is capitalised: ``"plain"`` leaves it untouched,
     ``"title"`` applies title‑case, and ``"cap"`` capitalises only the first
-    character. When ``use_icon`` is ``True`` any ``icon`` field is prefixed to
-    the citation. ``citation`` selects which field under ``doc.citation`` to use
-    or overrides the citation text entirely; pass ``"short"`` to use
-    ``doc.citation["short"]``.
+    character. ``use_icon`` defaults to ``False``; when set to ``True`` any
+    ``icon`` field is prefixed to the citation. ``citation`` selects which field
+    under ``doc.citation`` to use or overrides the citation text entirely; pass
+    ``"short"`` to use ``doc.citation["short"]``.
     """
 
     if isinstance(desc, str):

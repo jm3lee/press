@@ -104,14 +104,14 @@ def test_linkcap_includes_icon_and_capitalizes(monkeypatch):
     monkeypatch.setattr(metadata, "_metadata_cache", {})
     render_template.index_json = {}
 
-    html = render_template.render_link("entry", style="cap")
+    html = render_template.render_link("entry", style="cap", use_icon=True)
     assert 'ICON Foo bar' in html
     assert 'Foo Bar' not in html
     assert 'rel="noopener noreferrer" target="_blank"' in html
 
 
 def test_linkicon_includes_icon_without_capitalization(monkeypatch):
-    """Default style shows icon; citation unchanged."""
+    """Explicit icon preserves default citation casing."""
     fake = fakeredis.FakeRedis(decode_responses=True)
     fake.set("entry.doc.citation", "foo bar")
     fake.set("entry.url", "/link")
@@ -121,7 +121,7 @@ def test_linkicon_includes_icon_without_capitalization(monkeypatch):
     monkeypatch.setattr(metadata, "_metadata_cache", {})
     render_template.index_json = {}
 
-    html = render_template.render_link("entry")
+    html = render_template.render_link("entry", use_icon=True)
     assert 'ICON foo bar' in html
     assert 'Foo bar' not in html
     assert 'rel="noopener noreferrer" target="_blank"' in html
@@ -138,7 +138,7 @@ def test_link_icon_title_capitalizes_each_word_and_includes_icon(monkeypatch):
     monkeypatch.setattr(metadata, "_metadata_cache", {})
     render_template.index_json = {}
 
-    html = render_template.render_link("entry", style="title")
+    html = render_template.render_link("entry", style="title", use_icon=True)
     assert 'ICON Foo Bar' in html
     assert 'rel="noopener noreferrer" target="_blank"' in html
 
