@@ -30,6 +30,7 @@ setup(
             'create-site=pie.create.site:main',
             'emojify=pie.filter.emojify:main',
             'gen-markdown-index=pie.gen_markdown_index:main',
+            'indextree-create=pie.create.indextree:main',
             'include-filter=pie.filter.include:main',
             'indextree-json=pie.indextree_json:main',
             'nginx-permalinks=pie.nginx_permalinks:main',
