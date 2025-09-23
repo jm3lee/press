@@ -25,7 +25,7 @@ UID := $(shell id -u)
 GID := $(shell id -g)
 
 COMPOSE_RUN := $(DOCKER_COMPOSE) run --build --rm -T
-PYTEST_CMD  := $(DOCKER_COMPOSE) run --rm --user $(UID):$(GID) --entrypoint pytest shell
+PYTEST_CMD  := $(DOCKER_COMPOSE) run --rm --user $(UID):$(GID) --entrypoint pytest shell --html=log/pytest-report.html --self-contained-html
 RUN_MAKE   := $(DOCKER_COMPOSE) run --rm --user $(UID):$(GID) --entrypoint make shell
 
 # Verbosity control

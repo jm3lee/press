@@ -10,11 +10,7 @@ from pie.logging import configure_logging, logger
 from pie.utils import write_yaml
 
 
-DEFAULT_MD = (
-    "{% extends 'src/templates/template.html.jinja' %}\n"
-    "{% block content %}\n\n"
-    "{% endblock %}\n"
-)
+DEFAULT_MD = ""
 
 __all__ = ["main"]
 
