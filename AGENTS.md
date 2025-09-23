@@ -29,6 +29,10 @@
 - `pie.logging.logger`: instance of `loguru.Logger`
 - Prefer structured logging (e.g., `logger.bind(...)`) to capture context with
   Loguru; avoid plain string interpolation.
+- Use data models from `pie.model` when possible. If a new data model is
+  required, add it to `pie.model` with minimal changes.
+- Whenever data models are edited, update all relevant code, tests, and
+  documentation.
 
 ### Cyclomatic Complexity
 
