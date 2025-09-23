@@ -1,7 +1,9 @@
 
 Press provides custom Jinja globals for formatting links. Each example shows
-the template followed by its rendered result. Globals accept either a
-metadata ID string or a dictionary with at least `doc.citation` and `url`.
+the template followed by its rendered result. Globals accept either a metadata
+ID string or a dictionary with at least `doc.citation` and `url`. Icons are now
+opt-in; pass `use_icon=True` or rely on helpers such as `linkicon` when you
+want to render the `icon` field.
 
 ## linktitle
 

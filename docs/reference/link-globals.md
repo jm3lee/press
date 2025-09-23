@@ -16,8 +16,8 @@ accepts a few optional parameters to control the output:
 - `style` – controls capitalization of the citation text.  Use `"plain"`
   (default) to leave text unchanged, `"title"` for title‑case, or `"cap"` to
   capitalise only the first character.
-- `use_icon` – when `True` (default) any `icon` field in the metadata is
-  prefixed to the link text.  Set to `False` to suppress icons.
+- `use_icon` – when `True` any `icon` field in the metadata is prefixed to the
+  link text.  The default is `False`, so templates must opt in to render icons.
 - `anchor` – appends a fragment identifier (`#anchor`) to the URL when provided.
 - `citation` – selects which citation field to render or overrides the link
   text. The default `"citation"` uses the main `doc.citation` value; pass
@@ -64,6 +64,9 @@ produces:
 When you pass a string instead of a dictionary, the helper fetches the
 corresponding metadata from Redis. The lookup retries a few times before
 aborting so templates are more resilient when entries are added concurrently.
+
+Icons remain available through specialised helpers such as `linkicon` and
+`link_icon_title`, both of which call `link(..., use_icon=True)` internally.
 
 ### Link tracking
 

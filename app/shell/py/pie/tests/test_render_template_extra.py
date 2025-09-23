@@ -93,10 +93,23 @@ def test_render_link_handles_citation_metadata():
 def test_wrapper_functions():
     """Wrapper helpers render variants of links."""
     desc = {"doc": {"citation": "foo bar"}, "url": "/f", "icon": "I"}
-    assert "Foo Bar" in render_template.linktitle(desc)
-    assert "I Foo Bar" in render_template.link_icon_title(desc)
-    assert "Foo bar" in render_template.linkcap(desc)
-    assert "I foo bar" in render_template.linkicon(desc)
+    html = render_template.linktitle(desc)
+    assert "Foo Bar" in html
+    assert "I Foo Bar" not in html
+
+    html = render_template.link_icon_title(desc)
+    assert "I Foo Bar" in html
+
+    html = render_template.linkcap(desc)
+    assert "Foo bar" in html
+    assert "I Foo bar" not in html
+
+    html = render_template.linkicon(desc)
+    assert "I foo bar" in html
+
+    html = render_template.link(desc)
+    assert "foo bar" in html
+    assert "I foo bar" not in html
     short_desc = {"doc": {"citation": {"short": "S"}}, "url": "/s", "icon": "I"}
     html = render_template.linkshort(short_desc)
     assert ">S<" in html and "I" not in html
