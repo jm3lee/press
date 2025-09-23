@@ -48,7 +48,7 @@ def generate_rule(
             $(call status,Preprocess $<)
             $(Q)mkdir -p $(dir build/foo/bar.yml)
             $(Q)cp $< $@
-        build/foo/bar.html: build/foo/bar.md build/foo/bar.yml $(HTML_TEMPLATE) $(BUILD_DIR)/.process-yamls
+        build/foo/bar.html: build/foo/bar.md build/foo/bar.yml $(HTML_TEMPLATE)
             $(call status,Generate HTML $@)
             $(Q)render-html --template $(HTML_TEMPLATE) $< $@ -c build/foo/bar.yml
             $(Q)check-bad-jinja-output $@
@@ -61,7 +61,7 @@ def generate_rule(
     preprocessed_md = (build_root / relative.with_suffix(".md")).as_posix()
     preprocessed_yml = (build_root / relative.with_suffix(".yml")).as_posix()
 
-    preprocess_cmd = "cp $< $@; process-yaml $@"
+    preprocess_cmd = "cp $< $@"
     metadata = load_metadata_pair(input_path)
     tmpl = metadata.get("template") if metadata else None
     template = Path(tmpl).as_posix() if tmpl else None

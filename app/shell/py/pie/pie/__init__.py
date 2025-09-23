@@ -13,7 +13,6 @@ The most commonly used modules are:
 * :mod:`render_study_json` – convert an index tree to a JSON structure used by
   study tools.
 * :mod:`gen_markdown_index` – generate a Markdown index from YAML metadata.
-* :mod:`process_yaml` – parse and augment YAML frontmatter.
 * :mod:`build.picasso` – bundle assets for diagrams and interactive code examples.
 * :mod:`check.page_title` – ensure HTML files contain non-empty ``<h1>`` tags.
 * :mod:`check.post_build` – verify that expected build artifacts exist.
@@ -29,7 +28,6 @@ __all__ = [
     "render",
     "render_study_json",
     "gen_markdown_index",
-    "process_yaml",
     "schema",
     "yaml",
     "build",

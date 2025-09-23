@@ -33,7 +33,7 @@ build/index.yml: src/index.yml
     $(call status,Preprocess $<)
     mkdir -p $(dir build/index.yml)
     cp $< $@
-build/index.html: build/index.md build/index.yml $(HTML_TEMPLATE) $(BUILD_DIR)/.process-yamls
+build/index.html: build/index.md build/index.yml $(HTML_TEMPLATE)
     $(call status,Generate HTML $@)
     render-html $< build/index.yml $@
 ```
