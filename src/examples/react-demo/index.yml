@@ -1,0 +1,15 @@
+doc:
+  author: Brian Lee
+  breadcrumbs:
+  - title: Home
+    url: /
+  - title: Examples
+    url: /examples/
+  - title: React Demo Component
+  pubdate: Sep 17, 2025
+  title: React Demo Component
+html:
+  scripts:
+  - <script type="module" src="/static/js/react-demo.js" defer></script>
+id: react-demo
+schema: v1
