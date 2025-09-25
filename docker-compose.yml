@@ -67,6 +67,34 @@ services:
     # Useful in avoiding conflicts from multiple active instances of press projects.
     container_name: press-dragonfly
 
+
+  analytics-timescaledb:
+    image: timescale/timescaledb:latest-pg14
+    container_name: press-analytics-timescaledb
+    environment:
+      POSTGRES_USER: analytics
+      POSTGRES_PASSWORD: analytics
+      POSTGRES_DB: analytics
+    ports:
+      - "5433:5432"
+    volumes:
+      - analytics_timescale_data:/var/lib/postgresql/data
+
+  analytics-backend:
+    build: ./app/analytics-backend
+    container_name: press-analytics-backend
+    environment:
+      DATABASE_HOST: analytics-timescaledb
+      DATABASE_PORT: 5432
+      DATABASE_USER: analytics
+      DATABASE_PASSWORD: analytics
+      DATABASE_NAME: analytics
+    depends_on:
+      - analytics-timescaledb
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./app/analytics-backend:/app
   shell:
     image: press-shell
     build: ./app/shell
@@ -104,3 +132,6 @@ services:
     volumes:
       - ./app/shell/py/pie:/pie
     profiles: ["pdoc"]
+
+volumes:
+  analytics_timescale_data:

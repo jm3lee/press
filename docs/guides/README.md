@@ -23,6 +23,8 @@ concepts and data formats, see the
 - [tests.md](tests.md) – run the automated test suite.
 
 ## Services and utilities
+- [analytics-backend.md](analytics-backend.md) – run the Flask ingestion
+  service for engagement analytics.
 - [nginx.md](nginx.md) – development and production server configuration.
 - [pdoc-service.md](pdoc-service.md) – generate API documentation.
 - [react-index-tree.md](react-index-tree.md) – browse index data interactively.
