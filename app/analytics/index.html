@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Engagement Analytics Demo</title>
+  </head>
+  <body>
+    <div
+      id="analytics-root"
+      data-engagement-root
+      data-endpoint="https://engagement.internal.ondigitalocean.app/events"
+      data-site="press-docs"
+      data-selector="[data-track-id]"
+    ></div>
+    <main>
+      <section data-track-id="hero" data-track-label="Hero">
+        <h1>Hero</h1>
+        <p>Scroll to explore view and interaction tracking.</p>
+        <button data-track-id="hero-cta">Call to Action</button>
+      </section>
+      <section data-track-id="features" data-track-label="Feature Grid">
+        <h2>Features</h2>
+        <p>Each section is automatically tracked for viewability.</p>
+      </section>
+      <section data-track-id="pricing" data-track-label="Pricing">
+        <h2>Pricing</h2>
+        <p>Scroll depth and dwell events are queued while you read.</p>
+      </section>
+    </main>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

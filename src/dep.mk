@@ -13,6 +13,7 @@ include app/quiz/dep.mk
 include app/indextree/dep.mk
 include app/react-demo/dep.mk
 include app/magicbar/dep.mk
+include app/analytics/dep.mk
 
 all: build/static/index/examples.json
 
