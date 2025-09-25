@@ -1,0 +1,10 @@
+id: analytics
+schema: v1
+doc:
+  title: Analytics instrumentation
+  author: Brian Lee
+  pubdate: Jan 20, 2026
+  breadcrumbs:
+  - title: Home
+    url: /
+  - title: Analytics

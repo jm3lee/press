@@ -1,4 +1,4 @@
-# User Engagement Tracking
+## User engagement tracking
 
 This guide documents practical options for measuring user engagement on
 Press-generated sites that run inside a DigitalOcean App Platform private
@@ -6,7 +6,7 @@ network. The recommendations balance reliable data collection with the
 constraints of private networking, controlled data flows, and minimal client
 side overhead.
 
-## Architecture overview
+### Architecture overview
 
 A typical deployment contains three cooperating services inside the App
 Platform private network:
@@ -25,7 +25,7 @@ When you need to move aggregates or dashboards outside the private network,
 expose them through a separate reporting API or scheduled export job instead of
 letting the tracking service talk directly to the public Internet.
 
-## Data model and storage
+### Data model and storage
 
 Design the event format up front so that downstream analytics remain easy to
 query. A lightweight schema works well:
@@ -52,19 +52,19 @@ Store raw events in an append-only table and create materialized views for
 summary questions such as "How often do visitors reach the pricing table?"
 DigitalOcean's managed PostgreSQL and Timescale handle this pattern well.
 
-## Tracking techniques
+### Tracking techniques
 
 Combine multiple complementary signals to understand how visitors interact with
 the page.
 
-### 1. Viewability observers
+#### 1. Viewability observers
 
 Use the `IntersectionObserver` API to detect when elements enter the viewport.
 Attach a tracker to repeated sections such as feature callouts, pricing cards,
 or testimonials. Observers give precise "first seen" timestamps and can emit
 "visible for N milliseconds" metrics by recording entry and exit times.
 
-### 2. Scroll depth sampling
+#### 2. Scroll depth sampling
 
 Record cumulative scroll depth to understand whether readers reach the bottom
 of long articles. Sample the scroll position at debounced intervals and emit a
@@ -72,23 +72,23 @@ of long articles. Sample the scroll position at debounced intervals and emit a
 gets crossed. This complements viewability data for content without explicit
 trackers.
 
-### 3. Interaction beacons
+#### 3. Interaction beacons
 
 Capture meaningful interactions such as CTA clicks, video play/pause, or tab
 switches. For accessibility, prefer delegated listeners on semantic elements
 (`button`, `a`, `details`). Pair each event with the current scroll depth and
 the IDs of viewability trackers that are active when the interaction occurs.
 
-### 4. Idle and dwell timers
+#### 4. Idle and dwell timers
 
 Idle detection (via `requestIdleCallback` or a small heartbeat timer) helps you
 measure true reading time. Emit a `dwell` event every N seconds while the page
 has focus and the user is not idle. This highlights sections that draw attention
 versus those that are skimmed quickly.
 
-## Frontend implementation
+### Frontend implementation
 
-### Data attributes for static content
+#### Data attributes for static content
 
 Press templates can expose instrumentation points with semantic attributes:
 
@@ -102,7 +102,7 @@ The React components below automatically subscribe to every element that carries
 `data-track-id`. Authors can place as many trackers as they want throughout the
 page without writing additional JavaScript.
 
-### React instrumentation components
+#### React instrumentation components
 
 Press now ships an implementation under `app/analytics` that exports a provider
 plus helper components. The snippet below focuses on the core logic; it works
@@ -210,7 +210,7 @@ if (root) {
 `ViewTracker` components, or you can rely on the bundled `AutoTrack` helper that
 ships alongside the provider. Multiple trackers on a single page are welcome—the
 provider deduplicates concurrent events by merging them in the queue before
-flushing. See the [analytics engagement demo](./analytics-demo.md) for a
+flushing. See the [analytics engagement demo](./demo.md) for a
 full-page walkthrough that pulls in the compiled script.
 
 ### Scroll and idle observers

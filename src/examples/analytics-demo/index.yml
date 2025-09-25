@@ -1,0 +1,13 @@
+doc:
+  title: Analytics demo walkthrough
+  author: Brian Lee
+  pubdate: Jan 20, 2026
+  breadcrumbs:
+  - title: Home
+    url: /
+  - title: Examples
+    url: /examples/
+  - title: Analytics Demo
+  citation: analytics-demo
+id: analytics-demo
+schema: v1

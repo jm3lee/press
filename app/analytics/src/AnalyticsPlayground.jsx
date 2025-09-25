@@ -77,7 +77,7 @@ function ActiveTargets() {
   )
 }
 
-export default function DemoPage({ consoleUrl, consolePollMs = 3000 }) {
+export default function AnalyticsPlayground({ consoleUrl, consolePollMs = 3000 }) {
   const recordInteraction = useRecordInteraction()
   const [showBonus, setShowBonus] = useState(false)
   const bonusMeta = useMemo(() => JSON.stringify({ inserted: showBonus }), [showBonus])

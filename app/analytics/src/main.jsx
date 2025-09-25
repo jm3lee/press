@@ -1,7 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import AutoTrack from './AutoTrack'
-import DemoPage from './DemoPage'
+import AnalyticsPlayground from './AnalyticsPlayground'
 import { EngagementProvider } from './EngagementProvider'
 import './styles.css'
 
@@ -24,7 +24,10 @@ function bootstrap(root) {
         heartbeatInterval={heartbeatInterval}
         idleTimeout={idleTimeout}
       >
-        <DemoPage consoleUrl={consoleUrl} consolePollMs={consolePollMs} />
+        <AnalyticsPlayground
+          consoleUrl={consoleUrl}
+          consolePollMs={consolePollMs}
+        />
         <AutoTrack selector={selector} />
       </EngagementProvider>
     </StrictMode>

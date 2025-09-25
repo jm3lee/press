@@ -7,4 +7,5 @@ export {
   ViewTracker,
 } from './EngagementProvider'
 export { default as EventConsole } from './EventConsole'
-export { default as DemoPage } from './DemoPage'
+export { default as AnalyticsPlayground } from './AnalyticsPlayground'
+export { default as DemoPage } from './AnalyticsPlayground'

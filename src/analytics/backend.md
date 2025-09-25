@@ -1,11 +1,11 @@
-# Analytics backend service
+## Analytics backend service
 
 The analytics backend pairs a lightweight Flask ingestion API with a managed
 TimescaleDB instance. It accepts the batched engagement payload emitted by
 `EngagementProvider.jsx`, persists events as an append-only hypertable, and
 exposes health, discovery, and recent-event endpoints for monitoring.
 
-## Containers
+### Containers
 
 Two new services are defined in `docker-compose.yml`:
 
@@ -16,7 +16,7 @@ Both containers start with `docker compose up analytics-timescaledb
 analytics-backend`. TimescaleDB listens on port `5433` on the host, while the
 Flask service is available at `http://localhost:8001`.
 
-## Environment variables
+### Environment variables
 
 The backend reads its configuration from the following variables:
 
@@ -31,7 +31,7 @@ The backend reads its configuration from the following variables:
 Docker Compose sets these values automatically. When running the Flask app
 outside Docker you must export them manually.
 
-## HTTP endpoints
+### HTTP endpoints
 
 - `POST /events` ingests a batch of engagement events. Payloads should match
   the structure emitted by `EngagementProvider.jsx`.
@@ -40,7 +40,7 @@ outside Docker you must export them manually.
 - `GET /health` verifies TimescaleDB connectivity.
 - `GET /config` returns the database host, port, and name.
 
-## Local testing
+### Local testing
 
 Run the test suite inside the container to validate schema migrations and the
 ingestion endpoint:

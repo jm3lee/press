@@ -1,16 +1,16 @@
-# Analytics engagement demo
+## Engagement analytics demo
 
 This walkthrough spins up the Flask ingestion API, the TimescaleDB instance,
 and the React playground that emits engagement events. The end result is a live
 page that streams view, scroll, dwell, and interaction events into
 TimescaleDB while a console renders the captured payloads.
 
-## Prerequisites
+### Prerequisites
 
 - Docker Desktop (or a compatible runtime) for the backend containers.
 - Node.js 20+ and npm for the Vite development server.
 
-## Start the backend
+### Start the backend
 
 The `docker-compose.yml` file already wires the ingestion API and database
 behind sensible defaults. Launch them in a dedicated shell:
@@ -23,7 +23,7 @@ Wait until the Flask service logs `Running on http://0.0.0.0:8000/`. The compose
 file enables CORS for `http://localhost:5173`, which lets the Vite dev server
 post events with credentials.
 
-## Run the React demo
+### Run the React demo
 
 Open a second terminal and install dependencies before starting Vite:
 
@@ -37,7 +37,7 @@ Vite exposes the playground at `http://localhost:5173`. The landing page mounts
 `EngagementProvider`, renders several scrollable sections with instrumentation
 attributes, and polls `/events/recent` to display captured events.
 
-## Explore the instrumentation
+### Explore the instrumentation
 
 1. Scroll slowly through the feature sections to trigger `view` and `view-end`
    pairs.

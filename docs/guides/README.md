@@ -23,11 +23,10 @@ concepts and data formats, see the
   artifacts.
 - [tests.md](tests.md) – run the automated test suite.
 
+Refer to the [analytics documentation](/analytics/) for engagement
+instrumentation, ingestion, and demo walkthroughs.
+
 ## Services and utilities
-- [analytics-backend.md](analytics-backend.md) – run the Flask ingestion
-  service for engagement analytics.
-- [analytics-demo.md](analytics-demo.md) – launch the end-to-end engagement
-  tracking playground.
 - [nginx.md](nginx.md) – development and production server configuration.
 - [pdoc-service.md](pdoc-service.md) – generate API documentation.
 - [react-index-tree.md](react-index-tree.md) – browse index data
@@ -37,8 +36,6 @@ concepts and data formats, see the
 - [sync-service.md](sync-service.md) – upload site files to S3 using the sync container.
 - [webp-service.md](webp-service.md) – convert images to WebP using the helper
   container.
-- [user-engagement-tracking.md](user-engagement-tracking.md) – instrument
-  analytics that stay inside a private network.
 - [upgrade.md](upgrade.md) – rebuild containers and run tests
   after pulling changes.
 
