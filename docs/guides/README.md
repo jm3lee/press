@@ -30,6 +30,8 @@ concepts and data formats, see the
 - [sync-service.md](sync-service.md) – upload site files to S3 using the sync container.
 - [webp-service.md](webp-service.md) – convert images to WebP using the helper
   container.
+- [user-engagement-tracking.md](user-engagement-tracking.md) – instrument
+  analytics that stay inside a private network.
 - [upgrade.md](upgrade.md) – rebuild containers and run tests
   after pulling changes.
 

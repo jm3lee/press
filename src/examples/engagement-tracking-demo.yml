@@ -1,0 +1,13 @@
+doc:
+  author: Brian Lee
+  breadcrumbs:
+  - title: Home
+    url: /
+  - title: Examples
+    url: /examples/
+  - title: Engagement Tracking Bundle
+  citation: engagement-tracking-demo
+  pubdate: Jan 15, 2026
+  title: Engagement Tracking Bundle
+id: engagement-tracking-demo
+schema: v1
