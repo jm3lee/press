@@ -154,6 +154,47 @@ class TimescaleDB:
                 cur.execute("TRUNCATE engagement_events")
             conn.commit()
 
+    def fetch_recent_events(self, limit: int = 25) -> List[Dict[str, Any]]:
+        limit = max(1, min(limit, 200))
+        with self.connection() as conn:  # type: ignore[assignment]
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT
+                        id,
+                        site,
+                        session_id,
+                        event_type,
+                        target,
+                        occurred_at,
+                        meta,
+                        received_at
+                    FROM engagement_events
+                    ORDER BY received_at DESC
+                    LIMIT %s
+                    """,
+                    (limit,),
+                )
+                rows = cur.fetchall()
+
+        events: List[Dict[str, Any]] = []
+        for row in rows:
+            occurred_at = row[5]
+            received_at = row[7]
+            events.append(
+                {
+                    "id": row[0],
+                    "site": row[1],
+                    "session_id": row[2],
+                    "event_type": row[3],
+                    "target": row[4],
+                    "occurred_at": _parse_timestamp(occurred_at).isoformat(),
+                    "meta": row[6] or {},
+                    "received_at": _parse_timestamp(received_at).isoformat(),
+                }
+            )
+        return events
+
 
 def _parse_timestamp(value: Any) -> datetime:
     if isinstance(value, datetime):

@@ -89,6 +89,7 @@ services:
       DATABASE_USER: analytics
       DATABASE_PASSWORD: analytics
       DATABASE_NAME: analytics
+      CORS_ALLOW_ORIGINS: http://localhost:5173
     depends_on:
       - analytics-timescaledb
     ports:

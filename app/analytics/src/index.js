@@ -6,3 +6,5 @@ export {
   useViewTracker,
   ViewTracker,
 } from './EngagementProvider'
+export { default as EventConsole } from './EventConsole'
+export { default as DemoPage } from './DemoPage'

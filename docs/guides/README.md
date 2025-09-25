@@ -6,7 +6,8 @@ concepts and data formats, see the
 
 ## Build process
 - [create-site.md](create-site.md) – scaffold a new Press project.
-- [build-process.md](build-process.md) – overview of the build pipeline for new engineers.
+- [build-process.md](build-process.md) – overview of the build pipeline for
+  new engineers.
 - [picasso.md](picasso.md) – create Makefile rules from metadata files.
 - [preprocess.md](preprocess.md) – run custom pre‑processing steps.
 - [update-index.md](update-index.md) – keep the index in sync after edits.
@@ -25,10 +26,14 @@ concepts and data formats, see the
 ## Services and utilities
 - [analytics-backend.md](analytics-backend.md) – run the Flask ingestion
   service for engagement analytics.
+- [analytics-demo.md](analytics-demo.md) – launch the end-to-end engagement
+  tracking playground.
 - [nginx.md](nginx.md) – development and production server configuration.
 - [pdoc-service.md](pdoc-service.md) – generate API documentation.
-- [react-index-tree.md](react-index-tree.md) – browse index data interactively.
-- [store-files.md](store-files.md) – move files into S3 staging and create metadata.
+- [react-index-tree.md](react-index-tree.md) – browse index data
+  interactively.
+- [store-files.md](store-files.md) – move files into S3 staging and create
+  metadata.
 - [sync-service.md](sync-service.md) – upload site files to S3 using the sync container.
 - [webp-service.md](webp-service.md) – convert images to WebP using the helper
   container.
@@ -42,5 +47,6 @@ Refer to the individual files for additional guides not listed here.
 ## Content features
 - [breadcrumbs.md](breadcrumbs.md) – show hierarchical navigation with
   `doc.breadcrumbs`.
-- [responsive-images.md](responsive-images.md) – render responsive images with the figure helper.
+- [responsive-images.md](responsive-images.md) – render responsive images with
+  the figure helper.
 - [reading-notes.md](reading-notes.md) – add reading notes for a book.

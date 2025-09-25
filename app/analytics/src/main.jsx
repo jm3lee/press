@@ -1,7 +1,9 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import AutoTrack from './AutoTrack'
+import DemoPage from './DemoPage'
 import { EngagementProvider } from './EngagementProvider'
+import './styles.css'
 
 function bootstrap(root) {
   const endpoint = root.dataset.endpoint
@@ -10,6 +12,8 @@ function bootstrap(root) {
   const heartbeatInterval = Number(root.dataset.heartbeatInterval || 15000)
   const idleTimeout = Number(root.dataset.idleTimeout || 30000)
   const selector = root.dataset.selector || '[data-track-id]'
+  const consoleUrl = root.dataset.consoleUrl
+  const consolePollMs = Number(root.dataset.consolePollMs || 3000)
 
   createRoot(root).render(
     <StrictMode>
@@ -20,6 +24,7 @@ function bootstrap(root) {
         heartbeatInterval={heartbeatInterval}
         idleTimeout={idleTimeout}
       >
+        <DemoPage consoleUrl={consoleUrl} consolePollMs={consolePollMs} />
         <AutoTrack selector={selector} />
       </EngagementProvider>
     </StrictMode>

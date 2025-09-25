@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import atexit
 import json
-from typing import Any, Dict, Iterable
+import os
+from typing import Any, Dict, Iterable, Set
 
 from flask import Flask, Response, jsonify, request
 
@@ -25,10 +26,29 @@ def _load_event_payload(payload: Dict[str, Any]) -> Iterable[Dict[str, Any]]:
     for index, event in enumerate(events):
         if not isinstance(event, dict):
             raise ValueError(f"Event #{index} must be an object")
-        for key in ("event_type", "target"):
-            if key not in event:
-                raise ValueError(f"Missing '{key}' in event #{index}")
-        normalised.append(event)
+        if "target" not in event:
+            raise ValueError(f"Missing 'target' in event #{index}")
+
+        event_type = event.get("event_type") or event.get("type")
+        if not event_type:
+            raise ValueError(f"Missing 'type' in event #{index}")
+
+        occurred_at = event.get("occurred_at") or event.get("at")
+
+        meta = event.get("meta", {})
+        if meta is None:
+            meta = {}
+        if not isinstance(meta, dict):
+            raise ValueError(f"'meta' must be an object in event #{index}")
+
+        normalised.append(
+            {
+                "event_type": str(event_type),
+                "target": str(event["target"]),
+                "occurred_at": occurred_at,
+                "meta": meta,
+            }
+        )
     return normalised
 
 
@@ -42,6 +62,41 @@ def create_app() -> Flask:
     storage.initialize()
     atexit.register(storage.close)
     app.config["DB_POOL"] = storage
+
+    allowed_origins: Set[str] = {
+        origin.strip()
+        for origin in os.getenv("CORS_ALLOW_ORIGINS", "").split(",")
+        if origin.strip()
+    }
+
+    def apply_cors(response: Response) -> Response:
+        if allowed_origins:
+            origin = request.headers.get("Origin")
+            if origin and ("*" in allowed_origins or origin in allowed_origins):
+                response.headers["Access-Control-Allow-Origin"] = origin
+                response.headers["Access-Control-Allow-Credentials"] = "true"
+                vary = response.headers.get("Vary")
+                if vary:
+                    vary_values = {value.strip() for value in vary.split(",")}
+                    if "Origin" not in vary_values:
+                        response.headers["Vary"] = f"{vary}, Origin"
+                else:
+                    response.headers["Vary"] = "Origin"
+            response.headers.setdefault("Access-Control-Allow-Headers", "Content-Type")
+            response.headers.setdefault(
+                "Access-Control-Allow-Methods", "GET,POST,OPTIONS"
+            )
+            response.headers.setdefault("Access-Control-Max-Age", "3600")
+        return response
+
+    @app.after_request
+    def add_cors_headers(response: Response) -> Response:  # pragma: no cover - flask
+        return apply_cors(response)
+
+    @app.route("/events", methods=["OPTIONS"])
+    @app.route("/events/recent", methods=["OPTIONS"])
+    def options_handler() -> Response:
+        return apply_cors(Response(status=204))
 
     @app.route("/health", methods=["GET"])
     def healthcheck() -> Response:
@@ -75,6 +130,16 @@ def create_app() -> Flask:
             events=events,
         )
         return jsonify({"inserted": inserted}), 201
+
+    @app.route("/events/recent", methods=["GET"])
+    def recent_events() -> Response:
+        try:
+            limit = int(request.args.get("limit", "25"))
+        except ValueError:
+            limit = 25
+        limit = max(1, min(limit, 200))
+        events = storage.fetch_recent_events(limit)
+        return jsonify({"events": events})
 
     @app.route("/config", methods=["GET"])
     def config_dump() -> Response:

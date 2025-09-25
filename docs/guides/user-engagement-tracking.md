@@ -210,8 +210,8 @@ if (root) {
 `ViewTracker` components, or you can rely on the bundled `AutoTrack` helper that
 ships alongside the provider. Multiple trackers on a single page are welcome—the
 provider deduplicates concurrent events by merging them in the queue before
-flushing. See `/examples/engagement-tracking-demo/` for a full-page demo that
-pulls in the compiled script.
+flushing. See the [analytics engagement demo](./analytics-demo.md) for a
+full-page walkthrough that pulls in the compiled script.
 
 ### Scroll and idle observers
 
