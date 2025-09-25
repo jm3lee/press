@@ -25,10 +25,15 @@ RUN apt-get update -qq && \
         minify \
         openssh-server \
         pysassc && \
-    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
     apt-get install -y --no-install-recommends nodejs && \
     apt-get clean && rm -rf /var/lib/apt/lists/* && \
     mkdir -p /run/sshd
+
+# -------------------------------------------------------------------
+# Upgrade npm
+# -------------------------------------------------------------------
+RUN npm install -g npm
 
 # -------------------------------------------------------------------
 # Locale configuration

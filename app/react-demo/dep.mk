@@ -5,11 +5,11 @@
 all: build/static/js/react-demo.js
 
 build/static/js/react-demo.js: app/build/static/js/react-demo.js | build/static/js
-        cp $< $@
+	cp $< $@
 
 app/build/static/js/react-demo.js: $(wildcard app/react-demo/src/*) app/react-demo/.init
-        cd app/react-demo; npm run build
+	cd app/react-demo; npm run build
 
 app/react-demo/.init:
-        cd app/react-demo; npm install
-        touch $@
+	cd app/react-demo; npm install
+	touch $@

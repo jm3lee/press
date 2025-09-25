@@ -19,6 +19,8 @@ override MAKEFLAGS += --warn-undefined-variables  \
 # Export it so sub-makes see the same flags
 export MAKEFLAGS
 
+export HOME := /data
+
 # Verbosity control
 VERBOSE ?= 0
 ifeq ($(VERBOSE),1)
