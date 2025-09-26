@@ -1,0 +1,13 @@
+description: Configure the Flask ingestion API and TimescaleDB services.
+doc:
+  author: Brian Lee
+  breadcrumbs:
+  - title: Home
+    url: /
+  - title: Analytics
+    url: /analytics/
+  - title: Analytics backend service
+  pubdate: Jan 20, 2026
+  title: Analytics backend service
+id: analytics_backend_service
+schema: v1

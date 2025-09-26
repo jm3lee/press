@@ -1,0 +1,13 @@
+description: Deploy private-network engagement instrumentation for Press sites.
+doc:
+  author: Brian Lee
+  breadcrumbs:
+  - title: Home
+    url: /
+  - title: Analytics
+    url: /analytics/
+  - title: User engagement tracking
+  pubdate: Jan 20, 2026
+  title: User engagement tracking
+id: user_engagement_tracking
+schema: v1
