@@ -25,14 +25,18 @@ def load_from_redis(path: Path) -> Mapping[str, Any] | None:
     """Fetch metadata for *path* from Redis."""
 
     filepath = str(path)
-    doc_id = get_metadata_by_path(filepath, "id")
+    doc_id = get_metadata_by_path(filepath, "press.id")
     if not doc_id:
         logger.debug("No doc_id found", path=filepath)
         return None
 
     meta = metadata.build_from_redis(f"{doc_id}.") or {}
-    if "id" not in meta:
-        meta["id"] = doc_id
+    press = meta.get("press")
+    if not isinstance(press, dict):
+        press = {}
+        meta["press"] = press
+    if "id" not in press:
+        press["id"] = doc_id
     logger.debug("Fetched metadata via build_from_redis", path=filepath, id=doc_id)
     return meta
 

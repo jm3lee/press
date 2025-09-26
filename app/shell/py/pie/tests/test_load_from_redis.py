@@ -8,7 +8,7 @@ def test_build_from_redis_used(monkeypatch):
 
     def fake_get_metadata_by_path(filepath: str, keypath: str):
         assert filepath == str(path)
-        assert keypath == "id"
+        assert keypath == "press.id"
         return "doc1"
 
     calls: list[str] = []
@@ -16,7 +16,7 @@ def test_build_from_redis_used(monkeypatch):
     def fake_build(prefix: str):
         calls.append(prefix)
         return {
-            "id": "doc1",
+            "press": {"id": "doc1"},
             "title": "Title",
             "url": "URL",
             "indextree": {"link": "1", "show": "0"},
@@ -28,7 +28,7 @@ def test_build_from_redis_used(monkeypatch):
     meta = index_tree.load_from_redis(path)
 
     assert meta == {
-        "id": "doc1",
+        "press": {"id": "doc1"},
         "title": "Title",
         "url": "URL",
         "indextree": {"link": "1", "show": "0"},

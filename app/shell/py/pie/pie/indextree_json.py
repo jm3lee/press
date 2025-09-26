@@ -3,7 +3,7 @@
 import argparse
 import json
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, Mapping
 
 from pie.cli import create_parser
 from pie.logging import logger, configure_logging
@@ -25,7 +25,12 @@ def process_dir(directory: Path, tag: str | None = None) -> Iterator[dict]:
             raise ValueError(f"Missing 'title' in {path}")
     sort_entries(entries)
     for meta, path in entries:
-        entry_id = meta["id"]
+        press = meta.get("press")
+        if not isinstance(press, Mapping):
+            raise ValueError(f"Missing 'press' in {path}")
+        entry_id = press.get("id")
+        if not isinstance(entry_id, str):
+            raise ValueError(f"Missing 'press.id' in {path}")
         entry_title = meta["doc"]["title"]
         entry_url = meta.get("url")
         entry_link = getopt_link(meta)

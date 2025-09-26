@@ -46,7 +46,7 @@ def test_process_file_moves_and_creates_metadata(tmp_path: Path, monkeypatch) ->
     expected_yaml = store_files.METADATA_TEMPLATE.render(baseurl="", file_id="fixedid")
     assert meta_file.read_text() == expected_yaml
     meta_data = yaml.load(expected_yaml)
-    assert meta_data["id"] == "fixedid"
+    assert meta_data["press"]["id"] == "fixedid"
     assert meta_data["url"] == "/v2/files/0/fixedid"
     assert meta_data["doc"]["author"] == ""
     assert meta_data["doc"]["pubdate"] == ""

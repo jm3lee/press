@@ -54,14 +54,15 @@ doc:
 ## How IDs Are Generated
 
 During indexing, `read_from_yaml` loads the file and `generate_missing_metadata`
-adds an `id` if it is absent:
+adds a `press.id` if it is absent:
 
 ```
 base, _ = os.path.splitext(filepath)
-metadata["id"] = base.split(os.sep)[-1]
+metadata.setdefault("press", {})["id"] = base.split(os.sep)[-1]
 ```
 
-Thus `src/links/press_io_home.yml` results in the `id` `press_io_home`.
+Thus `src/links/press_io_home.yml` results in the `press.id`
+`press_io_home`.
 
 After defining link metadata, run
 [checklinks](../pie/check/checklinks.md) to ensure each target resolves

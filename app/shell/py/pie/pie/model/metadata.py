@@ -7,7 +7,7 @@ from typing import Any, List, Optional
 from pie.schema import DEFAULT_SCHEMA
 from pie.utils import get_pubdate
 
-__all__ = ["Breadcrumb", "Doc", "Metadata", "PubDate"]
+__all__ = ["Breadcrumb", "Doc", "Metadata", "Press", "PubDate"]
 
 
 @dataclass
@@ -71,10 +71,22 @@ class PubDate:
 
 
 @dataclass
+class Press:
+    """Metadata specific to the Press build system."""
+
+    id: str
+
+    def to_dict(self) -> dict[str, str]:
+        """Return dictionary representation for serialization."""
+
+        return {"id": self.id}
+
+
+@dataclass
 class Metadata:
     """Top-level metadata for a document."""
 
-    id: str
+    press: Press
     doc: Doc
     schema: str = DEFAULT_SCHEMA
     description: Optional[str] = None
@@ -84,7 +96,7 @@ class Metadata:
 
         data = {
             "doc": self.doc.to_dict(),
-            "id": self.id,
+            "press": self.press.to_dict(),
             "schema": self.schema,
         }
         if self.description:

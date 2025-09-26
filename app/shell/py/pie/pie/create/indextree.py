@@ -8,7 +8,7 @@ from typing import Sequence
 
 from pie.cli import create_parser
 from pie.logging import configure_logging, logger
-from pie.model import Breadcrumb, Doc, Metadata, PubDate
+from pie.model import Breadcrumb, Doc, Metadata, Press, PubDate
 from pie.utils import write_yaml
 
 SCRIPT_TAG = '<script type="module" src="/static/js/indextree.js" defer></script>'
@@ -79,7 +79,7 @@ def _build_metadata(
     """Return metadata dictionary for the IndexTree page."""
 
     metadata = Metadata(
-        id=doc_id,
+        press=Press(id=doc_id),
         doc=Doc(
             author="",
             pubdate=PubDate(),

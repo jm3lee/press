@@ -34,7 +34,7 @@ def test_indextree_create_generates_files(tmp_path: Path, monkeypatch) -> None:
 
     data = yaml.load(yml_path.read_text(encoding="utf-8"))
 
-    assert data["id"] == "guides"
+    assert data["press"]["id"] == "guides"
     assert data["schema"] == DEFAULT_SCHEMA
     assert data["url"] == "/guides/"
     assert data["html"] == {
@@ -71,7 +71,7 @@ def test_indextree_create_handles_nested_paths(tmp_path: Path, monkeypatch) -> N
 
     data = yaml.load(yml_path.read_text(encoding="utf-8"))
 
-    assert data["id"] == "docs-api"
+    assert data["press"]["id"] == "docs-api"
     assert data["url"] == "/docs/api/"
     assert data["doc"]["breadcrumbs"] == [
         {"title": "Home", "url": "/"},
@@ -110,7 +110,7 @@ def test_indextree_create_respects_overrides(tmp_path: Path, monkeypatch) -> Non
 
     data = yaml.load(yml_path.read_text(encoding="utf-8"))
 
-    assert data["id"] == "custom-id"
+    assert data["press"]["id"] == "custom-id"
     assert data["description"] == "API reference section"
     assert data["url"] == "/docs/reference/"
     assert data["doc"]["title"] == "Reference"

@@ -12,25 +12,29 @@ from pie import index_tree, metadata
 def test_show_property(tmp_path, monkeypatch):
     """Nodes with 'show: false' are skipped."""
     (tmp_path / "alpha.yml").write_text(
-        "id: alpha\ntitle: Alpha\ndoc:\n  title: Alpha\n"
+        "press:\n  id: alpha\ntitle: Alpha\ndoc:\n  title: Alpha\n"
     )
     (tmp_path / "beta.yml").write_text(
-        "id: beta\ntitle: Beta\ndoc:\n  title: Beta\n" "indextree:\n  show: false\n",
+        "press:\n  id: beta\ntitle: Beta\ndoc:\n  title: Beta\n"
+        "indextree:\n  show: false\n",
     )
     hidden = tmp_path / "hidden"
     hidden.mkdir()
     (hidden / "index.yml").write_text(
-        "id: hidden\ntitle: Hidden\ndoc:\n  title: Hidden\n"
+        "press:\n  id: hidden\ntitle: Hidden\ndoc:\n  title: Hidden\n"
         "indextree:\n  show: false\n",
     )
     (hidden / "child.yml").write_text(
-        "id: child\ntitle: Child\ndoc:\n  title: Child\n"
+        "press:\n  id: child\ntitle: Child\ndoc:\n  title: Child\n"
     )
 
     def fake_meta(filepath: str, keypath: str):
         data = yaml.load(Path(filepath).read_text()) or {}
-        if "id" not in data:
-            data["id"] = Path(filepath).with_suffix("").name
+        press = data.get("press")
+        if not isinstance(press, dict):
+            press = {}
+            data["press"] = press
+        press.setdefault("id", Path(filepath).with_suffix("").name)
         if "doc" not in data and "title" in data:
             data["doc"] = {"title": data["title"]}
         for key in keypath.split("."):
@@ -49,7 +53,11 @@ def test_show_property(tmp_path, monkeypatch):
             data = yaml.load(p.read_text()) or {}
             if "doc" not in data and "title" in data:
                 data["doc"] = {"title": data["title"]}
-            if data.get("id", p.with_suffix("").name) == doc_id:
+            press = data.get("press")
+            if not isinstance(press, dict):
+                press = {}
+                data["press"] = press
+            if press.get("id", p.with_suffix("").name) == doc_id:
                 return data
         return None
 
@@ -68,8 +76,11 @@ def test_missing_id_uses_filename(tmp_path, monkeypatch):
 
     def fake_meta(filepath: str, keypath: str):
         data = yaml.load(Path(filepath).read_text()) or {}
-        if "id" not in data:
-            data["id"] = Path(filepath).with_suffix("").name
+        press = data.get("press")
+        if not isinstance(press, dict):
+            press = {}
+            data["press"] = press
+        press.setdefault("id", Path(filepath).with_suffix("").name)
         if "doc" not in data and "title" in data:
             data["doc"] = {"title": data["title"]}
         for key in keypath.split("."):
@@ -88,7 +99,11 @@ def test_missing_id_uses_filename(tmp_path, monkeypatch):
             data = yaml.load(p.read_text()) or {}
             if "doc" not in data and "title" in data:
                 data["doc"] = {"title": data["title"]}
-            if data.get("id", p.with_suffix("").name) == doc_id:
+            press = data.get("press")
+            if not isinstance(press, dict):
+                press = {}
+                data["press"] = press
+            if press.get("id", p.with_suffix("").name) == doc_id:
                 return data
         return None
 
@@ -107,18 +122,18 @@ def test_link_false_and_recursion(tmp_path, monkeypatch):
     child_file.touch()
 
     meta_alpha = {
-        "id": "alpha",
+        "press": {"id": "alpha"},
         "title": "Alpha",
         "doc": {"title": "Alpha"},
         "indextree": {"link": False},
     }
     meta_group = {
-        "id": "group",
+        "press": {"id": "group"},
         "title": "Group",
         "doc": {"title": "Group"},
     }
     meta_child = {
-        "id": "child",
+        "press": {"id": "child"},
         "title": "Child",
         "doc": {"title": "Child"},
     }
@@ -144,16 +159,19 @@ def test_link_false_and_recursion(tmp_path, monkeypatch):
 def test_numeric_filenames_sort(tmp_path, monkeypatch):
     """Files named numerically appear in numerical order."""
     (tmp_path / "1.yml").write_text(
-        "id: one\ntitle: Beta\ndoc:\n  title: Beta\n"
+        "press:\n  id: one\ntitle: Beta\ndoc:\n  title: Beta\n"
     )
     (tmp_path / "2.yml").write_text(
-        "id: two\ntitle: Alpha\ndoc:\n  title: Alpha\n"
+        "press:\n  id: two\ntitle: Alpha\ndoc:\n  title: Alpha\n"
     )
 
     def fake_meta(filepath: str, keypath: str):
         data = yaml.load(Path(filepath).read_text()) or {}
-        if "id" not in data:
-            data["id"] = Path(filepath).with_suffix("").name
+        press = data.get("press")
+        if not isinstance(press, dict):
+            press = {}
+            data["press"] = press
+        press.setdefault("id", Path(filepath).with_suffix("").name)
         if "doc" not in data and "title" in data:
             data["doc"] = {"title": data["title"]}
         for key in keypath.split("."):
@@ -172,7 +190,11 @@ def test_numeric_filenames_sort(tmp_path, monkeypatch):
             data = yaml.load(p.read_text()) or {}
             if "doc" not in data and "title" in data:
                 data["doc"] = {"title": data["title"]}
-            if data.get("id", p.with_suffix("").name) == doc_id:
+            press = data.get("press")
+            if not isinstance(press, dict):
+                press = {}
+                data["press"] = press
+            if press.get("id", p.with_suffix("").name) == doc_id:
                 return data
         return None
 
@@ -189,7 +211,11 @@ def test_numeric_filenames_sort(tmp_path, monkeypatch):
 def test_main_prints_generated_index(tmp_path, monkeypatch, capsys):
     """The ``main`` function prints generated lines."""
     path = tmp_path / "foo.yml"
-    meta = {"id": "foo", "title": "Foo", "doc": {"title": "Foo"}}
+    meta = {
+        "press": {"id": "foo"},
+        "title": "Foo",
+        "doc": {"title": "Foo"},
+    }
 
     def fake_walk(directory):
         return [(meta, path)]

@@ -9,7 +9,7 @@ from __future__ import annotations
 import argparse
 import warnings
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, Mapping
 
 from pie.cli import create_parser
 from pie.logging import configure_logging
@@ -27,7 +27,11 @@ def generate(directory: Path, level: int = 0) -> Iterator[str]:
     entries = list(walk(directory))
     sort_entries(entries)
     for meta, path in entries:
-        entry_id = meta["id"]
+        press = meta.get("press")
+        if not isinstance(press, Mapping) or not isinstance(press.get("id"), str):
+            warnings.warn("Missing 'press.id' in metadata", UserWarning)
+            continue
+        entry_id = press["id"]
         title = meta["title"]
         link = getopt_link(meta)
         show = getopt_show(meta)

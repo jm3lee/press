@@ -26,7 +26,7 @@ def test_main_writes_augmented_metadata(tmp_path, monkeypatch) -> None:
     def fake_generate(meta: dict, p: str):
         assert meta == {"title": "T"}
         assert p == str(path)
-        return {**meta, "id": "t"}
+        return {**meta, "press": {"id": "t"}}
 
     monkeypatch.setattr(process_yaml, "generate_missing_metadata", fake_generate)
     monkeypatch.setattr(process_yaml, "configure_logging", lambda *a, **k: None)
@@ -34,7 +34,7 @@ def test_main_writes_augmented_metadata(tmp_path, monkeypatch) -> None:
 
     process_yaml.main([str(path)])
     data = yaml.load(path.read_text(encoding="utf-8"))
-    assert data["id"] == "t"
+    assert data["press"]["id"] == "t"
 
 
 def test_main_leaves_emoji_codes(tmp_path, monkeypatch) -> None:
@@ -156,7 +156,7 @@ def test_main_skips_write_when_text_diff(tmp_path, monkeypatch) -> None:
 def test_main_creates_file_when_missing(tmp_path, monkeypatch) -> None:
     path = tmp_path / "out.yml"
     monkeypatch.setattr(
-        process_yaml, "generate_missing_metadata", lambda m, p: {"id": "x"}
+        process_yaml, "generate_missing_metadata", lambda m, p: {"press": {"id": "x"}}
     )
     monkeypatch.setattr(process_yaml, "configure_logging", lambda *a, **k: None)
     monkeypatch.setattr(process_yaml.logger, "debug", lambda *a, **k: None)
@@ -172,4 +172,4 @@ def test_main_creates_file_when_missing(tmp_path, monkeypatch) -> None:
     process_yaml.main([str(path)])
 
     assert written["path"] == str(path)
-    assert written["meta"] == {"id": "x"}
+    assert written["meta"] == {"press": {"id": "x"}}

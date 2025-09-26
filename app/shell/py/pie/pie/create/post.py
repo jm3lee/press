@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Sequence
 
 from pie.cli import create_parser
-from pie.model import Breadcrumb, Doc, Metadata, PubDate
+from pie.model import Breadcrumb, Doc, Metadata, Press, PubDate
 from pie.logging import configure_logging, logger
 from pie.utils import write_yaml
 
@@ -62,7 +62,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     slug = rel_parts[-1]
     breadcrumbs.append(Breadcrumb(_title_from_slug(slug)))
     metadata = Metadata(
-        id=_id_from_slug(slug),
+        press=Press(id=_id_from_slug(slug)),
         doc=Doc(
             author="",
             pubdate=PubDate(),

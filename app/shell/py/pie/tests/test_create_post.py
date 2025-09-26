@@ -24,7 +24,7 @@ def test_create_post_creates_files(tmp_path: Path, monkeypatch) -> None:
     assert md_file.read_text(encoding="utf-8") == post.DEFAULT_MD
 
     data = yaml.load(yml_file.read_text(encoding="utf-8"))
-    assert set(data) == {"doc", "id", "schema"}
+    assert set(data) == {"doc", "press", "schema"}
     assert data["doc"] == {
         "author": "",
         "pubdate": get_pubdate(),
@@ -35,5 +35,5 @@ def test_create_post_creates_files(tmp_path: Path, monkeypatch) -> None:
             {"title": "My Post"},
         ],
     }
-    assert data["id"] == "my_post"
+    assert data["press"] == {"id": "my_post"}
     assert data["schema"] == DEFAULT_SCHEMA

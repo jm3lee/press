@@ -32,6 +32,17 @@ def load_index(path: str | Path) -> Mapping[str, Mapping[str, Any]]:
     return json.loads(text)
 
 
+def _metadata_doc_id(metadata: Mapping[str, Any]) -> str | None:
+    """Return the ``press.id`` value from *metadata* when present."""
+
+    press = metadata.get("press")
+    if isinstance(press, Mapping):
+        doc_id = press.get("id")
+        if isinstance(doc_id, str):
+            return doc_id
+    return None
+
+
 def _flatten_mapping(prefix, obj):
     for k, v in obj.items():
         yield from _walk(f"{prefix}.{k}", v)
@@ -134,7 +145,11 @@ def load_directory_index(path: Path) -> tuple[dict[str, dict[str, Any]], int]:
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
         for metadata in executor.map(load_metadata_pair, paths):
             if metadata:
-                index[metadata["id"]] = metadata
+                doc_id = _metadata_doc_id(metadata)
+                if not doc_id:
+                    warnings.warn("Missing 'press.id' field in metadata", UserWarning)
+                    continue
+                index[doc_id] = metadata
 
     return index, len(paths)
 
@@ -154,9 +169,9 @@ def load_index_from_path(path: Path) -> tuple[dict[str, dict[str, Any]], int]:
             logger.error("No metadata found", filename=str(path))
             raise SystemExit(1)
 
-        doc_id = metadata.get("id")
+        doc_id = _metadata_doc_id(metadata)
         if not doc_id:
-            warnings.warn("Missing 'id' field in metadata", UserWarning)
+            warnings.warn("Missing 'press.id' field in metadata", UserWarning)
             raise SystemExit(1)
 
         return {doc_id: metadata}, 1

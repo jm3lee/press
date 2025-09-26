@@ -33,7 +33,7 @@ def test_get_url_invalid_raises(tmp_path):
 
 
 def test__read_from_markdown_generates_fields(tmp_path):
-    """Frontmatter {'title': 'T'} -> url/id/doc.citation added."""
+    """Frontmatter {'title': 'T'} -> url/press.id/doc.citation added."""
     md = tmp_path / "src" / "doc.md"
     md.parent.mkdir(parents=True)
     md.write_text("---\n{\"title\": \"T\"}\n---\nbody")
@@ -48,12 +48,12 @@ def test__read_from_markdown_generates_fields(tmp_path):
     assert data["url"] == "/doc.html"
     assert data["doc"]["citation"] == "t"
     assert data["doc"]["mathjax"] is False
-    assert data["id"] == "doc"
+    assert data["press"]["id"] == "doc"
     assert data["schema"] == "v1"
 
 
 def test_read_from_yaml_generates_fields(tmp_path):
-    """YAML {'title': 'Foo'} -> metadata with url/id/doc.citation."""
+    """YAML {'title': 'Foo'} -> metadata with url/press.id/doc.citation."""
     yml = tmp_path / "src" / "item.yml"
     yml.parent.mkdir(parents=True)
     yml.write_text('{"title": "Foo"}')
@@ -68,7 +68,7 @@ def test_read_from_yaml_generates_fields(tmp_path):
     assert data["url"] == "/item.html"
     assert data["doc"]["citation"] == "foo"
     assert data["doc"]["mathjax"] is False
-    assert data["id"] == "item"
+    assert data["press"]["id"] == "item"
     assert data["schema"] == "v1"
 
 

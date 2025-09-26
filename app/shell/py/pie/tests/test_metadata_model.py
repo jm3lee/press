@@ -4,14 +4,14 @@ from datetime import datetime
 
 import pie.model.metadata as metadata_module
 
-from pie.model import Breadcrumb, Doc, Metadata, PubDate
+from pie.model import Breadcrumb, Doc, Metadata, Press, PubDate
 from pie.schema import DEFAULT_SCHEMA
 
 
 def test_metadata_to_dict_excludes_missing_url() -> None:
     breadcrumbs = [Breadcrumb("Home", "/"), Breadcrumb("Post")]
     meta = Metadata(
-        id="post",
+        press=Press(id="post"),
         doc=Doc(
             author="",
             pubdate="2024-01-01",
@@ -30,7 +30,7 @@ def test_metadata_to_dict_excludes_missing_url() -> None:
                 {"title": "Post"},
             ],
         },
-        "id": "post",
+        "press": {"id": "post"},
         "schema": DEFAULT_SCHEMA,
     }
 

@@ -13,7 +13,7 @@ def test_generates_redirects_from_redis(tmp_path, monkeypatch):
     fake = fakeredis.FakeRedis(decode_responses=True)
     monkeypatch.setattr(metadata, "redis_conn", fake)
     fake.set("src/doc.md", "doc")
-    fake.set("doc.id", "doc")
+    fake.set("doc.press.id", "doc")
     fake.set("doc.url", json.dumps("/doc.html"))
     fake.set("doc.permalink", json.dumps("/old.html"))
 
@@ -30,14 +30,18 @@ def test_generates_redirects_from_redis(tmp_path, monkeypatch):
 
 def test_load_metadata_adds_missing_id(monkeypatch):
     monkeypatch.setattr(
-        nginx_permalinks, "get_metadata_by_path", lambda fp, key: "doc"
+        nginx_permalinks,
+        "get_metadata_by_path",
+        lambda fp, key: "doc" if key == "press.id" else None,
     )
     monkeypatch.setattr(
-        nginx_permalinks, "build_from_redis", lambda prefix: {"url": "/doc.html"}
+        nginx_permalinks,
+        "build_from_redis",
+        lambda prefix: {"url": "/doc.html"},
     )
 
     meta = nginx_permalinks._load_metadata("doc.md")
-    assert meta == {"url": "/doc.html", "id": "doc"}
+    assert meta == {"url": "/doc.html", "press": {"id": "doc"}}
 
 
 def test_load_metadata_handles_exceptions(monkeypatch):

@@ -1,5 +1,5 @@
 """Data models for pie."""
 
-__all__ = ["Breadcrumb", "Doc", "Metadata", "PubDate"]
+__all__ = ["Breadcrumb", "Doc", "Metadata", "Press", "PubDate"]
 
-from .metadata import Breadcrumb, Doc, Metadata, PubDate  # noqa: F401
+from .metadata import Breadcrumb, Doc, Metadata, Press, PubDate  # noqa: F401

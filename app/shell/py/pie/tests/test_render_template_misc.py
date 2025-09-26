@@ -4,8 +4,12 @@ from pie.render import jinja as render_template
 
 def test_get_desc_returns_metadata(monkeypatch):
     """Existing entry -> metadata dict."""
-    monkeypatch.setattr(render_template, "get_metadata", lambda name: {"id": name})
-    assert render_template.get_desc("entry") == {"id": "entry"}
+    monkeypatch.setattr(
+        render_template,
+        "get_metadata",
+        lambda name: {"press": {"id": name}},
+    )
+    assert render_template.get_desc("entry") == {"press": {"id": "entry"}}
 
 
 def test_get_desc_missing_raises(monkeypatch):

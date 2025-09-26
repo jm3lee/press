@@ -110,7 +110,7 @@ def test_main_combines_md_and_yaml(tmp_path, monkeypatch):
     md = src / "doc.md"
     md.write_text('---\n{"title": "Md", "foo": "bar"}\n---\n')
     yml = src / "doc.yml"
-    yml.write_text('{"id": "doc", "title": "Yaml", "baz": "qux"}')
+    yml.write_text('{"press": {"id": "doc"}, "title": "Yaml", "baz": "qux"}')
 
     fake = fakeredis.FakeRedis(decode_responses=True)
     monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
@@ -191,7 +191,7 @@ def test_directory_processed_in_parallel(tmp_path, monkeypatch):
     def fake_loader(path):
         barrier.wait(timeout=1)
         base = path.with_suffix("")
-        return {"id": base.name, "title": base.name}
+        return {"press": {"id": base.name}, "title": base.name}
 
     monkeypatch.setattr(update_index, "load_metadata_pair", fake_loader)
 

@@ -15,19 +15,19 @@ def save_meta(store: fakeredis.FakeRedis, filepath: str, doc_id: str, meta: dict
     """Store *meta* for *doc_id* and map *filepath* to that id."""
     store.set(filepath, doc_id)
 
-    meta_with_id = {"id": doc_id, **meta}
+    meta_with_press = {**meta}
+    press = meta_with_press.setdefault("press", {})
+    press.setdefault("id", doc_id)
 
     def recurse(prefix: str, data: dict) -> None:
         for key, value in data.items():
             if isinstance(value, dict):
                 recurse(f"{prefix}{key}.", value)
             else:
-                if key == "id":
-                    store.set(prefix + key, value)
-                else:
-                    store.set(prefix + key, json.dumps(value))
+                stored = value if isinstance(value, str) else json.dumps(value)
+                store.set(prefix + key, stored)
 
-    recurse(f"{doc_id}.", meta_with_id)
+    recurse(f"{doc_id}.", meta_with_press)
 
 
 def test_process_dir_builds_tree(tmp_path, monkeypatch):

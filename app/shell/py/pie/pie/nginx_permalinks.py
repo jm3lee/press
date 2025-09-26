@@ -21,11 +21,15 @@ from pie.metadata import (
 def _load_metadata(filepath: str) -> dict | None:
     """Load metadata for *filepath* from Redis or fall back to the file pair."""
     try:
-        doc_id = get_metadata_by_path(filepath, "id")
+        doc_id = get_metadata_by_path(filepath, "press.id")
         if doc_id:
             meta = build_from_redis(f"{doc_id}.") or {}
-            if "id" not in meta:
-                meta["id"] = doc_id
+            press = meta.get("press")
+            if not isinstance(press, dict):
+                press = {}
+                meta["press"] = press
+            if "id" not in press:
+                press["id"] = doc_id
             logger.debug("Loaded metadata from redis", path=filepath, id=doc_id)
             return meta
         logger.debug("No doc_id found in redis", path=filepath)

@@ -95,17 +95,51 @@ def _add_citation_if_missing(metadata: dict[str, Any], filepath: str) -> None:
             doc["citation"] = metadata["name"].lower()
 
 
-def _add_id_if_missing(metadata: dict[str, Any], filepath: str) -> None:
-    """Generate an ``id`` based on ``filepath`` if absent."""
+def _get_press(metadata: dict[str, Any]) -> dict[str, Any]:
+    """Return the ``press`` sub-dictionary, creating it if required."""
 
-    if "id" not in metadata:
-        base = Path(filepath).with_suffix("")
-        metadata["id"] = base.name
+    press = metadata.get("press")
+    if not isinstance(press, dict):
+        press = {}
+        metadata["press"] = press
+    return press
+
+
+def _get_press_id(metadata: dict[str, Any]) -> str | None:
+    """Return the value of ``press.id`` when present."""
+
+    press = metadata.get("press")
+    if isinstance(press, dict):
+        value = press.get("id")
+        if isinstance(value, str):
+            return value
+    return None
+
+
+def _add_id_if_missing(metadata: dict[str, Any], filepath: str) -> None:
+    """Generate ``press.id`` based on ``filepath`` when absent."""
+
+    press = _get_press(metadata)
+    if "id" in press and isinstance(press["id"], str):
+        return
+
+    legacy_id = metadata.pop("id", None)
+    if isinstance(legacy_id, str):
+        press["id"] = legacy_id
         logger.debug(
-            "Generated 'id'",
+            "Migrated legacy 'id' to 'press.id'",
             filename=str(Path(filepath).resolve().relative_to(Path.cwd())),
-            id=metadata["id"],
+            id=press["id"],
         )
+        return
+
+    base = Path(filepath).with_suffix("")
+    press["id"] = base.name
+    logger.debug(
+        "Generated 'press.id'",
+        filename=str(Path(filepath).resolve().relative_to(Path.cwd())),
+        id=press["id"],
+    )
 
 
 def _add_canonical_link_if_missing(metadata: dict[str, Any], filepath: str) -> None:
@@ -149,7 +183,7 @@ def _add_if_missing(
         obj[last] = value
         logger.debug(
             "Generated",
-            id=metadata.get("id"),
+            id=_get_press_id(metadata),
             field=field,
             filename=str(Path(filepath).resolve().relative_to(Path.cwd())),
         )
@@ -359,8 +393,8 @@ def clear_cached_metadata() -> None:
 def get_metadata_by_path(filepath: str, keypath: str) -> Any | None:
     """Return metadata value for ``keypath`` associated with ``filepath``.
 
-    The function first looks up the document ``id`` stored under ``filepath``
-    in Redis and then retrieves ``<id>.<keypath>``.
+    The function first looks up the document identifier (``press.id``) stored
+    under ``filepath`` in Redis and then retrieves ``<id>.<keypath>``.
     """
 
     conn = _get_conn()
@@ -387,7 +421,7 @@ def load_metadata_pair(path: Path) -> Mapping[str, Any] | None:
     >>> (tmp / 'post.yml').write_text('title: Example')
     17
     >>> load_metadata_pair(tmp / 'post.yml')
-    {'title': 'Example', 'id': 'post', 'path': ['post.yml', 'post.md']}
+    {'title': 'Example', 'press': {'id': 'post'}, 'path': ['post.yml', 'post.md']}
     """
 
     base = path.with_suffix("")

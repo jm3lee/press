@@ -67,12 +67,12 @@ def test_get_cached_metadata_caches(monkeypatch):
 
     def fake_get(key):
         calls.append(key)
-        return {"id": key}
+        return {"press": {"id": key}}
 
     monkeypatch.setattr(metadata, "get_metadata", fake_get)
     metadata.clear_cached_metadata()
-    assert metadata.get_cached_metadata("x") == {"id": "x"}
-    assert metadata.get_cached_metadata("x") == {"id": "x"}
+    assert metadata.get_cached_metadata("x") == {"press": {"id": "x"}}
+    assert metadata.get_cached_metadata("x") == {"press": {"id": "x"}}
     assert calls == ["x"]
 
 
