@@ -1,0 +1,13 @@
+description: Run the analytics playground and inspect live event streams.
+doc:
+  author: Brian Lee
+  breadcrumbs:
+  - title: Home
+    url: /
+  - title: Analytics
+    url: /analytics/
+  - title: Engagement analytics demo
+  pubdate: Jan 20, 2026
+  title: Engagement analytics demo
+id: engagement_analytics_demo
+schema: v1
