@@ -52,3 +52,12 @@ text in parentheses.
 `doc.link.class` defaults to `internal-link`.
 `doc.mathjax` defaults to `false`, so MathJax is not loaded by default.
 
+## Schema ``v2``
+
+Metadata schema ``v2`` consists solely of the ``press`` namespace. The values
+are no longer mirrored at the top level and must be provided explicitly:
+
+- `press.id` – Canonical identifier for the document.
+- `press.schema` – Schema version string. This must be set to `"v2"` and is
+  not generated automatically.
+

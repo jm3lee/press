@@ -4,10 +4,17 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, List, Optional
 
-from pie.schema import DEFAULT_SCHEMA
+from pie.schema import DEFAULT_SCHEMA, V2_SCHEMA
 from pie.utils import get_pubdate
 
-__all__ = ["Breadcrumb", "Doc", "Metadata", "PubDate"]
+__all__ = [
+    "Breadcrumb",
+    "Doc",
+    "Metadata",
+    "MetadataV2",
+    "Press",
+    "PubDate",
+]
 
 
 @dataclass
@@ -90,3 +97,35 @@ class Metadata:
         if self.description:
             data["description"] = self.description
         return data
+
+
+@dataclass
+class Press:
+    """Press specific metadata for schema ``v2``."""
+
+    id: str
+    schema: str = V2_SCHEMA
+
+    def __post_init__(self) -> None:
+        """Ensure the schema version matches ``v2``."""
+
+        if self.schema != V2_SCHEMA:
+            msg = "press.schema must be 'v2'"
+            raise ValueError(msg)
+
+    def to_dict(self) -> dict[str, str]:
+        """Return dictionary representation for serialization."""
+
+        return {"id": self.id, "schema": self.schema}
+
+
+@dataclass
+class MetadataV2:
+    """Metadata schema ``v2`` exposing only the ``press`` namespace."""
+
+    press: Press
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return dictionary representation containing only ``press``."""
+
+        return {"press": self.press.to_dict()}

@@ -79,6 +79,39 @@ def test_schema_default():
     assert Schema().schema == "v1"
 
 
+def test_press_defaults_to_v2():
+    """Press metadata enforces the ``v2`` schema version."""
+    from pie.model import Press
+
+    info = Press(id="doc")
+    assert info.schema == "v2"
+
+
+def test_press_invalid_schema_raises():
+    """Attempting to override ``press.schema`` raises an error."""
+    from pie.model import Press
+
+    with pytest.raises(ValueError):
+        Press(id="doc", schema="v1")
+
+
+def test_metadata_v2_to_dict():
+    """MetadataV2 serializes only ``press`` information."""
+    from pie.model import MetadataV2, Press
+
+    metadata_v2 = MetadataV2(press=Press(id="doc"))
+
+    assert metadata_v2.to_dict() == {"press": {"id": "doc", "schema": "v2"}}
+
+
+def test_metadata_v2_rejects_unknown_fields():
+    """Passing unexpected fields raises a ``TypeError``."""
+    from pie.model import MetadataV2, Press
+
+    with pytest.raises(TypeError):
+        MetadataV2(id="doc", press=Press(id="doc"))
+
+
 def test_load_metadata_pair_conflict_shows_path(tmp_path, monkeypatch):
     """Conflicting values include path in warning."""
     md = tmp_path / "dir" / "post.md"
