@@ -415,7 +415,7 @@ def create_env():
     env.globals["metadata"] = metadata_module
     env.globals["read_json"] = read_json
     env.globals["read_yaml"] = read_yaml
-    env.globals["pie"] = {"yaml": pie.yaml}
+    env.globals["pie"] = {"yaml": pie.yaml, "utils": pie.utils}
     env.globals["render_jinja"] = render_jinja
     env.globals["to_alpha_index"] = to_alpha_index
     env.filters["press"] = render_press
