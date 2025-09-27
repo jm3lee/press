@@ -221,13 +221,20 @@ def _coerce_html(value: Any) -> Markup:
     return escape(value)
 
 
-def preview_card(card: Mapping[str, Any]) -> Markup:
+def preview_card(
+    card: Mapping[str, Any],
+    *,
+    overlay_text: str | Markup = "Tap to reveal this artistic nude pose.",
+    overlay_button_text: str | Markup = "View image",
+) -> Markup:
     """Render the Flashoffer preview card partial."""
 
     image_url = _escape_attr_value(_require_card_value(card, "image_url"))
     alt_text = _escape_attr_value(_require_card_value(card, "alt_text"))
     link_href = _escape_attr_value(_require_card_value(card, "link_href"))
     caption = _coerce_html(_require_card_value(card, "caption"))
+    overlay_html = _coerce_html(overlay_text)
+    overlay_button_html = _coerce_html(overlay_button_text)
 
     return Markup(
         (
@@ -244,9 +251,9 @@ def preview_card(card: Mapping[str, Any]) -> Markup:
             '      />\n'
             '      <div class="preview-overlay">\n'
             '        <div class="text-center px-3">\n'
-            '          <p class="mb-2 fw-semibold">Tap to reveal this artistic nude pose.</p>\n'
+            f'          <p class="mb-2 fw-semibold">{overlay_html}</p>\n'
             f'          <a class="btn btn-outline-light btn-sm preview-toggle" href="{link_href}" role="button">\n'
-            '            View image\n'
+            f'            {overlay_button_html}\n'
             '          </a>\n'
             '        </div>\n'
             '      </div>\n'

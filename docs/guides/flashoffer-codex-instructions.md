@@ -13,9 +13,11 @@ agents know how to render landing page buttons using `pie.flashoffer`.
   Configure the eyebrow, heading, description, and each call-to-action via the
   helper parameters or pass keyword argument dictionaries through to the CTA
   helpers.
-- Use `pie.flashoffer.preview_card(card)` to render the preview card markup.
-  The `card` mapping must include `image_url`, `alt_text`, `link_href`, and
-  `caption` keys.
+- Use `pie.flashoffer.preview_card(card, overlay_text="...",
+  overlay_button_text="...")` to render the preview card markup. The `card`
+  mapping must include `image_url`, `alt_text`, `link_href`, and `caption`
+  keys. Override `overlay_text` and `overlay_button_text` to customise the
+  overlay messaging while keeping HTML escaping intact.
 - Use `pie.flashoffer.footer(...)` to render the Flashoffer footer snippet.
   All visible text segments are configurable through the helper arguments.
 - Pass any additional keyword arguments to append raw HTML attributes (for
