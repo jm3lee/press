@@ -172,13 +172,25 @@ def hero_banner(
         **second_outline,
     )
 
+    hero_background_style = (
+        "background: var("
+        "--flashoffer-hero-background, "
+        "radial-gradient(circle at 10% -10%, "
+        "rgba(255, 92, 92, 0.18), transparent 45%), "
+        "radial-gradient(circle at 110% 20%, "
+        "rgba(34, 139, 230, 0.16), transparent 55%), "
+        "var(--press-background, #090b10)"
+        ");"
+    )
+
     return Markup(
         (
             '<section class="section">\n'
             '  <div class="container">\n'
             '    <div class="row justify-content-center">\n'
             '      <div class="col-lg-10">\n'
-            '        <div class="surface p-4 p-md-5 text-center">\n'
+            f'        <div class="surface p-4 p-md-5 text-center" '
+            f'style="{hero_background_style}">\n'
             '          <span class="eyebrow mb-3 d-inline-block">\n'
             f'            {eyebrow_html}\n'
             '          </span>\n'
