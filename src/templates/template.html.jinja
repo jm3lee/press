@@ -2,7 +2,14 @@
 <html lang="en">
   {% include "src/templates/head.html.jinja" %}
   <body class="fs-5 lh-lg">
+    {% set show_navbar = true %}
+    {% if html is defined and html.navbar is defined %}
+    {% set show_navbar = html.navbar %}
+    {% endif %}
+
+    {% if show_navbar %}
     <!-- site nav -->
+    {# Set `html.navbar` to False in page metadata to hide the global nav. #}
     <nav class="navbar navbar-expand-lg bg-body-tertiary fixed-top">
       <div class="container position-relative">
         <a class="navbar-brand" href="/">Home</a>
@@ -34,6 +41,7 @@
         </div>
       </div>
     </nav>
+    {% endif %}
 
     <header
       class="hero-header mb-5 text-white border-bottom position-relative bg-black d-flex align-items-center"
@@ -150,6 +158,7 @@
     {% endfor %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+    {% if show_navbar %}
     <script>
       window.addEventListener("DOMContentLoaded", () => {
         const hero = document.querySelector(".hero-header");
@@ -168,6 +177,7 @@
         observer.observe(hero);
       });
     </script>
+    {% endif %}
     {% if doc.mathjax %}
     <!-- MATHJAX SUPPORT -->
     <script
