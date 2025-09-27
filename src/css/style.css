@@ -1,0 +1,147 @@
+/*!
+ * Custom styles for the Press demo site.
+ */
+
+:root {
+  --sfs-background: #090b10;
+  --sfs-foreground: #f8f9fa;
+  --sfs-muted: #ced4da;
+  --sfs-accent: #ff5c5c;
+  --sfs-accent-dark: #e14242;
+  --sfs-font-size-root: 1rem;
+  --sfs-font-size-body: calc(var(--sfs-font-size-root) * 1.05);
+}
+
+html {
+  font-size: var(--sfs-font-size-root);
+  scroll-padding-top: calc(80px + env(safe-area-inset-top));
+}
+
+body {
+  margin: 0;
+  padding-top: calc(56px + env(safe-area-inset-top));
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  background: radial-gradient(
+      circle at 10% -10%,
+      rgba(255, 92, 92, 0.2),
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 110% 20%,
+      rgba(34, 139, 230, 0.16),
+      transparent 55%
+    ),
+    var(--sfs-background);
+  color: var(--sfs-foreground) !important;
+  font-size: var(--sfs-font-size-body);
+  line-height: 1.7;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 600;
+  color: var(--sfs-foreground);
+  letter-spacing: 0.02em;
+}
+
+p,
+li {
+  color: var(--sfs-muted);
+}
+
+a {
+  color: var(--sfs-accent);
+  text-decoration-thickness: 2px;
+}
+
+a:hover,
+a:focus {
+  color: var(--sfs-accent-dark);
+}
+
+main {
+  overflow: hidden;
+}
+
+.btn-outline-light {
+  color: var(--sfs-foreground);
+  border-color: rgba(248, 249, 250, 0.6);
+}
+
+.btn-outline-light:hover,
+.btn-outline-light:focus {
+  background-color: rgba(248, 249, 250, 0.12);
+  border-color: rgba(248, 249, 250, 0.9);
+}
+
+.hero-header {
+  min-height: 30vh;
+}
+
+.bg-image {
+  transition: opacity 0.6s ease;
+  object-position: var(--hero-image-position, center);
+}
+
+@media (max-width: 576px) {
+  .bg-image {
+    object-position: var(
+      --hero-image-position-mobile,
+      var(--hero-image-position, center)
+    );
+  }
+}
+
+.bg-overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.45) 0%,
+    rgba(0, 0, 0, 0.65) 60%,
+    rgba(0, 0, 0, 0.75) 100%
+  );
+  pointer-events: none;
+}
+
+.preview-card {
+  position: relative;
+  min-height: 240px;
+  background-color: #000;
+}
+
+.preview-image {
+  filter: blur(24px);
+  transform: scale(1.06);
+  transition: filter 0.4s ease, transform 0.4s ease;
+}
+
+.preview-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(9, 11, 16, 0.92),
+    rgba(9, 11, 16, 0.88)
+  );
+  color: var(--sfs-foreground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: opacity 0.35s ease;
+}
+
+.preview-overlay p {
+  color: var(--sfs-foreground);
+}
+
+.preview-card.revealed .preview-image {
+  filter: none;
+  transform: none;
+}
+
+.preview-card.revealed .preview-overlay {
+  opacity: 0;
+  pointer-events: none;
+}
