@@ -146,6 +146,20 @@ full image behind a tap target.
 } %}
 {{ pie.flashoffer.preview_card(preview) }}
 ```
+
+Pass `overlay_text` or `overlay_button_text` to tailor the message revealed on
+hover or tap. Both parameters escape plain strings while preserving
+`markupsafe.Markup` instances, so you can safely inject trusted HTML when
+needed.
+
+```jinja
+{{ pie.flashoffer.preview_card(
+    preview,
+    overlay_text="Tap to reveal the <em>full pose</em>",
+    overlay_button_text="Open reference",
+) }}
+```
+
 {% set preview = {
     "image_url": "https://seattlefigurestudio.sfo3.cdn.digitaloceanspaces.com/landing/favicon-48x48.png",
     "alt_text": "Seattle Figure Studio Favicon",
@@ -163,8 +177,8 @@ each card carries consistent Flashoffer styling.
 
 The overlay button created by `pie.flashoffer.preview_card` is wired up by the
 base template's JavaScript in `src/templates/template.html.jinja`, so visitors
-must click **View image** before any NSFW content is revealed. No additional
-script is required inside your page.
+must click the configured overlay button before any NSFW content is revealed.
+No additional script is required inside your page.
 
 The reusable partial at
 `src/templates/examples/flashoffer-card-grid.html.jinja` iterates through
