@@ -42,9 +42,7 @@ Pair the outline helper with the primary button to offer a secondary action.
 
 renders as:
 
-<div style="background: black; padding: 5px">
 {{ pie.flashoffer.outline_cta("Talk to sales", "/contact") }}
-</div>
 
 ## Customize attributes
 
@@ -64,7 +62,6 @@ layout or analytics requirements.
 
 renders as:
 
-<div style="background: black; padding: 5px">
 {{ pie.flashoffer.outline_cta(
     "View partner pricing",
     "https://example.com/pricing",
@@ -73,7 +70,6 @@ renders as:
     target="_blank",
     data_tracking_id="hero-secondary",
 ) }}
-</div>
 
 ## Preview card
 
@@ -89,3 +85,10 @@ full image behind a tap target.
 } %}
 {{ pie.flashoffer.preview_card(preview) }}
 ```
+{% set preview = {
+    "image_url": "https://seattlefigurestudio.sfo3.cdn.digitaloceanspaces.com/landing/favicon-48x48.png",
+    "alt_text": "Seattle Figure Studio Favicon",
+    "link_href": "https://seattlefigurestudio.com",
+    "caption": "a cool place",
+} %}
+{{ pie.flashoffer.preview_card(preview) }}

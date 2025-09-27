@@ -124,9 +124,9 @@
       {% endif %}
 
       <!-- Body content generated from Markdown goes here -->
-      {% filter press %}
-      {% include markdown_path with context %}
-      {% endfilter %}
+      {%- filter press %}
+      {%- include markdown_path with context %}
+      {%- endfilter %}
 
       <!-- prev/next page links -->
       {% if prev %}
@@ -195,5 +195,35 @@
       src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
     ></script>
     {% endif %}
+
+<script>
+  document.querySelectorAll(".preview-card").forEach((card) => {
+    const toggle = card.querySelector(".preview-toggle");
+    const image = card.querySelector(".preview-image");
+    if (!toggle || !image) {
+      return;
+    }
+    image.setAttribute("aria-hidden", "true");
+    const revealImage = () => {
+      if (card.classList.contains("revealed")) {
+        return;
+      }
+      card.classList.add("revealed");
+      toggle.classList.add("disabled");
+      toggle.setAttribute("aria-hidden", "true");
+      toggle.setAttribute("aria-disabled", "true");
+      toggle.setAttribute("tabindex", "-1");
+      toggle.removeAttribute("href");
+      image.setAttribute("aria-hidden", "false");
+    };
+    toggle.addEventListener("click", (event) => {
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button === 1) {
+        return;
+      }
+      event.preventDefault();
+      revealImage();
+    });
+  });
+</script>
   </body>
 </html>
