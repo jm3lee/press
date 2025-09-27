@@ -14,3 +14,22 @@ schema: v1
 html:
   scripts: []
   navbar: false
+hero_banner:
+  eyebrow: Seattle-born figure reference
+  title: Stone Canvas
+  description: >-
+    Build stronger drawings with Stone Canvas reference bundles created by
+    Seattle models and artists. Each pack keeps studies aligned with atelier
+    methods, community collaborations, and clear licensing.
+  primary_cta_text: Explore Stone Canvas
+  primary_cta_href: https://seattlefigurestudio.com/shop/stone-canvas-medusa
+  primary_cta_kwargs:
+    data_tracking_id: hero-primary
+  first_outline_text: Email to collaborate
+  first_outline_href: mailto:brian@seattlefigurestudio.com
+  first_outline_kwargs:
+    data_tracking_id: hero-secondary
+  second_outline_text: Meet Seattle Figure Studio
+  second_outline_href: https://seattlefigurestudio.com/about-us
+  second_outline_kwargs:
+    data_tracking_id: hero-secondary

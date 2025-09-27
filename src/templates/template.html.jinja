@@ -43,8 +43,64 @@
     </nav>
     {% endif %}
 
+    {% set hero_config = None %}
+    {% if hero_banner is defined and hero_banner %}
+    {% set hero_config = hero_banner %}
+    {% elif html is defined and html.hero_banner is defined and html.hero_banner %}
+    {% set hero_config = html.hero_banner %}
+    {% endif %}
+
+    {% if hero_config
+      and hero_config.primary_cta_text is defined
+      and hero_config.primary_cta_href is defined
+      and hero_config.first_outline_text is defined
+      and hero_config.first_outline_href is defined
+      and hero_config.second_outline_text is defined
+      and hero_config.second_outline_href is defined %}
+    <div class="hero-banner" data-hero-root>
+      {{ pie.flashoffer.hero_banner(
+        eyebrow=(
+          hero_config.eyebrow
+          if hero_config.eyebrow is defined
+          else (doc.author if doc.author else "")
+        ),
+        title=(
+          hero_config.title
+          if hero_config.title is defined
+          else (page_heading if page_heading else doc.title)
+        ),
+        description=(
+          hero_config.description
+          if hero_config.description is defined
+          else (description if description else "")
+        ),
+        primary_cta_text=hero_config.primary_cta_text,
+        primary_cta_href=hero_config.primary_cta_href,
+        primary_cta_kwargs=(
+          hero_config.primary_cta_kwargs
+          if hero_config.primary_cta_kwargs is defined
+          else {}
+        ),
+        first_outline_text=hero_config.first_outline_text,
+        first_outline_href=hero_config.first_outline_href,
+        first_outline_kwargs=(
+          hero_config.first_outline_kwargs
+          if hero_config.first_outline_kwargs is defined
+          else {}
+        ),
+        second_outline_text=hero_config.second_outline_text,
+        second_outline_href=hero_config.second_outline_href,
+        second_outline_kwargs=(
+          hero_config.second_outline_kwargs
+          if hero_config.second_outline_kwargs is defined
+          else {}
+        ),
+      ) }}
+    </div>
+    {% else %}
     <header
       class="hero-header mb-5 text-white border-bottom position-relative bg-black d-flex align-items-center"
+      data-hero-root
     >
       {% if header and header.get("src") %}
       {% set hero_image_styles = [] %}
@@ -78,6 +134,7 @@
         </h1>
       </div>
     </header>
+    {% endif %}
 
     <main class="container mb-5" style="max-width: 65ch">
       {% if doc.breadcrumbs %}
@@ -161,7 +218,7 @@
     {% if show_navbar %}
     <script>
       window.addEventListener("DOMContentLoaded", () => {
-        const hero = document.querySelector(".hero-header");
+        const hero = document.querySelector("[data-hero-root]");
         const titleEl = document.querySelector(".navbar .page-title");
         if (!titleEl) return;
         if (!hero) {

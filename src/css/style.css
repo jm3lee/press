@@ -142,6 +142,66 @@ main > nav[aria-label="Page navigation"] {
   margin-bottom: var(--press-space-2xs);
 }
 
+.hero-banner {
+  padding-inline: clamp(
+    var(--press-space-sm),
+    6vw,
+    var(--press-space-2xl)
+  );
+  margin-bottom: var(--press-space-2xl);
+}
+
+.hero-banner .section {
+  padding-block: clamp(
+    var(--press-space-xl),
+    12vh,
+    var(--press-space-2xl)
+  );
+}
+
+.hero-banner .surface {
+  background: radial-gradient(
+      circle at 10% -10%,
+      rgba(255, 92, 92, 0.18),
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 110% 20%,
+      rgba(34, 139, 230, 0.14),
+      transparent 55%
+    ),
+    rgba(9, 11, 16, 0.86);
+  border-radius: clamp(2rem, 6vw, 3rem);
+  border: 1px solid rgba(248, 249, 250, 0.08);
+  box-shadow: 0 38px 70px rgba(9, 11, 16, 0.5);
+  color: var(--press-foreground);
+}
+
+.hero-banner .eyebrow {
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: rgba(248, 249, 250, 0.66);
+}
+
+.hero-banner .lead {
+  color: var(--press-muted);
+}
+
+.hero-banner .hero-cta .btn {
+  min-width: 11.25rem;
+  box-shadow: 0 12px 30px rgba(9, 11, 16, 0.35);
+  border-radius: 999px;
+}
+
+.hero-banner .hero-cta .btn-outline-light {
+  border-color: rgba(248, 249, 250, 0.35);
+}
+
+.hero-banner + main {
+  margin-top: calc(var(--press-space-2xl) * -0.25);
+}
+
 .hero-header + main {
   margin-top: calc(var(--press-space-2xl) * -0.3);
 }
@@ -276,6 +336,10 @@ pre code {
 @media (max-width: 768px) {
   main {
     padding-inline: var(--press-space-sm);
+  }
+
+  .hero-banner .section {
+    padding-block: var(--press-space-xl);
   }
 
   .hero-header {
