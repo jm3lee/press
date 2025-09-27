@@ -40,7 +40,9 @@ Pair the outline helper with the primary button to offer a secondary action.
 
 renders as:
 
+<div style="background: black; padding: 5px">
 {{ pie.flashoffer.outline_cta("Talk to sales", "/contact") }}
+</div>
 
 ## Customize attributes
 
@@ -60,6 +62,7 @@ layout or analytics requirements.
 
 renders as:
 
+<div style="background: black; padding: 5px">
 {{ pie.flashoffer.outline_cta(
     "View partner pricing",
     "https://example.com/pricing",
@@ -68,3 +71,4 @@ renders as:
     target="_blank",
     data_tracking_id="hero-secondary",
 ) }}
+</div>
