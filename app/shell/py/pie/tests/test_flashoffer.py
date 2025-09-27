@@ -174,6 +174,60 @@ def test_preview_card_requires_expected_card_keys(missing_key):
         flashoffer.preview_card(card)
 
 
+def test_footer_renders_expected_markup():
+    html = flashoffer.footer()
+    assert html == Markup(
+        '<footer id="contact" class="container py-4 small">\n'
+        '  <div class="row gy-3 align-items-center">\n'
+        '    <div class="col-12 col-md">\n'
+        '      ©&nbsp;<a\n'
+        '        class="link-dark text-decoration-none"\n'
+        '        href="https://seattlefigurestudio.com"\n'
+        '      >\n'
+        '        Seattle Figure Studio\n'
+        '      </a>. All rights reserved.\n'
+        '    </div>\n'
+        '    <div class="col-12 col-md-auto">\n'
+        '      <a class="fw-semibold" href="mailto:brian@seattlefigurestudio.com">\n'
+        '        brian@seattlefigurestudio.com\n'
+        '      </a>\n'
+        '    </div>\n'
+        '  </div>\n'
+        '</footer>'
+    )
+
+
+def test_footer_allows_custom_text_and_markup():
+    html = flashoffer.footer(
+        container_id="footer",  # attribute, not displayed
+        left_prefix=Markup("<strong>&copy;</strong>&nbsp;"),
+        site_name=Markup("<em>Pie Corp</em>"),
+        site_href="/about",
+        rights_statement="All <rights>",
+        email_label=Markup("<span>Contact&nbsp;Us</span>"),
+        email_href="mailto:support@example.com",
+    )
+    assert "<em>Pie Corp</em>" in html
+    assert "<span>Contact&nbsp;Us</span>" in html
+    assert "All &lt;rights&gt;" in html
+    assert "href=\"/about\"" in html
+    assert "href=\"mailto:support@example.com\"" in html
+
+
+def test_footer_escapes_plain_text_segments():
+    html = flashoffer.footer(
+        left_prefix='"copy" ',
+        site_name='Pie & Co',
+        rights_statement='Rights "reserved"',
+        email_label='team@example.com?subject="Hi"',
+        email_href='mailto:team@example.com?subject="Hi"',
+    )
+    assert '&#34;copy&#34;' in html
+    assert 'Pie &amp; Co' in html
+    assert 'Rights &#34;reserved&#34;' in html
+    assert 'team@example.com?subject=&#34;Hi&#34;' in html
+
+
 def test_flashoffer_module_is_registered_with_jinja_globals(monkeypatch, tmp_path):
     import sys
     import types
@@ -203,9 +257,80 @@ def test_flashoffer_module_is_registered_with_jinja_globals(monkeypatch, tmp_pat
     flatten_stub.unflatten = _unflatten
     monkeypatch.setitem(sys.modules, "flatten_dict", flatten_stub)
 
+    cmarkgfm_stub = types.ModuleType("cmarkgfm")
+
+    def _markdown_to_html(*args, **kwargs):  # pragma: no cover - stub
+        return ""
+
+    cmarkgfm_stub.github_flavored_markdown_to_html = _markdown_to_html
+    monkeypatch.setitem(sys.modules, "cmarkgfm", cmarkgfm_stub)
+
+    class _FakeLogger:
+        def remove(self, *args, **kwargs):  # pragma: no cover - stub
+            return None
+
+        def add(self, *args, **kwargs):  # pragma: no cover - stub
+            return 0
+
+    loguru_stub = types.ModuleType("loguru")
+    loguru_stub.logger = _FakeLogger()
+    monkeypatch.setitem(sys.modules, "loguru", loguru_stub)
+
+    ruamel_stub = types.ModuleType("ruamel")
+    ruamel_yaml_stub = types.ModuleType("ruamel.yaml")
+
+    class _FakeYAML:  # pragma: no cover - stub
+        def __init__(self, *args, **kwargs):
+            pass
+
+    ruamel_yaml_stub.YAML = _FakeYAML
+    ruamel_yaml_stub.YAMLError = Exception
+    monkeypatch.setitem(sys.modules, "ruamel", ruamel_stub)
+    monkeypatch.setitem(sys.modules, "ruamel.yaml", ruamel_yaml_stub)
+
+    emoji_stub = types.ModuleType("emoji")
+
+    def _emojize(value, *args, **kwargs):  # pragma: no cover - stub
+        return value
+
+    emoji_stub.emojize = _emojize
+    monkeypatch.setitem(sys.modules, "emoji", emoji_stub)
+
+    class _FakeTemplate:
+        def render(self, *args, **kwargs):  # pragma: no cover - stub
+            return ""
+
+        @property
+        def module(self):  # pragma: no cover - stub
+            return types.SimpleNamespace(anchor=lambda _id: "")
+
+    class _FakeEnvironment:
+        def __init__(self, *args, **kwargs):  # pragma: no cover - stub
+            self.globals = {}
+            self.filters = {}
+
+        def from_string(self, *args, **kwargs):  # pragma: no cover - stub
+            return _FakeTemplate()
+
+        def get_template(self, *args, **kwargs):  # pragma: no cover - stub
+            return _FakeTemplate()
+
+    class _FakeLoader:  # pragma: no cover - stub
+        def __init__(self, *args, **kwargs):
+            pass
+
+    jinja2_stub = types.ModuleType("jinja2")
+    jinja2_stub.Environment = _FakeEnvironment
+    jinja2_stub.FileSystemLoader = _FakeLoader
+    jinja2_stub.StrictUndefined = object
+    jinja2_stub.TemplateNotFound = Exception
+    jinja2_stub.TemplateSyntaxError = Exception
+    monkeypatch.setitem(sys.modules, "jinja2", jinja2_stub)
+
     from pie.render import jinja
 
     flashoffer_global = jinja.env.globals["pie"]["flashoffer"]
     assert flashoffer_global.primary_cta is flashoffer.primary_cta
     assert flashoffer_global.outline_cta is flashoffer.outline_cta
     assert flashoffer_global.preview_card is flashoffer.preview_card
+    assert flashoffer_global.footer is flashoffer.footer

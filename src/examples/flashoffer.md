@@ -9,6 +9,9 @@ Available helpers:
   target=None, **attrs)` renders the outline secondary button.
 - `pie.flashoffer.preview_card(card)` renders the Flashoffer preview card from
   a mapping that includes `image_url`, `alt_text`, `link_href`, and `caption`.
+- `pie.flashoffer.footer(**kwargs)` renders the Flashoffer footer. Customize the
+  visible text by overriding keyword arguments such as `left_prefix`,
+  `site_name`, `rights_statement`, and `email_label`.
 
 ## Step-by-step instructions
 
@@ -92,3 +95,21 @@ full image behind a tap target.
     "caption": "a cool place",
 } %}
 {{ pie.flashoffer.preview_card(preview) }}
+
+## Footer
+
+Use the footer helper to render the contact information block.
+
+```jinja
+{{ pie.flashoffer.footer(
+    left_prefix="©&nbsp;",
+    site_name="Seattle Figure Studio",
+    site_href="https://seattlefigurestudio.com",
+    rights_statement="All rights reserved.",
+    email_label="brian@seattlefigurestudio.com",
+) }}
+```
+
+renders as:
+
+{{ pie.flashoffer.footer() }}

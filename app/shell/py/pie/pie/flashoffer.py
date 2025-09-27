@@ -15,7 +15,7 @@ from typing import Any
 
 from markupsafe import Markup, escape
 
-__all__ = ["primary_cta", "outline_cta", "preview_card"]
+__all__ = ["primary_cta", "outline_cta", "preview_card", "footer"]
 
 
 def _merge_attrs(
@@ -173,5 +173,55 @@ def preview_card(card: Mapping[str, Any]) -> Markup:
             '    </div>\n'
             '  </div>\n'
             '</div>'
+        )
+    )
+
+
+def _coerce_optional_html(value: str | Markup | None) -> Markup:
+    if value is None:
+        return Markup("")
+    return _coerce_html(value)
+
+
+def footer(
+    *,
+    container_id: str = "contact",
+    left_prefix: str | Markup | None = Markup("©&nbsp;"),
+    site_name: str | Markup = "Seattle Figure Studio",
+    site_href: str = "https://seattlefigurestudio.com",
+    rights_statement: str | Markup = "All rights reserved.",
+    email_label: str | Markup = "brian@seattlefigurestudio.com",
+    email_href: str = "mailto:brian@seattlefigurestudio.com",
+) -> Markup:
+    """Render the Flashoffer footer snippet."""
+
+    id_attr = _escape_attr_value(container_id)
+    site_href_attr = _escape_attr_value(site_href)
+    email_href_attr = _escape_attr_value(email_href)
+
+    prefix_html = _coerce_optional_html(left_prefix)
+    site_html = _coerce_html(site_name)
+    rights_html = _coerce_html(rights_statement)
+    email_html = _coerce_html(email_label)
+
+    return Markup(
+        (
+            f'<footer id="{id_attr}" class="container py-4 small">\n'
+            '  <div class="row gy-3 align-items-center">\n'
+            '    <div class="col-12 col-md">\n'
+            f'      {prefix_html}<a\n'
+            '        class="link-dark text-decoration-none"\n'
+            f'        href="{site_href_attr}"\n'
+            '      >\n'
+            f'        {site_html}\n'
+            f'      </a>. {rights_html}\n'
+            '    </div>\n'
+            '    <div class="col-12 col-md-auto">\n'
+            f'      <a class="fw-semibold" href="{email_href_attr}">\n'
+            f'        {email_html}\n'
+            '      </a>\n'
+            '    </div>\n'
+            '  </div>\n'
+            '</footer>'
         )
     )
