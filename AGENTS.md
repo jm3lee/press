@@ -17,6 +17,8 @@
   helpers change, also refresh
   `docs/guides/flashoffer-codex-instructions.md` to keep Codex guidance in
   sync.
+- When modifying Flashoffer methods, ensure any text rendered to end users is
+  configurable via function parameters.
 
 ## Checker Scripts
 

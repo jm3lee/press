@@ -35,6 +35,9 @@ for details on the structure of this metadata.
 - `pie.flashoffer.preview_card(card)` – render the Flashoffer preview card.
   Provide a mapping with `image_url`, `alt_text`, `link_href`, and `caption`
   entries to populate the image, overlay link, and caption text.
+- `pie.flashoffer.footer(...)` – render the Flashoffer footer layout. All text
+  displayed to users can be customized through keyword arguments while the
+  helper continues to escape plain strings safely.
 
 Example:
 
