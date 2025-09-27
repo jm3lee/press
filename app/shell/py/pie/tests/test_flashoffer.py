@@ -161,6 +161,36 @@ def test_preview_card_preserves_markup_caption():
     assert "<strong>markup</strong>" in html
 
 
+def test_preview_card_allows_custom_overlay_content():
+    html = flashoffer.preview_card(
+        {
+            "image_url": "image.jpg",
+            "alt_text": "Alt",
+            "link_href": "link",
+            "caption": "Caption",
+        },
+        overlay_text="Tap <em>gently</em> to reveal",
+        overlay_button_text="Open <strong>preview</strong>",
+    )
+    assert "Tap &lt;em&gt;gently&lt;/em&gt; to reveal" in html
+    assert "Open &lt;strong&gt;preview&lt;/strong&gt;" in html
+
+
+def test_preview_card_preserves_markup_overlay_content():
+    html = flashoffer.preview_card(
+        {
+            "image_url": "image.jpg",
+            "alt_text": "Alt",
+            "link_href": "link",
+            "caption": "Caption",
+        },
+        overlay_text=Markup("Tap to reveal <em>now</em>"),
+        overlay_button_text=Markup("<strong>Reveal</strong>"),
+    )
+    assert "Tap to reveal <em>now</em>" in html
+    assert ">\n            <strong>Reveal</strong>\n" in html
+
+
 @pytest.mark.parametrize("missing_key", ["image_url", "alt_text", "link_href", "caption"])
 def test_preview_card_requires_expected_card_keys(missing_key):
     card = {
