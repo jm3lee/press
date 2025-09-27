@@ -76,32 +76,43 @@ main {
   border-color: rgba(248, 249, 250, 0.9);
 }
 
-.hero-header {
-  min-height: 30vh;
+.section {
+  padding: clamp(4rem, 10vw, 6.5rem) 0;
 }
 
-.bg-image {
-  transition: opacity 0.6s ease;
-  object-position: var(--hero-image-position, center);
+.surface {
+  background: rgba(15, 18, 26, 0.85);
+  border: 1px solid rgba(248, 249, 250, 0.12);
+  border-radius: 1.5rem;
+  box-shadow: 0 2.5rem 3.5rem -2.5rem rgba(9, 11, 16, 0.9);
+  color: var(--sfs-foreground);
+}
+
+.surface .lead {
+  color: var(--sfs-muted);
+}
+
+.eyebrow {
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--sfs-accent);
+}
+
+.hero-cta .btn {
+  min-width: 10.5rem;
 }
 
 @media (max-width: 576px) {
-  .bg-image {
-    object-position: var(
-      --hero-image-position-mobile,
-      var(--hero-image-position, center)
-    );
+  .section {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
   }
-}
 
-.bg-overlay {
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0.45) 0%,
-    rgba(0, 0, 0, 0.65) 60%,
-    rgba(0, 0, 0, 0.75) 100%
-  );
-  pointer-events: none;
+  .hero-cta .btn {
+    width: 100%;
+  }
 }
 
 .preview-card {

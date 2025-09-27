@@ -73,6 +73,47 @@ def test_cta_preserves_markup_text():
     )
 
 
+def test_hero_banner_renders_optional_sections():
+    html = flashoffer.hero_banner(
+        eyebrow="Limited release",
+        title="Discover Stone Canvas",
+        description="Explore new poses crafted in Seattle.",
+        primary_cta_text="Start now",
+        primary_cta_href="/start",
+        first_outline_text="See docs",
+        first_outline_href="/docs",
+        second_outline_text="Contact",
+        second_outline_href="/contact",
+    )
+
+    assert isinstance(html, Markup)
+    html_text = str(html)
+    assert "Limited release" in html_text
+    assert "Discover Stone Canvas" in html_text
+    assert "hero-cta" in html_text
+    assert ">Start now<" in html_text
+
+
+def test_hero_banner_omits_optional_content_when_none():
+    html = flashoffer.hero_banner(
+        eyebrow=None,
+        title="Documentation",
+        description=None,
+        primary_cta_text=None,
+        primary_cta_href=None,
+        first_outline_text=None,
+        first_outline_href=None,
+        second_outline_text=None,
+        second_outline_href=None,
+    )
+
+    html_text = str(html)
+    assert "Documentation" in html_text
+    assert "hero-cta" not in html_text
+    assert "eyebrow" not in html_text
+    assert "lead mx-auto" not in html_text
+
+
 def test_preview_card_renders_expected_markup():
     html = flashoffer.preview_card(
         {
@@ -332,5 +373,6 @@ def test_flashoffer_module_is_registered_with_jinja_globals(monkeypatch, tmp_pat
     flashoffer_global = jinja.env.globals["pie"]["flashoffer"]
     assert flashoffer_global.primary_cta is flashoffer.primary_cta
     assert flashoffer_global.outline_cta is flashoffer.outline_cta
+    assert flashoffer_global.hero_banner is flashoffer.hero_banner
     assert flashoffer_global.preview_card is flashoffer.preview_card
     assert flashoffer_global.footer is flashoffer.footer

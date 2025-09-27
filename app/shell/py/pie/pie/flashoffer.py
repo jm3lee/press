@@ -10,7 +10,7 @@ any extra keyword arguments are rendered verbatim as HTML attributes.
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from typing import Any
 
 from markupsafe import Markup, escape
@@ -131,73 +131,112 @@ def _coerce_mapping(mapping: Mapping[str, Any] | None) -> dict[str, Any]:
     return dict(mapping)
 
 
+def _render_optional_hero_cta(
+    renderer: Callable[..., Markup],
+    text: str | Markup | None,
+    href: str | None,
+    kwargs: Mapping[str, Any],
+) -> Markup | None:
+    if text is None or href is None:
+        return None
+    return renderer(text, href, **kwargs)
+
+
 def hero_banner(
     *,
-    eyebrow: str | Markup = "Seattle-born figure reference",
+    eyebrow: str | Markup | None = "Seattle-born figure reference",
     title: str | Markup = "Stone Canvas",
-    description: str | Markup = (
+    description: str | Markup | None = (
         "Build stronger drawings with Stone Canvas reference bundles created by "
         "Seattle models and artists. Each pack keeps studies aligned with atelier "
         "methods, community collaborations, and clear licensing."
     ),
-    primary_cta_text: str | Markup = "Explore Stone Canvas",
-    primary_cta_href: str = "https://seattlefigurestudio.com/shop/stone-canvas-medusa",
+    primary_cta_text: str | Markup | None = "Explore Stone Canvas",
+    primary_cta_href: str | None = "https://seattlefigurestudio.com/shop/stone-canvas-medusa",
     primary_cta_kwargs: Mapping[str, Any] | None = None,
-    first_outline_text: str | Markup = "Email to collaborate",
-    first_outline_href: str = "mailto:brian@seattlefigurestudio.com",
+    first_outline_text: str | Markup | None = "Email to collaborate",
+    first_outline_href: str | None = "mailto:brian@seattlefigurestudio.com",
     first_outline_kwargs: Mapping[str, Any] | None = None,
-    second_outline_text: str | Markup = "Meet Seattle Figure Studio",
-    second_outline_href: str = "https://seattlefigurestudio.com/about-us",
+    second_outline_text: str | Markup | None = "Meet Seattle Figure Studio",
+    second_outline_href: str | None = "https://seattlefigurestudio.com/about-us",
     second_outline_kwargs: Mapping[str, Any] | None = None,
 ) -> Markup:
     """Render the Flashoffer hero banner with configurable CTAs."""
 
-    eyebrow_html = _coerce_html(eyebrow)
+    eyebrow_html = _coerce_optional_html(eyebrow)
     title_html = _coerce_html(title)
-    description_html = _coerce_html(description)
+    description_html = _coerce_optional_html(description)
 
     primary_kwargs = _coerce_mapping(primary_cta_kwargs)
     first_outline = _coerce_mapping(first_outline_kwargs)
     second_outline = _coerce_mapping(second_outline_kwargs)
 
-    primary_button = primary_cta(primary_cta_text, primary_cta_href, **primary_kwargs)
-    first_outline_button = outline_cta(
-        first_outline_text,
-        first_outline_href,
-        **first_outline,
+    buttons = [
+        _render_optional_hero_cta(
+            primary_cta,
+            primary_cta_text,
+            primary_cta_href,
+            primary_kwargs,
+        ),
+        _render_optional_hero_cta(
+            outline_cta,
+            first_outline_text,
+            first_outline_href,
+            first_outline,
+        ),
+        _render_optional_hero_cta(
+            outline_cta,
+            second_outline_text,
+            second_outline_href,
+            second_outline,
+        ),
+    ]
+
+    eyebrow_block = ""
+    if eyebrow_html:
+        eyebrow_block = (
+            '          <span class="eyebrow mb-3 d-inline-block">\n'
+            f'            {eyebrow_html}\n'
+            "          </span>\n"
+        )
+
+    description_block = ""
+    if description_html:
+        description_block = (
+            '          <p class="lead mx-auto mb-4" style="max-width: 38rem;">\n'
+            f'            {description_html}\n'
+            "          </p>\n"
+        )
+
+    button_markup = "".join(
+        f"            {button}\n" for button in buttons if button is not None
     )
-    second_outline_button = outline_cta(
-        second_outline_text,
-        second_outline_href,
-        **second_outline,
-    )
+    buttons_block = ""
+    if button_markup:
+        buttons_block = (
+            '          <div class="hero-cta d-grid gap-3 d-sm-flex justify-content-center">\n'
+            f"{button_markup}"
+            "          </div>\n"
+        )
 
     return Markup(
         (
-            '<section class="section">\n'
+            '<section class="section flashoffer-hero">\n'
             '  <div class="container">\n'
             '    <div class="row justify-content-center">\n'
             '      <div class="col-lg-10">\n'
             '        <div class="surface p-4 p-md-5 text-center">\n'
-            '          <span class="eyebrow mb-3 d-inline-block">\n'
-            f'            {eyebrow_html}\n'
-            '          </span>\n'
+            f"{eyebrow_block}"
             '          <h1 class="display-5 fw-semibold mb-3">\n'
             f'            {title_html}\n'
-            '          </h1>\n'
-            '          <p class="lead mx-auto mb-4" style="max-width: 38rem;">\n'
-            f'            {description_html}\n'
-            '          </p>\n'
-            '          <div class="hero-cta d-grid gap-3 d-sm-flex justify-content-center">\n'
-            f'            {primary_button}\n'
-            f'            {first_outline_button}\n'
-            f'            {second_outline_button}\n'
-            '          </div>\n'
-            '        </div>\n'
-            '      </div>\n'
-            '    </div>\n'
-            '  </div>\n'
-            '</section>'
+            "          </h1>\n"
+            f"{description_block}"
+            f"{buttons_block}"
+            "        </div>\n"
+            "      </div>\n"
+            "    </div>\n"
+            "  </div>\n"
+            "</section>"
         )
     )
 

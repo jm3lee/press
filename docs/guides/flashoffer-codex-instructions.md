@@ -13,6 +13,8 @@ agents know how to render landing page buttons using `pie.flashoffer`.
   Configure the eyebrow, heading, description, and each call-to-action via the
   helper parameters or pass keyword argument dictionaries through to the CTA
   helpers.
+- Pass `None` for any hero banner CTA text or link to omit that button. Set
+  `eyebrow` or `description` to `None` when those sections should be hidden.
 - Use `pie.flashoffer.preview_card(card)` to render the preview card markup.
   The `card` mapping must include `image_url`, `alt_text`, `link_href`, and
   `caption` keys.

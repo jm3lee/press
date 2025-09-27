@@ -43,41 +43,47 @@
     </nav>
     {% endif %}
 
-    <header
-      class="hero-header mb-5 text-white border-bottom position-relative bg-black d-flex align-items-center"
-    >
-      {% if header and header.get("src") %}
-      {% set hero_image_styles = [] %}
-      {% if header.get("object_position") %}
-      {% set hero_image_styles = hero_image_styles +
-        ["--hero-image-position: " ~ header.get("object_position")] %}
-      {% endif %}
-      {% if header.object_position_mobile %}
-      {% set hero_image_styles = hero_image_styles +
-        ["--hero-image-position-mobile: " ~ header.object_position_mobile] %}
-      {% endif %}
-      <img
-        src="{{ header.src }}"
-        {% if header.srcset %}srcset="{{ header.get('srcset') }}"
-        {% endif %}
-        sizes="100vw"
-        class="bg-image position-absolute top-0 start-0 w-100 h-100 object-fit-cover opacity-0"
-        onload="this.classList.add('opacity-100')"
-        {% if hero_image_styles %}style="{{ hero_image_styles | join('; ') }};"
-        {% endif %}
-        {% if header.get("alt") %}alt="{{ header.get('alt') }}"
-        {% else %}alt="Background"
-        {% endif %}
-      />
-      <div class="bg-overlay position-absolute top-0 start-0 w-100 h-100"></div>
-      {% endif %}
+    {% set show_hero_banner = true %}
+    {% set hero_config = {} %}
+    {% if hero_banner is defined %}
+    {% if hero_banner is sameas false %}
+    {% set show_hero_banner = false %}
+    {% elif hero_banner is mapping %}
+    {% set hero_config = hero_banner %}
+    {% endif %}
+    {% endif %}
+    {% if html is defined and html.hero_banner is defined %}
+    {% if html.hero_banner is sameas false %}
+    {% set show_hero_banner = false %}
+    {% elif html.hero_banner is mapping %}
+    {% set hero_config = html.hero_banner %}
+    {% endif %}
+    {% endif %}
 
-      <div class="container-fluid position-relative text-center">
-        <h1 class="display-3 fw-bold">
-          {% if page_heading %} {{ page_heading }} {% else %} {{ doc.title }} {% endif %}
-        </h1>
-      </div>
-    </header>
+    {% if show_hero_banner %}
+    {% set hero_title = hero_config.get('title') if hero_config.get('title') is not none else None %}
+    {% if hero_title is none %}
+    {% if page_heading is defined and page_heading %}
+    {% set hero_title = page_heading %}
+    {% else %}
+    {% set hero_title = doc.title %}
+    {% endif %}
+    {% endif %}
+    {{ pie.flashoffer.hero_banner(
+      eyebrow=hero_config.get('eyebrow'),
+      title=hero_title,
+      description=hero_config.get('description'),
+      primary_cta_text=hero_config.get('primary_cta_text'),
+      primary_cta_href=hero_config.get('primary_cta_href'),
+      primary_cta_kwargs=hero_config.get('primary_cta_kwargs'),
+      first_outline_text=hero_config.get('first_outline_text'),
+      first_outline_href=hero_config.get('first_outline_href'),
+      first_outline_kwargs=hero_config.get('first_outline_kwargs'),
+      second_outline_text=hero_config.get('second_outline_text'),
+      second_outline_href=hero_config.get('second_outline_href'),
+      second_outline_kwargs=hero_config.get('second_outline_kwargs'),
+    ) }}
+    {% endif %}
 
     <main class="container mb-5" style="max-width: 65ch">
       {% if doc.breadcrumbs %}
@@ -160,8 +166,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
     {% if show_navbar %}
     <script>
-      window.addEventListener("DOMContentLoaded", () => {
-        const hero = document.querySelector(".hero-header");
+        window.addEventListener("DOMContentLoaded", () => {
+          const hero = document.querySelector(".flashoffer-hero");
         const titleEl = document.querySelector(".navbar .page-title");
         if (!titleEl) return;
         if (!hero) {
