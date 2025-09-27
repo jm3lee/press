@@ -32,6 +32,9 @@ for details on the structure of this metadata.
   render the landing page call-to-action buttons. Both helpers mirror the
   original Jinja macros, support optional `rel`/`target` parameters, and accept
   arbitrary HTML attributes via keyword arguments.
+- `pie.flashoffer.preview_card(card)` – render the Flashoffer preview card.
+  Provide a mapping with `image_url`, `alt_text`, `link_href`, and `caption`
+  entries to populate the image, overlay link, and caption text.
 
 Example:
 

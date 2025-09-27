@@ -9,14 +9,28 @@ from pie import flashoffer
     [
         (flashoffer.primary_cta, "btn btn-primary btn-lg px-4"),
         (flashoffer.outline_cta, "btn btn-outline-light btn-lg px-4"),
+        (flashoffer.preview_card, None),
     ],
 )
 def test_cta_renders_anchor_with_expected_classes(helper, expected_class):
-    html = helper("Join", "/apply")
+    if helper is flashoffer.preview_card:
+        html = helper(
+            {
+                "image_url": "https://cdn.example.com/preview.jpg",
+                "alt_text": "Preview image",
+                "link_href": "https://example.com/full",
+                "caption": "A short caption",
+            }
+        )
+    else:
+        html = helper("Join", "/apply")
     assert isinstance(html, Markup)
-    assert html == Markup(
-        f'<a class="{expected_class}" href="/apply">Join</a>'
-    )
+    if helper is flashoffer.preview_card:
+        assert html.startswith("<div class=\"col\">")
+    else:
+        assert html == Markup(
+            f'<a class="{expected_class}" href="/apply">Join</a>'
+        )
 
 
 def test_cta_includes_optional_attributes_and_extra_kwargs():
@@ -59,6 +73,107 @@ def test_cta_preserves_markup_text():
     )
 
 
+def test_preview_card_renders_expected_markup():
+    html = flashoffer.preview_card(
+        {
+            "image_url": "https://cdn.example.com/image.jpg",
+            "alt_text": "Hero image",
+            "link_href": "https://example.com/gallery",
+            "caption": "The caption",
+        }
+    )
+    assert html == Markup(
+        '<div class="col">\n'
+        '  <div class="card h-100 bg-dark border border-light-subtle shadow-sm">\n'
+        '    <div\n'
+        '      class="card-img-top bg-black d-flex align-items-center justify-content-center rounded-top overflow-hidden position-relative preview-card"\n'
+        '    >\n'
+        '      <img\n'
+        '        src="https://cdn.example.com/image.jpg"\n'
+        '        class="img-fluid w-100 h-auto preview-image"\n'
+        '        alt="Hero image"\n'
+        '        loading="lazy"\n'
+        '      />\n'
+        '      <div class="preview-overlay">\n'
+        '        <div class="text-center px-3">\n'
+        '          <p class="mb-2 fw-semibold">Tap to reveal this artistic nude pose.</p>\n'
+        '          <a class="btn btn-outline-light btn-sm preview-toggle" href="https://example.com/gallery" role="button">\n'
+        '            View image\n'
+        '          </a>\n'
+        '        </div>\n'
+        '      </div>\n'
+        '    </div>\n'
+        '    <div class="card-body">\n'
+        '      <p class="card-text mb-0 text-white-50">The caption</p>\n'
+        '    </div>\n'
+        '  </div>\n'
+        '</div>'
+    )
+
+
+def test_preview_card_escapes_attribute_values_and_caption_text():
+    html = flashoffer.preview_card(
+        {
+            "image_url": '/img?tag="x"',
+            "alt_text": 'Alt "quote"',
+            "link_href": '/preview?ref="full"',
+            "caption": 'Use <em>markup</em>',
+        }
+    )
+    assert html == Markup(
+        '<div class="col">\n'
+        '  <div class="card h-100 bg-dark border border-light-subtle shadow-sm">\n'
+        '    <div\n'
+        '      class="card-img-top bg-black d-flex align-items-center justify-content-center rounded-top overflow-hidden position-relative preview-card"\n'
+        '    >\n'
+        '      <img\n'
+        '        src="/img?tag=&#34;x&#34;"\n'
+        '        class="img-fluid w-100 h-auto preview-image"\n'
+        '        alt="Alt &#34;quote&#34;"\n'
+        '        loading="lazy"\n'
+        '      />\n'
+        '      <div class="preview-overlay">\n'
+        '        <div class="text-center px-3">\n'
+        '          <p class="mb-2 fw-semibold">Tap to reveal this artistic nude pose.</p>\n'
+        '          <a class="btn btn-outline-light btn-sm preview-toggle" href="/preview?ref=&#34;full&#34;" role="button">\n'
+        '            View image\n'
+        '          </a>\n'
+        '        </div>\n'
+        '      </div>\n'
+        '    </div>\n'
+        '    <div class="card-body">\n'
+        '      <p class="card-text mb-0 text-white-50">Use &lt;em&gt;markup&lt;/em&gt;</p>\n'
+        '    </div>\n'
+        '  </div>\n'
+        '</div>'
+    )
+
+
+def test_preview_card_preserves_markup_caption():
+    html = flashoffer.preview_card(
+        {
+            "image_url": "image.jpg",
+            "alt_text": "Alt",
+            "link_href": "link",
+            "caption": Markup("Line with <strong>markup</strong>"),
+        }
+    )
+    assert "<strong>markup</strong>" in html
+
+
+@pytest.mark.parametrize("missing_key", ["image_url", "alt_text", "link_href", "caption"])
+def test_preview_card_requires_expected_card_keys(missing_key):
+    card = {
+        "image_url": "image.jpg",
+        "alt_text": "Alt",
+        "link_href": "link",
+        "caption": "Caption",
+    }
+    card.pop(missing_key)
+    with pytest.raises(KeyError):
+        flashoffer.preview_card(card)
+
+
 def test_flashoffer_module_is_registered_with_jinja_globals(monkeypatch, tmp_path):
     import sys
     import types
@@ -93,3 +208,4 @@ def test_flashoffer_module_is_registered_with_jinja_globals(monkeypatch, tmp_pat
     flashoffer_global = jinja.env.globals["pie"]["flashoffer"]
     assert flashoffer_global.primary_cta is flashoffer.primary_cta
     assert flashoffer_global.outline_cta is flashoffer.outline_cta
+    assert flashoffer_global.preview_card is flashoffer.preview_card

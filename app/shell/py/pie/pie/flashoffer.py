@@ -10,12 +10,12 @@ any extra keyword arguments are rendered verbatim as HTML attributes.
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from typing import Any
 
 from markupsafe import Markup, escape
 
-__all__ = ["primary_cta", "outline_cta"]
+__all__ = ["primary_cta", "outline_cta", "preview_card"]
 
 
 def _merge_attrs(
@@ -116,4 +116,62 @@ def outline_cta(
         rel=rel,
         target=target,
         **attrs,
+    )
+
+
+def _require_card_value(card: Mapping[str, Any], key: str) -> Any:
+    try:
+        return card[key]
+    except KeyError as exc:  # pragma: no cover - defensive branch
+        raise KeyError(
+            "preview_card() card mapping is missing required key " f"'{key}'"
+        ) from exc
+
+
+def _escape_attr_value(value: Any) -> Markup:
+    return escape(str(value))
+
+
+def _coerce_html(value: Any) -> Markup:
+    if isinstance(value, Markup):
+        return value
+    return escape(value)
+
+
+def preview_card(card: Mapping[str, Any]) -> Markup:
+    """Render the Flashoffer preview card partial."""
+
+    image_url = _escape_attr_value(_require_card_value(card, "image_url"))
+    alt_text = _escape_attr_value(_require_card_value(card, "alt_text"))
+    link_href = _escape_attr_value(_require_card_value(card, "link_href"))
+    caption = _coerce_html(_require_card_value(card, "caption"))
+
+    return Markup(
+        (
+            '<div class="col">\n'
+            '  <div class="card h-100 bg-dark border border-light-subtle shadow-sm">\n'
+            '    <div\n'
+            '      class="card-img-top bg-black d-flex align-items-center justify-content-center rounded-top overflow-hidden position-relative preview-card"\n'
+            '    >\n'
+            '      <img\n'
+            f'        src="{image_url}"\n'
+            '        class="img-fluid w-100 h-auto preview-image"\n'
+            f'        alt="{alt_text}"\n'
+            '        loading="lazy"\n'
+            '      />\n'
+            '      <div class="preview-overlay">\n'
+            '        <div class="text-center px-3">\n'
+            '          <p class="mb-2 fw-semibold">Tap to reveal this artistic nude pose.</p>\n'
+            f'          <a class="btn btn-outline-light btn-sm preview-toggle" href="{link_href}" role="button">\n'
+            '            View image\n'
+            '          </a>\n'
+            '        </div>\n'
+            '      </div>\n'
+            '    </div>\n'
+            '    <div class="card-body">\n'
+            f'      <p class="card-text mb-0 text-white-50">{caption}</p>\n'
+            '    </div>\n'
+            '  </div>\n'
+            '</div>'
+        )
     )
