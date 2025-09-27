@@ -60,4 +60,11 @@ are no longer mirrored at the top level and must be provided explicitly:
 - `press.id` – Canonical identifier for the document.
 - `press.schema` – Schema version string. This must be set to `"v2"` and is
   not generated automatically.
+- `press.author` – Optional author override surfaced in Press-generated
+  metadata.
+- `press.title` – Optional title override for downstream integrations.
+- `press.pubdate` – Publication date formatted like `Jan 05, 2023`. When the
+  value is omitted no date is emitted.
+- `press.mathjax` – Boolean flag enabling MathJax; defaults to `false` when
+  unspecified.
 
