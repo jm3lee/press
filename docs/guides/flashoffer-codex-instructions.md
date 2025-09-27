@@ -27,3 +27,29 @@ agents know how to render landing page buttons using `pie.flashoffer`.
   markup in `markupsafe.Markup` if you need to opt out of escaping. The preview
   card preserves `Markup` captions while escaping plain text strings.
 ```
+
+## Hero banner parameters
+
+`pie.flashoffer.hero_banner` renders the landing hero with an eyebrow, heading,
+supporting copy, and up to three CTAs. The helper accepts:
+
+- `eyebrow`, `title`, and `description` – either plain strings or trusted
+  `Markup`. Use `Markup` when the layout needs inline emphasis, just as you
+  would for preview captions in the
+  [preview card example](../../src/examples/flashoffer.md#preview-card).
+- `primary_cta_text` and `primary_cta_href` – populate the filled CTA. Extend
+  or override button attributes with `primary_cta_kwargs`, which forwards keys
+  like `extra_classes`, `rel`, and `target` to
+  [`pie.flashoffer.primary_cta`](../../src/examples/flashoffer.md#primary-cta).
+  Link labels should align with the footer language described in the
+  [Flashoffer footer](../../src/examples/flashoffer.md#footer) guidance.
+- `first_outline_text`/`href` and `second_outline_text`/`href` – populate the
+  outline CTAs. Each CTA also accepts a `*_kwargs` mapping. These dictionaries
+  are passed straight into `pie.flashoffer.outline_cta`, so you can add
+  tracking attributes or reuse the same label overrides that appear alongside
+  the [preview card helper](../../src/examples/flashoffer.md#preview-card).
+
+To hide a CTA entirely, supply a utility class through the corresponding
+`*_kwargs`, for example `{"extra_classes": "d-none"}`. You can also reorder
+buttons inside the responsive flex container by assigning Bootstrap order
+classes (`order-2`, `order-3`, and so on) via the same dictionaries.

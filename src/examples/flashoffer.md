@@ -74,6 +74,64 @@ renders as:
     data_tracking_id="hero-secondary",
 ) }}
 
+## Hero banner
+
+Combine the hero banner with the CTA helpers when you need a landing intro
+section that links to supporting content. Reuse the same keyword arguments
+described in the [Primary CTA](#primary-cta) and [Outline CTA](#outline-cta)
+sections to set analytics attributes or alter the button order. Linking the
+first outline CTA to `#preview-card` keeps the hero aligned with the
+[Preview card](#preview-card) gallery, while the second outline CTA can mirror
+compliance language documented in the [Footer](#footer).
+
+```jinja
+{% set primary_kwargs = {
+    "extra_classes": "shadow-lg",
+    "data_tracking_id": "hero-primary",
+} %}
+{% set first_outline_kwargs = {
+    "extra_classes": "order-3 order-sm-2",
+    "data_tracking_id": "hero-preview",
+} %}
+{% set second_outline_kwargs = {
+    "extra_classes": "order-2 order-sm-3",
+    "data_tracking_id": "hero-compliance",
+} %}
+{{ pie.flashoffer.hero_banner(
+    eyebrow="Limited-run bundles",
+    title="Stone Canvas: Medusa release",
+    description="Pair live session studies with downloadable references tuned "
+    "for the Stone Canvas Medusa campaign.",
+    primary_cta_text="Start your free trial",
+    primary_cta_href="/signup",
+    primary_cta_kwargs=primary_kwargs,
+    first_outline_text="See preview gallery",
+    first_outline_href="#preview-card",
+    first_outline_kwargs=first_outline_kwargs,
+    second_outline_text="Read studio policies",
+    second_outline_href="/policies",
+    second_outline_kwargs=second_outline_kwargs,
+) }}
+```
+
+renders as:
+
+{{ pie.flashoffer.hero_banner(
+    eyebrow="Limited-run bundles",
+    title="Stone Canvas: Medusa release",
+    description="Pair live session studies with downloadable references tuned "
+    "for the Stone Canvas Medusa campaign.",
+    primary_cta_text="Start your free trial",
+    primary_cta_href="/signup",
+    primary_cta_kwargs=primary_kwargs,
+    first_outline_text="See preview gallery",
+    first_outline_href="#preview-card",
+    first_outline_kwargs=first_outline_kwargs,
+    second_outline_text="Read studio policies",
+    second_outline_href="/policies",
+    second_outline_kwargs=second_outline_kwargs,
+) }}
+
 ## Preview card
 
 Combine the preview card with CTA helpers when a template needs to hide the

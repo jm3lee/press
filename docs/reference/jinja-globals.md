@@ -38,6 +38,14 @@ for details on the structure of this metadata.
   populate the image, overlay link, and caption text. Override the overlay
   keyword arguments to customise the message and button label without giving up
   HTML escaping.
+- `pie.flashoffer.hero_banner(...)` – render the hero section composed of an
+  eyebrow, `h1` title, supporting `<p>` description, and a flex container with
+  one primary CTA plus two outline CTAs. Provide `eyebrow`, `title`,
+  `description`, `primary_cta_text`, and `primary_cta_href`. Outline CTAs are
+  optional and configured with `first_outline_text`/`href` and
+  `second_outline_text`/`href`. Pass `primary_cta_kwargs` and the outline
+  `*_kwargs` dictionaries to forward keyword arguments directly into the CTA
+  helpers when you need to adjust labels, tracking attributes, or button order.
 - `pie.flashoffer.footer(...)` – render the Flashoffer footer layout. All text
   displayed to users can be customized through keyword arguments while the
   helper continues to escape plain strings safely.
