@@ -9,6 +9,10 @@ agents know how to render landing page buttons using `pie.flashoffer`.
   target=None, **attrs)` for the solid call-to-action button.
 - Use `pie.flashoffer.outline_cta(text, href, extra_classes="", rel=None,
   target=None, **attrs)` for the outline button variant.
+- Use `pie.flashoffer.hero_banner(...)` to render the Flashoffer hero banner.
+  Configure the eyebrow, heading, description, and each call-to-action via the
+  helper parameters or pass keyword argument dictionaries through to the CTA
+  helpers.
 - Use `pie.flashoffer.preview_card(card)` to render the preview card markup.
   The `card` mapping must include `image_url`, `alt_text`, `link_href`, and
   `caption` keys.
