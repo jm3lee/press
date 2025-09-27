@@ -24,6 +24,34 @@ from pie.logging import configure_logging, logger
 from pie.metadata import load_metadata_pair
 
 METADATA_EXTS = {".md", ".mdi", ".yml", ".yaml"}
+SUPPORTED_SCHEMA = "v1"
+
+
+def _metadata_schema(metadata: Mapping[str, Any]) -> str | None:
+    """Return the schema version encoded in ``metadata`` if present."""
+
+    schema = metadata.get("schema")
+    if isinstance(schema, str):
+        return schema
+
+    press = metadata.get("press")
+    if isinstance(press, Mapping):
+        press_schema = press.get("schema")
+        if isinstance(press_schema, str):
+            return press_schema
+
+    return None
+
+
+def _is_supported_metadata(metadata: Mapping[str, Any]) -> bool:
+    """Return ``True`` when ``metadata`` uses the supported schema version."""
+
+    schema = _metadata_schema(metadata)
+    if schema is None:
+        return True
+    if schema == SUPPORTED_SCHEMA:
+        return True
+    return False
 
 
 def load_index(path: str | Path) -> Mapping[str, Mapping[str, Any]]:
@@ -132,9 +160,17 @@ def load_directory_index(path: Path) -> tuple[dict[str, dict[str, Any]], int]:
     index: dict[str, dict[str, Any]] = {}
     num_workers = min(10, max(2, os.cpu_count() or 1))
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
-        for metadata in executor.map(load_metadata_pair, paths):
-            if metadata:
-                index[metadata["id"]] = metadata
+        for source_path, metadata in zip(paths, executor.map(load_metadata_pair, paths)):
+            if not metadata:
+                continue
+            if not _is_supported_metadata(metadata):
+                logger.debug(
+                    "Skipping unsupported metadata schema",
+                    path=str(source_path),
+                    schema=_metadata_schema(metadata),
+                )
+                continue
+            index[metadata["id"]] = metadata
 
     return index, len(paths)
 
@@ -157,6 +193,12 @@ def load_index_from_path(path: Path) -> tuple[dict[str, dict[str, Any]], int]:
         doc_id = metadata.get("id")
         if not doc_id:
             warnings.warn("Missing 'id' field in metadata", UserWarning)
+            raise SystemExit(1)
+
+        if not _is_supported_metadata(metadata):
+            logger.error(
+                "Unsupported metadata schema", schema=_metadata_schema(metadata)
+            )
             raise SystemExit(1)
 
         return {doc_id: metadata}, 1

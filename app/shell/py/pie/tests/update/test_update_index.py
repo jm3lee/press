@@ -83,6 +83,26 @@ def test_main_directory_processes_yamls(tmp_path, monkeypatch):
     assert fake.get("b.url") == "/b.html"
 
 
+def test_main_directory_skips_non_v1_schema(tmp_path, monkeypatch):
+    """Metadata using schemas other than v1 are ignored."""
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "a.yml").write_text('schema: v1\ntitle: Foo\n')
+    (src / "b.yml").write_text('schema: v2\ntitle: Bar\n')
+
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
+
+    os.chdir(tmp_path)
+    try:
+        update_index.main(["src"])
+    finally:
+        os.chdir("/tmp")
+
+    assert fake.get("a.title") == "Foo"
+    assert fake.get("b.title") is None
+
+
 def test_main_single_yaml_file(tmp_path, monkeypatch):
     """Single YAML file populates Redis."""
     src = tmp_path / "src"
@@ -101,6 +121,26 @@ def test_main_single_yaml_file(tmp_path, monkeypatch):
 
     assert fake.get("item.title") == "Foo"
     assert fake.get("item.url") == "/item.html"
+
+
+def test_main_single_yaml_non_v1_schema_errors(tmp_path, monkeypatch):
+    """Processing a single v2 schema file aborts with an error."""
+    src = tmp_path / "src"
+    src.mkdir()
+    yml = src / "item.yml"
+    yml.write_text('schema: v2\ntitle: Foo\n')
+
+    fake = fakeredis.FakeRedis(decode_responses=True)
+    monkeypatch.setattr(update_index.redis, "Redis", lambda *a, **kw: fake)
+
+    os.chdir(tmp_path)
+    try:
+        with pytest.raises(SystemExit):
+            update_index.main(["src/item.yml"])
+    finally:
+        os.chdir("/tmp")
+
+    assert fake.keys() == []
 
 
 def test_main_combines_md_and_yaml(tmp_path, monkeypatch):
