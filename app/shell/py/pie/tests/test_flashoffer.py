@@ -73,6 +73,20 @@ def test_cta_preserves_markup_text():
     )
 
 
+def test_hero_banner_uses_theme_background():
+    html = flashoffer.hero_banner()
+    expected_style = (
+        'style="background: var('
+        "--flashoffer-hero-background, "
+        "radial-gradient(circle at 10% -10%, rgba(255, 92, 92, 0.18), "
+        "transparent 45%), "
+        "radial-gradient(circle at 110% 20%, rgba(34, 139, 230, 0.16), "
+        "transparent 55%), "
+        'var(--press-background, #090b10));"'
+    )
+    assert expected_style in html
+
+
 def test_preview_card_renders_expected_markup():
     html = flashoffer.preview_card(
         {

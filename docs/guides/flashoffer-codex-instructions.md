@@ -53,3 +53,7 @@ To hide a CTA entirely, supply a utility class through the corresponding
 `*_kwargs`, for example `{"extra_classes": "d-none"}`. You can also reorder
 buttons inside the responsive flex container by assigning Bootstrap order
 classes (`order-2`, `order-3`, and so on) via the same dictionaries.
+
+The hero container ships with a gradient background that mirrors the Press
+theme. Override it by setting a custom `--flashoffer-hero-background` value in
+your CSS when a landing page needs different art direction.

@@ -132,6 +132,10 @@ renders as:
     second_outline_kwargs=second_outline_kwargs,
 ) }}
 
+The helper applies a gradient background that matches the Press theme. Define a
+`--flashoffer-hero-background` custom property in your stylesheet to supply a
+different background when needed.
+
 ## Preview card
 
 Combine the preview card with CTA helpers when a template needs to hide the
