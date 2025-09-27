@@ -5,6 +5,7 @@ fakeredis
 flatten-dict
 beautifulsoup4
 jinja2
+markupsafe
 cmarkgfm
 pytest
 pytest-cov
