@@ -7,6 +7,8 @@ Available helpers:
   target=None, **attrs)` renders the filled primary button.
 - `pie.flashoffer.outline_cta(text, href, extra_classes="", rel=None,
   target=None, **attrs)` renders the outline secondary button.
+- `pie.flashoffer.preview_card(card)` renders the Flashoffer preview card from
+  a mapping that includes `image_url`, `alt_text`, `link_href`, and `caption`.
 
 ## Step-by-step instructions
 
@@ -72,3 +74,18 @@ renders as:
     data_tracking_id="hero-secondary",
 ) }}
 </div>
+
+## Preview card
+
+Combine the preview card with CTA helpers when a template needs to hide the
+full image behind a tap target.
+
+```jinja
+{% set preview = {
+    "image_url": "https://cdn.example.com/image.jpg",
+    "alt_text": "Gallery preview",
+    "link_href": "https://example.com/gallery",
+    "caption": "Captured in natural light.",
+} %}
+{{ pie.flashoffer.preview_card(preview) }}
+```
