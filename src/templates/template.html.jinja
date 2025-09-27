@@ -39,6 +39,15 @@
       class="hero-header mb-5 text-white border-bottom position-relative bg-black d-flex align-items-center"
     >
       {% if header and header.get("src") %}
+      {% set hero_image_styles = [] %}
+      {% if header.get("object_position") %}
+      {% set hero_image_styles = hero_image_styles +
+        ["--hero-image-position: " ~ header.get("object_position")] %}
+      {% endif %}
+      {% if header.object_position_mobile %}
+      {% set hero_image_styles = hero_image_styles +
+        ["--hero-image-position-mobile: " ~ header.object_position_mobile] %}
+      {% endif %}
       <img
         src="{{ header.src }}"
         {% if header.srcset %}srcset="{{ header.get('srcset') }}"
@@ -46,6 +55,8 @@
         sizes="100vw"
         class="bg-image position-absolute top-0 start-0 w-100 h-100 object-fit-cover opacity-0"
         onload="this.classList.add('opacity-100')"
+        {% if hero_image_styles %}style="{{ hero_image_styles | join('; ') }};"
+        {% endif %}
         {% if header.get("alt") %}alt="{{ header.get('alt') }}"
         {% else %}alt="Background"
         {% endif %}
@@ -59,35 +70,6 @@
         </h1>
       </div>
     </header>
-
-    <style>
-      .hero-header {
-        min-height: 30vh;
-      }
-      {% if header and header.get('src') %}
-      .bg-image {
-        transition: opacity 0.6s ease;
-        {% if header.get('object_position') %}object-position: {{ header.get('object_position') }};{% endif %}
-      }
-      {% if header.object_position_mobile %}
-      @media (max-width: 576px) {
-        .bg-image {
-          object-position: {{ header.object_position_mobile }};
-        }
-      }
-      {% endif %}
-      .bg-overlay {
-        /* Slightly stronger at the bottom; adjust as needed */
-        background: linear-gradient(
-          180deg,
-          rgba(0, 0, 0, 0.45) 0%,
-          rgba(0, 0, 0, 0.65) 60%,
-          rgba(0, 0, 0, 0.75) 100%
-        );
-        pointer-events: none;
-      }
-      {% endif %}
-    </style>
 
     <main class="container mb-5" style="max-width: 65ch">
       {% if doc.breadcrumbs %}
