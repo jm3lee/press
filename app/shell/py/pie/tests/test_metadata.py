@@ -98,10 +98,28 @@ def test_press_invalid_schema_raises():
 def test_metadata_v2_to_dict():
     """MetadataV2 serializes only ``press`` information."""
     from pie.model import MetadataV2, Press
+    from datetime import datetime
 
-    metadata_v2 = MetadataV2(press=Press(id="doc"))
+    metadata_v2 = MetadataV2(
+        press=Press(
+            id="doc",
+            author="Ada Lovelace",
+            title="Analytical Engine",
+            pubdate=datetime(2023, 1, 5),
+            mathjax=True,
+        )
+    )
 
-    assert metadata_v2.to_dict() == {"press": {"id": "doc", "schema": "v2"}}
+    assert metadata_v2.to_dict() == {
+        "press": {
+            "id": "doc",
+            "schema": "v2",
+            "author": "Ada Lovelace",
+            "title": "Analytical Engine",
+            "pubdate": "Jan 05, 2023",
+            "mathjax": True,
+        }
+    }
 
 
 def test_metadata_v2_rejects_unknown_fields():
