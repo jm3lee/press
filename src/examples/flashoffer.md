@@ -27,9 +27,38 @@ Available helpers:
 
 Use the primary helper for your most important action.
 
-```jinja
-{{ pie.flashoffer.primary_cta("Start your free trial", "/signup") }}
-```
+<div
+  class="accordion mb-4"
+  id="flashoffer-primary-cta-code"
+>
+  <div class="accordion-item">
+    <h2
+      class="accordion-header"
+      id="flashoffer-primary-cta-code-heading"
+    >
+      <button
+        class="accordion-button collapsed"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#flashoffer-primary-cta-code-body"
+        aria-expanded="false"
+        aria-controls="flashoffer-primary-cta-code-body"
+      >
+        View template code
+      </button>
+    </h2>
+    <div
+      id="flashoffer-primary-cta-code-body"
+      class="accordion-collapse collapse"
+      aria-labelledby="flashoffer-primary-cta-code-heading"
+      data-bs-parent="#flashoffer-primary-cta-code"
+    >
+      <div class="accordion-body">
+<pre><code class="language-jinja">{{ pie.flashoffer.primary_cta("Start your free trial", "/signup") }}</code></pre>
+      </div>
+    </div>
+  </div>
+</div>
 
 renders as:
 
@@ -39,9 +68,38 @@ renders as:
 
 Pair the outline helper with the primary button to offer a secondary action.
 
-```jinja
-{{ pie.flashoffer.outline_cta("Talk to sales", "/contact") }}
-```
+<div
+  class="accordion mb-4"
+  id="flashoffer-outline-cta-code"
+>
+  <div class="accordion-item">
+    <h2
+      class="accordion-header"
+      id="flashoffer-outline-cta-code-heading"
+    >
+      <button
+        class="accordion-button collapsed"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#flashoffer-outline-cta-code-body"
+        aria-expanded="false"
+        aria-controls="flashoffer-outline-cta-code-body"
+      >
+        View template code
+      </button>
+    </h2>
+    <div
+      id="flashoffer-outline-cta-code-body"
+      class="accordion-collapse collapse"
+      aria-labelledby="flashoffer-outline-cta-code-heading"
+      data-bs-parent="#flashoffer-outline-cta-code"
+    >
+      <div class="accordion-body">
+<pre><code class="language-jinja">{{ pie.flashoffer.outline_cta("Talk to sales", "/contact") }}</code></pre>
+      </div>
+    </div>
+  </div>
+</div>
 
 renders as:
 
@@ -52,16 +110,45 @@ renders as:
 You can combine helpers with additional classes and attributes to match your
 layout or analytics requirements.
 
-```jinja
-{{ pie.flashoffer.outline_cta(
+<div
+  class="accordion mb-4"
+  id="flashoffer-customize-code"
+>
+  <div class="accordion-item">
+    <h2
+      class="accordion-header"
+      id="flashoffer-customize-code-heading"
+    >
+      <button
+        class="accordion-button collapsed"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#flashoffer-customize-code-body"
+        aria-expanded="false"
+        aria-controls="flashoffer-customize-code-body"
+      >
+        View template code
+      </button>
+    </h2>
+    <div
+      id="flashoffer-customize-code-body"
+      class="accordion-collapse collapse"
+      aria-labelledby="flashoffer-customize-code-heading"
+      data-bs-parent="#flashoffer-customize-code"
+    >
+      <div class="accordion-body">
+<pre><code class="language-jinja">{{ pie.flashoffer.outline_cta(
     "View partner pricing",
     "https://example.com/pricing",
     extra_classes="mt-3",
     rel="noopener",
     target="_blank",
     data_tracking_id="hero-secondary",
-) }}
-```
+) }}</code></pre>
+      </div>
+    </div>
+  </div>
+</div>
 
 renders as:
 
@@ -79,15 +166,44 @@ renders as:
 Combine the preview card with CTA helpers when a template needs to hide the
 full image behind a tap target.
 
-```jinja
-{% set preview = {
+<div
+  class="accordion mb-4"
+  id="flashoffer-preview-card-code"
+>
+  <div class="accordion-item">
+    <h2
+      class="accordion-header"
+      id="flashoffer-preview-card-code-heading"
+    >
+      <button
+        class="accordion-button collapsed"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#flashoffer-preview-card-code-body"
+        aria-expanded="false"
+        aria-controls="flashoffer-preview-card-code-body"
+      >
+        View template code
+      </button>
+    </h2>
+    <div
+      id="flashoffer-preview-card-code-body"
+      class="accordion-collapse collapse"
+      aria-labelledby="flashoffer-preview-card-code-heading"
+      data-bs-parent="#flashoffer-preview-card-code"
+    >
+      <div class="accordion-body">
+<pre><code class="language-jinja">{% set preview = {
     "image_url": "https://cdn.example.com/image.jpg",
     "alt_text": "Gallery preview",
     "link_href": "https://example.com/gallery",
     "caption": "Captured in natural light.",
 } %}
-{{ pie.flashoffer.preview_card(preview) }}
-```
+{{ pie.flashoffer.preview_card(preview) }}</code></pre>
+      </div>
+    </div>
+  </div>
+</div>
 {% set preview = {
     "image_url": "https://seattlefigurestudio.sfo3.cdn.digitaloceanspaces.com/landing/favicon-48x48.png",
     "alt_text": "Seattle Figure Studio Favicon",
@@ -114,49 +230,78 @@ The reusable partial at
 centralised and makes it easy to swap in new cards or update the button text
 in one place.
 
-```jinja
 <div
-  class="alert alert-warning d-flex align-items-center gap-2"
-  role="alert"
+  class="accordion mb-4"
+  id="flashoffer-preview-grid-code"
 >
-  <span class="fw-semibold text-uppercase small">Heads up</span>
-  <span>Preview links should comply with your terms of service.</span>
-</div>
+  <div class="accordion-item">
+    <h2
+      class="accordion-header"
+      id="flashoffer-preview-grid-code-heading"
+    >
+      <button
+        class="accordion-button collapsed"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#flashoffer-preview-grid-code-body"
+        aria-expanded="false"
+        aria-controls="flashoffer-preview-grid-code-body"
+      >
+        View template code
+      </button>
+    </h2>
+    <div
+      id="flashoffer-preview-grid-code-body"
+      class="accordion-collapse collapse"
+      aria-labelledby="flashoffer-preview-grid-code-heading"
+      data-bs-parent="#flashoffer-preview-grid-code"
+    >
+      <div class="accordion-body">
+<pre><code class="language-jinja">&lt;div
+  class=&quot;alert alert-warning d-flex align-items-center gap-2&quot;
+  role=&quot;alert&quot;
+&gt;
+  &lt;span class=&quot;fw-semibold text-uppercase small&quot;&gt;Heads up&lt;/span&gt;
+  &lt;span&gt;Preview links should comply with your terms of service.&lt;/span&gt;
+&lt;/div&gt;
 
 {% set card_list = [
     {
-        "image_url": "https://picsum.photos/seed/flashoffer-1/640/480",
-        "alt_text": "Dynamic seated pose",
-        "link_href": "https://example.com/bundles/dynamic",
-        "caption": "45-minute seated gestures with charcoal studies.",
+        &quot;image_url&quot;: &quot;https://picsum.photos/seed/flashoffer-1/640/480&quot;,
+        &quot;alt_text&quot;: &quot;Dynamic seated pose&quot;,
+        &quot;link_href&quot;: &quot;https://example.com/bundles/dynamic&quot;,
+        &quot;caption&quot;: &quot;45-minute seated gestures with charcoal studies.&quot;,
     },
     {
-        "image_url": "https://picsum.photos/seed/flashoffer-2/640/480",
-        "alt_text": "Contrapposto profile pose",
-        "link_href": "https://example.com/bundles/profile",
-        "caption": "Standing contrapposto sequence captured at 5 angles.",
+        &quot;image_url&quot;: &quot;https://picsum.photos/seed/flashoffer-2/640/480&quot;,
+        &quot;alt_text&quot;: &quot;Contrapposto profile pose&quot;,
+        &quot;link_href&quot;: &quot;https://example.com/bundles/profile&quot;,
+        &quot;caption&quot;: &quot;Standing contrapposto sequence captured at 5 angles.&quot;,
     },
     {
-        "image_url": "https://picsum.photos/seed/flashoffer-3/640/480",
-        "alt_text": "Foreshortened reclining pose",
-        "link_href": "https://example.com/bundles/reclining",
-        "caption": "Foreshortened reclining study with lighting notes.",
+        &quot;image_url&quot;: &quot;https://picsum.photos/seed/flashoffer-3/640/480&quot;,
+        &quot;alt_text&quot;: &quot;Foreshortened reclining pose&quot;,
+        &quot;link_href&quot;: &quot;https://example.com/bundles/reclining&quot;,
+        &quot;caption&quot;: &quot;Foreshortened reclining study with lighting notes.&quot;,
     },
 ] %}
 
-{% include "examples/flashoffer-card-grid.html.jinja" %}
+{% include &quot;examples/flashoffer-card-grid.html.jinja&quot; %}
 
-<div class="mt-4 d-grid gap-3 d-sm-flex justify-content-center">
+&lt;div class=&quot;mt-4 d-grid gap-3 d-sm-flex justify-content-center&quot;&gt;
   {{ pie.flashoffer.primary_cta(
-      "Download the full bundle",
-      "https://example.com/bundles/download"
+      &quot;Download the full bundle&quot;,
+      &quot;https://example.com/bundles/download&quot;
   ) }}
   {{ pie.flashoffer.outline_cta(
-      "See studio policies",
-      "https://example.com/policies"
+      &quot;See studio policies&quot;,
+      &quot;https://example.com/policies&quot;
   ) }}
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+  </div>
 </div>
-```
 
 renders as:
 
@@ -205,15 +350,44 @@ renders as:
 
 Use the footer helper to render the contact information block.
 
-```jinja
-{{ pie.flashoffer.footer(
-    left_prefix="©&nbsp;",
-    site_name="Seattle Figure Studio",
-    site_href="https://seattlefigurestudio.com",
-    rights_statement="All rights reserved.",
-    email_label="brian@seattlefigurestudio.com",
-) }}
-```
+<div
+  class="accordion mb-4"
+  id="flashoffer-footer-code"
+>
+  <div class="accordion-item">
+    <h2
+      class="accordion-header"
+      id="flashoffer-footer-code-heading"
+    >
+      <button
+        class="accordion-button collapsed"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#flashoffer-footer-code-body"
+        aria-expanded="false"
+        aria-controls="flashoffer-footer-code-body"
+      >
+        View template code
+      </button>
+    </h2>
+    <div
+      id="flashoffer-footer-code-body"
+      class="accordion-collapse collapse"
+      aria-labelledby="flashoffer-footer-code-heading"
+      data-bs-parent="#flashoffer-footer-code"
+    >
+      <div class="accordion-body">
+<pre><code class="language-jinja">{{ pie.flashoffer.footer(
+    left_prefix=&quot;©&amp;nbsp;&quot;,
+    site_name=&quot;Seattle Figure Studio&quot;,
+    site_href=&quot;https://seattlefigurestudio.com&quot;,
+    rights_statement=&quot;All rights reserved.&quot;,
+    email_label=&quot;brian@seattlefigurestudio.com&quot;,
+) }}</code></pre>
+      </div>
+    </div>
+  </div>
+</div>
 
 renders as:
 
