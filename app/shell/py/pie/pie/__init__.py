@@ -23,6 +23,8 @@ Use ``help(pie.<module>)`` to view documentation for any of the individual
 modules.
 """
 
+from . import flashoffer
+
 __all__ = [
     "filter",
     "metadata",
@@ -35,4 +37,5 @@ __all__ = [
     "build",
     "check",
     "update",
+    "flashoffer",
 ]

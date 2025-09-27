@@ -28,6 +28,10 @@ for details on the structure of this metadata.
   `figure-img img-fluid rounded`, and `figure-caption tex-center`).
 - `definition(desc)` – expand the `definition` metadata field as Markdown.
   See [definition.md](definition.md) for details.
+- `pie.flashoffer.primary_cta(...)` and `pie.flashoffer.outline_cta(...)` –
+  render the landing page call-to-action buttons. Both helpers mirror the
+  original Jinja macros, support optional `rel`/`target` parameters, and accept
+  arbitrary HTML attributes via keyword arguments.
 
 Example:
 
