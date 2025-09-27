@@ -1,0 +1,13 @@
+doc:
+  author: Brian Lee
+  breadcrumbs:
+  - title: Home
+    url: /
+  - title: Examples
+    url: /examples/
+  - title: Flashoffer CTAs
+  citation: flashoffer
+  pubdate: Sep 17, 2025
+  title: Flashoffer CTA Helpers
+id: flashoffer
+schema: v1
