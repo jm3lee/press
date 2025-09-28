@@ -18,15 +18,15 @@ export interface HeroBannerProps {
   /** Props passed to the primary CTA button. */
   primaryCta?: PrimaryCtaButtonProps;
   /** Props passed to the secondary CTA button. */
-  secondaryCta?: OutlineCtaButtonProps;
+  secondaryCta?: OutlineCtaButtonProps | null;
   /** Aligns content horizontally. */
   align?: "left" | "center";
 }
 
-const DEFAULT_TITLE = "Create limited-time offers that convert.";
+const DEFAULT_TITLE = "Launch coordinated offers in minutes.";
 const DEFAULT_SUBTITLE =
-  "Flashoffer ships with sensible defaults so marketing teams can stand up " +
-  "campaign pages without design bottlenecks.";
+  "Flashoffer ships reusable hero, CTA, and preview components so teams " +
+  "can publish landing experiments without bespoke design cycles.";
 
 /**
  * Promotional hero unit with sensible defaults for copy and layout.
@@ -35,8 +35,14 @@ export function HeroBanner({
   title = DEFAULT_TITLE,
   subtitle = DEFAULT_SUBTITLE,
   media,
-  primaryCta,
-  secondaryCta,
+  primaryCta = {
+    label: "Explore Flashoffer components",
+    href: "https://example.com/flashoffer"
+  },
+  secondaryCta = {
+    label: "Contact support",
+    href: "mailto:support@example.com"
+  },
   align = "center"
 }: HeroBannerProps) {
   const headingId = useId();

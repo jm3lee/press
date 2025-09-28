@@ -15,7 +15,7 @@ export interface OutlineCtaButtonProps
  * Secondary call-to-action button that defaults to an outlined style.
  */
 export function OutlineCtaButton({
-  label = "Learn more",
+  label = "Contact support",
   children,
   ...props
 }: OutlineCtaButtonProps) {

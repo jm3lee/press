@@ -15,7 +15,7 @@ export interface PrimaryCtaButtonProps
  * Primary call-to-action button styled with the Flashoffer theme.
  */
 export function PrimaryCtaButton({
-  label = "Get started",
+  label = "Explore Flashoffer components",
   children,
   ...props
 }: PrimaryCtaButtonProps) {

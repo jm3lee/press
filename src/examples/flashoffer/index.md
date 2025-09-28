@@ -29,13 +29,13 @@ Use the primary helper for your most important action.
 
 ```jinja
 {% raw %}
-{{ pie.flashoffer.primary_cta("Start your free trial", "/signup") }}
+{{ pie.flashoffer.primary_cta("Explore Flashoffer components", "https://example.com/flashoffer") }}
 {% endraw %}
 ```
 
 renders as:
 
-{{ pie.flashoffer.primary_cta("Start your free trial", "/signup") }}
+{{ pie.flashoffer.primary_cta("Explore Flashoffer components", "https://example.com/flashoffer") }}
 
 ## Outline CTA
 
@@ -43,13 +43,13 @@ Pair the outline helper with the primary button to offer a secondary action.
 
 ```jinja
 {% raw %}
-{{ pie.flashoffer.outline_cta("Talk to sales", "/contact") }}
+{{ pie.flashoffer.outline_cta("Contact support", "mailto:support@example.com") }}
 {% endraw %}
 ```
 
 renders as:
 
-{{ pie.flashoffer.outline_cta("Talk to sales", "/contact") }}
+{{ pie.flashoffer.outline_cta("Contact support", "mailto:support@example.com") }}
 
 ## Customize attributes
 
@@ -111,17 +111,17 @@ needed.
 {% raw %}
 {{ pie.flashoffer.preview_card(
     preview,
-    overlay_text="Tap to reveal the <em>full pose</em>",
-    overlay_button_text="Open reference",
+    overlay_text="Tap to preview the <em>full layout</em>",
+    overlay_button_text="Open preview",
 ) }}
 {% endraw %}
 ```
 
 {% set preview = {
-    "image_url": "https://seattlefigurestudio.sfo3.cdn.digitaloceanspaces.com/landing/favicon-48x48.png",
-    "alt_text": "Seattle Figure Studio Favicon",
-    "link_href": "https://seattlefigurestudio.com",
-    "caption": "a cool place",
+    "image_url": "https://picsum.photos/seed/flashoffer-logo/96/96",
+    "alt_text": "Flashoffer logomark",
+    "link_href": "https://example.com/flashoffer",
+    "caption": "Explore reusable marketing components.",
 } %}
 {{ pie.flashoffer.preview_card(preview) }}
 
@@ -240,10 +240,10 @@ Use the footer helper to render the contact information block.
 {% raw %}
 {{ pie.flashoffer.footer(
     left_prefix="© ",
-    site_name="Seattle Figure Studio",
-    site_href="https://seattlefigurestudio.com",
+    site_name="Flashoffer",
+    site_href="https://example.com/flashoffer",
     rights_statement="All rights reserved.",
-    email_label="brian@seattlefigurestudio.com",
+    email_label="support@example.com",
 ) }}
 {% endraw %}
 ```
@@ -252,8 +252,8 @@ renders as:
 
 {{ pie.flashoffer.footer(
     left_prefix="© ",
-    site_name="Seattle Figure Studio",
-    site_href="https://seattlefigurestudio.com",
+    site_name="Flashoffer",
+    site_href="https://example.com/flashoffer",
     rights_statement="All rights reserved.",
-    email_label="brian@seattlefigurestudio.com",
+    email_label="support@example.com",
 ) }}

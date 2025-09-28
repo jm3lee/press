@@ -28,21 +28,21 @@ Add a focal image to the hero by supplying `hero_image_url`. Pass
     "data_tracking_id": "hero-compliance",
 } %}
 {{ pie.flashoffer.hero_banner(
-    eyebrow="Limited-run bundles",
-    title="Stone Canvas: Medusa release",
-    description="Pair live session studies with downloadable references tuned "
-    "for the Stone Canvas Medusa campaign.",
-    primary_cta_text="Start your free trial",
-    primary_cta_href="/signup",
+    eyebrow="CAMPAIGN TOOLKIT",
+    title="Launch coordinated offers in minutes.",
+    description="Flashoffer ships reusable hero, CTA, and preview components "
+    "so teams can publish landing experiments without bespoke design cycles.",
+    primary_cta_text="Explore Flashoffer components",
+    primary_cta_href="https://example.com/flashoffer",
     primary_cta_kwargs=primary_kwargs,
-    first_outline_text="See preview gallery",
-    first_outline_href="#preview-card",
+    first_outline_text="Contact support",
+    first_outline_href="mailto:support@example.com",
     first_outline_kwargs=first_outline_kwargs,
-    second_outline_text="Read studio policies",
-    second_outline_href="/policies",
+    second_outline_text="View documentation",
+    second_outline_href="https://example.com/docs",
     second_outline_kwargs=second_outline_kwargs,
-    hero_image_url="https://seattlefigurestudio.sfo3.cdn.digitaloceanspaces.com/landing/favicon-48x48.png",
-    hero_image_alt="Stone Canvas hero artwork",
+    hero_image_url="https://picsum.photos/seed/flashoffer-hero/720/480",
+    hero_image_alt="Mock dashboard showcasing offer performance",
     hero_image_kwargs={"data_tracking_id": "hero-visual"},
 ) }}
 {% endraw %}
@@ -63,21 +63,21 @@ renders as:
     "data_tracking_id": "hero-compliance",
 } %}
 {{ pie.flashoffer.hero_banner(
-    eyebrow="Limited-run bundles",
-    title="Stone Canvas: Medusa release",
-    description="Pair live session studies with downloadable references tuned "
-    "for the Stone Canvas Medusa campaign.",
-    primary_cta_text="Start your free trial",
-    primary_cta_href="/signup",
+    eyebrow="CAMPAIGN TOOLKIT",
+    title="Launch coordinated offers in minutes.",
+    description="Flashoffer ships reusable hero, CTA, and preview components "
+    "so teams can publish landing experiments without bespoke design cycles.",
+    primary_cta_text="Explore Flashoffer components",
+    primary_cta_href="https://example.com/flashoffer",
     primary_cta_kwargs=primary_kwargs,
-    first_outline_text="See preview gallery",
-    first_outline_href="#preview-card",
+    first_outline_text="Contact support",
+    first_outline_href="mailto:support@example.com",
     first_outline_kwargs=first_outline_kwargs,
-    second_outline_text="Read studio policies",
-    second_outline_href="/policies",
+    second_outline_text="View documentation",
+    second_outline_href="https://example.com/docs",
     second_outline_kwargs=second_outline_kwargs,
-    hero_image_url="https://seattlefigurestudio.sfo3.cdn.digitaloceanspaces.com/landing/favicon-48x48.png",
-    hero_image_alt="Stone Canvas hero artwork",
+    hero_image_url="https://picsum.photos/seed/flashoffer-hero/720/480",
+    hero_image_alt="Mock dashboard showcasing offer performance",
     hero_image_kwargs={"data_tracking_id": "hero-visual"},
 ) }}
 

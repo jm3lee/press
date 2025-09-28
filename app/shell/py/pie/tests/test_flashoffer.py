@@ -101,7 +101,7 @@ def test_hero_banner_supports_optional_image():
     assert 'class="hero-visual img-fluid rounded-5"' in html
     assert 'src="https://cdn.example.com/hero.png"' in html
     assert 'alt="Hero &quot;quote&quot;"' in html
-    assert 'data_tracking_id="hero-visual"' in html
+    assert 'data-tracking-id="hero-visual"' in html
     assert 'loading="eager"' in html
 
 
@@ -123,7 +123,7 @@ def test_preview_card_renders_expected_markup():
                   <img alt="Hero image" class="img-fluid w-100 h-auto preview-image" loading="lazy" src="https://cdn.example.com/image.jpg">
                   <div class="preview-overlay">
                     <div class="text-center px-3">
-                      <p class="mb-2 fw-semibold">Tap to reveal this artistic nude pose.</p>
+                      <p class="mb-2 fw-semibold">Tap to preview this image.</p>
                       <a class="btn btn-outline-light btn-sm preview-toggle" href="https://example.com/gallery" role="button">View image</a>
                     </div>
                   </div>
@@ -156,7 +156,7 @@ def test_preview_card_escapes_attribute_values_and_caption_text():
                   <img alt="Alt &quot;quote&quot;" class="img-fluid w-100 h-auto preview-image" loading="lazy" src="/img?tag=&quot;x&quot;">
                   <div class="preview-overlay">
                     <div class="text-center px-3">
-                      <p class="mb-2 fw-semibold">Tap to reveal this artistic nude pose.</p>
+                      <p class="mb-2 fw-semibold">Tap to preview this image.</p>
                       <a class="btn btn-outline-light btn-sm preview-toggle" href="/preview?ref=&quot;full&quot;" role="button">View image</a>
                     </div>
                   </div>
@@ -273,10 +273,10 @@ def test_footer_renders_expected_markup():
             <footer class="container py-4 small" id="contact">
               <div class="row gy-3 align-items-center">
                 <div class="col-12 col-md">©&nbsp;
-                  <a class="link-dark text-decoration-none" href="https://seattlefigurestudio.com">Seattle Figure Studio</a>. All rights reserved.
+                  <a class="link text-decoration-none" href="https://example.com/flashoffer">Flashoffer</a>. All rights reserved.
                 </div>
                 <div class="col-12 col-md-auto">
-                  <a class="fw-semibold" href="mailto:brian@seattlefigurestudio.com">brian@seattlefigurestudio.com</a>
+                  <a class="fw-semibold" href="mailto:support@example.com">support@example.com</a>
                 </div>
               </div>
             </footer>

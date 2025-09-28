@@ -138,21 +138,20 @@ def _coerce_mapping(mapping: Mapping[str, Any] | None) -> dict[str, Any]:
 
 def hero_banner(
     *,
-    eyebrow: str | Markup = "Seattle-born figure reference",
-    title: str | Markup = "Stone Canvas",
+    eyebrow: str | Markup = "Campaign toolkit",
+    title: str | Markup = "Launch coordinated offers in minutes",
     description: str | Markup = (
-        "Build stronger drawings with Stone Canvas reference bundles created by "
-        "Seattle models and artists. Each pack keeps studies aligned with atelier "
-        "methods, community collaborations, and clear licensing."
+        "Flashoffer ships reusable hero, CTA, and preview components so teams "
+        "can publish landing experiments without bespoke design cycles."
     ),
-    primary_cta_text: str | Markup = "Explore Stone Canvas",
-    primary_cta_href: str = "https://seattlefigurestudio.com/shop/stone-canvas-medusa",
+    primary_cta_text: str | Markup = "Explore Flashoffer components",
+    primary_cta_href: str = "https://example.com/flashoffer",
     primary_cta_kwargs: Mapping[str, Any] | None = None,
-    first_outline_text: str | Markup = "Email to collaborate",
-    first_outline_href: str = "mailto:brian@seattlefigurestudio.com",
+    first_outline_text: str | Markup = "Contact support",
+    first_outline_href: str = "mailto:support@example.com",
     first_outline_kwargs: Mapping[str, Any] | None = None,
-    second_outline_text: str | Markup = "Meet Seattle Figure Studio",
-    second_outline_href: str = "https://seattlefigurestudio.com/about-us",
+    second_outline_text: str | Markup = "View documentation",
+    second_outline_href: str = "https://example.com/docs",
     second_outline_kwargs: Mapping[str, Any] | None = None,
     hero_image_url: str | None = None,
     hero_image_alt: str | Markup | None = None,
@@ -284,7 +283,7 @@ def _coerce_html(value: Any) -> Markup:
 def preview_card(
     card: Mapping[str, Any],
     *,
-    overlay_text: str | Markup = "Tap to reveal this artistic nude pose.",
+    overlay_text: str | Markup = "Tap to preview this image.",
     overlay_button_text: str | Markup = "View image",
 ) -> Markup:
     """Render the Flashoffer preview card partial."""
@@ -379,11 +378,11 @@ def footer(
     *,
     container_id: str = "contact",
     left_prefix: str | Markup | None = Markup("©&nbsp;"),
-    site_name: str | Markup = "Seattle Figure Studio",
-    site_href: str = "https://seattlefigurestudio.com",
+    site_name: str | Markup = "Flashoffer",
+    site_href: str = "https://example.com/flashoffer",
     rights_statement: str | Markup = "All rights reserved.",
-    email_label: str | Markup = "brian@seattlefigurestudio.com",
-    email_href: str = "mailto:brian@seattlefigurestudio.com",
+    email_label: str | Markup = "support@example.com",
+    email_href: str = "mailto:support@example.com",
 ) -> Markup:
     """Render the Flashoffer footer snippet."""
 

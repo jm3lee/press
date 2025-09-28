@@ -97,9 +97,9 @@ const previewCards = [
 ];
 
 const footerLinks = [
-  { label: "Component docs", href: "https://example.com/docs" },
-  { label: "Brand assets", href: "https://example.com/brand" },
-  { label: "Support", href: "mailto:flashoffer@example.com" }
+  { label: "Docs", href: "https://example.com/docs" },
+  { label: "Status", href: "https://status.example.com" },
+  { label: "Support", href: "mailto:support@example.com" }
 ];
 
 const heroMedia = (
@@ -200,17 +200,17 @@ export default function App() {
 
             <HeroBanner
               align={heroAlignment}
-              title="Launch high-converting Flashoffer pages in minutes."
-              subtitle="Use the ready-made hero, CTA, and showcase blocks to build polished marketing surfaces that reflect your brand."
+              title="Launch coordinated offers in minutes."
+              subtitle="Flashoffer ships reusable hero, CTA, and preview components so teams can publish landing experiments without bespoke design cycles."
               primaryCta={{
-                label: "View component source",
-                href: "https://example.com/component-source",
+                label: "Explore Flashoffer components",
+                href: "https://example.com/flashoffer",
                 target: "_blank",
                 rel: "noreferrer"
               }}
               secondaryCta={{
-                label: "Download spec",
-                href: "https://example.com/spec"
+                label: "Contact support",
+                href: "mailto:support@example.com"
               }}
               media={heroMedia}
             />
@@ -228,11 +228,11 @@ export default function App() {
                 alignItems="center"
                 justifyContent="center"
               >
-                <PrimaryCtaButton href="https://example.com/signup">
-                  Start a sandbox
+                <PrimaryCtaButton href="https://example.com/flashoffer">
+                  Explore Flashoffer components
                 </PrimaryCtaButton>
-                <OutlineCtaButton href="https://example.com/contact">
-                  Talk with our team
+                <OutlineCtaButton href="mailto:support@example.com">
+                  Contact support
                 </OutlineCtaButton>
               </Stack>
             </Box>
@@ -255,7 +255,7 @@ export default function App() {
 
             <Footer
               links={footerLinks}
-              copyrightText="© 2025 Flashoffer demo experience"
+              copyrightText="© 2025 Flashoffer. All rights reserved."
             />
           </Stack>
         </Container>
