@@ -1,3 +1,5 @@
+import textwrap
+
 import pytest
 from markupsafe import Markup
 
@@ -43,12 +45,11 @@ def test_cta_includes_optional_attributes_and_extra_kwargs():
         data_testid="hero-cta",
     )
     assert html == Markup(
-        "<a "
-        'class="btn btn-primary btn-lg px-4 cta" '
+        "<a class=\"btn btn-primary btn-lg px-4 cta\" "
+        'data_testid="hero-cta" '
         'href="/learn" '
         'rel="noopener" '
-        'target="_blank" '
-        'data_testid="hero-cta"'
+        'target="_blank"'
         ">Learn More</a>"
     )
 
@@ -56,9 +57,8 @@ def test_cta_includes_optional_attributes_and_extra_kwargs():
 def test_cta_escapes_text_and_attribute_values():
     html = flashoffer.primary_cta('Use "quote"', '/promo?ref="id"')
     assert html == Markup(
-        "<a "
-        'class="btn btn-primary btn-lg px-4" '
-        'href="/promo?ref=&#34;id&#34;"'
+        "<a class=\"btn btn-primary btn-lg px-4\" "
+        'href="/promo?ref=&quot;id&quot;"'
         ">Use &#34;quote&#34;</a>"
     )
 
@@ -97,31 +97,26 @@ def test_preview_card_renders_expected_markup():
         }
     )
     assert html == Markup(
-        '<div class="col">\n'
-        '  <div class="card h-100 bg-dark border border-light-subtle shadow-sm">\n'
-        '    <div\n'
-        '      class="card-img-top bg-black d-flex align-items-center justify-content-center rounded-top overflow-hidden position-relative preview-card"\n'
-        '    >\n'
-        '      <img\n'
-        '        src="https://cdn.example.com/image.jpg"\n'
-        '        class="img-fluid w-100 h-auto preview-image"\n'
-        '        alt="Hero image"\n'
-        '        loading="lazy"\n'
-        '      />\n'
-        '      <div class="preview-overlay">\n'
-        '        <div class="text-center px-3">\n'
-        '          <p class="mb-2 fw-semibold">Tap to reveal this artistic nude pose.</p>\n'
-        '          <a class="btn btn-outline-light btn-sm preview-toggle" href="https://example.com/gallery" role="button">\n'
-        '            View image\n'
-        '          </a>\n'
-        '        </div>\n'
-        '      </div>\n'
-        '    </div>\n'
-        '    <div class="card-body">\n'
-        '      <p class="card-text mb-0 text-white-50">The caption</p>\n'
-        '    </div>\n'
-        '  </div>\n'
-        '</div>'
+        textwrap.dedent(
+            """\
+            <div class="col">
+              <div class="card h-100 bg-dark border border-light-subtle shadow-sm">
+                <div class="card-img-top bg-black d-flex align-items-center justify-content-center rounded-top overflow-hidden position-relative preview-card">
+                  <img alt="Hero image" class="img-fluid w-100 h-auto preview-image" loading="lazy" src="https://cdn.example.com/image.jpg">
+                  <div class="preview-overlay">
+                    <div class="text-center px-3">
+                      <p class="mb-2 fw-semibold">Tap to reveal this artistic nude pose.</p>
+                      <a class="btn btn-outline-light btn-sm preview-toggle" href="https://example.com/gallery" role="button">View image</a>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <p class="card-text mb-0 text-white-50">The caption</p>
+                </div>
+              </div>
+            </div>
+            """
+        ).strip()
     )
 
 
@@ -135,31 +130,26 @@ def test_preview_card_escapes_attribute_values_and_caption_text():
         }
     )
     assert html == Markup(
-        '<div class="col">\n'
-        '  <div class="card h-100 bg-dark border border-light-subtle shadow-sm">\n'
-        '    <div\n'
-        '      class="card-img-top bg-black d-flex align-items-center justify-content-center rounded-top overflow-hidden position-relative preview-card"\n'
-        '    >\n'
-        '      <img\n'
-        '        src="/img?tag=&#34;x&#34;"\n'
-        '        class="img-fluid w-100 h-auto preview-image"\n'
-        '        alt="Alt &#34;quote&#34;"\n'
-        '        loading="lazy"\n'
-        '      />\n'
-        '      <div class="preview-overlay">\n'
-        '        <div class="text-center px-3">\n'
-        '          <p class="mb-2 fw-semibold">Tap to reveal this artistic nude pose.</p>\n'
-        '          <a class="btn btn-outline-light btn-sm preview-toggle" href="/preview?ref=&#34;full&#34;" role="button">\n'
-        '            View image\n'
-        '          </a>\n'
-        '        </div>\n'
-        '      </div>\n'
-        '    </div>\n'
-        '    <div class="card-body">\n'
-        '      <p class="card-text mb-0 text-white-50">Use &lt;em&gt;markup&lt;/em&gt;</p>\n'
-        '    </div>\n'
-        '  </div>\n'
-        '</div>'
+        textwrap.dedent(
+            """\
+            <div class="col">
+              <div class="card h-100 bg-dark border border-light-subtle shadow-sm">
+                <div class="card-img-top bg-black d-flex align-items-center justify-content-center rounded-top overflow-hidden position-relative preview-card">
+                  <img alt="Alt &quot;quote&quot;" class="img-fluid w-100 h-auto preview-image" loading="lazy" src="/img?tag=&quot;x&quot;">
+                  <div class="preview-overlay">
+                    <div class="text-center px-3">
+                      <p class="mb-2 fw-semibold">Tap to reveal this artistic nude pose.</p>
+                      <a class="btn btn-outline-light btn-sm preview-toggle" href="/preview?ref=&quot;full&quot;" role="button">View image</a>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <p class="card-text mb-0 text-white-50">Use &lt;em&gt;markup&lt;/em&gt;</p>
+                </div>
+              </div>
+            </div>
+            """
+        ).strip()
     )
 
 
@@ -202,7 +192,10 @@ def test_preview_card_preserves_markup_overlay_content():
         overlay_button_text=Markup("<strong>Reveal</strong>"),
     )
     assert "Tap to reveal <em>now</em>" in html
-    assert ">\n            <strong>Reveal</strong>\n" in html
+    assert (
+        '<a class="btn btn-outline-light btn-sm preview-toggle" '
+        'href="link" role="button"><strong>Reveal</strong></a>'
+    ) in html
 
 
 @pytest.mark.parametrize("missing_key", ["image_url", "alt_text", "link_href", "caption"])
@@ -225,55 +218,52 @@ def test_section_header_renders_all_fields_and_escapes_strings():
         body_html="Browse <strong>stories</strong>",
     )
     assert html == Markup(
-        '<div class="row justify-content-center mb-5 text-center">\n'
-        '  <div class="col-lg-8">\n'
-        '    <span class="eyebrow mb-3 d-inline-block text-white-50">\n'
-        '      Studio &lt;mark&gt;news&lt;/mark&gt;\n'
-        "    </span>\n"
-        '    <h2 class="fw-semibold mb-3">\n'
-        '      Fresh &amp; inspiring\n'
-        "    </h2>\n"
-        '    <p class="mb-0 text-white-50">\n'
-        '      Browse &lt;strong&gt;stories&lt;/strong&gt;\n'
-        "    </p>\n"
-        "  </div>\n"
-        "</div>"
+        textwrap.dedent(
+            """\
+            <div class="row justify-content-center mb-5 text-center">
+              <div class="col-lg-8">
+                <span class="eyebrow mb-3 d-inline-block text-white-50">Studio &lt;mark&gt;news&lt;/mark&gt;</span>
+                <h2 class="fw-semibold mb-3">Fresh &amp; inspiring</h2>
+                <p class="mb-0 text-white-50">Browse &lt;strong&gt;stories&lt;/strong&gt;</p>
+              </div>
+            </div>
+            """
+        ).strip()
     )
 
 
 def test_section_header_omits_missing_parts_and_preserves_markup():
     html = flashoffer.section_header(title=Markup("Featured <em>Sessions</em>"))
     assert html == Markup(
-        '<div class="row justify-content-center mb-5 text-center">\n'
-        '  <div class="col-lg-8">\n'
-        '    <h2 class="fw-semibold mb-3">\n'
-        '      Featured <em>Sessions</em>\n'
-        "    </h2>\n"
-        "  </div>\n"
-        "</div>"
+        textwrap.dedent(
+            """\
+            <div class="row justify-content-center mb-5 text-center">
+              <div class="col-lg-8">
+                <h2 class="fw-semibold mb-3">Featured <em>Sessions</em></h2>
+              </div>
+            </div>
+            """
+        ).strip()
     )
 
 
 def test_footer_renders_expected_markup():
     html = flashoffer.footer()
     assert html == Markup(
-        '<footer id="contact" class="container py-4 small">\n'
-        '  <div class="row gy-3 align-items-center">\n'
-        '    <div class="col-12 col-md">\n'
-        '      ©&nbsp;<a\n'
-        '        class="link-dark text-decoration-none"\n'
-        '        href="https://seattlefigurestudio.com"\n'
-        '      >\n'
-        '        Seattle Figure Studio\n'
-        '      </a>. All rights reserved.\n'
-        '    </div>\n'
-        '    <div class="col-12 col-md-auto">\n'
-        '      <a class="fw-semibold" href="mailto:brian@seattlefigurestudio.com">\n'
-        '        brian@seattlefigurestudio.com\n'
-        '      </a>\n'
-        '    </div>\n'
-        '  </div>\n'
-        '</footer>'
+        textwrap.dedent(
+            """\
+            <footer class="container py-4 small" id="contact">
+              <div class="row gy-3 align-items-center">
+                <div class="col-12 col-md">©&nbsp;
+                  <a class="link-dark text-decoration-none" href="https://seattlefigurestudio.com">Seattle Figure Studio</a>. All rights reserved.
+                </div>
+                <div class="col-12 col-md-auto">
+                  <a class="fw-semibold" href="mailto:brian@seattlefigurestudio.com">brian@seattlefigurestudio.com</a>
+                </div>
+              </div>
+            </footer>
+            """
+        ).strip()
     )
 
 
