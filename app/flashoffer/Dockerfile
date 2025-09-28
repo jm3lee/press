@@ -23,6 +23,7 @@ FROM node:22-slim AS runner
 ENV NODE_ENV=production
 ENV PORT=4173
 WORKDIR /workspace
+RUN npm install -g vite
 COPY --from=flashoffer-react-build /workspace/app/flashoffer-react /workspace/app/flashoffer-react
 COPY --from=flashoffer-demo-build /workspace/app/flashoffer-demo /workspace/app/flashoffer-demo
 COPY app/flashoffer/entrypoint.sh /usr/local/bin/flashoffer-entrypoint
