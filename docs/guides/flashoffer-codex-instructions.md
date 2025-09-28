@@ -20,9 +20,12 @@ agents know how to render landing page buttons using `pie.flashoffer`.
   overlay_button_text="...")` to render the preview card markup. The `card`
   mapping must include `image_url`, `alt_text`, `link_href`, and `caption`
   keys. Override `overlay_text` and `overlay_button_text` to customise the
-  overlay messaging while keeping HTML escaping intact.
+  overlay messaging while keeping HTML escaping intact. The defaults prompt
+  visitors with "Tap to preview this image." and "View image".
 - Use `pie.flashoffer.footer(...)` to render the Flashoffer footer snippet.
-  All visible text segments are configurable through the helper arguments.
+  All visible text segments are configurable through the helper arguments. The
+  defaults render "Flashoffer" linked to `https://example.com/flashoffer` and
+  the contact address `support@example.com`.
 - Pass any additional keyword arguments to append raw HTML attributes (for
   example, `data_tracking_id="hero"`).
 - Provide `rel` and `target` explicitly when linking to external destinations.
@@ -47,13 +50,15 @@ supporting copy, and up to three CTAs. The helper accepts:
   or override button attributes with `primary_cta_kwargs`, which forwards keys
   like `extra_classes`, `rel`, and `target` to
   [`pie.flashoffer.primary_cta`](../../src/examples/flashoffer.md#primary-cta).
-  Link labels should align with the footer language described in the
-  [Flashoffer footer](../../src/examples/flashoffer.md#footer) guidance.
+  The defaults link to `https://example.com/flashoffer` with the label
+  "Explore Flashoffer components" so documentation mirrors demo copy.
 - `first_outline_text`/`href` and `second_outline_text`/`href` – populate the
   outline CTAs. Each CTA also accepts a `*_kwargs` mapping. These dictionaries
   are passed straight into `pie.flashoffer.outline_cta`, so you can add
   tracking attributes or reuse the same label overrides that appear alongside
   the [preview card helper](../../src/examples/flashoffer.md#preview-card).
+  Default copy references "Contact support" and "View documentation" to keep
+  the hero aligned with footer contact details.
 - `hero_image_url`, `hero_image_alt`, and `hero_image_kwargs` – optionally add a
   focal image below the body copy. Provide `hero_image_alt` for accessibility
   text and leverage `hero_image_kwargs` to append custom HTML attributes or

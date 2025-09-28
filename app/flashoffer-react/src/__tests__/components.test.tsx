@@ -20,7 +20,7 @@ describe("Flashoffer React primitives", () => {
   it("renders primary CTA with default copy", () => {
     renderWithTheme(<PrimaryCtaButton />);
     expect(
-      screen.getByRole("button", { name: /get started/i })
+      screen.getByRole("button", { name: /explore flashoffer components/i })
     ).toBeInTheDocument();
   });
 
@@ -47,9 +47,15 @@ describe("Flashoffer React primitives", () => {
     if (headingId) {
       const heading = document.getElementById(headingId);
       expect(heading).not.toBeNull();
-      expect(heading).toHaveTextContent(/limited-time offers/i);
+      expect(heading).toHaveTextContent(/coordinated offers/i);
     }
     expect(banner).toHaveAttribute("aria-describedby");
+    expect(
+      screen.getByRole("link", { name: /explore flashoffer components/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /contact support/i })
+    ).toBeInTheDocument();
   });
 
   it("allows hero banner CTA overrides", () => {
@@ -86,7 +92,7 @@ describe("Flashoffer React primitives", () => {
   it("supports Outline CTA default label", () => {
     renderWithTheme(<OutlineCtaButton />);
     expect(
-      screen.getByRole("button", { name: /learn more/i })
+      screen.getByRole("button", { name: /contact support/i })
     ).toBeInTheDocument();
   });
 

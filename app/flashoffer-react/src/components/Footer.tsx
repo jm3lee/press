@@ -19,12 +19,12 @@ export interface FooterProps {
 }
 
 const DEFAULT_LINKS: FooterLink[] = [
-  { label: "Docs", href: "https://presslabs.com/docs" },
-  { label: "Status", href: "https://status.presslabs.com" },
-  { label: "Support", href: "mailto:support@presslabs.com" }
+  { label: "Docs", href: "https://example.com/docs" },
+  { label: "Status", href: "https://status.example.com" },
+  { label: "Support", href: "mailto:support@example.com" }
 ];
 
-const DEFAULT_COPYRIGHT = "© Flashoffer by Presslabs";
+const DEFAULT_COPYRIGHT = "© Flashoffer. All rights reserved.";
 
 /**
  * Footer component that renders navigation links and attribution text.

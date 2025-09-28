@@ -9,11 +9,11 @@ describe("Flashoffer demo", () => {
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: /flashoffer pages/i
+        name: /coordinated offers/i
       })
     ).toBeInTheDocument();
     expect(
-      screen.getAllByRole("link", { name: /view component source/i }).length
+      screen.getAllByRole("link", { name: /explore flashoffer components/i }).length
     ).toBeGreaterThan(0);
   });
 
@@ -27,7 +27,7 @@ describe("Flashoffer demo", () => {
       })
     ).toBeInTheDocument();
     expect(
-      screen.getAllByRole("link", { name: /start a sandbox/i }).length
+      screen.getAllByRole("link", { name: /explore flashoffer components/i }).length
     ).toBeGreaterThan(0);
     expect(screen.getAllByRole("article")).toHaveLength(3);
   });
