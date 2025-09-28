@@ -41,7 +41,7 @@ Add a focal image to the hero by supplying `hero_image_url`. Pass
     second_outline_text="Read studio policies",
     second_outline_href="/policies",
     second_outline_kwargs=second_outline_kwargs,
-    hero_image_url="https://cdn.example.com/hero-visual.jpg",
+    hero_image_url="https://seattlefigurestudio.sfo3.cdn.digitaloceanspaces.com/landing/favicon-48x48.png",
     hero_image_alt="Stone Canvas hero artwork",
     hero_image_kwargs={"data_tracking_id": "hero-visual"},
 ) }}
@@ -76,7 +76,7 @@ renders as:
     second_outline_text="Read studio policies",
     second_outline_href="/policies",
     second_outline_kwargs=second_outline_kwargs,
-    hero_image_url="https://cdn.example.com/hero-visual.jpg",
+    hero_image_url="https://seattlefigurestudio.sfo3.cdn.digitaloceanspaces.com/landing/favicon-48x48.png",
     hero_image_alt="Stone Canvas hero artwork",
     hero_image_kwargs={"data_tracking_id": "hero-visual"},
 ) }}
