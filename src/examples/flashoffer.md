@@ -89,7 +89,8 @@ Add a focal image to the hero by supplying `hero_image_url`. Pass
 `hero_image_kwargs` for additional HTML attributes such as data tracking IDs or
 `loading="eager"`.
 
-```jinja
+<pre>
+{% raw %}
 {% set primary_kwargs = {
     "extra_classes": "shadow-lg",
     "data_tracking_id": "hero-primary",
@@ -120,10 +121,23 @@ Add a focal image to the hero by supplying `hero_image_url`. Pass
     hero_image_alt="Stone Canvas hero artwork",
     hero_image_kwargs={"data_tracking_id": "hero-visual"},
 ) }}
-```
+{% endraw %}
+</pre>
 
 renders as:
 
+{% set primary_kwargs = {
+    "extra_classes": "shadow-lg",
+    "data_tracking_id": "hero-primary",
+} %}
+{% set first_outline_kwargs = {
+    "extra_classes": "order-3 order-sm-2",
+    "data_tracking_id": "hero-preview",
+} %}
+{% set second_outline_kwargs = {
+    "extra_classes": "order-2 order-sm-3",
+    "data_tracking_id": "hero-compliance",
+} %}
 {{ pie.flashoffer.hero_banner(
     eyebrow="Limited-run bundles",
     title="Stone Canvas: Medusa release",

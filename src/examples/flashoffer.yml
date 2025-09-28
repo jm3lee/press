@@ -7,10 +7,10 @@ doc:
     url: /examples/
   - title: Flashoffer CTAs
   citation: flashoffer
-  pubdate: Sep 27, 2025
+  pubdate: Sep 28, 2025
   title: Flashoffer CTA Helpers
+html:
+  navbar: false
+  scripts: []
 id: flashoffer
 schema: v1
-html:
-  scripts: []
-  navbar: false
