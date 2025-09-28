@@ -218,6 +218,42 @@ def test_preview_card_requires_expected_card_keys(missing_key):
         flashoffer.preview_card(card)
 
 
+def test_section_header_renders_all_fields_and_escapes_strings():
+    html = flashoffer.section_header(
+        eyebrow="Studio <mark>news</mark>",
+        title="Fresh & inspiring",
+        body_html="Browse <strong>stories</strong>",
+    )
+    assert html == Markup(
+        '<div class="row justify-content-center mb-5 text-center">\n'
+        '  <div class="col-lg-8">\n'
+        '    <span class="eyebrow mb-3 d-inline-block text-white-50">\n'
+        '      Studio &lt;mark&gt;news&lt;/mark&gt;\n'
+        "    </span>\n"
+        '    <h2 class="fw-semibold mb-3">\n'
+        '      Fresh &amp; inspiring\n'
+        "    </h2>\n"
+        '    <p class="mb-0 text-white-50">\n'
+        '      Browse &lt;strong&gt;stories&lt;/strong&gt;\n'
+        "    </p>\n"
+        "  </div>\n"
+        "</div>"
+    )
+
+
+def test_section_header_omits_missing_parts_and_preserves_markup():
+    html = flashoffer.section_header(title=Markup("Featured <em>Sessions</em>"))
+    assert html == Markup(
+        '<div class="row justify-content-center mb-5 text-center">\n'
+        '  <div class="col-lg-8">\n'
+        '    <h2 class="fw-semibold mb-3">\n'
+        '      Featured <em>Sessions</em>\n'
+        "    </h2>\n"
+        "  </div>\n"
+        "</div>"
+    )
+
+
 def test_footer_renders_expected_markup():
     html = flashoffer.footer()
     assert html == Markup(

@@ -13,6 +13,9 @@ agents know how to render landing page buttons using `pie.flashoffer`.
   Configure the eyebrow, heading, description, and each call-to-action via the
   helper parameters or pass keyword argument dictionaries through to the CTA
   helpers.
+- Use `pie.flashoffer.section_header(eyebrow=None, title=None, body_html=None)`
+  to render centered section headers. Each argument may be omitted, plain text,
+  or trusted `Markup` when inline HTML is required.
 - Use `pie.flashoffer.preview_card(card, overlay_text="...",
   overlay_button_text="...")` to render the preview card markup. The `card`
   mapping must include `image_url`, `alt_text`, `link_href`, and `caption`
@@ -57,3 +60,13 @@ classes (`order-2`, `order-3`, and so on) via the same dictionaries.
 The hero container ships with a gradient background that mirrors the Press
 theme. Override it by setting a custom `--flashoffer-hero-background` value in
 your CSS when a landing page needs different art direction.
+
+## Section header parameters
+
+`pie.flashoffer.section_header` renders a centered heading stack that mirrors
+the Jinja macro used in Flashoffer templates. Supply any combination of
+`eyebrow`, `title`, and `body_html` values to control which elements are shown.
+When you pass plain strings they are escaped automatically; wrap inline HTML in
+`markupsafe.Markup` to opt into trusted markup. The helper keeps the same
+spacing, text alignment, and color treatments as the original macro so it can
+drop into landing sections without extra CSS overrides.

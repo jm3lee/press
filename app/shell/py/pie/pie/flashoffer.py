@@ -19,6 +19,7 @@ __all__ = [
     "primary_cta",
     "outline_cta",
     "hero_banner",
+    "section_header",
     "preview_card",
     "footer",
 ]
@@ -283,6 +284,54 @@ def _coerce_optional_html(value: str | Markup | None) -> Markup:
     if value is None:
         return Markup("")
     return _coerce_html(value)
+
+
+def section_header(
+    *,
+    eyebrow: str | Markup | None = None,
+    title: str | Markup | None = None,
+    body_html: str | Markup | None = None,
+) -> Markup:
+    """Render a centered section header."""
+
+    eyebrow_block = ""
+    if eyebrow is not None:
+        eyebrow_html = _coerce_html(eyebrow)
+        eyebrow_block = (
+            '    <span class="eyebrow mb-3 d-inline-block text-white-50">\n'
+            f"      {eyebrow_html}\n"
+            "    </span>\n"
+        )
+
+    title_block = ""
+    if title is not None:
+        title_html = _coerce_html(title)
+        title_block = (
+            '    <h2 class="fw-semibold mb-3">\n'
+            f"      {title_html}\n"
+            "    </h2>\n"
+        )
+
+    body_block = ""
+    if body_html is not None:
+        body_markup = _coerce_html(body_html)
+        body_block = (
+            '    <p class="mb-0 text-white-50">\n'
+            f"      {body_markup}\n"
+            "    </p>\n"
+        )
+
+    return Markup(
+        (
+            '<div class="row justify-content-center mb-5 text-center">\n'
+            '  <div class="col-lg-8">\n'
+            f"{eyebrow_block}"
+            f"{title_block}"
+            f"{body_block}"
+            "  </div>\n"
+            "</div>"
+        )
+    )
 
 
 def footer(
