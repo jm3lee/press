@@ -82,7 +82,7 @@ renders as:
 
 ## Hero banner
 
-Review the [Flashoffer hero banner](./hero-banner/) example for a full landing
+Review the {{linktitle("flashoffer-hero-banner")}} example for a full landing
 intro that combines the CTA helpers with imagery and analytics attributes.
 
 ## Preview card

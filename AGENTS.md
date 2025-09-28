@@ -10,7 +10,6 @@
   - If no suitable word boundary exists, leave the line unbroken.
 - Metadata:
   - `description`: plain text only
-  - `id`: use `_` instead of `-` when modifying
 - Math: always use `$ ... $` or `$$ ... $$`  
   (never `\(`, `\)`, `\[`, `\]`)
 - Makefiles: **indent with real tab characters** for recipe lines.

@@ -13,7 +13,7 @@ Add a focal image to the hero by supplying `hero_image_url`. Pass
 `hero_image_kwargs` for additional HTML attributes such as data tracking IDs or
 `loading="eager"`.
 
-<pre>
+```jinja
 {% raw %}
 {% set primary_kwargs = {
     "extra_classes": "shadow-lg",
@@ -46,7 +46,7 @@ Add a focal image to the hero by supplying `hero_image_url`. Pass
     hero_image_kwargs={"data_tracking_id": "hero-visual"},
 ) }}
 {% endraw %}
-</pre>
+```
 
 renders as:
 
