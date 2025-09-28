@@ -29,6 +29,9 @@ agents know how to render landing page buttons using `pie.flashoffer`.
 - The helpers escape text and attribute values automatically; wrap trusted
   markup in `markupsafe.Markup` if you need to opt out of escaping. The preview
   card preserves `Markup` captions while escaping plain text strings.
+- Each helper builds HTML with the [`dominate`](https://github.com/Knio/
+  dominate) DOM builder, so you can compose additional fragments by converting
+  any returned `Markup` into `dominate.util.raw` when necessary.
 ```
 
 ## Hero banner parameters

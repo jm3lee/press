@@ -13,6 +13,8 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping
 from typing import Any
 
+from dominate import tags
+from dominate.util import raw
 from markupsafe import Markup, escape
 
 __all__ = [
@@ -32,8 +34,8 @@ def _merge_attrs(
     rel: str | None,
     target: str | None,
     attrs: dict[str, Any],
-) -> Iterable[tuple[str, Markup]]:
-    """Yield escaped attribute/value pairs for rendering."""
+) -> Iterable[tuple[str, str]]:
+    """Yield attribute/value pairs for rendering."""
 
     class_list = base_classes
     if extra_classes:
@@ -52,7 +54,7 @@ def _merge_attrs(
     for name, value in pairs:
         if value is None:
             continue
-        yield (escape(str(name)), escape(str(value)))
+        yield (str(name), str(value))
 
 
 def _render_cta(
@@ -67,21 +69,23 @@ def _render_cta(
 ) -> Markup:
     """Return a button-style anchor tag matching the landing CTA macros."""
 
-    attr_html = " ".join(
-        f"{name}=\"{value}\"" for name, value in _merge_attrs(
-            base_classes,
-            href,
-            extra_classes,
-            rel,
-            target,
-            attrs,
-        )
-    )
-    if isinstance(text, Markup):
-        label = text
-    else:
-        label = escape(text)
-    return Markup(f"<a {attr_html}>{label}</a>")
+    link = tags.a()
+    for name, value in _merge_attrs(
+        base_classes,
+        href,
+        extra_classes,
+        rel,
+        target,
+        attrs,
+    ):
+        if name == "class":
+            link["class"] = value
+        else:
+            link[name] = value
+
+    label = _coerce_html(text)
+    link.add(raw(str(label)))
+    return Markup(link.render())
 
 
 def primary_cta(
@@ -184,35 +188,39 @@ def hero_banner(
         ");"
     )
 
-    return Markup(
-        (
-            '<section class="section">\n'
-            '  <div class="container">\n'
-            '    <div class="row justify-content-center">\n'
-            '      <div class="col-lg-10">\n'
-            f'        <div class="surface p-4 p-md-5 text-center" '
-            f'style="{hero_background_style}">\n'
-            '          <span class="eyebrow mb-3 d-inline-block">\n'
-            f'            {eyebrow_html}\n'
-            '          </span>\n'
-            '          <h1 class="display-5 fw-semibold mb-3">\n'
-            f'            {title_html}\n'
-            '          </h1>\n'
-            '          <p class="lead mx-auto mb-4" style="max-width: 38rem;">\n'
-            f'            {description_html}\n'
-            '          </p>\n'
-            '          <div class="hero-cta d-grid gap-3 d-sm-flex justify-content-center">\n'
-            f'            {primary_button}\n'
-            f'            {first_outline_button}\n'
-            f'            {second_outline_button}\n'
-            '          </div>\n'
-            '        </div>\n'
-            '      </div>\n'
-            '    </div>\n'
-            '  </div>\n'
-            '</section>'
+    section_tag = tags.section(_class="section")
+    container = section_tag.add(tags.div(_class="container"))
+    row = container.add(tags.div(_class="row justify-content-center"))
+    column = row.add(tags.div(_class="col-lg-10"))
+    surface = column.add(
+        tags.div(
+            _class="surface p-4 p-md-5 text-center",
+            style=hero_background_style,
         )
     )
+
+    eyebrow_span = surface.add(tags.span(_class="eyebrow mb-3 d-inline-block"))
+    eyebrow_span.add(raw(str(eyebrow_html)))
+
+    title_heading = surface.add(tags.h1(_class="display-5 fw-semibold mb-3"))
+    title_heading.add(raw(str(title_html)))
+
+    description_paragraph = surface.add(
+        tags.p(
+            _class="lead mx-auto mb-4",
+            style="max-width: 38rem;",
+        )
+    )
+    description_paragraph.add(raw(str(description_html)))
+
+    cta_container = surface.add(
+        tags.div(_class="hero-cta d-grid gap-3 d-sm-flex justify-content-center")
+    )
+    cta_container.add(raw(str(primary_button)))
+    cta_container.add(raw(str(first_outline_button)))
+    cta_container.add(raw(str(second_outline_button)))
+
+    return Markup(section_tag.render())
 
 
 def _require_card_value(card: Mapping[str, Any], key: str) -> Any:
@@ -224,8 +232,8 @@ def _require_card_value(card: Mapping[str, Any], key: str) -> Any:
         ) from exc
 
 
-def _escape_attr_value(value: Any) -> Markup:
-    return escape(str(value))
+def _escape_attr_value(value: Any) -> str:
+    return str(value)
 
 
 def _coerce_html(value: Any) -> Markup:
@@ -249,35 +257,46 @@ def preview_card(
     overlay_html = _coerce_html(overlay_text)
     overlay_button_html = _coerce_html(overlay_button_text)
 
-    return Markup(
-        (
-            '<div class="col">\n'
-            '  <div class="card h-100 bg-dark border border-light-subtle shadow-sm">\n'
-            '    <div\n'
-            '      class="card-img-top bg-black d-flex align-items-center justify-content-center rounded-top overflow-hidden position-relative preview-card"\n'
-            '    >\n'
-            '      <img\n'
-            f'        src="{image_url}"\n'
-            '        class="img-fluid w-100 h-auto preview-image"\n'
-            f'        alt="{alt_text}"\n'
-            '        loading="lazy"\n'
-            '      />\n'
-            '      <div class="preview-overlay">\n'
-            '        <div class="text-center px-3">\n'
-            f'          <p class="mb-2 fw-semibold">{overlay_html}</p>\n'
-            f'          <a class="btn btn-outline-light btn-sm preview-toggle" href="{link_href}" role="button">\n'
-            f'            {overlay_button_html}\n'
-            '          </a>\n'
-            '        </div>\n'
-            '      </div>\n'
-            '    </div>\n'
-            '    <div class="card-body">\n'
-            f'      <p class="card-text mb-0 text-white-50">{caption}</p>\n'
-            '    </div>\n'
-            '  </div>\n'
-            '</div>'
+    card_column = tags.div(_class="col")
+    card_root = card_column.add(
+        tags.div(_class="card h-100 bg-dark border border-light-subtle shadow-sm")
+    )
+    image_wrapper = card_root.add(
+        tags.div(
+            _class=(
+                "card-img-top bg-black d-flex align-items-center "
+                "justify-content-center rounded-top overflow-hidden "
+                "position-relative preview-card"
+            )
         )
     )
+    image_wrapper.add(
+        tags.img(
+            src=image_url,
+            _class="img-fluid w-100 h-auto preview-image",
+            alt=alt_text,
+            loading="lazy",
+        )
+    )
+    overlay = image_wrapper.add(tags.div(_class="preview-overlay"))
+    overlay_inner = overlay.add(tags.div(_class="text-center px-3"))
+    overlay_text_paragraph = overlay_inner.add(tags.p(_class="mb-2 fw-semibold"))
+    overlay_text_paragraph.add(raw(str(overlay_html)))
+    overlay_button = overlay_inner.add(
+        tags.a(
+            _class="btn btn-outline-light btn-sm preview-toggle",
+            href=link_href,
+            role="button",
+        )
+    )
+    overlay_button.add(raw(str(overlay_button_html)))
+    card_body = card_root.add(tags.div(_class="card-body"))
+    caption_paragraph = card_body.add(
+        tags.p(_class="card-text mb-0 text-white-50")
+    )
+    caption_paragraph.add(raw(str(caption)))
+
+    return Markup(card_column.render())
 
 
 def _coerce_optional_html(value: str | Markup | None) -> Markup:
@@ -294,44 +313,27 @@ def section_header(
 ) -> Markup:
     """Render a centered section header."""
 
-    eyebrow_block = ""
+    row = tags.div(_class="row justify-content-center mb-5 text-center")
+    column = row.add(tags.div(_class="col-lg-8"))
+
     if eyebrow is not None:
         eyebrow_html = _coerce_html(eyebrow)
-        eyebrow_block = (
-            '    <span class="eyebrow mb-3 d-inline-block text-white-50">\n'
-            f"      {eyebrow_html}\n"
-            "    </span>\n"
+        eyebrow_span = column.add(
+            tags.span(_class="eyebrow mb-3 d-inline-block text-white-50")
         )
+        eyebrow_span.add(raw(str(eyebrow_html)))
 
-    title_block = ""
     if title is not None:
         title_html = _coerce_html(title)
-        title_block = (
-            '    <h2 class="fw-semibold mb-3">\n'
-            f"      {title_html}\n"
-            "    </h2>\n"
-        )
+        title_heading = column.add(tags.h2(_class="fw-semibold mb-3"))
+        title_heading.add(raw(str(title_html)))
 
-    body_block = ""
     if body_html is not None:
         body_markup = _coerce_html(body_html)
-        body_block = (
-            '    <p class="mb-0 text-white-50">\n'
-            f"      {body_markup}\n"
-            "    </p>\n"
-        )
+        body_paragraph = column.add(tags.p(_class="mb-0 text-white-50"))
+        body_paragraph.add(raw(str(body_markup)))
 
-    return Markup(
-        (
-            '<div class="row justify-content-center mb-5 text-center">\n'
-            '  <div class="col-lg-8">\n'
-            f"{eyebrow_block}"
-            f"{title_block}"
-            f"{body_block}"
-            "  </div>\n"
-            "</div>"
-        )
-    )
+    return Markup(row.render())
 
 
 def footer(
@@ -346,33 +348,34 @@ def footer(
 ) -> Markup:
     """Render the Flashoffer footer snippet."""
 
-    id_attr = _escape_attr_value(container_id)
-    site_href_attr = _escape_attr_value(site_href)
-    email_href_attr = _escape_attr_value(email_href)
-
     prefix_html = _coerce_optional_html(left_prefix)
     site_html = _coerce_html(site_name)
     rights_html = _coerce_html(rights_statement)
     email_html = _coerce_html(email_label)
 
-    return Markup(
-        (
-            f'<footer id="{id_attr}" class="container py-4 small">\n'
-            '  <div class="row gy-3 align-items-center">\n'
-            '    <div class="col-12 col-md">\n'
-            f'      {prefix_html}<a\n'
-            '        class="link-dark text-decoration-none"\n'
-            f'        href="{site_href_attr}"\n'
-            '      >\n'
-            f'        {site_html}\n'
-            f'      </a>. {rights_html}\n'
-            '    </div>\n'
-            '    <div class="col-12 col-md-auto">\n'
-            f'      <a class="fw-semibold" href="{email_href_attr}">\n'
-            f'        {email_html}\n'
-            '      </a>\n'
-            '    </div>\n'
-            '  </div>\n'
-            '</footer>'
+    footer_tag = tags.footer(
+        id=str(container_id),
+        _class="container py-4 small",
+    )
+    row = footer_tag.add(tags.div(_class="row gy-3 align-items-center"))
+
+    left_column = row.add(tags.div(_class="col-12 col-md"))
+    if prefix_html:
+        left_column.add(raw(str(prefix_html)))
+    site_link = left_column.add(
+        tags.a(
+            _class="link-dark text-decoration-none",
+            href=str(site_href),
         )
     )
+    site_link.add(raw(str(site_html)))
+    left_column.add(raw(". "))
+    left_column.add(raw(str(rights_html)))
+
+    right_column = row.add(tags.div(_class="col-12 col-md-auto"))
+    email_link = right_column.add(
+        tags.a(_class="fw-semibold", href=str(email_href))
+    )
+    email_link.add(raw(str(email_html)))
+
+    return Markup(footer_tag.render())
