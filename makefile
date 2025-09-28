@@ -53,7 +53,22 @@ MINIFY_CMD := minify
 CHECKLINKS_CMD := checklinks
 TEST_HOST_URL ?= http://nginx-test
 
+# Sass compiler selection. Default to pysassc; set USE_DART_SASS=1 to force the
+# Dart Sass CLI (via npx) when upstream sources require features unsupported by
+# LibSass.
+USE_DART_SASS ?= 0
+SASS_CMD ?= pysassc
+SASS_COMPRESS_ARGS ?= --style compressed
+SASS_LOAD_PATH_FLAG ?= -I
+ifeq ($(USE_DART_SASS),1)
+SASS_CMD := npx sass
+SASS_COMPRESS_ARGS := --style=compressed
+SASS_LOAD_PATH_FLAG := --load-path
+endif
+
 VPATH := $(SRC_DIR)
+
+.SECONDEXPANSION:
 
 # Find all Markdown files excluding specified directories
 MARKDOWNS := $(shell find $(SRC_DIR)/ -name '*.md')
@@ -73,6 +88,7 @@ BOOTSTRAP_VERSION := 5.3.8
 BOOTSTRAP_TARBALL := https://github.com/twbs/bootstrap/archive/refs/tags/v$(BOOTSTRAP_VERSION).tar.gz
 BOOTSTRAP_SRC_DIR := $(BUILD_DIR)/bootstrap-$(BOOTSTRAP_VERSION)
 BOOTSTRAP_MARKER := $(BOOTSTRAP_SRC_DIR)/.extracted
+BOOTSTRAP_SCSS_DIR := $(BOOTSTRAP_SRC_DIR)/scss
 
 # Nginx permalink redirect configuration
 PERMALINKS_CONF := $(BUILD_DIR)/permalinks.conf
@@ -96,6 +112,7 @@ everything: | $(BUILD_DIR) $(BUILD_SUBDIRS)
 
 all: $(HTMLS)
 all: $(CSS)
+all: $(FLASHOFFER_BOOTSTRAP_BUILD)
 all: $(BUILD_DIR)/robots.txt
 all: $(BUILD_DIR)/sitemap.xml
 all: $(PERMALINKS_CONF)
@@ -158,16 +175,21 @@ $(BOOTSTRAP_MARKER):
 FLASHOFFER_BOOTSTRAP_SRC := $(SRC_DIR)/css/flashoffer/flashoffer-bootstrap.css
 FLASHOFFER_BOOTSTRAP_BUILD := $(BUILD_DIR)/css/flashoffer/flashoffer-bootstrap.css
 
-$(FLASHOFFER_BOOTSTRAP_BUILD): $(FLASHOFFER_BOOTSTRAP_SRC) $(BOOTSTRAP_MARKER)
+FLASHOFFER_BOOTSTRAP_PARTIALS = $(shell if test -d $(BOOTSTRAP_SCSS_DIR); then \
+        find $(BOOTSTRAP_SCSS_DIR) -name '*.scss' | sort; \
+    fi)
+
+$(FLASHOFFER_BOOTSTRAP_BUILD): $(FLASHOFFER_BOOTSTRAP_SRC) $(BOOTSTRAP_MARKER) \
+        $$(FLASHOFFER_BOOTSTRAP_PARTIALS)
 	$(call status,Compile Flashoffer Bootstrap bundle)
 	$(Q)mkdir -p $(dir $@)
-	$(Q)pysassc --style compressed -I $(BOOTSTRAP_SRC_DIR)/scss $< $@
+	$(Q)$(SASS_CMD) $(SASS_COMPRESS_ARGS) $(SASS_LOAD_PATH_FLAG) $(BOOTSTRAP_SCSS_DIR) $< $@
 
 # Compile SCSS files to the build directory
 $(BUILD_DIR)/css/%.css: $(SRC_DIR)/css/%.css | $(BUILD_DIR)/css
 	$(call status,Compile SCSS $<)
 	$(Q)mkdir -p $(dir $@)
-	$(Q)pysassc $< $@
+	$(Q)$(SASS_CMD) $< $@
 
 # Include and preprocess Markdown files up to three levels deep
 # See docs/guides/preprocess.md for preprocessing details
