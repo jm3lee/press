@@ -17,6 +17,8 @@
   Leading spaces will break Makefile syntax. Never replace tabs with spaces.
 - Documentation: write as an **expert engineer**.
   Provide enough detail for new team members.
+- When generating links with anchors, ensure that the target anchor exists.
+  Create the anchor if it is missing.
 - Flashoffer updates: whenever `app/shell/py/pie/pie/flashoffer.py` or related
   helpers change, also refresh
   `docs/guides/flashoffer-codex-instructions.md` to keep Codex guidance in
