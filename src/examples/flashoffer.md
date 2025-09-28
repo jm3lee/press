@@ -84,6 +84,11 @@ first outline CTA to `#preview-card` keeps the hero aligned with the
 [Preview card](#preview-card) gallery, while the second outline CTA can mirror
 compliance language documented in the [Footer](#footer).
 
+Add a focal image to the hero by supplying `hero_image_url`. Pass
+`hero_image_alt` to meet accessibility requirements and reuse
+`hero_image_kwargs` for additional HTML attributes such as data tracking IDs or
+`loading="eager"`.
+
 ```jinja
 {% set primary_kwargs = {
     "extra_classes": "shadow-lg",
@@ -111,6 +116,9 @@ compliance language documented in the [Footer](#footer).
     second_outline_text="Read studio policies",
     second_outline_href="/policies",
     second_outline_kwargs=second_outline_kwargs,
+    hero_image_url="https://cdn.example.com/hero-visual.jpg",
+    hero_image_alt="Stone Canvas hero artwork",
+    hero_image_kwargs={"data_tracking_id": "hero-visual"},
 ) }}
 ```
 
@@ -134,7 +142,10 @@ renders as:
 
 The helper applies a gradient background that matches the Press theme. Define a
 `--flashoffer-hero-background` custom property in your stylesheet to supply a
-different background when needed.
+different background when needed. Additional Flashoffer variables such as
+`--flashoffer-hero-padding-block`, `--flashoffer-hero-visual-radius`, and
+`--flashoffer-preview-overlay-background` let you adjust layout spacing,
+shadows, and overlay treatments without writing new selectors.
 
 ## Preview card
 

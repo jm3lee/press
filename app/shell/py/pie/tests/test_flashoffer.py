@@ -87,6 +87,24 @@ def test_hero_banner_uses_theme_background():
     assert expected_style in html
 
 
+def test_hero_banner_supports_optional_image():
+    html = flashoffer.hero_banner(
+        hero_image_url="https://cdn.example.com/hero.png",
+        hero_image_alt='Hero "quote"',
+        hero_image_kwargs={
+            "data_tracking_id": "hero-visual",
+            "extra_classes": "rounded-5",
+            "loading": "eager",
+        },
+    )
+    assert '<div class="hero-visual-wrapper mx-auto mb-4">' in html
+    assert 'class="hero-visual img-fluid rounded-5"' in html
+    assert 'src="https://cdn.example.com/hero.png"' in html
+    assert 'alt="Hero &quot;quote&quot;"' in html
+    assert 'data_tracking_id="hero-visual"' in html
+    assert 'loading="eager"' in html
+
+
 def test_preview_card_renders_expected_markup():
     html = flashoffer.preview_card(
         {
