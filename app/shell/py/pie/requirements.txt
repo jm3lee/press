@@ -3,6 +3,7 @@ loguru
 redis
 fakeredis
 flatten-dict
+dominate
 beautifulsoup4
 jinja2
 markupsafe
