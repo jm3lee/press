@@ -28,7 +28,9 @@ Available helpers:
 Use the primary helper for your most important action.
 
 ```jinja
+{% raw %}
 {{ pie.flashoffer.primary_cta("Start your free trial", "/signup") }}
+{% endraw %}
 ```
 
 renders as:
@@ -40,7 +42,9 @@ renders as:
 Pair the outline helper with the primary button to offer a secondary action.
 
 ```jinja
+{% raw %}
 {{ pie.flashoffer.outline_cta("Talk to sales", "/contact") }}
+{% endraw %}
 ```
 
 renders as:
@@ -53,6 +57,7 @@ You can combine helpers with additional classes and attributes to match your
 layout or analytics requirements.
 
 ```jinja
+{% raw %}
 {{ pie.flashoffer.outline_cta(
     "View partner pricing",
     "https://example.com/pricing",
@@ -61,6 +66,7 @@ layout or analytics requirements.
     target="_blank",
     data_tracking_id="hero-secondary",
 ) }}
+{% endraw %}
 ```
 
 renders as:
@@ -167,6 +173,7 @@ Combine the preview card with CTA helpers when a template needs to hide the
 full image behind a tap target.
 
 ```jinja
+{% raw %}
 {% set preview = {
     "image_url": "https://cdn.example.com/image.jpg",
     "alt_text": "Gallery preview",
@@ -174,6 +181,7 @@ full image behind a tap target.
     "caption": "Captured in natural light.",
 } %}
 {{ pie.flashoffer.preview_card(preview) }}
+{% endraw %}
 ```
 
 Pass `overlay_text` or `overlay_button_text` to tailor the message revealed on
@@ -182,11 +190,13 @@ hover or tap. Both parameters escape plain strings while preserving
 needed.
 
 ```jinja
+{% raw %}
 {{ pie.flashoffer.preview_card(
     preview,
     overlay_text="Tap to reveal the <em>full pose</em>",
     overlay_button_text="Open reference",
 ) }}
+{% endraw %}
 ```
 
 {% set preview = {
@@ -216,6 +226,7 @@ centralised and makes it easy to swap in new cards or update the button text
 in one place.
 
 ```jinja
+{% raw %}
 <div
   class="alert alert-warning d-flex align-items-center gap-2"
   role="alert"
@@ -257,6 +268,7 @@ in one place.
       "https://example.com/policies"
   ) }}
 </div>
+{% endraw %}
 ```
 
 renders as:
@@ -307,15 +319,23 @@ renders as:
 Use the footer helper to render the contact information block.
 
 ```jinja
+{% raw %}
 {{ pie.flashoffer.footer(
-    left_prefix="©&nbsp;",
+    left_prefix="© ",
     site_name="Seattle Figure Studio",
     site_href="https://seattlefigurestudio.com",
     rights_statement="All rights reserved.",
     email_label="brian@seattlefigurestudio.com",
 ) }}
+{% endraw %}
 ```
 
 renders as:
 
-{{ pie.flashoffer.footer() }}
+{{ pie.flashoffer.footer(
+    left_prefix="© ",
+    site_name="Seattle Figure Studio",
+    site_href="https://seattlefigurestudio.com",
+    rights_statement="All rights reserved.",
+    email_label="brian@seattlefigurestudio.com",
+) }}

@@ -403,7 +403,7 @@ def footer(
         left_column.add(raw(str(prefix_html)))
     site_link = left_column.add(
         tags.a(
-            _class="link-dark text-decoration-none",
+            _class="link text-decoration-none",
             href=str(site_href),
         )
     )

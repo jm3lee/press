@@ -5,10 +5,10 @@ doc:
     url: /
   - title: Examples
     url: /examples/
-  - title: Flashoffer CTAs
+  - title: Flashoffer
   citation: flashoffer
   pubdate: Sep 28, 2025
-  title: Flashoffer CTA Helpers
+  title: Flashoffer
 html:
   navbar: false
   scripts: []
