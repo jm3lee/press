@@ -60,3 +60,15 @@ These helpers live in `app/shell/py/pie/pie/render/jinja/__init__.py` and are
 registered with the Jinja environment by `create_env()`. Figure rendering is
 implemented in `app/shell/py/pie/pie/render/jinja/figure/render.py`.
 
+## Filters
+
+The same module exposes a couple of filters that complement the globals.
+
+- `press` – render Markdown content using GitHub Flavored Markdown. The helper
+  first runs the text through the emoji alias replacement step so that
+  `:emoji:` codes become their Unicode counterparts before Markdown rendering.
+- `emojize` – convert alias-based emoji codes to Unicode. Use it when you need
+  to emojify snippets without invoking the full Markdown pipeline. The filter
+  accepts the same keyword arguments as `emoji.emojize`, defaulting to the
+  `"alias"` language.
+
