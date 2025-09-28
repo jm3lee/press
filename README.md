@@ -27,6 +27,19 @@ All project documentation lives under [docs/](docs/). Start with the
 [guides](docs/guides/README.md) for step-by-step workflows and see the
 [reference](docs/reference/README.md) for technical details.
 
+## Flashoffer demo container
+
+Build and run the Flashoffer demo with docker compose:
+
+```bash
+docker compose up flashoffer
+```
+
+The container compiles `app/flashoffer-react` and `app/flashoffer-demo` before
+serving a production preview. Access the demo at
+<http://localhost:4173>. Rebuild the image after dependency changes to keep the
+container environment in sync.
+
 ## Testing
 
 Run the test suite inside the same container used for development:

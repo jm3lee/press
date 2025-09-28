@@ -134,5 +134,17 @@ services:
       - ./app/shell/py/pie:/pie
     profiles: ["pdoc"]
 
+  flashoffer:
+    build:
+      context: .
+      dockerfile: ./app/flashoffer/Dockerfile
+    container_name: press-flashoffer
+    environment:
+      PORT: ${FLASHOFFER_PORT:-4173}
+    ports:
+      - "${FLASHOFFER_PORT:-4173}:4173"
+    volumes:
+      - ./:/workspace
+
 volumes:
   analytics_timescale_data:
