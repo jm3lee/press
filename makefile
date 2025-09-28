@@ -66,8 +66,13 @@ HTMLS := $(patsubst $(SRC_DIR)/%.md, $(BUILD_DIR)/%.html, $(MARKDOWNS))
 # Sort and define build subdirectories based on HTML files
 BUILD_SUBDIRS := $(sort $(dir $(HTMLS))) $(LOG_DIR) $(BUILD_DIR)/static $(BUILD_DIR)/css
 
-CSS_SRC := $(wildcard $(SRC_DIR)/css/*.css)
-CSS := $(patsubst $(SRC_DIR)/css/%.css,$(BUILD_DIR)/css/%.css, $(CSS_SRC))
+CSS_SRC := $(shell find $(SRC_DIR)/css -name '*.css' | sort)
+CSS := $(patsubst $(SRC_DIR)/css/%, $(BUILD_DIR)/css/%, $(CSS_SRC))
+
+BOOTSTRAP_VERSION := 5.3.8
+BOOTSTRAP_TARBALL := https://github.com/twbs/bootstrap/archive/refs/tags/v$(BOOTSTRAP_VERSION).tar.gz
+BOOTSTRAP_SRC_DIR := $(BUILD_DIR)/bootstrap-$(BOOTSTRAP_VERSION)
+BOOTSTRAP_MARKER := $(BOOTSTRAP_SRC_DIR)/.extracted
 
 # Nginx permalink redirect configuration
 PERMALINKS_CONF := $(BUILD_DIR)/permalinks.conf
@@ -142,9 +147,26 @@ $(BUILD_SUBDIRS):
 	$(call status,Create directory $@)
 	$(Q)mkdir -p $@
 
+# Download Bootstrap sources for the Flashoffer bundle on demand
+$(BOOTSTRAP_MARKER):
+	$(call status,Download Bootstrap v$(BOOTSTRAP_VERSION))
+	$(Q)rm -rf $(BOOTSTRAP_SRC_DIR)
+	$(Q)mkdir -p $(BUILD_DIR)
+	$(Q)curl -sSL $(BOOTSTRAP_TARBALL) | tar -xz -C $(BUILD_DIR)
+	$(Q)touch $@
+
+FLASHOFFER_BOOTSTRAP_SRC := $(SRC_DIR)/css/flashoffer/flashoffer-bootstrap.css
+FLASHOFFER_BOOTSTRAP_BUILD := $(BUILD_DIR)/css/flashoffer/flashoffer-bootstrap.css
+
+$(FLASHOFFER_BOOTSTRAP_BUILD): $(FLASHOFFER_BOOTSTRAP_SRC) $(BOOTSTRAP_MARKER)
+	$(call status,Compile Flashoffer Bootstrap bundle)
+	$(Q)mkdir -p $(dir $@)
+	$(Q)pysassc --style compressed -I $(BOOTSTRAP_SRC_DIR)/scss $< $@
+
 # Compile SCSS files to the build directory
 $(BUILD_DIR)/css/%.css: $(SRC_DIR)/css/%.css | $(BUILD_DIR)/css
 	$(call status,Compile SCSS $<)
+	$(Q)mkdir -p $(dir $@)
 	$(Q)pysassc $< $@
 
 # Include and preprocess Markdown files up to three levels deep
