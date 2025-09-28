@@ -29,7 +29,7 @@
     var(--press-space-2xl)
   );
   --flashoffer-hero-border-color: rgba(248, 249, 250, 0.08);
-  --flashoffer-hero-visual-max-width: min(100%, 28rem);
+  --flashoffer-hero-visual-max-width: unquote("min(100%, 28rem)");
   --flashoffer-hero-visual-radius: 1.5rem;
   --flashoffer-hero-visual-shadow: 0 24px 60px rgba(9, 11, 16, 0.45);
   --flashoffer-preview-card-min-height: 240px;
@@ -209,7 +209,7 @@ main > nav[aria-label="Page navigation"] {
 .hero-visual-wrapper {
   max-width: var(
     --flashoffer-hero-visual-max-width,
-    min(100%, 28rem)
+    unquote("min(100%, 28rem)")
   );
 }
 
