@@ -1,11 +1,20 @@
 
 import json
+import os
 import runpy
 import sys
 from pathlib import Path
 
 import pytest
 from jinja2 import FileSystemLoader, TemplateSyntaxError
+
+os.environ.setdefault(
+    "PIE_DATA_DIR",
+    "/data/src/templates",
+)
+os.environ["PIE_DATA_DIR"] = str(
+    Path(__file__).resolve().parents[5] / "src" / "templates"
+)
 
 from pie.render import jinja
 
@@ -92,4 +101,9 @@ def test_render_press_renders_footnotes():
     text = "Note.[^1]\n\n[^1]: Footnote"
     html = jinja.render_press(text)
     assert '<section class="footnotes"' in str(html)
+
+
+def test_emojize_filter_replaces_alias():
+    tmpl = jinja.env.from_string("{{ 'Hi :smile:' | emojize }}")
+    assert tmpl.render() == "Hi 😄"
 
