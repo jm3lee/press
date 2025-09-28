@@ -4,6 +4,10 @@
 
 - Wrap **paragraph text** at 80 characters.
   (Code, tables, and lists are exempt.)
+- Within `<pre>` blocks:
+  - Use two spaces for indentation.
+  - Prefer breaking lines at 80 characters on word boundaries.
+  - If no suitable word boundary exists, leave the line unbroken.
 - Metadata:
   - `description`: plain text only
   - `id`: use `_` instead of `-` when modifying
