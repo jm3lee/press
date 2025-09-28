@@ -9,6 +9,9 @@ doc:
   citation: flashoffer
   pubdate: Sep 27, 2025
   title: Flashoffer CTA Helpers
+css:
+- /css/style.css
+- /css/flashoffer-bootstrap.css
 id: flashoffer
 schema: v1
 html:
