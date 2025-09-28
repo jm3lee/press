@@ -154,6 +154,9 @@ def hero_banner(
     second_outline_text: str | Markup = "Meet Seattle Figure Studio",
     second_outline_href: str = "https://seattlefigurestudio.com/about-us",
     second_outline_kwargs: Mapping[str, Any] | None = None,
+    hero_image_url: str | None = None,
+    hero_image_alt: str | Markup | None = None,
+    hero_image_kwargs: Mapping[str, Any] | None = None,
 ) -> Markup:
     """Render the Flashoffer hero banner with configurable CTAs."""
 
@@ -212,6 +215,42 @@ def hero_banner(
         )
     )
     description_paragraph.add(raw(str(description_html)))
+
+    if hero_image_url is not None:
+        image_wrapper = surface.add(
+            tags.div(_class="hero-visual-wrapper mx-auto mb-4")
+        )
+        image_attrs = _coerce_mapping(hero_image_kwargs)
+        image_classes = "hero-visual img-fluid"
+        extra_classes = image_attrs.pop("class", "")
+        if extra_classes:
+            image_classes = f"{image_classes} {extra_classes}"
+        extra_classes = image_attrs.pop("extra_classes", "")
+        if extra_classes:
+            image_classes = f"{image_classes} {extra_classes}"
+
+        hero_image_alt_value = "" if hero_image_alt is None else hero_image_alt
+
+        sanitized_attrs: dict[str, str] = {
+            "src": _escape_attr_value(hero_image_url),
+            "alt": _escape_attr_value(hero_image_alt_value),
+        }
+
+        loading_value = image_attrs.pop("loading", "lazy")
+        if loading_value is not None:
+            sanitized_attrs["loading"] = _escape_attr_value(loading_value)
+
+        for name, value in image_attrs.items():
+            if value is None:
+                continue
+            sanitized_attrs[name] = _escape_attr_value(value)
+
+        image_wrapper.add(
+            tags.img(
+                _class=image_classes,
+                **sanitized_attrs,
+            )
+        )
 
     cta_container = surface.add(
         tags.div(_class="hero-cta d-grid gap-3 d-sm-flex justify-content-center")

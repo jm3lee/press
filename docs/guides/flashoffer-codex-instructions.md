@@ -54,6 +54,10 @@ supporting copy, and up to three CTAs. The helper accepts:
   are passed straight into `pie.flashoffer.outline_cta`, so you can add
   tracking attributes or reuse the same label overrides that appear alongside
   the [preview card helper](../../src/examples/flashoffer.md#preview-card).
+- `hero_image_url`, `hero_image_alt`, and `hero_image_kwargs` – optionally add a
+  focal image below the body copy. Provide `hero_image_alt` for accessibility
+  text and leverage `hero_image_kwargs` to append custom HTML attributes or
+  override defaults such as the loading behaviour.
 
 To hide a CTA entirely, supply a utility class through the corresponding
 `*_kwargs`, for example `{"extra_classes": "d-none"}`. You can also reorder
@@ -62,7 +66,12 @@ classes (`order-2`, `order-3`, and so on) via the same dictionaries.
 
 The hero container ships with a gradient background that mirrors the Press
 theme. Override it by setting a custom `--flashoffer-hero-background` value in
-your CSS when a landing page needs different art direction.
+your CSS when a landing page needs different art direction. You can also tweak
+the default layout and color treatments by redefining the Flashoffer CSS custom
+properties exposed in `src/css/style.css`. Variables such as
+`--flashoffer-hero-padding-block`, `--flashoffer-hero-visual-shadow`, and
+`--flashoffer-preview-overlay-background` provide override points without
+requiring manual selector overrides.
 
 ## Section header parameters
 
