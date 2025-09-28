@@ -7,6 +7,8 @@ documents provide context for the task‑oriented
 ## Contents
 
 - [architecture.md](architecture.md) – overview of the site's architecture.
+- [analytics-stack.md](analytics-stack.md) – Docker services and architecture
+  for engagement analytics.
 - [link-globals.md](link-globals.md) – global Jinja helpers for link
 formatting.
 - [jinja-globals.md](jinja-globals.md) – global variables exposed to templates.

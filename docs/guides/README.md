@@ -23,7 +23,8 @@ concepts and data formats, see the
   artifacts.
 - [tests.md](tests.md) – run the automated test suite.
 
-Refer to the [analytics documentation](/analytics/) for engagement
+Refer to the
+[analytics stack reference](../reference/analytics-stack.md) for engagement
 instrumentation, ingestion, and demo walkthroughs.
 
 ## Services and utilities
