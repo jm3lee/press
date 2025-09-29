@@ -145,6 +145,7 @@ services:
       - "${FLASHOFFER_PORT:-4173}:4173"
     volumes:
       - ./:/workspace
+    network_mode: host
 
 volumes:
   analytics_timescale_data:
