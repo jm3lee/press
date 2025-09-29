@@ -21,6 +21,14 @@ type ThemePreset = "ocean" | "sunset" | "midnight";
 
 type HeroAlignment = "left" | "center";
 
+function toTrackId(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/-{2,}/g, "-");
+}
+
 const themePresets: Record<ThemePreset, ThemeOptions | undefined> = {
   ocean: undefined,
   sunset: {
@@ -119,6 +127,21 @@ export default function App() {
     [palettePreset]
   );
 
+  const controlsMeta = useMemo(
+    () => JSON.stringify({ palette: palettePreset, heroAlignment }),
+    [heroAlignment, palettePreset]
+  );
+
+  const heroMeta = useMemo(
+    () => JSON.stringify({ alignment: heroAlignment, palette: palettePreset }),
+    [heroAlignment, palettePreset]
+  );
+
+  const previewMeta = useMemo(
+    () => JSON.stringify({ cards: previewCards.length }),
+    []
+  );
+
   return (
     <FlashofferThemeProvider themeOptions={themeOptions}>
       <Box
@@ -130,7 +153,14 @@ export default function App() {
       >
         <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 } }}>
           <Stack spacing={10}>
-            <Paper component="section" elevation={0} sx={{ p: { xs: 3, md: 4 } }}>
+            <Paper
+              component="section"
+              elevation={0}
+              sx={{ p: { xs: 3, md: 4 } }}
+              data-track-id="customization-panel"
+              data-track-label="Customization controls"
+              data-track-meta={controlsMeta}
+            >
               <Stack spacing={3}>
                 <Typography variant="h6" component="h2">
                   Customize the showcase
@@ -164,6 +194,9 @@ export default function App() {
                         color: "var(--flashoffer-color-text-primary)",
                         fontSize: "0.95rem"
                       }}
+                      data-track-id="palette-selector"
+                      data-track-label="Palette selector"
+                      data-track-meta={JSON.stringify({ palette: palettePreset })}
                     >
                       <option value="ocean">Ocean (default)</option>
                       <option value="sunset">Sunset</option>
@@ -189,6 +222,9 @@ export default function App() {
                         color: "var(--flashoffer-color-text-primary)",
                         fontSize: "0.95rem"
                       }}
+                      data-track-id="hero-alignment"
+                      data-track-label="Hero alignment selector"
+                      data-track-meta={JSON.stringify({ alignment: heroAlignment })}
                     >
                       <option value="center">Centered</option>
                       <option value="left">Left aligned</option>
@@ -198,24 +234,41 @@ export default function App() {
               </Stack>
             </Paper>
 
-            <HeroBanner
-              align={heroAlignment}
-              title="Launch coordinated offers in minutes."
-              subtitle="Flashoffer ships reusable hero, CTA, and preview components so teams can publish landing experiments without bespoke design cycles."
-              primaryCta={{
-                label: "Explore Flashoffer components",
-                href: "https://example.com/flashoffer",
-                target: "_blank",
-                rel: "noreferrer"
-              }}
-              secondaryCta={{
-                label: "Contact support",
-                href: "mailto:support@example.com"
-              }}
-              media={heroMedia}
-            />
+            <Box
+              data-track-id="hero-banner"
+              data-track-label="Hero banner"
+              data-track-meta={heroMeta}
+            >
+              <HeroBanner
+                align={heroAlignment}
+                title="Launch coordinated offers in minutes."
+                subtitle="Flashoffer ships reusable hero, CTA, and preview components so teams can publish landing experiments without bespoke design cycles."
+                primaryCta={{
+                  label: "Explore Flashoffer components",
+                  href: "https://example.com/flashoffer",
+                  target: "_blank",
+                  rel: "noreferrer",
+                  "data-track-id": "hero-primary-cta",
+                  "data-track-label": "Hero primary CTA",
+                  "data-track-meta": heroMeta
+                }}
+                secondaryCta={{
+                  label: "Contact support",
+                  href: "mailto:support@example.com",
+                  "data-track-id": "hero-secondary-cta",
+                  "data-track-label": "Hero secondary CTA",
+                  "data-track-meta": heroMeta
+                }}
+                media={heroMedia}
+              />
+            </Box>
 
-            <Box component="section">
+            <Box
+              component="section"
+              data-track-id="cta-variations"
+              data-track-label="CTA showcase"
+              data-track-meta={JSON.stringify({ variants: 2 })}
+            >
               <SectionHeader
                 eyebrow="CALL TO ACTION"
                 title="Pre-built CTA variations"
@@ -228,16 +281,31 @@ export default function App() {
                 alignItems="center"
                 justifyContent="center"
               >
-                <PrimaryCtaButton href="https://example.com/flashoffer">
+                <PrimaryCtaButton
+                  href="https://example.com/flashoffer"
+                  data-track-id="cta-primary"
+                  data-track-label="Primary CTA"
+                  data-track-meta={JSON.stringify({ location: "cta-showcase" })}
+                >
                   Explore Flashoffer components
                 </PrimaryCtaButton>
-                <OutlineCtaButton href="mailto:support@example.com">
+                <OutlineCtaButton
+                  href="mailto:support@example.com"
+                  data-track-id="cta-secondary"
+                  data-track-label="Secondary CTA"
+                  data-track-meta={JSON.stringify({ location: "cta-showcase" })}
+                >
                   Contact support
                 </OutlineCtaButton>
               </Stack>
             </Box>
 
-            <Box component="section">
+            <Box
+              component="section"
+              data-track-id="preview-section"
+              data-track-label="Preview cards"
+              data-track-meta={previewMeta}
+            >
               <SectionHeader
                 eyebrow="SHOWCASE"
                 title="Modular previews for any campaign"
@@ -245,18 +313,36 @@ export default function App() {
                 align="left"
               />
               <Grid container spacing={3} sx={{ mt: 3 }}>
-                {previewCards.map((card) => (
-                  <Grid key={card.title} size={{ xs: 12, md: 4 }}>
-                    <PreviewCard {...card} />
-                  </Grid>
-                ))}
+                {previewCards.map((card, index) => {
+                  const label = String(card.title);
+                  const cardTrackId = `preview-card-${
+                    toTrackId(label) || index + 1
+                  }`;
+                  return (
+                    <Grid
+                      key={card.title}
+                      size={{ xs: 12, md: 4 }}
+                      data-track-id={cardTrackId}
+                      data-track-label={label}
+                      data-track-meta={JSON.stringify({ index, title: label })}
+                    >
+                      <PreviewCard {...card} />
+                    </Grid>
+                  );
+                })}
               </Grid>
             </Box>
 
-            <Footer
-              links={footerLinks}
-              copyrightText="© 2025 Flashoffer. All rights reserved."
-            />
+            <Box
+              data-track-id="footer"
+              data-track-label="Footer"
+              data-track-meta={JSON.stringify({ links: footerLinks.length })}
+            >
+              <Footer
+                links={footerLinks}
+                copyrightText="© 2025 Flashoffer. All rights reserved."
+              />
+            </Box>
           </Stack>
         </Container>
       </Box>

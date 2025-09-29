@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { AutoTrack, EngagementProvider } from "flashoffer-react";
 import App from "./App";
 import "./index.css";
 
@@ -11,6 +12,9 @@ if (!rootElement) {
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <App />
+    <EngagementProvider site="flashoffer-demo">
+      <App />
+      <AutoTrack />
+    </EngagementProvider>
   </React.StrictMode>
 );
