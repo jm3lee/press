@@ -23,7 +23,7 @@
   "files": [
     "dist"
   ],
-  "sideEffects": false,
+  "sideEffects": ["*.css"],
   "scripts": {
     "build": "vite build",
     "test": "jest",

@@ -2,9 +2,10 @@
 
 ## Overview
 Press instruments engagement analytics with a trio of services that run under
-Docker Compose. The React playground in `app/analytics` emits batched events,
-`analytics-backend` authenticates and validates the payload, and
-`analytics-timescaledb` stores the resulting hypertable data set. The stack
+Docker Compose. React components in `app/flashoffer-react` emit batched events
+when embedded in marketing experiences, `analytics-backend` authenticates and
+validates the payload, and `analytics-timescaledb` stores the resulting
+hypertable data set. The stack
 provides a reproducible environment for demos and supports production-like
 pipelines. Two JavaScript helpers, `EngagementProvider` and `AutoTrack`, sit at
 the edge of the system and funnel page activity into the ingestion API.
@@ -78,9 +79,9 @@ enter and leave the viewport. Manual interactions call directly into the
 provider with `useRecordInteraction` to supply richer metadata.
 
 ## Demo walkthrough
-The React playground under `app/analytics` renders a fully instrumented landing
-page that streams engagement events into the ingestion API. Use the demo to see
-how the provider, AutoTrack helper, and live console fit together.
+Embedding the helpers from `app/flashoffer-react` inside a marketing page
+streams engagement events into the ingestion API. Use the following walkthrough
+to see how the provider, AutoTrack helper, and live console fit together.
 
 - **Hero and primary calls to action** – The hero section is tagged with
   `data-track-id="hero"` and two CTA buttons. Clicks invoke
@@ -163,19 +164,19 @@ application reaches the API through the host-mapped port.
   The suite boots TimescaleDB, applies migrations, submits sample payloads, and
   truncates the hypertable when the run completes.
 
-### analytics
-- **Purpose** – Hosts the Vite playground in `app/analytics` that demonstrates
-  the instrumentation bundle.
-- **Tooling** – Install dependencies and start the dev server in a separate
-  terminal:
+### flashoffer-react
+- **Purpose** – `app/flashoffer-react` packages the React instrumentation
+  helpers (`EngagementProvider`, `AutoTrack`, and `EventConsole`) for
+  consumption in marketing front-ends.
+- **Tooling** – Install dependencies and run the build to generate distributable
+  assets:
   ```bash
-  cd app/analytics
+  cd app/flashoffer-react
   npm install
-  npm run dev
+  npm run build
   ```
-  Vite binds to `http://localhost:5173` by default and proxies API calls to the
-  backend. Ensure CORS settings include the origin when running against a remote
-  ingestion service.
+  The Vite build emits ESM and CommonJS bundles so applications can import the
+  helpers directly or publish a compiled asset for static sites.
 
 ## Local workflow
 1. Start the database and ingestion API:
@@ -184,8 +185,8 @@ application reaches the API through the host-mapped port.
    ```
    Wait until the Flask logs show `Running on http://0.0.0.0:8000/`. Port `8001`
    on the host forwards to the container's `8000`.
-2. Launch the Vite demo as described above and open the site in a browser. The
-   console lists captured events in real time.
+2. Import the React helpers into your marketing site or demo application and run
+   it alongside the backend. The console lists captured events in real time.
 3. Experiment with scroll, interaction, and dwell instrumentation. Each action
    appears immediately in the backend logs and TimescaleDB queries.
 4. Stop the stack with `Ctrl+C` in each terminal. The Docker volume preserves
