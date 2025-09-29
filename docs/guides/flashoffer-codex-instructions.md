@@ -1,4 +1,4 @@
-# Codex Instructions for Flashoffer CTAs
+# Codex Instructions for Flashoffer
 
 The following block can be copied into an `AGENTS.md` file so Codex-powered
 agents know how to render landing page buttons using `pie.flashoffer`.
