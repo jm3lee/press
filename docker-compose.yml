@@ -147,5 +147,20 @@ services:
       - ./:/workspace
     network_mode: host
 
+  flashoffer-dev:
+    build:
+      context: .
+      dockerfile: ./app/flashoffer/Dockerfile
+    container_name: press-flashoffer-dev
+    environment:
+      FLASHOFFER_MODE: dev
+      PORT: ${FLASHOFFER_DEV_PORT:-5173}
+      CHOKIDAR_USEPOLLING: "true"
+    ports:
+      - "${FLASHOFFER_DEV_PORT:-5173}:5173"
+    volumes:
+      - ./:/workspace
+    network_mode: host
+
 volumes:
   analytics_timescale_data:
