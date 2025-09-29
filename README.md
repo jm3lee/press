@@ -40,6 +40,18 @@ serving a production preview. Access the demo at
 <http://localhost:4173>. Rebuild the image after dependency changes to keep the
 container environment in sync.
 
+For hot reloading with the Vite development server, start the dedicated dev
+service instead:
+
+```bash
+docker compose up flashoffer-dev
+```
+
+The dev container serves the demo in development mode at
+<http://localhost:5173>, so component names remain unminified for tools like
+React DevTools. Changes made to the local filesystem are reflected in the
+running container automatically.
+
 ## Testing
 
 Run the test suite inside the same container used for development:
