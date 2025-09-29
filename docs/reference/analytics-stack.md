@@ -178,6 +178,17 @@ application reaches the API through the host-mapped port.
   The Vite build emits ESM and CommonJS bundles so applications can import the
   helpers directly or publish a compiled asset for static sites.
 
+### flashoffer / flashoffer-dev
+- **Purpose** – Serve the Flashoffer marketing demo either as a static preview
+  (`flashoffer`) or via the Vite dev server (`flashoffer-dev`).
+- **Analytics wiring** – Compose exports
+  `VITE_FLASHOFFER_ANALYTICS_ENDPOINT` and
+  `VITE_FLASHOFFER_ANALYTICS_RECENT_URL` so the demo posts batched events to
+  `analytics-backend` at `http://localhost:8001` by default.
+- **Overrides** – Set `FLASHOFFER_ANALYTICS_ENDPOINT` or
+  `FLASHOFFER_ANALYTICS_RECENT_URL` in your environment to target alternate
+  ingestion hosts without editing Compose files.
+
 ## Local workflow
 1. Start the database and ingestion API:
    ```bash
