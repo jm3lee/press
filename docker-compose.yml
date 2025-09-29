@@ -89,7 +89,7 @@ services:
       DATABASE_USER: analytics
       DATABASE_PASSWORD: analytics
       DATABASE_NAME: analytics
-      CORS_ALLOW_ORIGINS: http://localhost:5173
+      CORS_ALLOW_ORIGINS: http://localhost:5173,http://localhost:4173
     depends_on:
       - analytics-timescaledb
     ports:
@@ -141,6 +141,8 @@ services:
     container_name: press-flashoffer
     environment:
       PORT: ${FLASHOFFER_PORT:-4173}
+      VITE_FLASHOFFER_ANALYTICS_ENDPOINT: ${FLASHOFFER_ANALYTICS_ENDPOINT:-http://localhost:8001/events}
+      VITE_FLASHOFFER_ANALYTICS_RECENT_URL: ${FLASHOFFER_ANALYTICS_RECENT_URL:-http://localhost:8001/events/recent}
     ports:
       - "${FLASHOFFER_PORT:-4173}:4173"
     volumes:
@@ -156,6 +158,8 @@ services:
       FLASHOFFER_MODE: dev
       PORT: ${FLASHOFFER_DEV_PORT:-5173}
       CHOKIDAR_USEPOLLING: "true"
+      VITE_FLASHOFFER_ANALYTICS_ENDPOINT: ${FLASHOFFER_ANALYTICS_ENDPOINT:-http://localhost:8001/events}
+      VITE_FLASHOFFER_ANALYTICS_RECENT_URL: ${FLASHOFFER_ANALYTICS_RECENT_URL:-http://localhost:8001/events/recent}
     ports:
       - "${FLASHOFFER_DEV_PORT:-5173}:5173"
     volumes:
