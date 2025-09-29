@@ -18,3 +18,21 @@ export type { PreviewCardProps } from "./components/PreviewCard";
 
 export { Footer } from "./components/Footer";
 export type { FooterProps, FooterLink } from "./components/Footer";
+
+export {
+  AutoTrack,
+  EngagementProvider,
+  EventConsole,
+  useEngagement,
+  useRecordInteraction,
+  useViewTracker,
+  ViewTracker,
+} from "./analytics";
+export type {
+  AutoTrackProps,
+  EngagementContextValue,
+  EngagementEvent,
+  EngagementProviderProps,
+  EventConsoleProps,
+  ViewTrackerProps,
+} from "./analytics";
