@@ -40,6 +40,7 @@ gunicorn \
   --workers "$GUNICORN_WORKERS" \
   --access-logfile - \
   --error-logfile - \
+  --factory \
   analytics_backend.app:create_app &
 GUNICORN_PID=$!
 
