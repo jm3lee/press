@@ -137,13 +137,14 @@ services:
     build:
       context: .
       dockerfile: ./app/flashoffer/Dockerfile
-      target: runner
+      target: production
     environment:
       PORT: ${FLASHOFFER_PORT:-4173}
       VITE_FLASHOFFER_ANALYTICS_ENDPOINT: ${FLASHOFFER_ANALYTICS_ENDPOINT:-http://localhost:8001/events}
       VITE_FLASHOFFER_ANALYTICS_RECENT_URL: ${FLASHOFFER_ANALYTICS_RECENT_URL:-http://localhost:8001/events/recent}
     ports:
       - "${FLASHOFFER_PORT:-4173}:4173"
+      - "80:80"
     volumes:
       - ./:/workspace
 
