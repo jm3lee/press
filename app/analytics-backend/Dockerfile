@@ -5,11 +5,14 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+COPY app/analytics-backend/requirements.txt ./requirements.txt
+COPY app/shell/py/pie /tmp/pie
+RUN pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir /tmp/pie \
+    && rm -rf /tmp/pie
 
-COPY analytics_backend ./analytics_backend
-COPY tests ./tests
+COPY app/analytics-backend/analytics_backend ./analytics_backend
+COPY app/analytics-backend/tests ./tests
 
 ENV FLASK_APP=analytics_backend.app:create_app \
     CORS_ALLOW_ORIGINS=
