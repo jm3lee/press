@@ -21,13 +21,18 @@ RUN npm run build
 
 FROM node:22-slim AS runner
 ENV NODE_ENV=production
+ENV PORT=4173
 WORKDIR /workspace
 COPY --from=flashoffer-react-build /workspace/app/flashoffer-react /workspace/app/flashoffer-react
 COPY --from=flashoffer-demo-build /workspace/app/flashoffer-demo /workspace/app/flashoffer-demo
+COPY app/flashoffer/entrypoint.sh /usr/local/bin/flashoffer-entrypoint
+RUN chmod +x /usr/local/bin/flashoffer-entrypoint
+EXPOSE 4173
+ENTRYPOINT ["flashoffer-entrypoint"]
 
 FROM nginx:1.27-alpine AS production
 WORKDIR /usr/share/nginx/html
 COPY app/flashoffer/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=flashoffer-demo-build /workspace/app/flashoffer-demo/ ./
+COPY --from=flashoffer-demo-build /workspace/app/flashoffer-demo/dist ./
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
