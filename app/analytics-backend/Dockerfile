@@ -10,14 +10,13 @@ WORKDIR /app
 COPY app/analytics-backend/requirements.txt ./requirements.txt
 COPY app/shell/py/pie /tmp/pie
 RUN pip install --no-cache-dir -r requirements.txt \
-    && pip install --no-cache-dir /tmp/pie \
+    && pip install --no-cache-dir /tmp/pie dominate \
     && rm -rf /tmp/pie
 
 COPY app/analytics-backend/analytics_backend ./analytics_backend
 COPY app/analytics-backend/tests ./tests
 
 FROM base AS dev
-COPY tests ./tests
 
 EXPOSE 8000
 
