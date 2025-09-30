@@ -11,7 +11,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY analytics_backend ./analytics_backend
 COPY tests ./tests
 
-ENV FLASK_APP=analytics_backend.app:create_app
+ENV FLASK_APP=analytics_backend.app:create_app \
+    CORS_ALLOW_ORIGINS=
 
 EXPOSE 8000
 
