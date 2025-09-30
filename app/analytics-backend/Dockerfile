@@ -22,7 +22,7 @@ EXPOSE 8000
 
 CMD ["flask", "--app", "analytics_backend.app:create_app", "run", "--host=0.0.0.0", "--port=8000"]
 
-FROM base AS production
+FROM base AS prod
 ENV GUNICORN_WORKERS=4 \
     GUNICORN_BIND=unix:/tmp/gunicorn.sock
 
@@ -32,8 +32,8 @@ RUN apt-get update \
 
 RUN pip install --no-cache-dir gunicorn
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY entrypoint.sh /entrypoint.sh
+COPY app/analytics-backend/nginx.conf /etc/nginx/conf.d/default.conf
+COPY app/analytics-backend/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 EXPOSE 8000
