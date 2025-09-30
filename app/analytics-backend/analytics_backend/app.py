@@ -9,6 +9,7 @@ import time
 from typing import Any, Dict, Iterable, Set
 
 from flask import Flask, Response, jsonify, request
+from loguru import logger
 
 from .db import DatabaseConfig, TimescaleDB
 
@@ -63,11 +64,19 @@ def create_app() -> Flask:
     atexit.register(storage.close)
     app.config["DB_POOL"] = storage
 
+    cors_logger = logger.bind(component="cors")
+    cors_allow_origins = os.getenv("CORS_ALLOW_ORIGINS", "")
+    cors_logger.info("Loaded CORS_ALLOW_ORIGINS value", value=cors_allow_origins)
+
     allowed_origins: Set[str] = {
         origin.strip()
-        for origin in os.getenv("CORS_ALLOW_ORIGINS", "").split(",")
+        for origin in cors_allow_origins.split(",")
         if origin.strip()
     }
+    cors_logger.info(
+        "Configured allowed origins",
+        allowed_origins=sorted(allowed_origins),
+    )
 
     def apply_cors(response: Response) -> Response:
         if allowed_origins:
