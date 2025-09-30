@@ -32,14 +32,21 @@ build_package() {
   npm run build
 }
 
-ensure_dependencies "${ROOT_DIR}/app/flashoffer-react"
-ensure_dependencies "${ROOT_DIR}/app/flashoffer-demo"
-
 if [ "${MODE}" = "dev" ]; then
+  ensure_dependencies "${ROOT_DIR}/app/flashoffer-react"
+  ensure_dependencies "${ROOT_DIR}/app/flashoffer-demo"
+
+  build_package "${ROOT_DIR}/app/flashoffer-react"
+  build_package "${ROOT_DIR}/app/flashoffer-demo"
+
   cd "${ROOT_DIR}/app/flashoffer-demo"
   exec npm run dev -- --host 0.0.0.0 --port "${PORT}"
 fi
 
-build_package "${ROOT_DIR}/app/flashoffer-react"
-build_package "${ROOT_DIR}/app/flashoffer-demo"
-exec npm run preview -- --host 0.0.0.0 --port "${PORT}"
+if [ ! -d "${ROOT_DIR}/app/flashoffer-demo/dist" ]; then
+  echo "flashoffer-demo has not been built. Expected dist directory missing." >&2
+  echo "Ensure the production image copies build artifacts from the build stage." >&2
+  exit 1
+fi
+
+exec serve -s "${ROOT_DIR}/app/flashoffer-demo/dist" -l "tcp://0.0.0.0:${PORT}"
