@@ -120,7 +120,7 @@ services:
   analytics-backend:
     build: ./app/analytics-backend
     environment:
-      DATABASE_HOST: analytics-timescaledb
+      DATABASE_HOST: analytics-db
       DATABASE_PORT: 5432
       DATABASE_USER: analytics
       DATABASE_PASSWORD: analytics
