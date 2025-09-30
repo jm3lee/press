@@ -106,8 +106,8 @@ services:
       - ./app/shell/py/pie:/pie
     profiles: ["pdoc"]
 
-  analytics-timescaledb:
-    image: timescale/timescaledb:latest-pg14
+  analytics-db:
+    build: ./app/analytics-db
     environment:
       POSTGRES_USER: analytics
       POSTGRES_PASSWORD: analytics
@@ -115,7 +115,7 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - analytics_timescale_data:/var/lib/postgresql/data
+      - analytics_data:/var/lib/postgresql/data
 
   analytics-backend:
     build: ./app/analytics-backend
@@ -127,7 +127,7 @@ services:
       DATABASE_NAME: analytics
       CORS_ALLOW_ORIGINS: http://localhost:5173,http://localhost:4173
     depends_on:
-      - analytics-timescaledb
+      - analytics-db
     ports:
       - "8001:8000"
     volumes:
@@ -164,4 +164,4 @@ services:
       - analytics-backend
 
 volumes:
-  analytics_timescale_data:
+  analytics_data:
