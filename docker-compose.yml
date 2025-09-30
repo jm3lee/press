@@ -137,6 +137,7 @@ services:
     build:
       context: .
       dockerfile: ./app/flashoffer/Dockerfile
+      target: runner
     environment:
       PORT: ${FLASHOFFER_PORT:-4173}
       VITE_FLASHOFFER_ANALYTICS_ENDPOINT: ${FLASHOFFER_ANALYTICS_ENDPOINT:-http://localhost:8001/events}
@@ -149,7 +150,7 @@ services:
   flashoffer-dev:
     build:
       context: .
-      dockerfile: ./app/flashoffer/Dockerfile
+      dockerfile: ./app/flashoffer/Dockerfile.dev
     environment:
       FLASHOFFER_MODE: dev
       PORT: ${FLASHOFFER_DEV_PORT:-5173}
