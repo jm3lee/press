@@ -5,6 +5,7 @@ from __future__ import annotations
 import atexit
 import json
 import os
+import time
 from typing import Any, Dict, Iterable, Set
 
 from flask import Flask, Response, jsonify, request
@@ -58,8 +59,7 @@ def create_app() -> Flask:
     app = Flask(__name__)
 
     config = DatabaseConfig.from_env()
-    storage = TimescaleDB(config)
-    storage.initialize()
+    storage = _initialise_storage(app, config)
     atexit.register(storage.close)
     app.config["DB_POOL"] = storage
 
@@ -155,6 +155,50 @@ def create_app() -> Flask:
         return Response(json.dumps(details), mimetype="application/json")
 
     return app
+
+
+def _initialise_storage(app: Flask, config: DatabaseConfig) -> TimescaleDB:
+    """Initialise the database connection with retry semantics."""
+
+    retry_interval = 5.0
+    timeout = 300.0
+    deadline = time.monotonic() + timeout
+    attempt = 1
+
+    while True:
+        storage: TimescaleDB | None = None
+        try:
+            storage = TimescaleDB(config)
+            storage.initialize()
+        except Exception as exc:  # noqa: BLE001 - must propagate original error
+            if storage is not None:
+                try:
+                    storage.close()
+                except Exception:  # noqa: BLE001 - suppress during retry cleanup
+                    pass
+
+            now = time.monotonic()
+            if now >= deadline:
+                app.logger.error(
+                    "Failed to connect to the database after %s attempts", attempt
+                )
+                raise
+
+            app.logger.warning(
+                "Database connection attempt %s failed: %s. Retrying in %s seconds.",
+                attempt,
+                exc,
+                int(retry_interval),
+            )
+            attempt += 1
+            time.sleep(retry_interval)
+        else:
+            app.logger.info(
+                "Connected to the database after %s attempt%s.",
+                attempt,
+                "s" if attempt != 1 else "",
+            )
+            return storage
 
 
 __all__ = ["create_app"]
