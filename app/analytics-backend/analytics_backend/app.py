@@ -9,7 +9,8 @@ import time
 from typing import Any, Dict, Iterable, Set
 
 from flask import Flask, Response, jsonify, request
-from loguru import logger
+
+from pie.logging import logger
 
 from .db import DatabaseConfig, TimescaleDB
 
@@ -64,7 +65,7 @@ def create_app() -> Flask:
     atexit.register(storage.close)
     app.config["DB_POOL"] = storage
 
-    cors_logger = logger.bind(component="cors")
+    cors_logger = logger.bind(component="analytics-backend", feature="cors")
     cors_allow_origins = os.getenv("CORS_ALLOW_ORIGINS", "")
     cors_logger.info("Loaded CORS_ALLOW_ORIGINS value", value=cors_allow_origins)
 
@@ -171,8 +172,15 @@ def _initialise_storage(app: Flask, config: DatabaseConfig) -> TimescaleDB:
 
     retry_interval = 5.0
     timeout = 300.0
-    deadline = time.monotonic() + timeout
+    start_time = time.monotonic()
+    deadline = start_time + timeout
     attempt = 1
+
+    storage_logger = logger.bind(
+        component="analytics-backend",
+        operation="database-initialisation",
+        flask_app=app.name,
+    )
 
     while True:
         storage: TimescaleDB | None = None
@@ -188,24 +196,27 @@ def _initialise_storage(app: Flask, config: DatabaseConfig) -> TimescaleDB:
 
             now = time.monotonic()
             if now >= deadline:
-                app.logger.error(
-                    "Failed to connect to the database after %s attempts", attempt
+                storage_logger.opt(exception=exc).error(
+                    "Failed to connect to the database",
+                    attempts=attempt,
+                    timeout_seconds=timeout,
+                    elapsed_seconds=now - start_time,
                 )
                 raise
 
-            app.logger.warning(
-                "Database connection attempt %s failed: %s. Retrying in %s seconds.",
-                attempt,
-                exc,
-                int(retry_interval),
+            storage_logger.opt(exception=exc).warning(
+                "Database connection attempt failed",
+                attempt=attempt,
+                retry_interval_seconds=retry_interval,
+                seconds_until_timeout=max(0.0, deadline - now),
             )
             attempt += 1
             time.sleep(retry_interval)
         else:
-            app.logger.info(
-                "Connected to the database after %s attempt%s.",
-                attempt,
-                "s" if attempt != 1 else "",
+            storage_logger.info(
+                "Connected to the database",
+                attempts=attempt,
+                elapsed_seconds=time.monotonic() - start_time,
             )
             return storage
 
