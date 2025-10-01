@@ -24,6 +24,8 @@
   sync.
 - When modifying Flashoffer methods, ensure any text rendered to end users is
   configurable via function parameters.
+- Node.js projects: modify `package.json` and `package-lock.json` only when
+  the dependency list changes.
 
 ## Checker Scripts
 
