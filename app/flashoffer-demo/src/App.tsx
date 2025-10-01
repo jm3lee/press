@@ -161,6 +161,11 @@ export default function App() {
     []
   );
 
+  const pageMeta = useMemo(
+    () => JSON.stringify({ palette: palettePreset }),
+    [palettePreset]
+  );
+
   return (
     <FlashofferThemeProvider themeOptions={themeOptions}>
       <Box
@@ -169,6 +174,9 @@ export default function App() {
           color: "var(--flashoffer-color-text-primary)",
           minHeight: "100vh"
         }}
+        data-track-id="flashoffer-demo-surface"
+        data-track-label="Flashoffer demo surface"
+        data-track-meta={pageMeta}
       >
         <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 } }}>
           <Stack spacing={10}>
