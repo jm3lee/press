@@ -7,25 +7,19 @@ export interface SectionHeaderProps {
   eyebrow?: ReactNode;
   /** Main heading text. */
   title?: ReactNode;
-  /** Supporting description under the title. */
-  description?: ReactNode;
   /** Horizontal alignment for the text stack. */
   align?: "left" | "center";
 }
 
 const DEFAULT_EYEBROW = "FLASHOFFER";
 const DEFAULT_TITLE = "Launch faster with reusable content blocks.";
-const DEFAULT_DESCRIPTION =
-  "Compose hero banners, feature highlights, and testimonials using the same " +
-  "accessible primitives found in production Flashoffer experiences.";
 
 /**
- * Section heading with optional eyebrow and description.
+ * Section heading with optional eyebrow.
  */
 export function SectionHeader({
   eyebrow = DEFAULT_EYEBROW,
   title = DEFAULT_TITLE,
-  description = DEFAULT_DESCRIPTION,
   align = "center"
 }: SectionHeaderProps) {
   return (
@@ -43,11 +37,6 @@ export function SectionHeader({
       <Typography component="h2" variant="h4">
         {title}
       </Typography>
-      {description ? (
-        <Typography variant="body1" color="text.secondary">
-          {description}
-        </Typography>
-      ) : null}
     </Stack>
   );
 }
