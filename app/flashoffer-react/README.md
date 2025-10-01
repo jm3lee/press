@@ -5,6 +5,20 @@ used by Flashoffer experiences. The library ships with a theme provider,
 strongly typed component APIs, and accessibility-focused defaults so marketing
 teams can drop the primitives into landing pages without extra scaffolding.
 
+## Maintenance guidelines
+
+- Whenever you modify a `flashoffer-react` component, open a companion pull
+  request on `flashoffer-demo` so the marketing showcase mirrors the latest API
+  and visual treatment. The demo must ship the same defaults and examples as
+  the component library to guarantee parity.
+- Components should always render a sensible layout when instantiated with no
+  props. Verify that each primitive exposes defaults that marketing teams can
+  compose into a functional experiment page without first wiring bespoke data.
+- Every component must accept child React nodes in the obvious content slots.
+  Where Material UI slots exist (e.g., `CardActions`, `CardContent`), ensure we
+  forward them so integrators can replace copy, media, and CTAs without
+  forking the component.
+
 ## Installation
 
 ```bash
