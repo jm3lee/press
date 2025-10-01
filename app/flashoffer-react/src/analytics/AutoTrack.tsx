@@ -3,6 +3,13 @@ import { useEngagement } from "./EngagementProvider";
 
 const DEFAULT_SELECTOR = "[data-track-id]";
 
+const scheduleMicrotask =
+  typeof queueMicrotask === "function"
+    ? queueMicrotask
+    : (callback: () => void) => {
+        void Promise.resolve().then(callback);
+      };
+
 function parseMeta(element: HTMLElement): Record<string, unknown> {
   const meta: Record<string, unknown> = {};
   const label = element.getAttribute("data-track-label");
@@ -38,9 +45,13 @@ export function AutoTrack({ selector = DEFAULT_SELECTOR }: AutoTrackProps) {
     }
 
     const tracked = new Map<HTMLElement, () => void>();
+    const pendingConnects = new Set<HTMLElement>();
+    const pendingDisconnects = new Set<HTMLElement>();
+    let flushScheduled = false;
+    let disposed = false;
 
-    const connect = (element: Element | null) => {
-      if (!(element instanceof HTMLElement)) {
+    const connectNow = (element: Element | null) => {
+      if (!(element instanceof HTMLElement) || disposed) {
         return;
       }
       const trackId = element.getAttribute("data-track-id");
@@ -51,7 +62,7 @@ export function AutoTrack({ selector = DEFAULT_SELECTOR }: AutoTrackProps) {
       tracked.set(element, cleanup);
     };
 
-    const disconnect = (element: Element | null) => {
+    const disconnectNow = (element: Element | null) => {
       if (!(element instanceof HTMLElement)) {
         return;
       }
@@ -64,26 +75,89 @@ export function AutoTrack({ selector = DEFAULT_SELECTOR }: AutoTrackProps) {
       }
     };
 
+    const flushPending = () => {
+      if (disposed) {
+        pendingConnects.clear();
+        pendingDisconnects.clear();
+        return;
+      }
+      pendingDisconnects.forEach((element) => {
+        disconnectNow(element);
+      });
+      pendingDisconnects.clear();
+      pendingConnects.forEach((element) => {
+        connectNow(element);
+      });
+      pendingConnects.clear();
+    };
+
+    const scheduleFlush = () => {
+      if (flushScheduled || disposed) {
+        return;
+      }
+      flushScheduled = true;
+      scheduleMicrotask(() => {
+        flushScheduled = false;
+        flushPending();
+      });
+    };
+
+    const queueDisconnect = (
+      element: Element | null,
+      { preserve }: { preserve?: boolean } = {}
+    ) => {
+      if (!(element instanceof HTMLElement) || disposed) {
+        return;
+      }
+      if (!preserve) {
+        pendingConnects.delete(element);
+      }
+      pendingDisconnects.add(element);
+      scheduleFlush();
+    };
+
+    const queueConnect = (
+      element: Element | null,
+      { preserve }: { preserve?: boolean } = {}
+    ) => {
+      if (!(element instanceof HTMLElement) || disposed) {
+        return;
+      }
+      if (!preserve) {
+        pendingDisconnects.delete(element);
+      }
+      pendingConnects.add(element);
+      scheduleFlush();
+    };
+
+    const visitMatches = (
+      node: HTMLElement,
+      visitor: (element: HTMLElement) => void
+    ) => {
+      if (node.matches(selector)) {
+        visitor(node);
+      }
+      node.querySelectorAll(selector).forEach((child) => {
+        if (child instanceof HTMLElement) {
+          visitor(child);
+        }
+      });
+    };
+
     document.querySelectorAll(selector).forEach((node) => {
-      connect(node);
+      connectNow(node);
     });
 
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
           if (node instanceof HTMLElement) {
-            if (node.matches(selector)) {
-              connect(node);
-            }
-            node.querySelectorAll(selector).forEach((child) => connect(child));
+            visitMatches(node, (element) => queueConnect(element));
           }
         });
         mutation.removedNodes.forEach((node) => {
           if (node instanceof HTMLElement) {
-            if (node.matches(selector)) {
-              disconnect(node);
-            }
-            node.querySelectorAll(selector).forEach((child) => disconnect(child));
+            visitMatches(node, (element) => queueDisconnect(element));
           }
         });
         if (
@@ -91,8 +165,14 @@ export function AutoTrack({ selector = DEFAULT_SELECTOR }: AutoTrackProps) {
           mutation.target instanceof HTMLElement &&
           mutation.target.matches(selector)
         ) {
-          disconnect(mutation.target);
-          connect(mutation.target);
+          queueDisconnect(mutation.target, { preserve: true });
+          queueConnect(mutation.target, { preserve: true });
+        } else if (
+          mutation.type === "attributes" &&
+          mutation.target instanceof HTMLElement &&
+          !mutation.target.matches(selector)
+        ) {
+          queueDisconnect(mutation.target);
         }
       });
     });
@@ -105,6 +185,10 @@ export function AutoTrack({ selector = DEFAULT_SELECTOR }: AutoTrackProps) {
     });
 
     return () => {
+      disposed = true;
+      flushScheduled = false;
+      pendingConnects.clear();
+      pendingDisconnects.clear();
       observer.disconnect();
       tracked.forEach((cleanup) => cleanup());
       tracked.clear();

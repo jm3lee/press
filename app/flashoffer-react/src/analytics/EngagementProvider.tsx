@@ -280,7 +280,10 @@ export function EngagementProvider({
       }
       trackedElementsRef.current.set(element, { trackId, meta });
       if (element instanceof HTMLElement) {
-        element.setAttribute("data-track-id", trackId);
+        const currentTrackId = element.getAttribute("data-track-id");
+        if (currentTrackId !== trackId) {
+          element.setAttribute("data-track-id", trackId);
+        }
       }
       observer.observe(element as Element);
       return () => detachElement(element);
