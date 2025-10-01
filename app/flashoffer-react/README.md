@@ -61,9 +61,9 @@ export function LandingPage() {
 
 ### Theme customization
 
-`FlashofferThemeProvider` merges any supplied Material UI `ThemeOptions` with the
-baseline palette. For more granular control, call `createFlashofferTheme` and
-pass the resulting theme to your own `ThemeProvider` instance. The component
+`FlashofferThemeProvider` merges any supplied Material UI `ThemeOptions` with
+the baseline palette. For more granular control, call `createFlashofferTheme`
+and pass the resulting theme to your own `ThemeProvider` instance. The component
 primitives respect CSS tokens such as `--flashoffer-color-primary` and
 `--flashoffer-font-family`, enabling runtime theming through global styles.
 
@@ -82,12 +82,86 @@ export function App({ children }: { children: React.ReactNode }) {
 }
 ```
 
-### Component overview
+### Component reference
 
-The library includes call-to-action buttons, hero banners, section headers,
-preview cards, and a footer with neutral defaults. Each component exposes typed
-props so product teams can swap copy, inject custom media, or override CTA
-behavior while retaining baseline accessibility attributes.
+Each component ships with sensible defaults that marketing teams can override
+incrementally. All props are optional unless noted otherwise and forward
+arbitrary attributes to the underlying Material UI primitive.
+
+- **`PrimaryCtaButton`** – High-emphasis call-to-action rendered as a contained
+  button. Provide `label` or custom `children`, and pass any Material UI
+  `ButtonProps` (for example `href`, `onClick`, or `startIcon`).
+- **`OutlineCtaButton`** – Low-emphasis companion CTA that mirrors the primary
+  button API but renders as an outlined variant.
+- **`HeroBanner`** – Promotional hero section that combines headline, subtitle,
+  and CTA buttons. Set `align="left"` to left-align copy, pass `media` to render
+  an illustration, and override `primaryCta`/`secondaryCta` with button props or
+  disable the secondary button by supplying `null`.
+- **`SectionHeader`** – Standalone heading stack with `eyebrow`, `title`, and
+  `description` slots. The `align` prop controls text alignment and flex
+  behavior.
+- **`Section`** – High-level wrapper that renders `SectionHeader` plus body copy
+  paragraphs. Supply `paragraphs` as an array of React nodes to populate the
+  prose region or omit it for a header-only section. Accepts an optional `id`
+  for anchor linking.
+- **`PreviewCard`** – Feature preview card with optional media and CTA row.
+  Provide `primaryCta`/`secondaryCta` props to render button controls, or leave
+  them undefined for a purely informational card.
+- **`Figure`** – Responsive image container that preserves aspect ratio and
+  renders an optional caption. Use `imgProps` to forward attributes such as
+  `loading="lazy"` or `width`.
+- **`Footer`** – Content info footer that renders navigation links followed by
+  attribution copy. Customize the `links` array or `copyrightText` while the
+  layout stays consistent.
+
+### Analytics helpers
+
+`flashoffer-react` also ships instrumentation utilities that record viewability
+and interaction events. The helpers expose consistent metadata for downstream
+analytics services and gracefully degrade when browser APIs are unavailable.
+
+Wrap the subtree you want to measure in an `EngagementProvider`. The provider
+requires a `site` identifier and can optionally post batches to an HTTP
+`endpoint`.
+
+```tsx
+import {
+  EngagementProvider,
+  AutoTrack,
+  ViewTracker,
+  useRecordInteraction,
+} from "flashoffer-react";
+
+export function LandingWithAnalytics() {
+  const recordInteraction = useRecordInteraction("primary-cta");
+
+  return (
+    <EngagementProvider site="marketing-site" endpoint="/api/events">
+      <AutoTrack />
+      <ViewTracker trackId="hero">
+        <HeroBanner
+          primaryCta={{ onClick: () => recordInteraction() }}
+          secondaryCta={null}
+        />
+      </ViewTracker>
+    </EngagementProvider>
+  );
+}
+```
+
+- **`EngagementProvider`** tracks viewport visibility, scroll depth, and user
+  activity. Adjust thresholds with `viewThresholds` or disable network flushes
+  by setting `flushInterval={null}` when you only need in-memory metrics.
+- **`AutoTrack`** watches the DOM for elements marked with `data-track-id`
+  attributes. It attaches observers automatically and reads optional
+  `data-track-label`/`data-track-meta` attributes for enriched metadata.
+- **`ViewTracker`** attaches view tracking to a specific element. Use the
+  `useViewTracker` hook to attach the same behavior to custom components.
+- **`useRecordInteraction`** returns a callback that records click or custom
+  interactions. Call it manually or wire it into event handlers.
+- **`EventConsole`** polls a REST endpoint that returns captured engagement
+  events and renders them inside a developer-focused console, which is helpful
+  when verifying instrumentation in staging environments.
 
 ## Development
 
