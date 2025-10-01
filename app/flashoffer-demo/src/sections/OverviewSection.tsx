@@ -1,10 +1,6 @@
 import Box from "@mui/material/Box";
 import { Section } from "flashoffer-react";
-
-const OVERVIEW_PARAGRAPHS = [
-  "Use the Section component to pair launch announcements, feature guides, or changelog summaries with consistent typography.",
-  "Each paragraph is wrapped in semantic markup and inherits spacing from the Flashoffer design tokens, so marketing teams can focus on messaging."
-];
+import { OVERVIEW_PARAGRAPHS } from "./content";
 
 export interface OverviewSectionProps {
   overviewMeta: string;

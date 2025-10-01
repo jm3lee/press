@@ -2,21 +2,38 @@ import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Stack from "@mui/material/Stack";
 import type { ThemeOptions } from "@mui/material/styles";
-import { startTransition, useMemo, useState } from "react";
+import { Suspense, lazy, startTransition, useMemo, useState } from "react";
 import { FlashofferThemeProvider } from "flashoffer-react";
-import {
-  CtaShowcaseSection,
-  CustomizationControlsSection,
-  FigureSpotlightSection,
-  FooterSection,
-  HeroShowcaseSection,
-  OverviewSection,
-  PreviewShowcaseSection,
-  type HeroAlignment,
-  type ThemePreset,
-  OVERVIEW_PARAGRAPHS,
-  PREVIEW_CARDS
-} from "./sections";
+import type { HeroAlignment, ThemePreset } from "./sections/types";
+import { OVERVIEW_PARAGRAPHS, PREVIEW_CARDS } from "./sections/content";
+
+const CustomizationControlsSection = lazy(async () => ({
+  default: (await import("./sections/CustomizationControlsSection")).CustomizationControlsSection
+}));
+
+const HeroShowcaseSection = lazy(async () => ({
+  default: (await import("./sections/HeroShowcaseSection")).HeroShowcaseSection
+}));
+
+const OverviewSection = lazy(async () => ({
+  default: (await import("./sections/OverviewSection")).OverviewSection
+}));
+
+const CtaShowcaseSection = lazy(async () => ({
+  default: (await import("./sections/CtaShowcaseSection")).CtaShowcaseSection
+}));
+
+const PreviewShowcaseSection = lazy(async () => ({
+  default: (await import("./sections/PreviewShowcaseSection")).PreviewShowcaseSection
+}));
+
+const FigureSpotlightSection = lazy(async () => ({
+  default: (await import("./sections/FigureSpotlightSection")).FigureSpotlightSection
+}));
+
+const FooterSection = lazy(async () => ({
+  default: (await import("./sections/FooterSection")).FooterSection
+}));
 
 const themePresets: Record<ThemePreset, ThemeOptions | undefined> = {
   ocean: undefined,
@@ -102,32 +119,46 @@ export default function App() {
       >
         <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 } }}>
           <Stack spacing={10}>
-            <CustomizationControlsSection
-              palettePreset={palettePreset}
-              onPalettePresetChange={(nextPreset) => {
-                startTransition(() => {
-                  setPalettePreset(nextPreset);
-                });
-              }}
-              heroAlignment={heroAlignment}
-              onHeroAlignmentChange={(nextAlignment) => {
-                startTransition(() => {
-                  setHeroAlignment(nextAlignment);
-                });
-              }}
-              controlsMeta={controlsMeta}
-            />
-            <HeroShowcaseSection
-              heroAlignment={heroAlignment}
-              heroMeta={heroMeta}
-              heroMedia={heroMedia}
-              palettePreset={palettePreset}
-            />
-            <OverviewSection overviewMeta={overviewMeta} />
-            <CtaShowcaseSection />
-            <PreviewShowcaseSection previewMeta={previewMeta} />
-            <FigureSpotlightSection />
-            <FooterSection />
+            <Suspense fallback={null}>
+              <CustomizationControlsSection
+                palettePreset={palettePreset}
+                onPalettePresetChange={(nextPreset) => {
+                  startTransition(() => {
+                    setPalettePreset(nextPreset);
+                  });
+                }}
+                heroAlignment={heroAlignment}
+                onHeroAlignmentChange={(nextAlignment) => {
+                  startTransition(() => {
+                    setHeroAlignment(nextAlignment);
+                  });
+                }}
+                controlsMeta={controlsMeta}
+              />
+            </Suspense>
+            <Suspense fallback={null}>
+              <HeroShowcaseSection
+                heroAlignment={heroAlignment}
+                heroMeta={heroMeta}
+                heroMedia={heroMedia}
+                palettePreset={palettePreset}
+              />
+            </Suspense>
+            <Suspense fallback={null}>
+              <OverviewSection overviewMeta={overviewMeta} />
+            </Suspense>
+            <Suspense fallback={null}>
+              <CtaShowcaseSection />
+            </Suspense>
+            <Suspense fallback={null}>
+              <PreviewShowcaseSection previewMeta={previewMeta} />
+            </Suspense>
+            <Suspense fallback={null}>
+              <FigureSpotlightSection />
+            </Suspense>
+            <Suspense fallback={null}>
+              <FooterSection />
+            </Suspense>
           </Stack>
         </Container>
       </Box>
