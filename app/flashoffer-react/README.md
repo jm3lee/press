@@ -163,6 +163,20 @@ export function LandingWithAnalytics() {
   events and renders them inside a developer-focused console, which is helpful
   when verifying instrumentation in staging environments.
 
+## API documentation
+
+Run the TypeDoc pipeline to generate Markdown reference files for every
+component and helper exported from the library. The output lands in
+`docs/reference/flashoffer-react` so the Press documentation build can surface
+the latest props and usage guidance.
+
+```bash
+npm run docs
+```
+
+The command reads configuration from `typedoc.json` and reuses the standard
+TypeScript project settings defined in `tsconfig.docs.json`.
+
 ## Development
 
 - `npm test`: run Jest and React Testing Library suites.
