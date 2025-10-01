@@ -6,6 +6,7 @@ import { OutlineCtaButton } from "../components/OutlineCtaButton";
 import { PreviewCard } from "../components/PreviewCard";
 import { PrimaryCtaButton } from "../components/PrimaryCtaButton";
 import { SectionHeader } from "../components/SectionHeader";
+import { Figure } from "../components/Figure";
 import { useTheme } from "@mui/material/styles";
 import type { ReactElement } from "react";
 
@@ -93,6 +94,37 @@ describe("Flashoffer React primitives", () => {
     renderWithTheme(<OutlineCtaButton />);
     expect(
       screen.getByRole("button", { name: /contact support/i })
+    ).toBeInTheDocument();
+  });
+
+  it("renders figure with empty defaults", () => {
+    const { container } = renderWithTheme(
+      <Figure src="https://example.com/test.png" />
+    );
+    const image = container.querySelector("img");
+    if (!(image instanceof HTMLImageElement)) {
+      throw new Error("Expected figure to render an image element");
+    }
+    expect(image).toHaveAttribute("alt", "");
+    expect(image).toHaveAttribute("src", "https://example.com/test.png");
+    const caption = container.querySelector("figcaption");
+    expect(caption).not.toBeNull();
+    expect(caption?.textContent).toBe("");
+  });
+
+  it("supports custom figure caption", () => {
+    renderWithTheme(
+      <Figure
+        src="https://example.com/test.png"
+        alt="Dashboard screenshot"
+        caption="Flashoffer dashboard overview"
+      />
+    );
+    expect(
+      screen.getByText("Flashoffer dashboard overview")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("img", { name: "Dashboard screenshot" })
     ).toBeInTheDocument();
   });
 
