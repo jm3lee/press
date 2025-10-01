@@ -20,13 +20,6 @@ export function HeroShowcaseSection({
       data-track-label="Hero banner"
       data-track-meta={heroMeta}
     >
-      <Section
-        align="center"
-        eyebrow="HERO"
-        title="Preview the HeroBanner component"
-        description="The hero adapts to palette updates and alignment changes from the controls above."
-        paragraphs={[]}
-      />
       <HeroBanner
         align={heroAlignment}
         title="Launch coordinated offers in minutes."

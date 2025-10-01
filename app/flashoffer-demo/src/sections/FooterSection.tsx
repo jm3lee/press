@@ -16,18 +16,10 @@ export function FooterSection() {
       data-track-label="Footer"
       data-track-meta={JSON.stringify({ links: FOOTER_LINKS.length })}
     >
-      <Stack spacing={3}>
-        <Section
-          eyebrow="FOOTER"
-          title="Close with a helpful footer"
-          description="Surface documentation, status pages, and support channels without writing bespoke markup."
-          paragraphs={[]}
-        />
-        <Footer
-          links={FOOTER_LINKS}
-          copyrightText="© 2025 Flashoffer. All rights reserved."
-        />
-      </Stack>
+      <Footer
+        links={FOOTER_LINKS}
+        copyrightText="© 2025 Flashoffer. All rights reserved."
+      />
     </Box>
   );
 }
