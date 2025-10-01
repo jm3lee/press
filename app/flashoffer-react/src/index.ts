@@ -19,6 +19,9 @@ export type { PreviewCardProps } from "./components/PreviewCard";
 export { Footer } from "./components/Footer";
 export type { FooterProps, FooterLink } from "./components/Footer";
 
+export { Figure } from "./components/Figure";
+export type { FigureProps } from "./components/Figure";
+
 export {
   AutoTrack,
   EngagementProvider,
