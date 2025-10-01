@@ -1,19 +1,25 @@
 import Box from "@mui/material/Box";
 import { HeroBanner, Section } from "flashoffer-react";
+import { useMemo } from "react";
 import type { ReactNode } from "react";
-import type { HeroAlignment } from "./types";
+import type { HeroAlignment, ThemePreset } from "./types";
 
 export interface HeroShowcaseSectionProps {
   heroAlignment: HeroAlignment;
-  heroMeta: string;
   heroMedia: ReactNode;
+  palettePreset: ThemePreset;
 }
 
 export function HeroShowcaseSection({
   heroAlignment,
-  heroMeta,
-  heroMedia
+  heroMedia,
+  palettePreset
 }: HeroShowcaseSectionProps) {
+  const heroMeta = useMemo(
+    () => JSON.stringify({ alignment: heroAlignment, palette: palettePreset }),
+    [heroAlignment, palettePreset]
+  );
+
   return (
     <Box
       data-track-id="hero-banner"

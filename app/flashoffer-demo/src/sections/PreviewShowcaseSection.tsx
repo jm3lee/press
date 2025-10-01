@@ -57,11 +57,9 @@ function toTrackId(value: string): string {
     .replace(/-{2,}/g, "-");
 }
 
-export interface PreviewShowcaseSectionProps {
-  previewMeta: string;
-}
+export function PreviewShowcaseSection() {
+  const previewMeta = JSON.stringify({ cards: PREVIEW_CARDS.length });
 
-export function PreviewShowcaseSection({ previewMeta }: PreviewShowcaseSectionProps) {
   return (
     <Box
       component="section"

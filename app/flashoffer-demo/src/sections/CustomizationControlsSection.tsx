@@ -4,6 +4,7 @@ import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { Section } from "flashoffer-react";
+import { useMemo } from "react";
 import type { HeroAlignment, ThemePreset } from "./types";
 
 export interface CustomizationControlsSectionProps {
@@ -11,16 +12,19 @@ export interface CustomizationControlsSectionProps {
   onPalettePresetChange: (nextPreset: ThemePreset) => void;
   heroAlignment: HeroAlignment;
   onHeroAlignmentChange: (nextAlignment: HeroAlignment) => void;
-  controlsMeta: string;
 }
 
 export function CustomizationControlsSection({
   palettePreset,
   onPalettePresetChange,
   heroAlignment,
-  onHeroAlignmentChange,
-  controlsMeta
+  onHeroAlignmentChange
 }: CustomizationControlsSectionProps) {
+  const controlsMeta = useMemo(
+    () => JSON.stringify({ palette: palettePreset, heroAlignment }),
+    [heroAlignment, palettePreset]
+  );
+
   return (
     <Paper
       elevation={0}

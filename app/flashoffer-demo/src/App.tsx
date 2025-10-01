@@ -2,21 +2,85 @@ import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Stack from "@mui/material/Stack";
 import type { ThemeOptions } from "@mui/material/styles";
-import { startTransition, useMemo, useState } from "react";
 import { FlashofferThemeProvider } from "flashoffer-react";
+import type { ComponentType } from "react";
 import {
-  CtaShowcaseSection,
-  CustomizationControlsSection,
-  FigureSpotlightSection,
-  FooterSection,
-  HeroShowcaseSection,
-  OverviewSection,
-  PreviewShowcaseSection,
-  type HeroAlignment,
-  type ThemePreset,
-  OVERVIEW_PARAGRAPHS,
-  PREVIEW_CARDS
-} from "./sections";
+  Suspense,
+  lazy,
+  startTransition,
+  useMemo,
+  useState
+} from "react";
+import type { CustomizationControlsSectionProps } from "./sections/CustomizationControlsSection";
+import type { HeroAlignment, ThemePreset } from "./sections/types";
+
+const CustomizationControlsSection = lazy(
+  () =>
+    import("./sections/CustomizationControlsSection").then((module) => ({
+      default: module.CustomizationControlsSection
+    })) as Promise<{
+      default: ComponentType<CustomizationControlsSectionProps>;
+    }>
+);
+
+const HeroShowcaseSection = lazy(() =>
+  import("./sections/HeroShowcaseSection").then((module) => ({
+    default: module.HeroShowcaseSection
+  }))
+);
+
+const OverviewSection = lazy(() =>
+  import("./sections/OverviewSection").then((module) => ({
+    default: module.OverviewSection
+  }))
+);
+
+const CtaShowcaseSection = lazy(() =>
+  import("./sections/CtaShowcaseSection").then((module) => ({
+    default: module.CtaShowcaseSection
+  }))
+);
+
+const PreviewShowcaseSection = lazy(() =>
+  import("./sections/PreviewShowcaseSection").then((module) => ({
+    default: module.PreviewShowcaseSection
+  }))
+);
+
+const FigureSpotlightSection = lazy(() =>
+  import("./sections/FigureSpotlightSection").then((module) => ({
+    default: module.FigureSpotlightSection
+  }))
+);
+
+const FooterSection = lazy(() =>
+  import("./sections/FooterSection").then((module) => ({
+    default: module.FooterSection
+  }))
+);
+
+function SectionPlaceholder({ label }: { label: string }) {
+  return (
+    <Box
+      component="section"
+      role="status"
+      aria-live="polite"
+      sx={{
+        borderRadius: 3,
+        border: "1px solid",
+        borderColor: "divider",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: 200,
+        color: "text.secondary",
+        typography: "body2"
+      }}
+    >
+      Loading {label}…
+    </Box>
+  );
+}
 
 const themePresets: Record<ThemePreset, ThemeOptions | undefined> = {
   ocean: undefined,
@@ -63,26 +127,6 @@ export default function App() {
     [palettePreset]
   );
 
-  const controlsMeta = useMemo(
-    () => JSON.stringify({ palette: palettePreset, heroAlignment }),
-    [heroAlignment, palettePreset]
-  );
-
-  const heroMeta = useMemo(
-    () => JSON.stringify({ alignment: heroAlignment, palette: palettePreset }),
-    [heroAlignment, palettePreset]
-  );
-
-  const previewMeta = useMemo(
-    () => JSON.stringify({ cards: PREVIEW_CARDS.length }),
-    []
-  );
-
-  const overviewMeta = useMemo(
-    () => JSON.stringify({ paragraphs: OVERVIEW_PARAGRAPHS.length }),
-    []
-  );
-
   const pageMeta = useMemo(
     () => JSON.stringify({ palette: palettePreset }),
     [palettePreset]
@@ -102,31 +146,44 @@ export default function App() {
       >
         <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 } }}>
           <Stack spacing={10}>
-            <CustomizationControlsSection
-              palettePreset={palettePreset}
-              onPalettePresetChange={(nextPreset) => {
-                startTransition(() => {
-                  setPalettePreset(nextPreset);
-                });
-              }}
-              heroAlignment={heroAlignment}
-              onHeroAlignmentChange={(nextAlignment) => {
-                startTransition(() => {
-                  setHeroAlignment(nextAlignment);
-                });
-              }}
-              controlsMeta={controlsMeta}
-            />
-            <HeroShowcaseSection
-              heroAlignment={heroAlignment}
-              heroMeta={heroMeta}
-              heroMedia={heroMedia}
-            />
-            <OverviewSection overviewMeta={overviewMeta} />
-            <CtaShowcaseSection />
-            <PreviewShowcaseSection previewMeta={previewMeta} />
-            <FigureSpotlightSection />
-            <FooterSection />
+            <Suspense fallback={<SectionPlaceholder label="Customization controls" />}>
+              <CustomizationControlsSection
+                palettePreset={palettePreset}
+                onPalettePresetChange={(nextPreset) => {
+                  startTransition(() => {
+                    setPalettePreset(nextPreset);
+                  });
+                }}
+                heroAlignment={heroAlignment}
+                onHeroAlignmentChange={(nextAlignment) => {
+                  startTransition(() => {
+                    setHeroAlignment(nextAlignment);
+                  });
+                }}
+              />
+            </Suspense>
+            <Suspense fallback={<SectionPlaceholder label="Hero" />}>
+              <HeroShowcaseSection
+                heroAlignment={heroAlignment}
+                heroMedia={heroMedia}
+                palettePreset={palettePreset}
+              />
+            </Suspense>
+            <Suspense fallback={<SectionPlaceholder label="Overview" />}>
+              <OverviewSection />
+            </Suspense>
+            <Suspense fallback={<SectionPlaceholder label="CTA showcase" />}>
+              <CtaShowcaseSection />
+            </Suspense>
+            <Suspense fallback={<SectionPlaceholder label="Preview cards" />}>
+              <PreviewShowcaseSection />
+            </Suspense>
+            <Suspense fallback={<SectionPlaceholder label="Figure spotlight" />}>
+              <FigureSpotlightSection />
+            </Suspense>
+            <Suspense fallback={<SectionPlaceholder label="Footer" />}>
+              <FooterSection />
+            </Suspense>
           </Stack>
         </Container>
       </Box>

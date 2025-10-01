@@ -6,11 +6,9 @@ const OVERVIEW_PARAGRAPHS = [
   "Each paragraph is wrapped in semantic markup and inherits spacing from the Flashoffer design tokens, so marketing teams can focus on messaging."
 ];
 
-export interface OverviewSectionProps {
-  overviewMeta: string;
-}
+export function OverviewSection() {
+  const overviewMeta = JSON.stringify({ paragraphs: OVERVIEW_PARAGRAPHS.length });
 
-export function OverviewSection({ overviewMeta }: OverviewSectionProps) {
   return (
     <Box
       data-track-id="overview-section"
