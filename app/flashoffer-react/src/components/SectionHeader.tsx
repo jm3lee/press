@@ -3,11 +3,11 @@ import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
 
 export interface SectionHeaderProps {
-  /** Optional label rendered above the title. */
+  /** Optional label rendered above the title. Defaults to "FLASHOFFER". */
   eyebrow?: ReactNode;
-  /** Main heading text. */
+  /** Main heading text. Defaults to Flashoffer marketing copy. */
   title?: ReactNode;
-  /** Horizontal alignment for the text stack. */
+  /** Horizontal alignment for the text stack. Defaults to "center". */
   align?: "left" | "center";
 }
 
@@ -15,7 +15,7 @@ const DEFAULT_EYEBROW = "FLASHOFFER";
 const DEFAULT_TITLE = "Launch faster with reusable content blocks.";
 
 /**
- * Section heading with optional eyebrow.
+ * Section heading with optional eyebrow and configurable alignment.
  */
 export function SectionHeader({
   eyebrow = DEFAULT_EYEBROW,

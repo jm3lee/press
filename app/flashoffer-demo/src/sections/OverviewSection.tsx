@@ -1,4 +1,5 @@
 import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import { Section } from "flashoffer-react";
 import { OVERVIEW_PARAGRAPHS } from "./content";
 
@@ -17,9 +18,17 @@ export function OverviewSection({ overviewMeta }: OverviewSectionProps) {
         align="center"
         eyebrow="OVERVIEW"
         title="Narrate launches with reusable sections"
-        description="Combine headlines and supporting copy without rebuilding layouts from scratch."
-        paragraphs={OVERVIEW_PARAGRAPHS}
-      />
+      >
+        <Typography color="text.secondary">
+          Combine headlines and supporting copy without rebuilding layouts from
+          scratch.
+        </Typography>
+        {OVERVIEW_PARAGRAPHS.map((paragraph) => (
+          <Typography key={paragraph} color="text.secondary">
+            {paragraph}
+          </Typography>
+        ))}
+      </Section>
     </Box>
   );
 }

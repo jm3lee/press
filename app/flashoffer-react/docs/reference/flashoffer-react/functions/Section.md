@@ -6,7 +6,7 @@
 
 > **Section**(`__namedParameters`): `Element`
 
-Defined in: src/components/Section.tsx:29
+Defined in: src/components/Section.tsx:16
 
 High-level section wrapper that combines SectionHeader with supporting copy.
 

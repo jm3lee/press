@@ -1,5 +1,6 @@
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import { PreviewCard, Section } from "flashoffer-react";
 import { PREVIEW_CARDS } from "./content";
 
@@ -26,27 +27,30 @@ export function PreviewShowcaseSection({ previewMeta }: PreviewShowcaseSectionPr
       <Section
         eyebrow="SHOWCASE"
         title="Modular previews for any campaign"
-        description="Drop PreviewCard components into grid layouts to tease content, share regional updates, or pair with testimonials."
         align="left"
-        paragraphs={[]}
-      />
-      <Grid container spacing={3} sx={{ mt: 3 }}>
-        {PREVIEW_CARDS.map((card, index) => {
-          const label = String(card.title);
-          const cardTrackId = `preview-card-${toTrackId(label) || index + 1}`;
-          return (
-            <Grid
-              key={card.title}
-              size={{ xs: 12, md: 4 }}
-              data-track-id={cardTrackId}
-              data-track-label={label}
-              data-track-meta={JSON.stringify({ index, title: label })}
-            >
-              <PreviewCard {...card} />
-            </Grid>
-          );
-        })}
-      </Grid>
+      >
+        <Typography color="text.secondary">
+          Drop PreviewCard components into grid layouts to tease content, share
+          regional updates, or pair with testimonials.
+        </Typography>
+        <Grid container spacing={3} sx={{ width: "100%" }}>
+          {PREVIEW_CARDS.map((card, index) => {
+            const label = String(card.title);
+            const cardTrackId = `preview-card-${toTrackId(label) || index + 1}`;
+            return (
+              <Grid
+                key={card.title}
+                size={{ xs: 12, md: 4 }}
+                data-track-id={cardTrackId}
+                data-track-label={label}
+                data-track-meta={JSON.stringify({ index, title: label })}
+              >
+                <PreviewCard {...card} />
+              </Grid>
+            );
+          })}
+        </Grid>
+      </Section>
     </Box>
   );
 }

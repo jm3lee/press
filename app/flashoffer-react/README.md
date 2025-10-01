@@ -97,13 +97,13 @@ arbitrary attributes to the underlying Material UI primitive.
   and CTA buttons. Set `align="left"` to left-align copy, pass `media` to render
   an illustration, and override `primaryCta`/`secondaryCta` with button props or
   disable the secondary button by supplying `null`.
-- **`SectionHeader`** – Standalone heading stack with `eyebrow`, `title`, and
-  `description` slots. The `align` prop controls text alignment and flex
-  behavior.
-- **`Section`** – High-level wrapper that renders `SectionHeader` plus body copy
-  paragraphs. Supply `paragraphs` as an array of React nodes to populate the
-  prose region or omit it for a header-only section. Accepts an optional `id`
-  for anchor linking.
+- **`SectionHeader`** – Standalone heading stack with optional `eyebrow` and
+  `title` slots. Defaults render Flashoffer marketing copy, and the `align`
+  prop controls text alignment and flex behavior.
+- **`Section`** – High-level wrapper that renders `SectionHeader` plus optional
+  supporting children. Pass any React nodes as `children` to render supporting
+  prose or omit them for a header-only section. Accepts an optional `id` for
+  anchor linking.
 - **`PreviewCard`** – Feature preview card with optional media and CTA row.
   Provide `primaryCta`/`secondaryCta` props to render button controls, or leave
   them undefined for a purely informational card.

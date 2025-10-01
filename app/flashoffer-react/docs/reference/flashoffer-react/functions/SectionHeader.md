@@ -8,7 +8,7 @@
 
 Defined in: src/components/SectionHeader.tsx:25
 
-Section heading with optional eyebrow and description.
+Section heading with optional eyebrow and configurable alignment.
 
 ## Parameters
 
