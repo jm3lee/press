@@ -9,6 +9,8 @@ import {
 } from "react";
 import type { ElementType, ReactNode } from "react";
 
+const MAX_CONSECUTIVE_FAILURES = 10;
+
 export interface EngagementEvent {
   type: string;
   target: string;
@@ -109,6 +111,35 @@ export function EngagementProvider({
   const intersectionHandlerRef = useRef<
     (entries: IntersectionObserverEntry[]) => void
   >(() => undefined);
+  const failureCountRef = useRef(0);
+  const disabledRef = useRef(false);
+
+  const disableTracking = useCallback(() => {
+    if (disabledRef.current) {
+      return;
+    }
+    disabledRef.current = true;
+    queueRef.current = [];
+    trackedElementsRef.current.clear();
+    activeTargetsRef.current.clear();
+    activeViewsRef.current.clear();
+    failureCountRef.current = 0;
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = null;
+    }
+  }, []);
+
+  const registerFailure = useCallback(() => {
+    failureCountRef.current += 1;
+    if (failureCountRef.current >= MAX_CONSECUTIVE_FAILURES) {
+      disableTracking();
+    }
+  }, [disableTracking]);
+
+  const resetFailure = useCallback(() => {
+    failureCountRef.current = 0;
+  }, []);
 
   useEffect(() => {
     maxBatchRef.current = maxBatch;
@@ -116,6 +147,9 @@ export function EngagementProvider({
 
   const enqueue = useCallback(
     (event: EngagementEvent) => {
+      if (disabledRef.current) {
+        return;
+      }
       queueRef.current.push(event);
       if (queueRef.current.length >= maxBatchRef.current) {
         flushRef.current?.("capacity");
@@ -126,6 +160,14 @@ export function EngagementProvider({
 
   const flush = useCallback(
     async (reason = "interval", { sync = false }: { sync?: boolean } = {}) => {
+      if (disabledRef.current) {
+        queueRef.current = [];
+        return;
+      }
+      if (failureCountRef.current >= MAX_CONSECUTIVE_FAILURES) {
+        disableTracking();
+        return;
+      }
       if (!endpoint || queueRef.current.length === 0) {
         return;
       }
@@ -139,7 +181,12 @@ export function EngagementProvider({
       if (sync && typeof navigator !== "undefined" && "sendBeacon" in navigator) {
         const ok = navigator.sendBeacon(endpoint, body);
         if (!ok) {
-          queueRef.current.unshift(...events);
+          registerFailure();
+          if (!disabledRef.current) {
+            queueRef.current.unshift(...events);
+          }
+        } else {
+          resetFailure();
         }
         return;
       }
@@ -154,13 +201,17 @@ export function EngagementProvider({
         if (!response.ok) {
           throw new Error(`Unexpected status ${response.status}`);
         }
+        resetFailure();
       } catch (error) {
         // eslint-disable-next-line no-console
         console.warn("Failed to flush engagement events", error);
-        queueRef.current.unshift(...events);
+        registerFailure();
+        if (!disabledRef.current) {
+          queueRef.current.unshift(...events);
+        }
       }
     },
-    [endpoint, site]
+    [disableTracking, endpoint, registerFailure, resetFailure, site]
   );
 
   useEffect(() => {
@@ -199,6 +250,9 @@ export function EngagementProvider({
   }, []);
 
   const ensureObserver = useCallback(() => {
+    if (disabledRef.current) {
+      return null;
+    }
     if (observerRef.current) {
       return observerRef.current;
     }
@@ -215,6 +269,9 @@ export function EngagementProvider({
   }, []);
 
   intersectionHandlerRef.current = (entries: IntersectionObserverEntry[]) => {
+    if (disabledRef.current) {
+      return;
+    }
     const timestamp = typeof performance !== "undefined" ? performance.now() : 0;
     entries.forEach((entry) => {
       const info = trackedElementsRef.current.get(entry.target);
@@ -268,6 +325,9 @@ export function EngagementProvider({
 
   const attachElement = useCallback(
     (trackId: string, element: Element | null, meta: Record<string, unknown> = {}) => {
+      if (disabledRef.current) {
+        return () => undefined;
+      }
       if (!trackId || !element) {
         return () => undefined;
       }
@@ -299,6 +359,9 @@ export function EngagementProvider({
 
   const recordInteraction = useCallback(
     (target: string, data: Record<string, unknown> = {}) => {
+      if (disabledRef.current) {
+        return;
+      }
       if (!target) {
         return;
       }
