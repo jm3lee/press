@@ -15,6 +15,7 @@ import {
   OutlineCtaButton,
   PreviewCard,
   PrimaryCtaButton,
+  Section,
   SectionHeader
 } from "flashoffer-react";
 
@@ -111,6 +112,13 @@ const footerLinks = [
   { label: "Support", href: "mailto:support@example.com" }
 ];
 
+const overviewParagraphs = [
+  "Use the Section component to pair launch announcements, feature guides, " +
+    "or changelog summaries with consistent typography.",
+  "Each paragraph is wrapped in semantic markup and inherits spacing from the " +
+    "Flashoffer design tokens, so marketing teams can focus on messaging."
+];
+
 const heroMedia = (
   <img
     src="https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=720&q=80"
@@ -145,6 +153,11 @@ export default function App() {
 
   const figureMeta = useMemo(
     () => JSON.stringify({ orientation: "landscape" }),
+    []
+  );
+
+  const overviewMeta = useMemo(
+    () => JSON.stringify({ paragraphs: overviewParagraphs.length }),
     []
   );
 
@@ -273,6 +286,20 @@ export default function App() {
                   "data-track-meta": heroMeta
                 }}
                 media={heroMedia}
+              />
+            </Box>
+
+            <Box
+              data-track-id="overview-section"
+              data-track-label="Section overview"
+              data-track-meta={overviewMeta}
+            >
+              <Section
+                align="center"
+                eyebrow="OVERVIEW"
+                title="Narrate launches with reusable sections"
+                description="Combine headlines and supporting copy without rebuilding layouts from scratch."
+                paragraphs={overviewParagraphs}
               />
             </Box>
 
