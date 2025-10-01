@@ -6,7 +6,7 @@ import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import type { ThemeOptions } from "@mui/material/styles";
-import { useMemo, useState } from "react";
+import { startTransition, useMemo, useState } from "react";
 import {
   FlashofferThemeProvider,
   Footer,
@@ -181,9 +181,12 @@ export default function App() {
                     </Typography>
                     <select
                       value={palettePreset}
-                      onChange={(event) =>
-                        setPalettePreset(event.target.value as ThemePreset)
-                      }
+                      onChange={(event) => {
+                        const nextPreset = event.target.value as ThemePreset;
+                        startTransition(() => {
+                          setPalettePreset(nextPreset);
+                        });
+                      }}
                       aria-label="Select theme palette"
                       style={{
                         marginTop: "0.5rem",
@@ -209,9 +212,13 @@ export default function App() {
                     </Typography>
                     <select
                       value={heroAlignment}
-                      onChange={(event) =>
-                        setHeroAlignment(event.target.value as HeroAlignment)
-                      }
+                      onChange={(event) => {
+                        const nextAlignment =
+                          event.target.value as HeroAlignment;
+                        startTransition(() => {
+                          setHeroAlignment(nextAlignment);
+                        });
+                      }}
                       aria-label="Select hero alignment"
                       style={{
                         marginTop: "0.5rem",
