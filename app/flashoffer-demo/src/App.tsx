@@ -121,6 +121,7 @@ export default function App() {
               heroAlignment={heroAlignment}
               heroMeta={heroMeta}
               heroMedia={heroMedia}
+              palettePreset={palettePreset}
             />
             <OverviewSection overviewMeta={overviewMeta} />
             <CtaShowcaseSection />
