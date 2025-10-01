@@ -38,8 +38,8 @@ export const PREVIEW_CARDS = [
       "Clone the same structure across regions while tuning content, pricing, and compliance disclosures in minutes.",
     media: (
       <img
-        src="https://images.unsplash.com/photo-1521292270410-a8c6788e40cc?auto=format&fit=crop&w=480&q=80"
-        alt="Color swatches and typography samples"
+        src="https://images.unsplash.com/photo-1527430253228-e93688616381?auto=format&fit=crop&w=480&q=80"
+        alt="Abstract dashboard charts"
         style={{ width: "100%", borderRadius: "16px" }}
       />
     ),
