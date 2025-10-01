@@ -13,6 +13,9 @@ export type { HeroBannerProps } from "./components/HeroBanner";
 export { SectionHeader } from "./components/SectionHeader";
 export type { SectionHeaderProps } from "./components/SectionHeader";
 
+export { Section } from "./components/Section";
+export type { SectionProps } from "./components/Section";
+
 export { PreviewCard } from "./components/PreviewCard";
 export type { PreviewCardProps } from "./components/PreviewCard";
 

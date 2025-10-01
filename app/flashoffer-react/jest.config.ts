@@ -5,7 +5,10 @@ const config: Config = {
   testEnvironment: "jsdom",
   setupFilesAfterEnv: ["<rootDir>/setupTests.ts"],
   moduleFileExtensions: ["ts", "tsx", "js", "jsx"],
-  testMatch: ["<rootDir>/src/**/__tests__/**/*.test.(ts|tsx)"]
+  testMatch: ["<rootDir>/src/**/__tests__/**/*.test.(ts|tsx)"],
+  moduleNameMapper: {
+    "\\.(css|less|sass|scss)$": "<rootDir>/test/__mocks__/styleMock.ts"
+  }
 };
 
 export default config;
