@@ -34,9 +34,12 @@ export function CustomizationControlsSection({
           align="left"
           eyebrow="CUSTOMIZE"
           title="Customize the showcase"
-          description="Switch palettes or tweak hero alignment to preview how Flashoffer primitives adapt."
-          paragraphs={[]}
-        />
+        >
+          <Typography color="text.secondary">
+            Switch palettes or tweak hero alignment to preview how Flashoffer
+            primitives adapt.
+          </Typography>
+        </Section>
         <Divider flexItem sx={{ borderColor: "divider" }} />
         <Stack
           direction={{ xs: "column", sm: "row" }}

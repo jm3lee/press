@@ -4,7 +4,7 @@
 
 # Interface: SectionProps
 
-Defined in: src/components/Section.tsx:9
+Defined in: src/components/Section.tsx:6
 
 ## Extends
 
@@ -12,24 +12,23 @@ Defined in: src/components/Section.tsx:9
 
 ## Properties
 
-### paragraphs?
-
-> `optional` **paragraphs**: `ReactNode`[]
-
-Defined in: src/components/Section.tsx:14
-
-Body copy rendered under the section header. Each entry is wrapped in a
-paragraph-level Typography component.
-
-***
-
 ### id?
 
 > `optional` **id**: `string`
 
-Defined in: src/components/Section.tsx:16
+Defined in: src/components/Section.tsx:10
 
 Optional custom id applied to the underlying section element.
+
+***
+
+### children?
+
+> `optional` **children**: `ReactNode`
+
+Defined in: src/components/Section.tsx:8
+
+Supporting content rendered under the section header.
 
 ***
 
@@ -58,20 +57,6 @@ Main heading text.
 #### Inherited from
 
 [`SectionHeaderProps`](SectionHeaderProps.md).[`title`](SectionHeaderProps.md#title)
-
-***
-
-### description?
-
-> `optional` **description**: `ReactNode`
-
-Defined in: src/components/SectionHeader.tsx:11
-
-Supporting description under the title.
-
-#### Inherited from
-
-[`SectionHeaderProps`](SectionHeaderProps.md).[`description`](SectionHeaderProps.md#description)
 
 ***
 

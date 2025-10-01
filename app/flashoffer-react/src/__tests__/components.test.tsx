@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import Typography from "@mui/material/Typography";
 import { FlashofferThemeProvider, createFlashofferTheme } from "../index";
 import { Footer } from "../components/Footer";
 import { HeroBanner } from "../components/HeroBanner";
@@ -95,13 +96,36 @@ describe("Flashoffer React primitives", () => {
     expect(screen.getAllByRole("link").length).toBeGreaterThanOrEqual(1);
   });
 
-  it("renders supplied paragraphs inside section", () => {
+  it("renders SectionHeader defaults when props are omitted", () => {
+    renderWithTheme(<SectionHeader />);
+
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: /reusable content blocks/i
+      })
+    ).toBeVisible();
+    expect(screen.getByText("FLASHOFFER")).toBeVisible();
+  });
+
+  it("aligns SectionHeader content when left-aligned", () => {
     renderWithTheme(
-      <Section
-        align="left"
-        title="Release highlights"
-        paragraphs={["First paragraph", "Second paragraph"]}
-      />
+      <SectionHeader align="left" eyebrow="Highlights" title="Aligned" />
+    );
+
+    const heading = screen.getByRole("heading", { level: 2, name: "Aligned" });
+    const header = heading.closest("header");
+    expect(header).not.toBeNull();
+    expect(header).toHaveStyle({ textAlign: "left" });
+    expect(header).toHaveStyle({ alignItems: "flex-start" });
+  });
+
+  it("renders supplied children inside section", () => {
+    renderWithTheme(
+      <Section align="left" title="Release highlights">
+        <Typography>First paragraph</Typography>
+        <Typography>Second paragraph</Typography>
+      </Section>
     );
 
     expect(
@@ -109,25 +133,19 @@ describe("Flashoffer React primitives", () => {
     ).toBeVisible();
     const paragraphs = screen.getAllByText(/paragraph$/);
     expect(paragraphs).toHaveLength(2);
-    paragraphs.forEach((paragraph) => {
-      expect(paragraph.tagName.toLowerCase()).toBe("p");
-    });
   });
 
-  it("applies themed palette colors to section copy", () => {
-    render(
-      <FlashofferThemeProvider
-        applyCssBaseline={false}
-        themeOptions={{
-          palette: { text: { primary: "#111827", secondary: "#0ea5e9" } }
-        }}
-      >
-        <Section title="Themed section" paragraphs={["Custom paragraph"]} />
-      </FlashofferThemeProvider>
+  it("applies alignment styles to section copy", () => {
+    renderWithTheme(
+      <Section align="left" title="Aligned section">
+        <Typography>Aligned content</Typography>
+      </Section>
     );
 
-    const paragraph = screen.getByText("Custom paragraph");
-    expect(window.getComputedStyle(paragraph).color).toBe("rgb(14, 165, 233)");
+    const heading = screen.getByRole("heading", { level: 2, name: "Aligned section" });
+    const section = heading.closest("section");
+    expect(section).not.toBeNull();
+    expect(section).toHaveStyle({ textAlign: "left" });
   });
 
   it("supports Outline CTA default label", () => {
