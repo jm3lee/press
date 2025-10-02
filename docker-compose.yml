@@ -126,7 +126,9 @@ services:
       - analytics_data:/var/lib/postgresql/data
 
   analytics-backend:
-    build: ./app/analytics-backend
+    build:
+      context: .
+      dockerfile: ./app/analytics-backend/Dockerfile
     environment:
       DATABASE_HOST: analytics-db
       DATABASE_PORT: 5432
