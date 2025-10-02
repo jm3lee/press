@@ -93,3 +93,75 @@ describe("EngagementProvider connection failure handling", () => {
     view.unmount();
   });
 });
+
+describe("EngagementProvider lifetime", () => {
+  const globalScope = globalThis as GlobalWithOptionalFetch;
+  const originalFetch = globalScope.fetch;
+  let fetchMock: jest.MockedFunction<typeof fetch>;
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+    fetchMock = jest
+      .fn(async () => ({ ok: true } as Response))
+      .mockName("fetch") as jest.MockedFunction<typeof fetch>;
+    globalScope.fetch = fetchMock;
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    globalScope.fetch = originalFetch;
+    jest.clearAllMocks();
+  });
+
+  it("halts event recording after one minute", async () => {
+    const recordRef = {
+      current: (() => undefined) as RecordFn,
+    } as MutableRefObject<RecordFn>;
+
+    const view = render(
+      <EngagementProvider
+        endpoint="/engagement"
+        site="test"
+        maxBatch={1}
+        flushInterval={null}
+        heartbeatInterval={60_000}
+        idleTimeout={-1}
+        scrollThresholds={[]}
+        viewThresholds={[]}
+      >
+        <Recorder recordRef={recordRef} />
+      </EngagementProvider>
+    );
+
+    await act(async () => {
+      recordRef.current("before-timeout");
+      await Promise.resolve();
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      jest.advanceTimersByTime(59_000);
+      await Promise.resolve();
+    });
+
+    await act(async () => {
+      recordRef.current("still-active");
+      await Promise.resolve();
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    await act(async () => {
+      jest.advanceTimersByTime(1_000);
+      await Promise.resolve();
+    });
+
+    await act(async () => {
+      recordRef.current("post-timeout");
+      await Promise.resolve();
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    view.unmount();
+  });
+});

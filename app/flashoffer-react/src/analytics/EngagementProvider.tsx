@@ -10,6 +10,7 @@ import {
 import type { ElementType, ReactNode } from "react";
 
 const MAX_CONSECUTIVE_FAILURES = 10;
+const MAX_COLLECTION_DURATION_MS = 60_000;
 
 export interface EngagementEvent {
   type: string;
@@ -217,6 +218,19 @@ export function EngagementProvider({
   useEffect(() => {
     flushRef.current = flush;
   }, [flush]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return undefined;
+    }
+    const timeout = window.setTimeout(() => {
+      void flushRef.current?.("lifetime");
+      disableTracking();
+    }, MAX_COLLECTION_DURATION_MS);
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, [disableTracking]);
 
   useEffect(() => {
     thresholdsRef.current = viewThresholds;
