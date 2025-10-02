@@ -1,4 +1,9 @@
-export { FlashofferThemeProvider, createFlashofferTheme } from "./theme/FlashofferThemeProvider";
+export {
+  FlashofferThemeProvider,
+  createFlashofferTheme,
+  createSpaciousTypographyTheme
+} from "./theme/FlashofferThemeProvider";
+export type { FlashofferThemePreset } from "./theme/FlashofferThemeProvider";
 export type { FlashofferThemeProviderProps } from "./theme/FlashofferThemeProvider";
 
 export { PrimaryCtaButton } from "./components/PrimaryCtaButton";

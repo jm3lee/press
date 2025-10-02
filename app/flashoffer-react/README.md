@@ -62,10 +62,13 @@ export function LandingPage() {
 ### Theme customization
 
 `FlashofferThemeProvider` merges any supplied Material UI `ThemeOptions` with
-the baseline palette. For more granular control, call `createFlashofferTheme`
-and pass the resulting theme to your own `ThemeProvider` instance. The component
-primitives respect CSS tokens such as `--flashoffer-color-primary` and
-`--flashoffer-font-family`, enabling runtime theming through global styles.
+the baseline palette. Use the `preset` prop to activate opinionated design
+systems that ship with the library. The `colorMode` prop toggles between light
+and dark variants when a preset exposes them. For more granular control, call
+`createFlashofferTheme` and pass the resulting theme to your own
+`ThemeProvider` instance. The component primitives respect CSS tokens such as
+`--flashoffer-color-primary` and `--flashoffer-font-family`, enabling runtime
+theming through global styles.
 
 ```tsx
 import { ThemeProvider } from "@mui/material/styles";
@@ -78,6 +81,41 @@ const theme = createFlashofferTheme({
 });
 
 export function App({ children }: { children: React.ReactNode }) {
+  return <ThemeProvider theme={theme}>{children}</ThemeProvider>;
+}
+```
+
+To start from the spacious typography preset rather than the default palette,
+pass the preset into the provider or derive a standalone theme with
+`createSpaciousTypographyTheme`.
+
+```tsx
+import { ThemeProvider } from "@mui/material/styles";
+import {
+  FlashofferThemeProvider,
+  createSpaciousTypographyTheme
+} from "flashoffer-react";
+
+export function SpaciousLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <FlashofferThemeProvider
+      preset="spaciousTypography"
+      colorMode="dark"
+      themeOptions={{ typography: { fontSize: 18 } }}
+    >
+      {children}
+    </FlashofferThemeProvider>
+  );
+}
+
+export function SpaciousThemeProvider({
+  children
+}: {
+  children: React.ReactNode;
+}) {
+  const theme = createSpaciousTypographyTheme("dark", {
+    typography: { fontSize: 18 }
+  });
   return <ThemeProvider theme={theme}>{children}</ThemeProvider>;
 }
 ```

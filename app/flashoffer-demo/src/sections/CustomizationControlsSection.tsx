@@ -5,6 +5,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { Section } from "flashoffer-react";
 import type { HeroAlignment, ThemePreset } from "./types";
+import { THEME_PRESET_LABELS, THEME_PRESET_ORDER } from "./types";
 
 export interface CustomizationControlsSectionProps {
   palettePreset: ThemePreset;
@@ -71,9 +72,11 @@ export function CustomizationControlsSection({
               data-track-label="Palette selector"
               data-track-meta={JSON.stringify({ palette: palettePreset })}
             >
-              <option value="ocean">Ocean (default)</option>
-              <option value="sunset">Sunset</option>
-              <option value="midnight">Midnight</option>
+              {THEME_PRESET_ORDER.map((value) => (
+                <option key={value} value={value}>
+                  {THEME_PRESET_LABELS[value]}
+                </option>
+              ))}
             </select>
           </Box>
           <Box>

@@ -41,3 +41,23 @@ Optional theme overrides merged with the default Flashoffer palette.
 Defined in: src/theme/FlashofferThemeProvider.tsx:86
 
 Whether to include MUI's CssBaseline.
+
+***
+
+### preset?
+
+> `optional` **preset**: [`FlashofferThemePreset`](../type-aliases/FlashofferThemePreset.md)
+
+Defined in: src/theme/FlashofferThemeProvider.tsx:95
+
+Select a preset to use as the base Flashoffer theme before applying overrides.
+
+***
+
+### colorMode?
+
+> `optional` **colorMode**: `PaletteMode`
+
+Defined in: src/theme/FlashofferThemeProvider.tsx:97
+
+Controls the palette mode for presets that support a light and dark variant.
