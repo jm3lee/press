@@ -77,3 +77,16 @@ Range interpretation:
       "/data/src/templates",
   )
   ```
+
+## Dockerfile Maintenance
+
+- Document every new build argument, environment variable, or external tool
+  that a Dockerfile introduces. Add comments near the relevant instructions and
+  update any associated README sections so future maintainers understand the
+  rationale and usage.
+- When adjusting the base image or package manager commands, note the reason
+  for the change and describe any compatibility implications (for example,
+  required host capabilities or minimum versions).
+- If the Docker build process depends on auxiliary scripts or configuration
+  files, cross-reference those files and ensure their instructions stay in
+  sync with the Dockerfile comments.
