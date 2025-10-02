@@ -44,7 +44,7 @@ import {
   EngagementProvider,
   AutoTrack,
   useRecordInteraction,
-} from "@press/analytics";
+} from "flashoffer-react";
 
 export function App() {
   return (
@@ -52,6 +52,11 @@ export function App() {
       endpoint="/events"
       site="marketing"
       flushInterval={2500}
+      heartbeatInterval={10000}
+      idleTimeout={60000}
+      scrollThresholds={[0.25, 0.5, 0.75, 1]}
+      viewThresholds={[0.25, 0.5, 0.75, 1]}
+      maxBatch={50}
     >
       <LandingPage />
       <AutoTrack selector="[data-track-id]" />
@@ -75,8 +80,10 @@ function LandingPage() {
 
 `EngagementProvider` handles batching and submission, while AutoTrack discovers
 elements annotated with `data-track-*` attributes and emits view events as they
-enter and leave the viewport. Manual interactions call directly into the
-provider with `useRecordInteraction` to supply richer metadata.
+enter and leave the viewport. Tuning `heartbeatInterval`, `idleTimeout`,
+`scrollThresholds`, `viewThresholds`, or `maxBatch` adjusts how aggressively
+the provider samples and flushes data. Manual interactions call directly into
+the provider with `useRecordInteraction` to supply richer metadata.
 
 ## Demo walkthrough
 Embedding the helpers from `app/flashoffer-react` inside a marketing page

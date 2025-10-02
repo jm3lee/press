@@ -98,12 +98,21 @@ arbitrary attributes to the underlying Material UI primitive.
   an illustration, and override `primaryCta`/`secondaryCta` with button props or
   disable the secondary button by supplying `null`.
 - **`SectionHeader`** – Standalone heading stack with optional `eyebrow` and
-  `title` slots. Defaults render Flashoffer marketing copy, and the `align`
-  prop controls text alignment and flex behavior.
+  `title` slots. Defaults render the `"FLASHOFFER"` eyebrow and the "Launch
+  faster with reusable content blocks." headline. Use `align="center"`
+  (default) or `align="left"` to adjust layout.
 - **`Section`** – High-level wrapper that renders `SectionHeader` plus optional
-  supporting children. Pass any React nodes as `children` to render supporting
-  prose or omit them for a header-only section. Accepts an optional `id` for
-  anchor linking.
+  supporting children. Inherits the same defaults and accepts all
+  `SectionHeader` props alongside an optional `id` for anchor linking.
+  Render supporting content as natural React children instead of collecting
+  paragraphs in arrays; the component handles spacing itself.
+
+  ```tsx
+  <Section eyebrow="Customers" title="Loved by operators">
+    <p>Flashoffer's automation eliminates manual proposal work.</p>
+    <p>Integrate your CRM to close deals faster.</p>
+  </Section>
+  ```
 - **`PreviewCard`** – Feature preview card with optional media and CTA row.
   Provide `primaryCta`/`secondaryCta` props to render button controls, or leave
   them undefined for a purely informational card.
@@ -150,8 +159,10 @@ export function LandingWithAnalytics() {
 ```
 
 - **`EngagementProvider`** tracks viewport visibility, scroll depth, and user
-  activity. Adjust thresholds with `viewThresholds` or disable network flushes
-  by setting `flushInterval={null}` when you only need in-memory metrics.
+  activity. Control sampling with `viewThresholds`, `scrollThresholds`, and
+  `heartbeatInterval`, tune inactivity handling with `idleTimeout`, adjust
+  batch sizing through `maxBatch`, or disable network flushes entirely by
+  setting `flushInterval={null}` when you only need in-memory metrics.
 - **`AutoTrack`** watches the DOM for elements marked with `data-track-id`
   attributes. It attaches observers automatically and reads optional
   `data-track-label`/`data-track-meta` attributes for enriched metadata.

@@ -16,6 +16,10 @@ const DEFAULT_TITLE = "Launch faster with reusable content blocks.";
 
 /**
  * Section heading with optional eyebrow and configurable alignment.
+ *
+ * Defaults render the "FLASHOFFER" eyebrow and the "Launch faster with
+ * reusable content blocks." title. Text is centered unless `align="left"` is
+ * provided, and either content slot can be omitted by passing `null`.
  */
 export function SectionHeader({
   eyebrow = DEFAULT_EYEBROW,
