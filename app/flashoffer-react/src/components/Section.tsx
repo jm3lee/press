@@ -15,7 +15,8 @@ export interface SectionProps extends SectionHeaderProps {
  *
  * Mirrors SectionHeader defaults (Flashoffer eyebrow, marketing title,
  * centered alignment) while exposing extra space for arbitrary `children` and
- * an optional section `id`.
+ * an optional section `id`. Pass supporting markup as regular React nodes
+ * rather than assembling arrays; the surrounding Stack handles spacing.
  */
 export function Section({
   align = "center",

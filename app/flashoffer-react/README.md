@@ -104,7 +104,15 @@ arbitrary attributes to the underlying Material UI primitive.
 - **`Section`** – High-level wrapper that renders `SectionHeader` plus optional
   supporting children. Inherits the same defaults and accepts all
   `SectionHeader` props alongside an optional `id` for anchor linking.
-  Drop in supporting prose without wiring data first.
+  Render supporting content as natural React children instead of collecting
+  paragraphs in arrays; the component handles spacing itself.
+
+  ```tsx
+  <Section eyebrow="Customers" title="Loved by operators">
+    <p>Flashoffer's automation eliminates manual proposal work.</p>
+    <p>Integrate your CRM to close deals faster.</p>
+  </Section>
+  ```
 - **`PreviewCard`** – Feature preview card with optional media and CTA row.
   Provide `primaryCta`/`secondaryCta` props to render button controls, or leave
   them undefined for a purely informational card.
