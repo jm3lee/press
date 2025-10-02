@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 # Streaming COPY → pandas in batches (memory-safe) with psycopg v3
 
-import os
+import codecs
+import csv
 import io
 import json
-import csv
-import codecs
+import os
+
 import pandas as pd
 import psycopg
 
@@ -28,6 +29,7 @@ COPY (
   ORDER BY occurred_at, id
 ) TO STDOUT WITH (FORMAT csv, HEADER true)
 """
+
 
 def copy_text_lines(cur, sql: str, chunk_bytes: int = 1 << 20):
     """
@@ -53,6 +55,7 @@ def copy_text_lines(cur, sql: str, chunk_bytes: int = 1 << 20):
     if tail:
         yield tail
 
+
 def dataframes_from_copy(cur, sql: str, batch_rows: int = 200_000):
     """
     Stream CSV rows from COPY, yield pandas DataFrames of size batch_rows.
@@ -75,7 +78,8 @@ def dataframes_from_copy(cur, sql: str, batch_rows: int = 200_000):
     if batch:
         yield pd.DataFrame.from_records(batch)
 
-def main():
+
+def load():
     dfs = []
     with psycopg.connect(PGURL, autocommit=True) as conn, conn.cursor() as cur:
         # If you use compressed chunks:
@@ -84,19 +88,20 @@ def main():
             # dtypes & timestamp parsing per-batch to keep memory bounded
             part["occurred_at"] = pd.to_datetime(part["occurred_at"], utc=True)
             part["received_at"] = pd.to_datetime(part["received_at"], utc=True)
-            part = part.astype({
-                "id": "Int64",
-                "site": "string",
-                "session_id": "string",
-                "event_type": "string",
-                "target": "string",
-            })
+            part = part.astype(
+                {
+                    "id": "Int64",
+                    "site": "string",
+                    "session_id": "string",
+                    "event_type": "string",
+                    "target": "string",
+                }
+            )
             dfs.append(part)
 
+    global df
     df = pd.concat(dfs, ignore_index=True) if dfs else pd.DataFrame()
-    print(df.info())
-    print("rows:", len(df))
-    print(df.iloc[1])
 
-if __name__ == "__main__":
-    main()
+
+# For use in ipython
+df = load()
