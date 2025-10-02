@@ -1,6 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import Typography from "@mui/material/Typography";
-import { FlashofferThemeProvider, createFlashofferTheme } from "../index";
+import {
+  FlashofferThemeProvider,
+  createFlashofferTheme,
+  createSpaciousTypographyTheme
+} from "../index";
 import { Footer } from "../components/Footer";
 import { HeroBanner } from "../components/HeroBanner";
 import { OutlineCtaButton } from "../components/OutlineCtaButton";
@@ -193,6 +197,16 @@ describe("Flashoffer React primitives", () => {
     expect(theme.palette.primary.main).toBe("#123456");
   });
 
+  it("offers spacious typography theme variants", () => {
+    const lightTheme = createSpaciousTypographyTheme("light");
+    const darkTheme = createSpaciousTypographyTheme("dark");
+
+    expect(lightTheme.palette.mode).toBe("light");
+    expect(lightTheme.typography.body1?.lineHeight).toBe(1.75);
+    expect(darkTheme.palette.mode).toBe("dark");
+    expect(darkTheme.palette.background.default).toBe("#0b1120");
+  });
+
   it("propagates custom theme options through provider", () => {
     function ThemeProbe() {
       const theme = useTheme();
@@ -217,5 +231,32 @@ describe("Flashoffer React primitives", () => {
       "data-color",
       "#ff00aa"
     );
+  });
+
+  it("allows selecting the spacious typography preset", () => {
+    function ThemeProbe() {
+      const theme = useTheme();
+      return (
+        <span
+          data-testid="spacious-typography"
+          data-line-height={theme.typography.body1?.lineHeight}
+          data-background={theme.palette.background.default}
+        />
+      );
+    }
+
+    render(
+      <FlashofferThemeProvider
+        applyCssBaseline={false}
+        preset="spaciousTypography"
+        colorMode="dark"
+      >
+        <ThemeProbe />
+      </FlashofferThemeProvider>
+    );
+
+    const probe = screen.getByTestId("spacious-typography");
+    expect(probe).toHaveAttribute("data-line-height", "1.75");
+    expect(probe).toHaveAttribute("data-background", "#0b1120");
   });
 });

@@ -22,6 +22,14 @@ const HERO_GRADIENT_OVERRIDES: Record<
   midnight: {
     "--flashoffer-hero-gradient-start": "#1e293b",
     "--flashoffer-hero-gradient-stop": "#0f172a"
+  },
+  spaciousLight: {
+    "--flashoffer-hero-gradient-start": "rgba(29, 78, 216, 0.14)",
+    "--flashoffer-hero-gradient-stop": "rgba(219, 39, 119, 0.18)"
+  },
+  spaciousDark: {
+    "--flashoffer-hero-gradient-start": "rgba(96, 165, 250, 0.28)",
+    "--flashoffer-hero-gradient-stop": "rgba(15, 23, 42, 0.85)"
   }
 };
 
@@ -45,6 +53,7 @@ export function HeroShowcaseSection({
       data-track-id="hero-banner"
       data-track-label="Hero banner"
       data-track-meta={heroMeta}
+      data-testid="hero-banner-wrapper"
       sx={heroGradientOverrides}
     >
       <HeroBanner

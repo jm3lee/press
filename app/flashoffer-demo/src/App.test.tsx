@@ -65,4 +65,34 @@ describe("Flashoffer demo", () => {
       ).toBe("#0f172a");
     });
   });
+
+  it.each([
+    ["spaciousLight", "rgba(29, 78, 216, 0.14)", "rgba(219, 39, 119, 0.18)"],
+    ["spaciousDark", "rgba(96, 165, 250, 0.28)", "rgba(15, 23, 42, 0.85)"]
+  ])(
+    "updates the hero banner gradient tokens for the %s theme",
+    async (preset, gradientStart, gradientStop) => {
+      render(<App />);
+
+      const paletteSelect = await screen.findByLabelText(
+        /select theme palette/i
+      );
+      fireEvent.change(paletteSelect, { target: { value: preset } });
+
+      const heroWrapper = (await screen.findByTestId("hero-banner-wrapper")) as HTMLElement;
+
+      await waitFor(() => {
+        expect(
+          getComputedStyle(heroWrapper).getPropertyValue(
+            "--flashoffer-hero-gradient-start"
+          ).trim()
+        ).toBe(gradientStart);
+        expect(
+          getComputedStyle(heroWrapper).getPropertyValue(
+            "--flashoffer-hero-gradient-stop"
+          ).trim()
+        ).toBe(gradientStop);
+      });
+    }
+  );
 });

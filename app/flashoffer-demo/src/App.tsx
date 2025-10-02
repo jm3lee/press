@@ -1,11 +1,13 @@
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Stack from "@mui/material/Stack";
-import type { ThemeOptions } from "@mui/material/styles";
+import type { PaletteMode, ThemeOptions } from "@mui/material/styles";
 import { Suspense, lazy, startTransition, useMemo, useState } from "react";
 import { FlashofferThemeProvider } from "flashoffer-react";
+import type { FlashofferThemePreset } from "flashoffer-react";
 import type { HeroAlignment, ThemePreset } from "./sections/types";
 import { OVERVIEW_PARAGRAPHS, PREVIEW_CARDS } from "./sections/content";
+import { THEME_PRESET_LABELS } from "./sections/types";
 
 const CustomizationControlsSection = lazy(async () => ({
   default: (await import("./sections/CustomizationControlsSection")).CustomizationControlsSection
@@ -35,31 +37,49 @@ const FooterSection = lazy(async () => ({
   default: (await import("./sections/FooterSection")).FooterSection
 }));
 
-const themePresets: Record<ThemePreset, ThemeOptions | undefined> = {
-  ocean: undefined,
+interface ThemePresetConfig {
+  preset?: FlashofferThemePreset;
+  colorMode?: PaletteMode;
+  themeOptions?: ThemeOptions;
+}
+
+const themePresets: Record<ThemePreset, ThemePresetConfig> = {
+  ocean: {},
   sunset: {
-    palette: {
-      primary: { main: "#f97316", contrastText: "#1f2937" },
-      secondary: { main: "#facc15", contrastText: "#0f172a" }
+    themeOptions: {
+      palette: {
+        primary: { main: "#f97316", contrastText: "#1f2937" },
+        secondary: { main: "#facc15", contrastText: "#0f172a" }
+      }
     }
   },
   midnight: {
-    palette: {
-      primary: { main: "#6366f1", contrastText: "#f8fafc" },
-      secondary: { main: "#38bdf8", contrastText: "#0f172a" },
-      background: { default: "#0f172a", paper: "#111827" },
-      text: { primary: "#f8fafc", secondary: "#cbd5f5" }
-    },
-    components: {
-      MuiCard: {
-        styleOverrides: {
-          root: {
-            backgroundColor: "rgba(15, 23, 42, 0.75)",
-            border: "1px solid rgba(148, 163, 184, 0.2)"
+    themeOptions: {
+      palette: {
+        primary: { main: "#6366f1", contrastText: "#f8fafc" },
+        secondary: { main: "#38bdf8", contrastText: "#0f172a" },
+        background: { default: "#0f172a", paper: "#111827" },
+        text: { primary: "#f8fafc", secondary: "#cbd5f5" }
+      },
+      components: {
+        MuiCard: {
+          styleOverrides: {
+            root: {
+              backgroundColor: "rgba(15, 23, 42, 0.75)",
+              border: "1px solid rgba(148, 163, 184, 0.2)"
+            }
           }
         }
       }
     }
+  },
+  spaciousLight: {
+    preset: "spaciousTypography",
+    colorMode: "light"
+  },
+  spaciousDark: {
+    preset: "spaciousTypography",
+    colorMode: "dark"
   }
 };
 
@@ -164,18 +184,28 @@ export default function App() {
   const [palettePreset, setPalettePreset] = useState<ThemePreset>("ocean");
   const [heroAlignment, setHeroAlignment] = useState<HeroAlignment>("center");
 
-  const themeOptions = useMemo(
+  const themeConfig = useMemo(
     () => themePresets[palettePreset],
     [palettePreset]
   );
 
   const controlsMeta = useMemo(
-    () => JSON.stringify({ palette: palettePreset, heroAlignment }),
+    () =>
+      JSON.stringify({
+        palette: palettePreset,
+        presetLabel: THEME_PRESET_LABELS[palettePreset],
+        heroAlignment
+      }),
     [heroAlignment, palettePreset]
   );
 
   const heroMeta = useMemo(
-    () => JSON.stringify({ alignment: heroAlignment, palette: palettePreset }),
+    () =>
+      JSON.stringify({
+        alignment: heroAlignment,
+        palette: palettePreset,
+        presetLabel: THEME_PRESET_LABELS[palettePreset]
+      }),
     [heroAlignment, palettePreset]
   );
 
@@ -190,12 +220,20 @@ export default function App() {
   );
 
   const pageMeta = useMemo(
-    () => JSON.stringify({ palette: palettePreset }),
+    () =>
+      JSON.stringify({
+        palette: palettePreset,
+        presetLabel: THEME_PRESET_LABELS[palettePreset]
+      }),
     [palettePreset]
   );
 
   return (
-    <FlashofferThemeProvider themeOptions={themeOptions}>
+    <FlashofferThemeProvider
+      themeOptions={themeConfig.themeOptions}
+      preset={themeConfig.preset}
+      colorMode={themeConfig.colorMode}
+    >
       <Box
         sx={{
           backgroundColor: "var(--flashoffer-color-background)",

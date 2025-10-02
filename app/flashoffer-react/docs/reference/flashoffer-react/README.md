@@ -23,6 +23,7 @@
 
 ## Type Aliases
 
+- [FlashofferThemePreset](type-aliases/FlashofferThemePreset.md)
 - [OutlineCtaButtonProps](type-aliases/OutlineCtaButtonProps.md)
 - [PrimaryCtaButtonProps](type-aliases/PrimaryCtaButtonProps.md)
 
@@ -44,4 +45,5 @@
 - [Section](functions/Section.md)
 - [SectionHeader](functions/SectionHeader.md)
 - [createFlashofferTheme](functions/createFlashofferTheme.md)
+- [createSpaciousTypographyTheme](functions/createSpaciousTypographyTheme.md)
 - [FlashofferThemeProvider](functions/FlashofferThemeProvider.md)
