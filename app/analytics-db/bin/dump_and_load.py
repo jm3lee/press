@@ -99,8 +99,7 @@ def load():
             )
             dfs.append(part)
 
-    global df
-    df = pd.concat(dfs, ignore_index=True) if dfs else pd.DataFrame()
+    return pd.concat(dfs, ignore_index=True) if dfs else pd.DataFrame()
 
 
 # For use in ipython
