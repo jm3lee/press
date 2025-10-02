@@ -1,3 +1,13 @@
+######################################################################
+# Static site nginx image
+#
+# This container serves the pre-built Press site. The Docker build embeds
+# a chosen nginx configuration and the static artifact produced by the
+# frontend pipeline so the image can run without external volumes.
+######################################################################
+
+# Use the lightweight Alpine-based nginx image since it already contains an
+# optimized configuration for serving static files.
 FROM nginx:alpine-slim
 
 # Allows specifying which nginx configuration file to include at build time.
