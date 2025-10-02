@@ -12,6 +12,10 @@ export interface SectionProps extends SectionHeaderProps {
 
 /**
  * High-level section wrapper that combines SectionHeader with supporting copy.
+ *
+ * Mirrors SectionHeader defaults (Flashoffer eyebrow, marketing title,
+ * centered alignment) while exposing extra space for arbitrary `children` and
+ * an optional section `id`.
  */
 export function Section({
   align = "center",
