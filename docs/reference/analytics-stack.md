@@ -153,11 +153,8 @@ application reaches the API through the host-mapped port.
 - **Build context** – `app/analytics-backend` contains the Flask service,
   Alembic migrations, and pytest suite. Compose mounts the directory for live
   reloads during development.
-- **Environment variables** – The service reads its database configuration from
-  `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_USER`, `DATABASE_PASSWORD`, and
-  `DATABASE_NAME`. `CORS_ALLOW_ORIGINS` lists permitted front-end origins (the
-  demo defaults to `http://localhost:5173`). Export the same values when running
-  the app outside Docker.
+- **Database configuration variables** – Review the summary below for the
+  environment variables that control TimescaleDB connectivity.
 - **HTTP interface** –
   - `POST /events` ingests a batch of engagement events emitted by the
     playground.
@@ -170,6 +167,68 @@ application reaches the API through the host-mapped port.
   ```
   The suite boots TimescaleDB, applies migrations, submits sample payloads, and
   truncates the hypertable when the run completes.
+
+#### Database configuration summary
+- `DATABASE_URL` – Full PostgreSQL connection string that may include
+  credentials, port, and SSL query parameters.
+- `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_USER`, `DATABASE_PASSWORD`, and
+  `DATABASE_NAME` – Discrete connection settings when you are not using
+  `DATABASE_URL`.
+- `DATABASE_POOL_MIN` and `DATABASE_POOL_MAX` – Optional overrides for the
+  psycopg connection pool size.
+- `DATABASE_SSLMODE`, `DATABASE_SSLROOTCERT`, `DATABASE_SSLCERT`,
+  `DATABASE_SSLKEY`, `DATABASE_SSLPASSWORD`, `DATABASE_SSLCRL`, and
+  `DATABASE_TARGET_SESSION_ATTRS` – Optional SSL overrides that supplement the
+  connection options parsed from `DATABASE_URL` or the discrete settings.
+- `CORS_ALLOW_ORIGINS` – Comma-separated front-end origins allowed to issue
+  cross-origin requests.
+
+#### `DATABASE_URL`
+Use `DATABASE_URL` when the hosting provider gives you a ready-made connection
+string. Include any SSL requirements as query parameters, such as:
+
+```
+postgresql://user:pass@host:25060/defaultdb?sslmode=require
+```
+
+When `DATABASE_URL` is set, the backend ignores the discrete host, port, user,
+password, and database variables.
+
+#### `DATABASE_HOST`
+`DATABASE_HOST` selects the TimescaleDB host when `DATABASE_URL` is not set.
+Combine it with `DATABASE_USER`, `DATABASE_PASSWORD`, and `DATABASE_NAME` to
+describe the target instance.
+
+#### `DATABASE_PORT`
+`DATABASE_PORT` specifies the TCP port for TimescaleDB. It defaults to `5432`
+when omitted.
+
+#### `DATABASE_USER`
+`DATABASE_USER` is the TimescaleDB role used for both migrations and runtime
+queries. Pair it with `DATABASE_PASSWORD` for password authentication.
+
+#### `DATABASE_PASSWORD`
+`DATABASE_PASSWORD` holds the TimescaleDB password associated with
+`DATABASE_USER`.
+
+#### `DATABASE_NAME`
+`DATABASE_NAME` is the database within the TimescaleDB cluster that stores the
+engagement event schema.
+
+#### Connection pool sizing
+`DATABASE_POOL_MIN` and `DATABASE_POOL_MAX` tune the psycopg connection pool.
+They default to `1` and `10`. Increase the values when the deployment needs more
+concurrent ingestion throughput.
+
+#### SSL overrides
+When `DATABASE_URL` does not include every SSL parameter, or when you are using
+discrete connection settings, supply the remaining options through the
+`DATABASE_SSL*` environment variables listed above. Each value is passed directly
+to psycopg's connection factory.
+
+#### `CORS_ALLOW_ORIGINS`
+`CORS_ALLOW_ORIGINS` enumerates front-end origins allowed to call the backend.
+For local development it defaults to `http://localhost:5173`.
 
 ### flashoffer-react
 - **Purpose** – `app/flashoffer-react` packages the React instrumentation
