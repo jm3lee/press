@@ -80,3 +80,8 @@ Range interpretation:
       "/data/src/templates",
   )
   ```
+- Avoid creating stubs or shims for Python dependencies in tests whenever
+  possible; assume that required Python modules are available in the testing
+  environment.
+- When tests fail due to missing Python packages, install the dependencies
+  needed for the suite instead of skipping tests or introducing stand-ins.
