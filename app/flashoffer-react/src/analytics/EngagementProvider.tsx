@@ -282,6 +282,51 @@ export function EngagementProvider({
     return observerRef.current;
   }, []);
 
+  const handleIntersectionEntry = useCallback(
+    (
+      trackId: string,
+      meta: Record<string, unknown>,
+      entry: IntersectionObserverEntry,
+      timestamp: number
+    ) => {
+      activeTargetsRef.current.add(trackId);
+      const ratio = clampRatio(entry.intersectionRatio || 0);
+      const state = activeViewsRef.current.get(trackId);
+      if (state) {
+        state.maxRatio = Math.max(state.maxRatio, ratio);
+        return;
+      }
+      activeViewsRef.current.set(trackId, {
+        startedAt: timestamp,
+        maxRatio: ratio,
+        meta,
+      });
+      // Fires when an element first becomes visible; ratio captures the clamped entry intersection.
+      enqueue({ type: "view", target: trackId, meta: { ...meta, ratio }, at: nowIso() });
+    },
+    [enqueue]
+  );
+
+  const handleIntersectionExit = useCallback(
+    (trackId: string, timestamp: number) => {
+      activeTargetsRef.current.delete(trackId);
+      const state = activeViewsRef.current.get(trackId);
+      if (!state) {
+        return;
+      }
+      activeViewsRef.current.delete(trackId);
+      const duration = Math.round(timestamp - state.startedAt);
+      // Fires when visibility ends; duration_ms covers time since entry and ratio records the peak visibility.
+      enqueue({
+        type: "view-end",
+        target: trackId,
+        meta: { ...state.meta, duration_ms: duration, ratio: state.maxRatio },
+        at: nowIso(),
+      });
+    },
+    [enqueue]
+  );
+
   intersectionHandlerRef.current = (entries: IntersectionObserverEntry[]) => {
     if (disabledRef.current) {
       return;
@@ -294,45 +339,9 @@ export function EngagementProvider({
       }
       const { trackId, meta } = info;
       if (entry.isIntersecting) {
-        activeTargetsRef.current.add(trackId);
-        if (!activeViewsRef.current.has(trackId)) {
-          activeViewsRef.current.set(trackId, {
-            startedAt: timestamp,
-            maxRatio: clampRatio(entry.intersectionRatio || 0),
-            meta,
-          });
-          enqueue({
-            type: "view",
-            target: trackId,
-            meta: { ...meta, ratio: clampRatio(entry.intersectionRatio || 0) },
-            at: nowIso(),
-          });
-        } else {
-          const state = activeViewsRef.current.get(trackId);
-          if (state) {
-            state.maxRatio = Math.max(
-              state.maxRatio,
-              clampRatio(entry.intersectionRatio || 0)
-            );
-          }
-        }
+        handleIntersectionEntry(trackId, meta, entry, timestamp);
       } else {
-        activeTargetsRef.current.delete(trackId);
-        const state = activeViewsRef.current.get(trackId);
-        if (state) {
-          activeViewsRef.current.delete(trackId);
-          const duration = Math.round(timestamp - state.startedAt);
-          enqueue({
-            type: "view-end",
-            target: trackId,
-            meta: {
-              ...state.meta,
-              duration_ms: duration,
-              ratio: state.maxRatio,
-            },
-            at: nowIso(),
-          });
-        }
+        handleIntersectionExit(trackId, timestamp);
       }
     });
   };

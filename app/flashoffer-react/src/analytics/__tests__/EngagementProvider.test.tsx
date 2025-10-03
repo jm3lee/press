@@ -2,6 +2,7 @@ import { act, render } from "@testing-library/react";
 import type { MutableRefObject } from "react";
 import {
   EngagementProvider,
+  ViewTracker,
   useRecordInteraction,
 } from "../EngagementProvider";
 
@@ -161,6 +162,143 @@ describe("EngagementProvider lifetime", () => {
     });
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    view.unmount();
+  });
+});
+
+describe("EngagementProvider view tracking", () => {
+  const globalScope = globalThis as GlobalWithOptionalFetch & {
+    IntersectionObserver?: typeof IntersectionObserver;
+  };
+  const originalFetch = globalScope.fetch;
+  const originalObserver = globalScope.IntersectionObserver;
+  let fetchMock: jest.MockedFunction<typeof fetch>;
+  let nowSpy: jest.SpyInstance<number, []> | undefined;
+
+  class MockIntersectionObserver {
+    callback: (entries: IntersectionObserverEntry[]) => void;
+
+    observed = new Set<Element>();
+
+    constructor(callback: (entries: IntersectionObserverEntry[]) => void) {
+      this.callback = callback;
+      observers.push(this);
+    }
+
+    observe(element: Element) {
+      this.observed.add(element);
+    }
+
+    unobserve(element: Element) {
+      this.observed.delete(element);
+    }
+
+    disconnect() {
+      this.observed.clear();
+    }
+
+    trigger(entries: IntersectionObserverEntry[]) {
+      this.callback(entries);
+    }
+  }
+
+  const observers: MockIntersectionObserver[] = [];
+
+  beforeEach(() => {
+    fetchMock = jest
+      .fn(async () => ({ ok: true } as Response))
+      .mockName("fetch") as jest.MockedFunction<typeof fetch>;
+    globalScope.fetch = fetchMock;
+    observers.length = 0;
+    globalScope.IntersectionObserver = MockIntersectionObserver as unknown as typeof IntersectionObserver;
+    nowSpy = jest.spyOn(performance, "now").mockImplementation(() => currentNow);
+    currentNow = 0;
+  });
+
+  afterEach(() => {
+    nowSpy?.mockRestore();
+    globalScope.fetch = originalFetch;
+    if (originalObserver) {
+      globalScope.IntersectionObserver = originalObserver;
+    } else {
+      delete globalScope.IntersectionObserver;
+    }
+    jest.clearAllMocks();
+  });
+
+  let currentNow = 0;
+
+  const setNow = (value: number) => {
+    currentNow = value;
+  };
+
+  const trigger = (observer: MockIntersectionObserver, entry: Partial<IntersectionObserverEntry>) => {
+    const observed = Array.from(observer.observed.values());
+    const target = entry.target ?? observed[0];
+    if (!target) {
+      throw new Error("No observed target to trigger");
+    }
+    observer.trigger([
+      {
+        time: currentNow,
+        target,
+        isIntersecting: false,
+        intersectionRatio: 0,
+        ...entry,
+      } as IntersectionObserverEntry,
+    ]);
+  };
+
+  it("emits matching view and view-end events with timing metadata", async () => {
+    const view = render(
+      <EngagementProvider
+        endpoint="/engagement"
+        site="test"
+        maxBatch={1}
+        flushInterval={null}
+        heartbeatInterval={60_000}
+        idleTimeout={60_000}
+        scrollThresholds={[]}
+        viewThresholds={[]}
+      >
+        <ViewTracker trackId="hero" meta={{ section: "hero" }} />
+      </EngagementProvider>
+    );
+
+    const observer =
+      observers.find((candidate) => candidate.observed.size > 0) ??
+      observers[observers.length - 1];
+    expect(observer).toBeDefined();
+    setNow(100);
+    await act(async () => {
+      trigger(observer, { isIntersecting: true, intersectionRatio: 0.66 });
+      await Promise.resolve();
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const firstPayload = JSON.parse(fetchMock.mock.calls[0][1]?.body ?? "{}");
+    expect(firstPayload.events).toHaveLength(1);
+    expect(firstPayload.events[0]).toMatchObject({
+      type: "view",
+      target: "hero",
+      meta: { section: "hero", ratio: 0.66 },
+    });
+
+    setNow(220);
+    await act(async () => {
+      trigger(observer, { isIntersecting: false });
+      await Promise.resolve();
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    const secondPayload = JSON.parse(fetchMock.mock.calls[1][1]?.body ?? "{}");
+    expect(secondPayload.events).toHaveLength(1);
+    expect(secondPayload.events[0]).toMatchObject({
+      type: "view-end",
+      target: "hero",
+      meta: { section: "hero", duration_ms: 120, ratio: 0.66 },
+    });
 
     view.unmount();
   });
