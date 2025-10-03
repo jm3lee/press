@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Flashoffer Developers
+ * Released under the MIT license.
+ */
+
 export {
   FlashofferThemeProvider,
   createFlashofferTheme,
@@ -23,6 +28,9 @@ export type { SectionProps } from "./components/Section";
 
 export { PreviewCard } from "./components/PreviewCard";
 export type { PreviewCardProps } from "./components/PreviewCard";
+
+export { InstagramEngagementSection } from "./components/InstagramEngagementSection";
+export type { InstagramEngagementSectionProps } from "./components/InstagramEngagementSection";
 
 export { Footer } from "./components/Footer";
 export type { FooterProps, FooterLink } from "./components/Footer";

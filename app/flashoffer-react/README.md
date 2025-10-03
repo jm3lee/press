@@ -157,6 +157,10 @@ arbitrary attributes to the underlying Material UI primitive.
 - **`Figure`** – Responsive image container that preserves aspect ratio and
   renders an optional caption. Use `imgProps` to forward attributes such as
   `loading="lazy"` or `width`.
+- **`InstagramEngagementSection`** – Instagram-style engagement demo that
+  renders a Reels-inspired card with heart and share icon buttons. Wrap the
+  component in `EngagementProvider` so likes and shares emit interaction events
+  alongside view tracking for the mock post.
 - **`Footer`** – Content info footer that renders navigation links followed by
   attribution copy. Customize the `links` array or `copyrightText` while the
   layout stays consistent.
