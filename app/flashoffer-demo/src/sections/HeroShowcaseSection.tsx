@@ -59,7 +59,10 @@ export function HeroShowcaseSection({
       <HeroBanner
         align={heroAlignment}
         title="Launch coordinated offers in minutes."
-        subtitle="Flashoffer ships reusable hero, CTA, and preview components so teams can publish landing experiments without bespoke design cycles."
+        subtitle={
+          "Flashoffer-react helps artists publish campaigns without bending to " +
+          "inconsistent moderation while respecting civic safeguards."
+        }
         primaryCta={{
           label: "Explore Flashoffer components",
           href: "https://example.com/flashoffer",
