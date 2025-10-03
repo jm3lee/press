@@ -6,7 +6,6 @@ import { Suspense, lazy, startTransition, useMemo, useState } from "react";
 import { FlashofferThemeProvider } from "flashoffer-react";
 import type { FlashofferThemePreset } from "flashoffer-react";
 import type { HeroAlignment, ThemePreset } from "./sections/types";
-import { OVERVIEW_PARAGRAPHS, PREVIEW_CARDS } from "./sections/content";
 import { THEME_PRESET_LABELS } from "./sections/types";
 
 const CustomizationControlsSection = lazy(async () => ({
@@ -82,6 +81,9 @@ const themePresets: Record<ThemePreset, ThemePresetConfig> = {
     colorMode: "dark"
   }
 };
+
+const PREVIEW_CARD_COUNT = 3;
+const OVERVIEW_SUPPORTING_PARAGRAPHS = 3;
 
 const heroMedia = (
   <svg
@@ -210,12 +212,12 @@ export default function App() {
   );
 
   const previewMeta = useMemo(
-    () => JSON.stringify({ cards: PREVIEW_CARDS.length }),
+    () => JSON.stringify({ cards: PREVIEW_CARD_COUNT }),
     []
   );
 
   const overviewMeta = useMemo(
-    () => JSON.stringify({ paragraphs: OVERVIEW_PARAGRAPHS.length }),
+    () => JSON.stringify({ paragraphs: OVERVIEW_SUPPORTING_PARAGRAPHS }),
     []
   );
 
