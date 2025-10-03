@@ -6,6 +6,9 @@
 
 > **useRecordInteraction**(`defaultTarget?`, `defaultMeta?`): (`target`, `meta`) => `void`
 
+Returns a callback that records `interaction` events described in the
+[engagement events](../engagement-events.md) guide.
+
 Defined in: src/analytics/EngagementProvider.tsx:582
 
 ## Parameters

@@ -47,3 +47,7 @@
 - [createFlashofferTheme](functions/createFlashofferTheme.md)
 - [createSpaciousTypographyTheme](functions/createSpaciousTypographyTheme.md)
 - [FlashofferThemeProvider](functions/FlashofferThemeProvider.md)
+
+## Guides
+
+- [Engagement events](engagement-events.md)
