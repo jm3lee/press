@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import pytest
 
+pytest.importorskip("flask")
+pytest.importorskip("psycopg2")
+
 from analytics_backend.db import DatabaseConfig
 
 
