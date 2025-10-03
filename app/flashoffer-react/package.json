@@ -27,6 +27,8 @@
   "scripts": {
     "build": "vite build",
     "docs": "typedoc",
+    "lint": "eslint --ext .ts,.tsx src",
+    "lint:ci": "eslint --ext .ts,.tsx src --rule \"complexity: ['error', { 'max': 10 }]\" --quiet",
     "test": "jest",
     "test:watch": "jest --watch"
   },
@@ -46,6 +48,9 @@
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",
+    "eslint": "^8.57.0",
+    "@typescript-eslint/eslint-plugin": "^8.15.0",
+    "@typescript-eslint/parser": "^8.15.0",
     "jest": "^29.7.0",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",

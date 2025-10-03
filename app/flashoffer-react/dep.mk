@@ -40,8 +40,9 @@ app/flashoffer-react/.built: app/flashoffer-react/.init \
         app/flashoffer-react/tsconfig.json \
         app/flashoffer-react/tsconfig.node.json \
         app/flashoffer-react/package.json
-        cd app/flashoffer-react; npm run build
-        touch $@
+	cd app/flashoffer-react; npm run lint:ci
+	cd app/flashoffer-react; npm run build
+	touch $@
 
 app/flashoffer-react/.init:
         cd app/flashoffer-react; npm install

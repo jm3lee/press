@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import "./EventConsole.css";
 
@@ -52,6 +52,24 @@ function describeLatency(occurredAt: string, receivedAt: string): string | null 
   return `${Math.round(delta / 60000)} min`;
 }
 
+function isAbortError(error: unknown): boolean {
+  return (
+    !!error &&
+    typeof error === "object" &&
+    "name" in error &&
+    (error as { name?: string }).name === "AbortError"
+  );
+}
+
+function extractEvents(
+  data: { events?: CapturedEvent[] } | undefined
+): CapturedEvent[] {
+  if (!data || !Array.isArray(data.events)) {
+    return [];
+  }
+  return data.events as CapturedEvent[];
+}
+
 export function EventConsole({
   eventsUrl,
   pollInterval = 3000,
@@ -61,6 +79,27 @@ export function EventConsole({
   const [status, setStatus] = useState<ConsoleStatus>("idle");
   const [error, setError] = useState<Error | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+
+  const applyLimitParam = useCallback(
+    (url: URL) => {
+      if (limit && !url.searchParams.has("limit")) {
+        url.searchParams.set("limit", String(limit));
+      }
+    },
+    [limit]
+  );
+
+  const handleLoadSuccess = useCallback((payload: CapturedEvent[]) => {
+    setEvents(payload);
+    setLastUpdated(new Date().toISOString());
+    setStatus("live");
+    setError(null);
+  }, []);
+
+  const handleLoadFailure = useCallback((cause: unknown) => {
+    setStatus("error");
+    setError(cause instanceof Error ? cause : new Error(String(cause)));
+  }, []);
 
   useEffect(() => {
     if (!eventsUrl) {
@@ -76,9 +115,7 @@ export function EventConsole({
       try {
         setStatus((current) => (current === "idle" ? "connecting" : "updating"));
         const url = new URL(eventsUrl, window.location.href);
-        if (limit && !url.searchParams.has("limit")) {
-          url.searchParams.set("limit", String(limit));
-        }
+        applyLimitParam(url);
         const response = await fetch(url, {
           credentials: "include",
           signal: controller.signal,
@@ -90,27 +127,12 @@ export function EventConsole({
         if (cancelled) {
           return;
         }
-        const payload = Array.isArray(data.events)
-          ? (data.events as CapturedEvent[])
-          : [];
-        setEvents(payload);
-        setLastUpdated(new Date().toISOString());
-        setStatus("live");
-        setError(null);
+        handleLoadSuccess(extractEvents(data));
       } catch (err) {
-        if (cancelled) {
+        if (cancelled || isAbortError(err)) {
           return;
         }
-        if (
-          err &&
-          typeof err === "object" &&
-          "name" in err &&
-          err.name === "AbortError"
-        ) {
-          return;
-        }
-        setStatus("error");
-        setError(err instanceof Error ? err : new Error(String(err)));
+        handleLoadFailure(err);
       }
     };
 
@@ -124,7 +146,13 @@ export function EventConsole({
       controller.abort();
       window.clearInterval(interval);
     };
-  }, [eventsUrl, pollInterval, limit]);
+  }, [
+    applyLimitParam,
+    eventsUrl,
+    handleLoadFailure,
+    handleLoadSuccess,
+    pollInterval,
+  ]);
 
   const summary = useMemo(() => {
     if (events.length === 0) {

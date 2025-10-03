@@ -49,7 +49,8 @@
 
 ### Cyclomatic Complexity
 
-Thresholds:
+Thresholds (apply to **all** languages in this repository — Python and
+JavaScript/TypeScript):
 
 - **Function level**: warn > 7, fail > 10
 - **Class level**: max total ≤ 50
@@ -64,8 +65,10 @@ Range interpretation:
 
 ### Enforcement
 
-- Use `radon`/`xenon` in CI
-- Fail builds if thresholds are exceeded
+- **Python**: enforce with `radon`/`xenon` in CI; fail builds if thresholds are
+  exceeded.
+- **JavaScript/TypeScript**: enforce with ESLint (`complexity` rule) in CI;
+  fail builds if thresholds are exceeded.
 
 ### Testing
 
