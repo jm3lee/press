@@ -231,6 +231,10 @@ TypeScript project settings defined in `tsconfig.docs.json`.
 - `npm test`: run Jest and React Testing Library suites.
 - `npm run build`: compile the component library via Vite, producing ESM/CJS
   bundles and type declarations in `dist/`.
+- `npm run lint`: surface cyclomatic complexity warnings (`complexity > 7`)
+  across the TypeScript sources so risky functions can be refactored early.
+- `npm run lint:ci`: run the ESLint gate used in CI, which fails if any
+  function exceeds the hard ceiling of `complexity > 10`.
 
 See `dep.mk` for details on how the top-level build copies the generated
 artifacts into the monorepo distribution directories.

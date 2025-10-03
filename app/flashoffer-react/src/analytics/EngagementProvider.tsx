@@ -70,15 +70,42 @@ function clampRatio(value: number): number {
   return Number(Math.max(0, Math.min(1, value)).toFixed(3));
 }
 
+function canUseBeacon(sync: boolean): boolean {
+  return (
+    sync &&
+    typeof navigator !== "undefined" &&
+    "sendBeacon" in navigator
+  );
+}
+
+function getScrollOffset(win: Window): number {
+  if (typeof win.scrollY === "number") {
+    return win.scrollY;
+  }
+  if (typeof win.pageYOffset === "number") {
+    return win.pageYOffset;
+  }
+  return 0;
+}
+
+function getViewportHeight(win: Window): number {
+  return typeof win.innerHeight === "number" ? win.innerHeight : 0;
+}
+
+function getDocumentHeight(doc: Document): number {
+  const root = doc.documentElement;
+  return root && typeof root.scrollHeight === "number" ? root.scrollHeight : 0;
+}
+
 function calculateScrollRatio(): { ratio: number; pixels: number } {
   if (typeof window === "undefined") {
     return { ratio: 0, pixels: 0 };
   }
-  const scrollY = window.scrollY || window.pageYOffset || 0;
-  const viewport = window.innerHeight || 0;
-  const doc = document.documentElement;
-  const fullHeight = doc ? doc.scrollHeight || 0 : 0;
-  const ratio = fullHeight <= 0 ? 1 : (scrollY + viewport) / fullHeight;
+  const scrollY = getScrollOffset(window);
+  const viewport = getViewportHeight(window);
+  const fullHeight = getDocumentHeight(document);
+  const denominator = fullHeight <= 0 ? 1 : fullHeight;
+  const ratio = (scrollY + viewport) / denominator;
   return { ratio: Math.min(1, ratio), pixels: Math.round(scrollY) };
 }
 
@@ -146,6 +173,69 @@ export function EngagementProvider({
     maxBatchRef.current = maxBatch;
   }, [maxBatch]);
 
+  const requeueEvents = useCallback((events: EngagementEvent[]) => {
+    if (!disabledRef.current) {
+      queueRef.current.unshift(...events);
+    }
+  }, []);
+
+  const evaluateFlushEndpoint = useCallback((): string | null => {
+    if (disabledRef.current) {
+      queueRef.current = [];
+      return null;
+    }
+    if (failureCountRef.current >= MAX_CONSECUTIVE_FAILURES) {
+      disableTracking();
+      return null;
+    }
+    if (!endpoint || queueRef.current.length === 0) {
+      return null;
+    }
+    return endpoint;
+  }, [disableTracking, endpoint]);
+
+  const deliverWithBeacon = useCallback(
+    (currentEndpoint: string, events: EngagementEvent[], body: string) => {
+      const delivered = navigator.sendBeacon(currentEndpoint, body);
+      if (!delivered) {
+        registerFailure();
+        requeueEvents(events);
+        return;
+      }
+      resetFailure();
+    },
+    [registerFailure, requeueEvents, resetFailure]
+  );
+
+  const deliverWithFetch = useCallback(
+    async (
+      currentEndpoint: string,
+      events: EngagementEvent[],
+      body: string,
+      syncDelivery: boolean
+    ) => {
+      try {
+        const response = await fetch(currentEndpoint, {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body,
+          keepalive: syncDelivery,
+        });
+        if (!response.ok) {
+          throw new Error(`Unexpected status ${response.status}`);
+        }
+        resetFailure();
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.warn("Failed to flush engagement events", error);
+        registerFailure();
+        requeueEvents(events);
+      }
+    },
+    [registerFailure, requeueEvents, resetFailure]
+  );
+
   const enqueue = useCallback(
     (event: EngagementEvent) => {
       if (disabledRef.current) {
@@ -161,15 +251,8 @@ export function EngagementProvider({
 
   const flush = useCallback(
     async (reason = "interval", { sync = false }: { sync?: boolean } = {}) => {
-      if (disabledRef.current) {
-        queueRef.current = [];
-        return;
-      }
-      if (failureCountRef.current >= MAX_CONSECUTIVE_FAILURES) {
-        disableTracking();
-        return;
-      }
-      if (!endpoint || queueRef.current.length === 0) {
+      const currentEndpoint = evaluateFlushEndpoint();
+      if (!currentEndpoint) {
         return;
       }
       const events = queueRef.current.splice(0, queueRef.current.length);
@@ -179,40 +262,13 @@ export function EngagementProvider({
         events,
         reason,
       });
-      if (sync && typeof navigator !== "undefined" && "sendBeacon" in navigator) {
-        const ok = navigator.sendBeacon(endpoint, body);
-        if (!ok) {
-          registerFailure();
-          if (!disabledRef.current) {
-            queueRef.current.unshift(...events);
-          }
-        } else {
-          resetFailure();
-        }
+      if (canUseBeacon(sync)) {
+        deliverWithBeacon(currentEndpoint, events, body);
         return;
       }
-      try {
-        const response = await fetch(endpoint, {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body,
-          keepalive: sync,
-        });
-        if (!response.ok) {
-          throw new Error(`Unexpected status ${response.status}`);
-        }
-        resetFailure();
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.warn("Failed to flush engagement events", error);
-        registerFailure();
-        if (!disabledRef.current) {
-          queueRef.current.unshift(...events);
-        }
-      }
+      await deliverWithFetch(currentEndpoint, events, body, sync);
     },
-    [disableTracking, endpoint, registerFailure, resetFailure, site]
+    [deliverWithBeacon, deliverWithFetch, evaluateFlushEndpoint, site]
   );
 
   useEffect(() => {
