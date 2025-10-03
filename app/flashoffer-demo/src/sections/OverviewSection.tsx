@@ -20,8 +20,8 @@ export function OverviewSection({ overviewMeta }: OverviewSectionProps) {
         title="Narrate launches with reusable sections"
       >
         <Typography color="text.secondary">
-          Combine headlines and supporting copy without rebuilding layouts from
-          scratch.
+          Combine headlines and supporting copy while staying independent from
+          opaque review cycles.
         </Typography>
         {OVERVIEW_PARAGRAPHS.map((paragraph) => (
           <Typography key={paragraph} color="text.secondary">

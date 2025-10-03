@@ -66,8 +66,22 @@ const previewMedia = (
 );
 
 export const OVERVIEW_PARAGRAPHS = [
-  "Use the Section component to pair launch announcements, feature guides, or changelog summaries with consistent typography.",
-  "Each paragraph is wrapped in semantic markup and inherits spacing from the Flashoffer design tokens, so marketing teams can focus on messaging."
+  [
+    "Flashoffer-react emerged after repeated takedowns of fine art on ",
+    "mainstream networks. We respect law and order, yet opaque filters ",
+    "squeeze the livelihoods of artists."
+  ].join(""),
+  [
+    "We understand the tension between shielding minors from explicit ",
+    "material and giving artists room to breathe. The framework offers ",
+    "reusable, policy-free layouts so you can advertise art on your own ",
+    "terms."
+  ].join(""),
+  [
+    "Compose campaigns and deploy them to any Docker-ready cloud in ",
+    "minutes. While any tool can be misused, we trust creators to stand by ",
+    "one another more often than not."
+  ].join("")
 ];
 
 export const PREVIEW_CARDS = [
