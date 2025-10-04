@@ -88,19 +88,26 @@ def load():
             # dtypes & timestamp parsing per-batch to keep memory bounded
             part["occurred_at"] = pd.to_datetime(part["occurred_at"], utc=True)
             part["received_at"] = pd.to_datetime(part["received_at"], utc=True)
-            part = part.astype(
-                {
-                    "id": "Int64",
-                    "site": "string",
-                    "session_id": "string",
-                    "event_type": "string",
-                    "target": "string",
-                }
-            )
             dfs.append(part)
 
-    return pd.concat(dfs, ignore_index=True) if dfs else pd.DataFrame()
+    df = pd.concat(dfs, ignore_index=True) if dfs else pd.DataFrame()
+    meta_flat = pd.json_normalize(df["meta"]).add_prefix("meta.")
+    return df.join(meta_flat)
 
+def get_scroll_depth(df):
+    t = df[['session_id', 'meta.depth']].fillna(0).groupby("session_id").max("meta.depth")
+    t = t.reset_index().groupby('meta.depth').count()
+    return t
 
 # For use in ipython
 df = load()
+df_scroll_depth = get_scroll_depth(df)
+
+print("--- df_scroll_depth:")
+print('# sessions      :', int(df_scroll_depth.sum()))
+print('# sessions v0.5+:', int(df_scroll_depth[df_scroll_depth.index >= 0.50].sum()))
+
+print("--- df_dwell")
+df_dwell = df[df.event_type == 'dwell']
+print("long user engagements:")
+print(df_dwell[['session_id', 'meta']].groupby('session_id').count())
