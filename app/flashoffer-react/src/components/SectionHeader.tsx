@@ -38,7 +38,7 @@ export function SectionHeader({
           {eyebrow}
         </Typography>
       ) : null}
-      <Typography component="h2" variant="h4">
+      <Typography variant="h2">
         {title}
       </Typography>
     </Stack>
