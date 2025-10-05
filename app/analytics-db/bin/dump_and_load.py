@@ -94,20 +94,27 @@ def load():
     meta_flat = pd.json_normalize(df["meta"]).add_prefix("meta.")
     return df.join(meta_flat)
 
+
 def get_scroll_depth(df):
-    t = df[['session_id', 'meta.depth']].fillna(0).groupby("session_id").max("meta.depth")
-    t = t.reset_index().groupby('meta.depth').count()
+    t = (
+        df[["session_id", "meta.depth"]]
+        .fillna(0)
+        .groupby("session_id")
+        .max("meta.depth")
+    )
+    t = t.reset_index().groupby("meta.depth").count()
     return t
+
 
 # For use in ipython
 df = load()
 df_scroll_depth = get_scroll_depth(df)
 
 print("--- df_scroll_depth:")
-print('# sessions      :', int(df_scroll_depth.sum()))
-print('# sessions v0.5+:', int(df_scroll_depth[df_scroll_depth.index >= 0.50].sum()))
+print("# sessions      :", int(df_scroll_depth.sum()))
+print("# sessions v0.5+:", int(df_scroll_depth[df_scroll_depth.index >= 0.50].sum()))
 
 print("--- df_dwell")
-df_dwell = df[df.event_type == 'dwell']
+df_dwell = df[df.event_type == "dwell"]
 print("long user engagements:")
-print(df_dwell[['session_id', 'meta']].groupby('session_id').count())
+print(df_dwell[["session_id", "meta"]].groupby("session_id").count())
