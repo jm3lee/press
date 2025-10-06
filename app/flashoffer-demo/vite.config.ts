@@ -10,6 +10,9 @@ const flashofferSource = fileURLToPath(
   new URL("../flashoffer-react/src/index.ts", import.meta.url)
 );
 const nodeModulesDir = resolvePath(projectRoot, "node_modules");
+const compatLegacyRadio = toPosixPath(
+  resolvePath(projectRoot, "src/compat/material-ui/Radio.tsx")
+);
 const materialBase = toPosixPath(
   resolvePath(nodeModulesDir, "@mui/material")
 );
@@ -22,6 +25,18 @@ export default defineConfig({
       {
         find: "flashoffer-react",
         replacement: flashofferSource
+      },
+      {
+        find: "@material-ui/core/Radio",
+        replacement: compatLegacyRadio
+      },
+      {
+        find: "@material-ui/core/Radio/Radio",
+        replacement: compatLegacyRadio
+      },
+      {
+        find: "@material-ui/core/Radio/index",
+        replacement: compatLegacyRadio
       },
       {
         find: /^@mui\/material$/i,

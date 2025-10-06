@@ -18,9 +18,11 @@
     "@mui/utils": "^7.3.1",
     "flashoffer-react": "file:../flashoffer-react",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "react-multiple-choice": "^2.0.2"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
     "@types/node": "^22.10.1",

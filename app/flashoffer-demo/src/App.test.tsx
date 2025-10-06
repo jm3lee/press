@@ -36,6 +36,16 @@ describe("Flashoffer demo", () => {
     expect(previewCards).toHaveLength(3);
   });
 
+  it("links to the multiple choice demo", async () => {
+    render(<App />);
+
+    const demoLink = await screen.findByRole("link", {
+      name: /try the multiple choice demo/i
+    });
+
+    expect(demoLink).toHaveAttribute("href", "/multiple-choice");
+  });
+
   it("updates the hero banner gradient tokens for the midnight theme", async () => {
     render(<App />);
 

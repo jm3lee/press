@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { Section } from "flashoffer-react";
+import { PrimaryCtaButton, Section } from "flashoffer-react";
 
 export interface OverviewSectionProps {
   overviewMeta: string;
@@ -38,6 +39,22 @@ export function OverviewSection({ overviewMeta }: OverviewSectionProps) {
           minutes. While any tool can be misused, we trust creators to stand by
           one another more often than not.
         </Typography>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          justifyContent="center"
+          alignItems="center"
+          spacing={2}
+          sx={{ pt: { xs: 3, md: 4 } }}
+        >
+          <PrimaryCtaButton
+            component="a"
+            href="/multiple-choice"
+            label="Try the multiple choice demo"
+            data-track-id="overview-multiple-choice-link"
+            data-track-label="Multiple choice demo link"
+            data-track-meta={overviewMeta}
+          />
+        </Stack>
       </Section>
     </Box>
   );
