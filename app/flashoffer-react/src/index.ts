@@ -29,6 +29,13 @@ export type { SectionProps } from "./components/Section";
 export { PreviewCard } from "./components/PreviewCard";
 export type { PreviewCardProps } from "./components/PreviewCard";
 
+export { MultipleChoiceQuiz } from "./components/MultipleChoiceQuiz";
+export type {
+  MultipleChoiceAnswer,
+  MultipleChoiceOption,
+  MultipleChoiceQuizProps
+} from "./components/MultipleChoiceQuiz";
+
 export { InstagramEngagementSection } from "./components/InstagramEngagementSection";
 export type { InstagramEngagementSectionProps } from "./components/InstagramEngagementSection";
 

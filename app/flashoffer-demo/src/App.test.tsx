@@ -36,6 +36,23 @@ describe("Flashoffer demo", () => {
     expect(previewCards).toHaveLength(3);
   });
 
+  it("renders the quiz showcase question", async () => {
+    render(<App />);
+
+    expect(
+      await screen.findByRole("heading", {
+        level: 2,
+        name: /teach best practices with interactive quizzes/i
+      })
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByRole("button", { name: /check answer/i })
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByText(/multiplechoicequiz mirrors the feel/i)
+    ).toBeInTheDocument();
+  });
+
   it("updates the hero banner gradient tokens for the midnight theme", async () => {
     render(<App />);
 
