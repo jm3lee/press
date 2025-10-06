@@ -32,6 +32,10 @@ const FigureSpotlightSection = lazy(async () => ({
   default: (await import("./sections/FigureSpotlightSection")).FigureSpotlightSection
 }));
 
+const QuizShowcaseSection = lazy(async () => ({
+  default: (await import("./sections/QuizShowcaseSection")).QuizShowcaseSection
+}));
+
 const FooterSection = lazy(async () => ({
   default: (await import("./sections/FooterSection")).FooterSection
 }));
@@ -284,6 +288,9 @@ export default function App() {
             </Suspense>
             <Suspense fallback={null}>
               <FigureSpotlightSection />
+            </Suspense>
+            <Suspense fallback={null}>
+              <QuizShowcaseSection />
             </Suspense>
             <Suspense fallback={null}>
               <FooterSection />

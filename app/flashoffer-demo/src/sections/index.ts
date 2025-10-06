@@ -5,4 +5,5 @@ export * from "./OverviewSection";
 export * from "./CtaShowcaseSection";
 export * from "./PreviewShowcaseSection";
 export * from "./FigureSpotlightSection";
+export * from "./QuizShowcaseSection";
 export * from "./FooterSection";
