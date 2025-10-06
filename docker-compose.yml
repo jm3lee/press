@@ -87,14 +87,6 @@ services:
       - ./app/shell/py/pie/tests:/press/py/pie/tests
       - ./src/templates/:/press/templates/
 
-  bastion:
-    build:
-      context: .
-      dockerfile: ./app/bastion/Dockerfile
-    container_name: press-bastion
-    ports:
-      - "2222:22"
-
   release:
     image: press-release
     build:
