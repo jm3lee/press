@@ -7,3 +7,5 @@
   conventions for detailed parameter and return information.
 - Author documentation with the depth and tone expected between expert
   software engineers.
+- When curating documentation indexes (for example, lists of child page links),
+  sort entries alphabetically.
