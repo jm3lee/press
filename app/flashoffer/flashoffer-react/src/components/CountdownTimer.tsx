@@ -7,6 +7,7 @@ import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import { alpha, lighten } from "@mui/material/styles";
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
@@ -181,17 +182,25 @@ export function CountdownTimer({
       aria-live="polite"
       aria-atomic="true"
       aria-label={ariaAnnouncement}
-      sx={{
-        background:
-          "linear-gradient(135deg, rgba(255, 238, 239, 0.95) 0%, rgba(255, 226, 233, 0.95) 45%, rgba(255, 255, 255, 0.95) 100%)",
-        borderRadius: 6,
-        border: "1px solid",
-        borderColor: "error.light",
-        boxShadow: "0 24px 40px rgba(229, 57, 53, 0.35)",
-        color: "text.primary",
-        overflow: "visible",
-        p: { xs: 3, md: 4 },
-        position: "relative"
+      sx={(theme) => {
+        const errorLight = theme.palette.error.light;
+        const errorMain = theme.palette.error.main;
+        const surface = theme.palette.background.paper;
+
+        return {
+          background: `linear-gradient(135deg, ${alpha(errorLight, 0.95)} 0%, ${alpha(
+            errorMain,
+            0.95
+          )} 45%, ${alpha(surface, 0.95)} 100%)`,
+          borderRadius: 6,
+          border: "1px solid",
+          borderColor: errorLight,
+          boxShadow: `0 24px 40px ${alpha(errorMain, 0.35)}`,
+          color: theme.palette.text.primary,
+          overflow: "visible",
+          p: { xs: 3, md: 4 },
+          position: "relative"
+        };
       }}
     >
       <Stack spacing={3} alignItems={{ xs: "stretch", md: "center" }}>
@@ -248,16 +257,22 @@ export function CountdownTimer({
                   </Typography>
                 </Stack>
               }
-              sx={{
-                background:
-                  "linear-gradient(135deg, #ff1744 0%, #ff4569 50%, #ff8a80 100%)",
-                px: 2.5,
-                py: 2.5,
-                borderRadius: 4,
-                '& .MuiChip-label': {
-                  px: 0,
-                  py: 0
-                }
+              sx={(theme) => {
+                const main = theme.palette.error.main;
+                const light = theme.palette.error.light;
+                return {
+                  background: `linear-gradient(135deg, ${main} 0%, ${lighten(
+                    main,
+                    0.2
+                  )} 50%, ${lighten(light, 0.1)} 100%)`,
+                  px: 2.5,
+                  py: 2.5,
+                  borderRadius: 4,
+                  "& .MuiChip-label": {
+                    px: 0,
+                    py: 0
+                  }
+                };
               }}
             />
           ) : null}
@@ -279,15 +294,29 @@ export function CountdownTimer({
             return (
               <Box
                 key={key}
-                sx={{
-                  background:
-                    "linear-gradient(160deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 205, 210, 0.6) 60%, rgba(255, 82, 82, 0.6) 100%)",
-                  borderRadius: 4,
-                  border: "1px solid rgba(255, 255, 255, 0.7)",
-                  boxShadow: "0 20px 40px rgba(244, 67, 54, 0.35)",
-                  px: 3,
-                  py: 2,
-                  textAlign: "center"
+                sx={(theme) => {
+                  const main = theme.palette.error.main;
+                  const light = theme.palette.error.light;
+                  const surface = theme.palette.background.paper;
+                  const text =
+                    theme.palette.error[
+                      theme.palette.mode === "dark" ? "light" : "dark"
+                    ] ?? main;
+                  return {
+                    background: `linear-gradient(160deg, ${alpha(
+                      surface,
+                      0.9
+                    )} 0%, ${alpha(light, 0.6)} 60%, ${alpha(main, 0.6)} 100%)`,
+                    borderRadius: 4,
+                    border: `1px solid ${alpha(theme.palette.common.white, 0.7)}`,
+                    boxShadow: `0 20px 40px ${alpha(main, 0.35)}`,
+                    px: 3,
+                    py: 2,
+                    textAlign: "center",
+                    "& .CountdownTimer-segmentLabel": {
+                      color: text
+                    }
+                  };
                 }}
               >
                 <Typography
@@ -308,8 +337,8 @@ export function CountdownTimer({
                 <Typography
                   component="span"
                   variant="subtitle2"
+                  className="CountdownTimer-segmentLabel"
                   sx={{
-                    color: "error.dark",
                     fontWeight: 700,
                     letterSpacing: 1.5,
                     textTransform: "uppercase"
