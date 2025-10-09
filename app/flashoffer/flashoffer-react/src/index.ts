@@ -6,7 +6,12 @@
 export {
   FlashofferThemeProvider,
   createFlashofferTheme,
-  createSpaciousTypographyTheme
+  createSpaciousTypographyTheme,
+  createSunriseGlowTheme,
+  createMidnightPulseTheme,
+  createOceanBreezeTheme,
+  createForestCanopyTheme,
+  createMonochromeFocusTheme
 } from "./theme/FlashofferThemeProvider";
 export type { FlashofferThemePreset } from "./theme/FlashofferThemeProvider";
 export type { FlashofferThemeProviderProps } from "./theme/FlashofferThemeProvider";

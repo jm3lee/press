@@ -46,6 +46,23 @@ export function App() {
 }
 ```
 
+The additional presets expose opinionated palettes for common marketing tones.
+For example, the `sunriseGlow` preset emphasises warm gradients suitable for
+seasonal launches:
+
+```tsx
+import { FlashofferThemeProvider } from "flashoffer-react";
+import { HeroBanner } from "flashoffer-react";
+
+export function WarmCampaign() {
+  return (
+    <FlashofferThemeProvider preset="sunriseGlow">
+      <HeroBanner />
+    </FlashofferThemeProvider>
+  );
+}
+```
+
 ## Parameters
 
 ### \_\_namedParameters
@@ -54,7 +71,8 @@ export function App() {
 
 - `themeOptions`: Additional `ThemeOptions` merged with the preset defaults.
 - `applyCssBaseline`: Controls whether MUI's `CssBaseline` is rendered.
-- `preset`: Choose between the `default` palette and `spaciousTypography`.
+- `preset`: Choose one of `default`, `spaciousTypography`, `sunriseGlow`,
+  `midnightPulse`, `oceanBreeze`, `forestCanopy`, or `monochromeFocus`.
 - `colorMode`: Palette mode forwarded to presets that support light or dark
   variants.
 

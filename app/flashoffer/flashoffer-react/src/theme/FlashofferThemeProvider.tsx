@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Flashoffer Developers
+ * Released under the MIT license.
+ */
+
 import CssBaseline from "@mui/material/CssBaseline";
 import GlobalStyles from "@mui/material/GlobalStyles";
 import { StyledEngineProvider } from "@mui/material/styles";
@@ -211,7 +216,492 @@ export function createSpaciousTypographyTheme(
   return createTheme(deepmerge(baseOptions, overrides));
 }
 
-export type FlashofferThemePreset = "default" | "spaciousTypography";
+/**
+ * Create a preset theme by merging base, palette, and override options.
+ */
+function createPresetTheme(
+  baseOptions: ThemeOptions,
+  paletteByMode: Record<PaletteMode, ThemeOptions>,
+  mode: PaletteMode,
+  overrides?: ThemeOptions
+): Theme {
+  const mergedBase = deepmerge(baseOptions, paletteByMode[mode]);
+  if (!overrides) {
+    return createTheme(mergedBase);
+  }
+  return createTheme(deepmerge(mergedBase, overrides));
+}
+
+const sunriseGlowBaseOptions: ThemeOptions = {
+  typography: {
+    fontFamily: '"Poppins", "Inter", "Helvetica", "Arial", sans-serif',
+    h1: {
+      fontWeight: 700,
+      letterSpacing: "-0.02em"
+    },
+    h2: {
+      fontWeight: 600,
+      letterSpacing: "-0.018em"
+    },
+    button: {
+      borderRadius: "999px",
+      fontWeight: 700,
+      letterSpacing: "0.02em"
+    }
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: "var(--flashoffer-radius-button, 999px)",
+          paddingInline: "1.75rem",
+          paddingBlock: "0.75rem"
+        }
+      }
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          borderRadius: "999px",
+          fontWeight: 600
+        }
+      }
+    }
+  }
+};
+
+const sunriseGlowPalette: Record<PaletteMode, ThemeOptions> = {
+  light: {
+    palette: {
+      mode: "light",
+      primary: {
+        main: "#f97316",
+        contrastText: "#ffffff"
+      },
+      secondary: {
+        main: "#facc15",
+        contrastText: "#1f2937"
+      },
+      background: {
+        default: "#fff7ed",
+        paper: "#fffbeb"
+      },
+      text: {
+        primary: "#7c2d12",
+        secondary: "#b45309"
+      }
+    }
+  },
+  dark: {
+    palette: {
+      mode: "dark",
+      primary: {
+        main: "#fb923c",
+        contrastText: "#1f2937"
+      },
+      secondary: {
+        main: "#fbbf24",
+        contrastText: "#0f172a"
+      },
+      background: {
+        default: "#1c1917",
+        paper: "#292524"
+      },
+      text: {
+        primary: "#fed7aa",
+        secondary: "#fde68a"
+      }
+    }
+  }
+};
+
+const midnightPulseBaseOptions: ThemeOptions = {
+  typography: {
+    fontFamily: '"Space Grotesk", "Inter", "Helvetica", "Arial", sans-serif',
+    h1: {
+      fontWeight: 700,
+      letterSpacing: "-0.015em"
+    },
+    button: {
+      textTransform: "uppercase",
+      letterSpacing: "0.08em"
+    }
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: "18px",
+          paddingInline: "1.5rem"
+        }
+      }
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          borderRadius: "28px"
+        }
+      }
+    }
+  }
+};
+
+const midnightPulsePalette: Record<PaletteMode, ThemeOptions> = {
+  light: {
+    palette: {
+      mode: "light",
+      primary: {
+        main: "#4f46e5",
+        contrastText: "#ffffff"
+      },
+      secondary: {
+        main: "#0ea5e9",
+        contrastText: "#0f172a"
+      },
+      background: {
+        default: "#eef2ff",
+        paper: "#e0e7ff"
+      },
+      text: {
+        primary: "#111827",
+        secondary: "#4338ca"
+      }
+    }
+  },
+  dark: {
+    palette: {
+      mode: "dark",
+      primary: {
+        main: "#6366f1",
+        contrastText: "#0f172a"
+      },
+      secondary: {
+        main: "#22d3ee",
+        contrastText: "#0f172a"
+      },
+      background: {
+        default: "#020617",
+        paper: "#0f172a"
+      },
+      text: {
+        primary: "#e0e7ff",
+        secondary: "#bae6fd"
+      }
+    }
+  }
+};
+
+const oceanBreezeBaseOptions: ThemeOptions = {
+  typography: {
+    fontFamily: '"Rubik", "Inter", "Helvetica", "Arial", sans-serif',
+    h2: {
+      fontWeight: 700,
+      letterSpacing: "-0.012em"
+    },
+    subtitle1: {
+      letterSpacing: "0.015em"
+    }
+  },
+  components: {
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: "26px",
+          padding: "1.5rem"
+        }
+      }
+    },
+    MuiContainer: {
+      styleOverrides: {
+        root: {
+          paddingInline: "clamp(1rem, 4vw, 3rem)"
+        }
+      }
+    }
+  }
+};
+
+const oceanBreezePalette: Record<PaletteMode, ThemeOptions> = {
+  light: {
+    palette: {
+      mode: "light",
+      primary: {
+        main: "#0284c7",
+        contrastText: "#f8fafc"
+      },
+      secondary: {
+        main: "#14b8a6",
+        contrastText: "#022c22"
+      },
+      background: {
+        default: "#f1f5f9",
+        paper: "#e0f2fe"
+      },
+      text: {
+        primary: "#0f172a",
+        secondary: "#0f766e"
+      }
+    }
+  },
+  dark: {
+    palette: {
+      mode: "dark",
+      primary: {
+        main: "#38bdf8",
+        contrastText: "#082f49"
+      },
+      secondary: {
+        main: "#2dd4bf",
+        contrastText: "#042f2e"
+      },
+      background: {
+        default: "#0f172a",
+        paper: "#11263a"
+      },
+      text: {
+        primary: "#e0f2fe",
+        secondary: "#99f6e4"
+      }
+    }
+  }
+};
+
+const forestCanopyBaseOptions: ThemeOptions = {
+  typography: {
+    fontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
+    h3: {
+      fontWeight: 700,
+      letterSpacing: "-0.01em"
+    },
+    body1: {
+      lineHeight: 1.7
+    }
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: "14px",
+          paddingInline: "1.5rem"
+        }
+      }
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          borderRadius: "24px"
+        }
+      }
+    }
+  }
+};
+
+const forestCanopyPalette: Record<PaletteMode, ThemeOptions> = {
+  light: {
+    palette: {
+      mode: "light",
+      primary: {
+        main: "#15803d",
+        contrastText: "#f0fdf4"
+      },
+      secondary: {
+        main: "#65a30d",
+        contrastText: "#1a2e05"
+      },
+      background: {
+        default: "#f7fee7",
+        paper: "#ecfccb"
+      },
+      text: {
+        primary: "#1f2937",
+        secondary: "#365314"
+      }
+    }
+  },
+  dark: {
+    palette: {
+      mode: "dark",
+      primary: {
+        main: "#34d399",
+        contrastText: "#052e16"
+      },
+      secondary: {
+        main: "#bef264",
+        contrastText: "#1a2e05"
+      },
+      background: {
+        default: "#052e16",
+        paper: "#0f3f23"
+      },
+      text: {
+        primary: "#dcfce7",
+        secondary: "#bbf7d0"
+      }
+    }
+  }
+};
+
+const monochromeFocusBaseOptions: ThemeOptions = {
+  typography: {
+    fontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
+    h1: {
+      fontWeight: 700,
+      letterSpacing: "-0.02em"
+    },
+    caption: {
+      letterSpacing: "0.1em"
+    }
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: "0.75rem",
+          paddingInline: "1.5rem"
+        }
+      }
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          borderRadius: "20px",
+          borderWidth: 1,
+          borderStyle: "solid",
+          borderColor: "rgba(15, 23, 42, 0.12)"
+        }
+      }
+    }
+  }
+};
+
+const monochromeFocusPalette: Record<PaletteMode, ThemeOptions> = {
+  light: {
+    palette: {
+      mode: "light",
+      primary: {
+        main: "#111827",
+        contrastText: "#f8fafc"
+      },
+      secondary: {
+        main: "#475569",
+        contrastText: "#f8fafc"
+      },
+      background: {
+        default: "#f8fafc",
+        paper: "#ffffff"
+      },
+      text: {
+        primary: "#0f172a",
+        secondary: "#475569"
+      }
+    }
+  },
+  dark: {
+    palette: {
+      mode: "dark",
+      primary: {
+        main: "#e2e8f0",
+        contrastText: "#0f172a"
+      },
+      secondary: {
+        main: "#94a3b8",
+        contrastText: "#020617"
+      },
+      background: {
+        default: "#0f172a",
+        paper: "#111827"
+      },
+      text: {
+        primary: "#f8fafc",
+        secondary: "#cbd5f5"
+      }
+    }
+  }
+};
+
+/**
+ * Create a sunrise-inspired palette with bold warm gradients.
+ */
+export function createSunriseGlowTheme(
+  mode: PaletteMode = "light",
+  overrides?: ThemeOptions
+): Theme {
+  return createPresetTheme(
+    sunriseGlowBaseOptions,
+    sunriseGlowPalette,
+    mode,
+    overrides
+  );
+}
+
+/**
+ * Create a neon-accented palette optimized for dark hero sections.
+ */
+export function createMidnightPulseTheme(
+  mode: PaletteMode = "light",
+  overrides?: ThemeOptions
+): Theme {
+  return createPresetTheme(
+    midnightPulseBaseOptions,
+    midnightPulsePalette,
+    mode,
+    overrides
+  );
+}
+
+/**
+ * Create a calm oceanic palette focused on teal gradients.
+ */
+export function createOceanBreezeTheme(
+  mode: PaletteMode = "light",
+  overrides?: ThemeOptions
+): Theme {
+  return createPresetTheme(
+    oceanBreezeBaseOptions,
+    oceanBreezePalette,
+    mode,
+    overrides
+  );
+}
+
+/**
+ * Create a green-forward palette suited for sustainability campaigns.
+ */
+export function createForestCanopyTheme(
+  mode: PaletteMode = "light",
+  overrides?: ThemeOptions
+): Theme {
+  return createPresetTheme(
+    forestCanopyBaseOptions,
+    forestCanopyPalette,
+    mode,
+    overrides
+  );
+}
+
+/**
+ * Create a high-contrast monochrome palette for editorial layouts.
+ */
+export function createMonochromeFocusTheme(
+  mode: PaletteMode = "light",
+  overrides?: ThemeOptions
+): Theme {
+  return createPresetTheme(
+    monochromeFocusBaseOptions,
+    monochromeFocusPalette,
+    mode,
+    overrides
+  );
+}
+
+export type FlashofferThemePreset =
+  | "default"
+  | "spaciousTypography"
+  | "sunriseGlow"
+  | "midnightPulse"
+  | "oceanBreeze"
+  | "forestCanopy"
+  | "monochromeFocus";
 
 const cssVariableStyles = (theme: Theme) => ({
   ":root": {
@@ -252,14 +742,25 @@ export function FlashofferThemeProvider({
   preset = "default",
   colorMode = "light"
 }: FlashofferThemeProviderProps) {
+  const themeFactories: Record<FlashofferThemePreset, (mode: PaletteMode) => Theme> =
+    useMemo(
+      () => ({
+        default: () => createFlashofferTheme(themeOptions),
+        spaciousTypography: (mode) =>
+          createSpaciousTypographyTheme(mode, themeOptions),
+        sunriseGlow: (mode) => createSunriseGlowTheme(mode, themeOptions),
+        midnightPulse: (mode) => createMidnightPulseTheme(mode, themeOptions),
+        oceanBreeze: (mode) => createOceanBreezeTheme(mode, themeOptions),
+        forestCanopy: (mode) => createForestCanopyTheme(mode, themeOptions),
+        monochromeFocus: (mode) =>
+          createMonochromeFocusTheme(mode, themeOptions)
+      }),
+      [themeOptions]
+    );
+
   const theme = useMemo(
-    () => {
-      if (preset === "spaciousTypography") {
-        return createSpaciousTypographyTheme(colorMode, themeOptions);
-      }
-      return createFlashofferTheme(themeOptions);
-    },
-    [colorMode, preset, themeOptions]
+    () => themeFactories[preset](colorMode),
+    [colorMode, preset, themeFactories]
   );
 
   return (
