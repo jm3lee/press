@@ -3,10 +3,11 @@ INSERT INTO quiz_results (
     quiz_id,
     user_id,
     attempt_id,
+    campaign_id,
     occurred_at,
     attempts,
     passes,
     fails,
     payload
-) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
 RETURNING id, received_at

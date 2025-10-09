@@ -149,7 +149,7 @@ export const CampaignDashboard = ({
     eventPaneContent = (
       <Stack spacing={1.5} alignItems="center" justifyContent="center" sx={{ py: 6 }}>
         <Typography variant="h6" align="center">
-          Select a campaign to monitor events
+          Select a campaign to monitor engagement and quiz completions
         </Typography>
         <Typography variant="body2" color="text.secondary" align="center">
           Choose a row above to review the most recent activity captured for that campaign.
@@ -169,7 +169,7 @@ export const CampaignDashboard = ({
       <SectionHeader
         eyebrow="Campaigns"
         title="Manage Flashoffer campaign metadata"
-        subtitle="Create new campaigns or adjust deadlines in UTC while reviewing details in your local timezone."
+        subtitle="Create new campaigns or adjust deadlines in UTC while reviewing activity in your local timezone."
       />
       <Stack direction={{ xs: "column", sm: "row" }} spacing={2} justifyContent="space-between">
         <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems="center">

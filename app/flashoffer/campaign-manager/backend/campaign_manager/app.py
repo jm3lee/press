@@ -5,9 +5,10 @@
 
 from __future__ import annotations
 
+import asyncio
 import os
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import httpx
 from fastapi import Depends, FastAPI, HTTPException, status
@@ -62,6 +63,20 @@ def _analytics_recent_url() -> str:
     return f"{base}/events/recent"
 
 
+def _quiz_recent_url() -> str:
+    raw_recent = os.getenv("CAMPAIGN_MANAGER_QUIZ_RECENT_URL", "").strip()
+    if raw_recent:
+        return raw_recent
+
+    raw_base = os.getenv("CAMPAIGN_MANAGER_QUIZ_BASE", "http://quiz-backend:8080").strip()
+    if not raw_base:
+        raise RuntimeError(
+            "CAMPAIGN_MANAGER_QUIZ_BASE must be configured with a valid URL",
+        )
+    base = raw_base.rstrip("/")
+    return f"{base}/api/events/quiz"
+
+
 def _create_auth_manager() -> AuthManager:
     username = os.getenv("CAMPAIGN_MANAGER_ADMIN_USERNAME", "admin")
     return AuthManager(
@@ -91,6 +106,7 @@ def create_app() -> FastAPI:
     repository = _create_repository()
     auth_manager = _create_auth_manager()
     analytics_url = _analytics_recent_url()
+    quiz_url = _quiz_recent_url()
 
     repository.initialize()
     auth_manager.reload_password()
@@ -103,6 +119,7 @@ def create_app() -> FastAPI:
         headers={"Accept": "application/json"},
     )
     app.state.analytics_recent_url = analytics_url
+    app.state.quiz_recent_url = quiz_url
     app.state.analytics_client = analytics_client
 
     @app.on_event("shutdown")
@@ -225,46 +242,80 @@ def create_app() -> FastAPI:
                 detail="Campaign identifier must not be blank",
             )
 
-        params = {"campaign_id": normalized_id}
+        sanitized = 25
         if limit is not None:
             sanitized = max(1, min(limit, 200))
-            params["limit"] = str(sanitized)
+
+        params = {"campaign_id": normalized_id, "limit": str(sanitized)}
 
         client: httpx.AsyncClient = app.state.analytics_client
         analytics_recent_url: str = app.state.analytics_recent_url
+        quiz_recent_url: str = app.state.quiz_recent_url
 
         try:
-            response = await client.get(analytics_recent_url, params=params)
+            analytics_response, quiz_response = await asyncio.gather(
+                client.get(analytics_recent_url, params=params.copy()),
+                client.get(quiz_recent_url, params=params.copy()),
+            )
         except httpx.RequestError as exc:
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
-                detail=f"Failed to contact analytics backend: {exc}",
+                detail=f"Failed to contact analytics services: {exc}",
             ) from exc
 
-        if response.status_code >= 400:
-            raise HTTPException(
-                status_code=status.HTTP_502_BAD_GATEWAY,
-                detail=(
-                    "Analytics backend returned unexpected status "
-                    f"{response.status_code}"
-                ),
-            )
+        for backend, response in (
+            ("Analytics", analytics_response),
+            ("Quiz", quiz_response),
+        ):
+            if response.status_code >= 400:
+                raise HTTPException(
+                    status_code=status.HTTP_502_BAD_GATEWAY,
+                    detail=f"{backend} backend returned unexpected status {response.status_code}",
+                )
 
         try:
-            payload = response.json()
+            analytics_payload = analytics_response.json()
         except ValueError as exc:
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail="Analytics backend response was not valid JSON",
             ) from exc
 
-        if not isinstance(payload, dict):
+        try:
+            quiz_payload = quiz_response.json()
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="Quiz backend response was not valid JSON",
+            ) from exc
+
+        if not isinstance(analytics_payload, dict):
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail="Analytics backend response must be a JSON object",
             )
+        if not isinstance(quiz_payload, dict):
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="Quiz backend response must be a JSON object",
+            )
 
-        return payload
+        engagement_events: List[Dict[str, Any]] = []
+        raw_events = analytics_payload.get("events")
+        if isinstance(raw_events, list):
+            engagement_events = [event for event in raw_events if isinstance(event, dict)]
+
+        quiz_results: List[Dict[str, Any]] = []
+        raw_quiz_results = quiz_payload.get("results")
+        if isinstance(raw_quiz_results, list):
+            quiz_results = [result for result in raw_quiz_results if isinstance(result, dict)]
+
+        combined: List[Dict[str, Any]] = []
+        combined.extend(engagement_events)
+        combined.extend(_convert_quiz_result(result) for result in quiz_results)
+        combined.sort(key=_event_sort_key, reverse=True)
+
+        return {"events": combined[:sanitized]}
 
     index_path = static_dir / "index.html"
 
@@ -281,6 +332,49 @@ def create_app() -> FastAPI:
         return FileResponse(index_path)
 
     return app
+
+
+def _convert_quiz_result(result: Dict[str, Any]) -> Dict[str, Any]:
+    """Convert quiz completion records into the console event schema."""
+
+    payload = result.get("payload") or {}
+    meta: Dict[str, Any] = {
+        "quiz_id": result.get("quiz_id"),
+        "user_id": result.get("user_id"),
+        "attempt_id": result.get("attempt_id"),
+        "campaign_id": result.get("campaign_id"),
+        "attempts": result.get("attempts"),
+        "passes": result.get("passes"),
+        "fails": result.get("fails"),
+        "payload": payload,
+    }
+    cleaned_meta = {key: value for key, value in meta.items() if value is not None or key == "payload"}
+
+    occurred_at = result.get("occurred_at")
+    received_at = result.get("received_at") or occurred_at
+
+    return {
+        "id": f"quiz-{result.get('id')}",
+        "event_type": "quiz-complete",
+        "target": result.get("quiz_id") or "quiz",
+        "occurred_at": occurred_at,
+        "received_at": received_at,
+        "site": "quiz-service",
+        "session_id": result.get("user_id") or "unknown-user",
+        "meta": cleaned_meta,
+    }
+
+
+def _event_sort_key(event: Dict[str, Any]) -> str:
+    """Return the timestamp used when ordering mixed event streams."""
+
+    received_at = event.get("received_at")
+    occurred_at = event.get("occurred_at")
+    if isinstance(received_at, str):
+        return received_at
+    if isinstance(occurred_at, str):
+        return occurred_at
+    return ""
 
 
 def _normalize_name(name: str | None) -> str | None:

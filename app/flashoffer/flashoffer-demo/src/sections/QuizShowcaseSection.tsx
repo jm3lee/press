@@ -53,6 +53,7 @@ export function QuizShowcaseSection() {
       selectedOptionId: answer.optionId,
       correctOptionId: "reminder",
       isCorrect: answer.isCorrect,
+      campaignId: "flashoffer-demo",
     });
   };
 

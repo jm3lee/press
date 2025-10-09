@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS quiz_results (
     quiz_id TEXT NOT NULL,
     user_id TEXT NOT NULL,
     attempt_id TEXT,
+    campaign_id TEXT,
     occurred_at TIMESTAMPTZ NOT NULL,
     attempts INTEGER NOT NULL,
     passes INTEGER NOT NULL,
