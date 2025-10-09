@@ -1,4 +1,8 @@
 services:
+  # --- Content delivery ----------------------------------------------------
+  # Production-grade NGINX for CI/CD publishing of the static site. Keep the
+  # build args aligned with `app/nginx/Dockerfile` and Terraform so cache
+  # headers and redirects stay consistent.
   nginx:
     build:
       context: .
@@ -7,13 +11,9 @@ services:
         NGINX_CONF: app/nginx/prod.conf
     restart: unless-stopped
 
-  # No ports are exposed so we can use a private instance to check for broken
-  # links. All scripts are executed within a container.
-  nginx-test:
-    build:
-      context: .
-      dockerfile: ./app/nginx/Dockerfile
-
+  # Local static file host that mirrors production. Use when testing HTML
+  # before shipping, especially when sharing builds via `docker compose up
+  # nginx-dev`.
   nginx-dev:
     build:
       context: .
@@ -24,16 +24,16 @@ services:
       - ./build:/usr/share/nginx/html
     restart: unless-stopped
 
-  sync:
-    build: ./app/s3
-    container_name: press-sync
-    entrypoint: ["/app/bin/sync"]
-    environment:
-      S3_BUCKET_PATH: ${S3_BUCKET_PATH:-s3://press}
-      S3CFG_PATH: ${S3CFG_PATH:-/root/.s3cfg}
-    volumes:
-      - ../s3:/s3
+  # Private NGINX instance for automated link checking. Keep it internal so
+  # tooling can crawl generated content without binding host ports.
+  nginx-test:
+    build:
+      context: .
+      dockerfile: ./app/nginx/Dockerfile
 
+  # --- Data pipelines ------------------------------------------------------
+  # Seeds the S3 bucket with baseline assets. Run when bootstrapping a new
+  # environment or rebuilding the bucket from scratch.
   seed:
     build: ./app/s3
     container_name: press-seed
@@ -44,6 +44,29 @@ services:
     volumes:
       - ../s3:/s3
 
+  # Continuously syncs local artifacts with S3. Schedule via cron or CI so
+  # every deploy picks up regenerated assets.
+  sync:
+    build: ./app/s3
+    container_name: press-sync
+    entrypoint: ["/app/bin/sync"]
+    environment:
+      S3_BUCKET_PATH: ${S3_BUCKET_PATH:-s3://press}
+      S3CFG_PATH: ${S3CFG_PATH:-/root/.s3cfg}
+    volumes:
+      - ../s3:/s3
+
+  # --- Asset generation ----------------------------------------------------
+  # CLI wrapper for Mermaid diagrams. Keep the `minlag/mermaid-cli` version in
+  # sync with docs tooling to avoid rendering drift.
+  mermaid:
+    image: minlag/mermaid-cli
+    container_name: press-mermaid
+    volumes:
+      - ./:/data
+
+  # Converts uploads to WebP for site performance. Monitor the log directory
+  # when batches are processed to catch conversion issues early.
   webp:
     build: ./app/webp
     container_name: press-webp
@@ -53,21 +76,52 @@ services:
       - ./app/webp/output:/app/output
       - ../log:/app/log
 
-  mermaid:
-    image: minlag/mermaid-cli
-    container_name: press-mermaid
+  # --- Data stores ---------------------------------------------------------
+  # Postgres instance for analytics features. Back up the named volume before
+  # upgrading images or applying non-reversible migrations.
+  analytics-db:
+    build: ./app/analytics-db
+    environment:
+      POSTGRES_USER: analytics
+      POSTGRES_PASSWORD: analytics
+      POSTGRES_DB: analytics
+    ports:
+      - "5433:5432"
     volumes:
-      - ./:/data
+      - analytics_data:/var/lib/postgresql/data
 
-  # Default port is 6379. Not exposed to the host to avoid port conflicts.
-  # You can run redis-cli within this container.
-  #   docker compose exec dragonfly redis-cli
+  # Redis-compatible cache for local development. Ports stay internal to avoid
+  # conflicts. Use `docker compose exec dragonfly redis-cli` for inspection.
   dragonfly:
     image: docker.dragonflydb.io/dragonflydb/dragonfly
-    # Useful in avoiding conflicts from multiple active instances of press projects.
     container_name: press-dragonfly
 
+  # --- Developer tooling ---------------------------------------------------
+  # Docs preview server for the Python API reference. Behind the `pdoc`
+  # profile so it only runs when explicitly requested.
+  pdoc:
+    build:
+      context: .
+      dockerfile: ./app/pdoc/Dockerfile
+    command: pdoc -h 0.0.0.0 -p 8080
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./app/shell/py/pie:/pie
+    profiles: ["pdoc"]
 
+  # Builds the release artifact by orchestrating tasks inside the shell
+  # container. Keep the Dockerfile in sync with CI pipeline changes.
+  release:
+    image: press-release
+    build:
+      context: .
+      dockerfile: ./app/release/Dockerfile
+    depends_on:
+      - shell
+
+  # Primary shell environment for engineers and CI. Mounts the repo and helper
+  # scripts so tasks run in a reproducible container.
   shell:
     image: press-shell
     build: ./app/shell
@@ -87,36 +141,9 @@ services:
       - ./app/shell/py/pie/tests:/press/py/pie/tests
       - ./src/templates/:/press/templates/
 
-  release:
-    image: press-release
-    build:
-      context: .
-      dockerfile: ./app/release/Dockerfile
-    depends_on:
-      - shell
-
-  pdoc:
-    build:
-      context: .
-      dockerfile: ./app/pdoc/Dockerfile
-    command: pdoc -h 0.0.0.0 -p 8080
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./app/shell/py/pie:/pie
-    profiles: ["pdoc"]
-
-  analytics-db:
-    build: ./app/analytics-db
-    environment:
-      POSTGRES_USER: analytics
-      POSTGRES_PASSWORD: analytics
-      POSTGRES_DB: analytics
-    ports:
-      - "5433:5432"
-    volumes:
-      - analytics_data:/var/lib/postgresql/data
-
+  # --- Application services ------------------------------------------------
+  # Backend that records product analytics. Keep environment variables aligned
+  # with Terraform so production and local development stay in sync.
   analytics-backend:
     build:
       context: .
@@ -135,24 +162,8 @@ services:
     volumes:
       - ./app/analytics-backend:/app
 
-  quiz-backend:
-    build:
-      context: .
-      dockerfile: ./app/quiz-backend/Dockerfile
-    environment:
-      DATABASE_HOST: analytics-db
-      DATABASE_PORT: 5432
-      DATABASE_USER: analytics
-      DATABASE_PASSWORD: analytics
-      DATABASE_NAME: analytics
-      CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-http://localhost:5173,http://localhost:4173}
-    depends_on:
-      - analytics-db
-    ports:
-      - "8002:8000"
-    volumes:
-      - ./app/quiz-backend:/app
-
+  # Production build of the Flashoffer web app. Mirrors the deployed container
+  # and exposes port 80 for parity with CDN routing.
   flashoffer:
     build:
       context: .
@@ -172,6 +183,8 @@ services:
       - analytics-backend
       - quiz-backend
 
+  # Vite-powered Flashoffer development server. Enables hot reloading and uses
+  # polling so bind mounts behave on macOS and Windows.
   flashoffer-dev:
     build:
       context: .
@@ -190,6 +203,26 @@ services:
     depends_on:
       - analytics-backend
       - quiz-backend
+
+  # Quiz backend that shares the analytics database. Coordinate schema changes
+  # with analytics to avoid breaking ingestion jobs.
+  quiz-backend:
+    build:
+      context: .
+      dockerfile: ./app/quiz-backend/Dockerfile
+    environment:
+      DATABASE_HOST: analytics-db
+      DATABASE_PORT: 5432
+      DATABASE_USER: analytics
+      DATABASE_PASSWORD: analytics
+      DATABASE_NAME: analytics
+      CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-http://localhost:5173,http://localhost:4173}
+    depends_on:
+      - analytics-db
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./app/quiz-backend:/app
 
 volumes:
   analytics_data:
