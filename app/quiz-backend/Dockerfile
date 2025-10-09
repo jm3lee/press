@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.6
 ######################################################################
 # Quiz API image
 #
@@ -19,7 +20,8 @@ COPY app/quiz-backend/requirements.txt ./requirements.txt
 COPY app/backend-common/backend_common ./backend_common
 COPY app/shell/py/pie /tmp/pie
 
-RUN pip install --no-cache-dir -r requirements.txt \
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --no-cache-dir -r requirements.txt \
     && pip install --no-cache-dir /tmp/pie dominate \
     && rm -rf /tmp/pie
 
@@ -37,11 +39,16 @@ FROM base AS prod
 ENV GUNICORN_WORKERS=4 \
     GUNICORN_BIND=unix:/tmp/gunicorn.sock
 
-RUN apt-get update \
+# Install nginx for reverse proxying and keep apt metadata cached during
+# builds to speed up rebuilds without bloating the runtime image.
+RUN --mount=type=cache,target=/var/cache/apt \
+    --mount=type=cache,target=/var/lib/apt/lists \
+    apt-get update \
     && apt-get install --no-install-recommends -y nginx \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir gunicorn
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --no-cache-dir gunicorn
 
 COPY app/quiz-backend/nginx.conf /etc/nginx/conf.d/default.conf
 COPY app/quiz-backend/entrypoint.sh /entrypoint.sh

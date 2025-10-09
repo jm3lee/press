@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.6
 ######################################################################
 # Analytics API image
 #
@@ -31,7 +32,8 @@ COPY app/shell/py/pie /tmp/pie
 # Install application dependencies, the shared PIE package, and dominate
 # (used to render HTML emails). Cleaning the temporary directory avoids
 # keeping duplicate source trees in the final image.
-RUN pip install --no-cache-dir -r requirements.txt \
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --no-cache-dir -r requirements.txt \
     && pip install --no-cache-dir /tmp/pie dominate \
     && rm -rf /tmp/pie
 
@@ -57,14 +59,18 @@ ENV GUNICORN_WORKERS=4 \
     GUNICORN_BIND=unix:/tmp/gunicorn.sock
 
 # Install nginx for reverse proxying and clean up apt metadata to keep the
-# image size in check.
-RUN apt-get update \
+# image size in check. Caching apt metadata dramatically speeds up rebuilds
+# while still ensuring the runtime layer stays slim.
+RUN --mount=type=cache,target=/var/cache/apt \
+    --mount=type=cache,target=/var/lib/apt/lists \
+    apt-get update \
     && apt-get install --no-install-recommends -y nginx \
     && rm -rf /var/lib/apt/lists/*
 
 # Gunicorn is only required in the production image, so install it here to
 # avoid bloating the base stage.
-RUN pip install --no-cache-dir gunicorn
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --no-cache-dir gunicorn
 
 # Provide the templated nginx config and startup script used in
 # deployments.
