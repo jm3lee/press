@@ -29,12 +29,15 @@ COPY app/analytics-backend/requirements.txt ./requirements.txt
 COPY app/backend-common /backend-common
 COPY app/shell/py/pie /tmp/pie
 
-# Install application dependencies, the shared PIE package, and dominate
-# (used to render HTML emails). Cleaning the temporary directory avoids
-# keeping duplicate source trees in the final image.
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir -r requirements.txt \
-    && pip install --no-cache-dir /tmp/pie dominate \
+# Maintenance: dedicate a pip cache to the analytics image so
+# parallel builds do not contend for the same files or trip over
+# cache locks.
+# Install application dependencies, the shared PIE package, and
+# dominate (used to render HTML emails). Cleaning the temporary
+# directory avoids keeping duplicate source trees in the final image.
+RUN --mount=type=cache,target=/root/.cache/pip,id=analytics-backend-pip \
+    pip install -r requirements.txt \
+    && pip install /tmp/pie dominate \
     && rm -rf /tmp/pie /backend-common
 
 # Copy the application and tests as the final step so source edits only
@@ -69,8 +72,8 @@ RUN --mount=type=cache,target=/var/cache/apt \
 
 # Gunicorn is only required in the production image, so install it here to
 # avoid bloating the base stage.
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir gunicorn
+RUN --mount=type=cache,target=/root/.cache/pip,id=analytics-backend-pip \
+    pip install gunicorn
 
 # Provide the templated nginx config and startup script used in
 # deployments.
