@@ -1,0 +1,16 @@
+doc:
+  author: Brian Lee
+  breadcrumbs:
+  - title: Home
+    url: /
+  - title: Examples
+    url: /examples/
+  - title: Flashoffer
+  citation: flashoffer
+  pubdate: Sep 28, 2025
+  title: Flashoffer
+html:
+  navbar: false
+  scripts: []
+id: flashoffer
+schema: v1

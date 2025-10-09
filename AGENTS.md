@@ -4,15 +4,28 @@
 
 - Wrap **paragraph text** at 80 characters.
   (Code, tables, and lists are exempt.)
+- Within `<pre>` blocks:
+  - Use two spaces for indentation.
+  - Prefer breaking lines at 80 characters on word boundaries.
+  - If no suitable word boundary exists, leave the line unbroken.
 - Metadata:
   - `description`: plain text only
-  - `id`: use `_` instead of `-` when modifying
 - Math: always use `$ ... $` or `$$ ... $$`  
   (never `\(`, `\)`, `\[`, `\]`)
 - Makefiles: **indent with real tab characters** for recipe lines.
   Leading spaces will break Makefile syntax. Never replace tabs with spaces.
 - Documentation: write as an **expert engineer**.
   Provide enough detail for new team members.
+- When generating links with anchors, ensure that the target anchor exists.
+  Create the anchor if it is missing.
+- Flashoffer updates: whenever `app/shell/py/pie/pie/flashoffer.py` or related
+  helpers change, also refresh
+  `docs/guides/flashoffer-codex-instructions.md` to keep Codex guidance in
+  sync.
+- When modifying Flashoffer methods, ensure any text rendered to end users is
+  configurable via function parameters.
+- Node.js projects: modify `package.json` and `package-lock.json` only when
+  the dependency list changes.
 
 ## Checker Scripts
 
@@ -36,7 +49,8 @@
 
 ### Cyclomatic Complexity
 
-Thresholds:
+Thresholds (apply to **all** languages in this repository — Python and
+JavaScript/TypeScript):
 
 - **Function level**: warn > 7, fail > 10
 - **Class level**: max total ≤ 50
@@ -51,8 +65,10 @@ Range interpretation:
 
 ### Enforcement
 
-- Use `radon`/`xenon` in CI
-- Fail builds if thresholds are exceeded
+- **Python**: enforce with `radon`/`xenon` in CI; fail builds if thresholds are
+  exceeded.
+- **JavaScript/TypeScript**: enforce with ESLint (`complexity` rule) in CI;
+  fail builds if thresholds are exceeded.
 
 ### Testing
 
@@ -64,3 +80,8 @@ Range interpretation:
       "/data/src/templates",
   )
   ```
+- Avoid creating stubs or shims for Python dependencies in tests whenever
+  possible; assume that required Python modules are available in the testing
+  environment.
+- When tests fail due to missing Python packages, install the dependencies
+  needed for the suite instead of skipping tests or introducing stand-ins.

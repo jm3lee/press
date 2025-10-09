@@ -1,6 +1,6 @@
 
 This page shows how to embed the engagement tracking bundle generated from
-`app/analytics`. The script watches for elements tagged with `data-track-id`
+`app/flashoffer-react`. The script watches for elements tagged with `data-track-id`
 and emits view, scroll depth, interaction, and dwell events to a private
 endpoint.
 
@@ -17,7 +17,7 @@ is needed in the page itself.
   data-site="press-docs"
   data-selector="[data-track-id]"
 ></div>
-<script type="module" src="/static/js/analytics.js" defer></script>
+<script type="module" src="/static/js/flashoffer-analytics.js" defer></script>
 ```
 
 ## 2. Tag the sections you care about
@@ -51,7 +51,7 @@ For React islands, use the exported `useRecordInteraction` hook to associate
 clicks or other behaviours with the active view targets and scroll position.
 
 ```jsx
-import { useRecordInteraction } from '/static/js/analytics.js'
+import { useRecordInteraction } from '/static/js/flashoffer-analytics.js'
 
 function PricingCTA() {
   const recordInteraction = useRecordInteraction('pricing-cta')

@@ -1,6 +1,7 @@
 # store-files Script
 
-`store-files` moves assets into the local S3 staging area and creates matching metadata entries.
+`store-files` moves assets into the local S3 staging area and creates matching
+metadata entries.
 
 ## Usage
 
@@ -8,9 +9,12 @@
 store-files [-n LIMIT] [-c CONFIG] <path>...
 ```
 
-- Each `path` may point to a single file or a directory; directories are processed recursively. Multiple paths may be supplied.
+- Each `path` may point to a single file or a directory. Directories are
+  processed recursively and multiple paths may be supplied.
 - `-n LIMIT` optionally restricts how many files are handled in one run.
-- `-c CONFIG` path to a configuration file. Defaults to `cfg/store-files.yml` and is ignored if missing. When a path is explicitly supplied the command exits with an error if the file does not exist.
+- `-c CONFIG` points to a configuration file. It defaults to
+  `cfg/store-files.yml` and is ignored if missing. When you pass a path
+  explicitly the command exits with an error if the file does not exist.
 
 Each processed file is:
 
@@ -22,4 +26,5 @@ Each processed file is:
    where `baseurl` comes from the configuration file (defaulting to an empty
    string).
 
-Progress information is logged to the console and can be redirected using the standard `--log` option.
+Progress information is logged to the console and can be redirected using the
+standard `--log` option.

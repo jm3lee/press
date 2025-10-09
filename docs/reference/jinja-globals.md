@@ -28,6 +28,27 @@ for details on the structure of this metadata.
   `figure-img img-fluid rounded`, and `figure-caption tex-center`).
 - `definition(desc)` – expand the `definition` metadata field as Markdown.
   See [definition.md](definition.md) for details.
+- `pie.flashoffer.primary_cta(...)` and `pie.flashoffer.outline_cta(...)` –
+  render the landing page call-to-action buttons. Both helpers mirror the
+  original Jinja macros, support optional `rel`/`target` parameters, and accept
+  arbitrary HTML attributes via keyword arguments.
+- `pie.flashoffer.preview_card(card, overlay_text="...",
+  overlay_button_text="...")` – render the Flashoffer preview card. Provide a
+  mapping with `image_url`, `alt_text`, `link_href`, and `caption` entries to
+  populate the image, overlay link, and caption text. Override the overlay
+  keyword arguments to customise the message and button label without giving up
+  HTML escaping.
+- `pie.flashoffer.hero_banner(...)` – render the hero section composed of an
+  eyebrow, `h1` title, supporting `<p>` description, and a flex container with
+  one primary CTA plus two outline CTAs. Provide `eyebrow`, `title`,
+  `description`, `primary_cta_text`, and `primary_cta_href`. Outline CTAs are
+  optional and configured with `first_outline_text`/`href` and
+  `second_outline_text`/`href`. Pass `primary_cta_kwargs` and the outline
+  `*_kwargs` dictionaries to forward keyword arguments directly into the CTA
+  helpers when you need to adjust labels, tracking attributes, or button order.
+- `pie.flashoffer.footer(...)` – render the Flashoffer footer layout. All text
+  displayed to users can be customized through keyword arguments while the
+  helper continues to escape plain strings safely.
 
 Example:
 
@@ -38,4 +59,16 @@ Example:
 These helpers live in `app/shell/py/pie/pie/render/jinja/__init__.py` and are
 registered with the Jinja environment by `create_env()`. Figure rendering is
 implemented in `app/shell/py/pie/pie/render/jinja/figure/render.py`.
+
+## Filters
+
+The same module exposes a couple of filters that complement the globals.
+
+- `press` – render Markdown content using GitHub Flavored Markdown. The helper
+  first runs the text through the emoji alias replacement step so that
+  `:emoji:` codes become their Unicode counterparts before Markdown rendering.
+- `emojize` – convert alias-based emoji codes to Unicode. Use it when you need
+  to emojify snippets without invoking the full Markdown pipeline. The filter
+  accepts the same keyword arguments as `emoji.emojize`, defaulting to the
+  `"alias"` language.
 

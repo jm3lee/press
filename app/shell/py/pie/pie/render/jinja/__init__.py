@@ -380,8 +380,14 @@ def load_config(path: str | Path = DEFAULT_CONFIG) -> dict:
         raise SystemExit(1)
 
 
+def emojize(text: str, *, language: str = "alias", **kwargs) -> str:
+    """Return *text* with ``:emoji:`` codes replaced by Unicode characters."""
+
+    return emoji.emojize(text, language=language, **kwargs)
+
+
 def render_press(text):
-    text = emoji.emojize(text, language='alias')
+    text = emojize(text)
     return Markup(
         cmarkgfm.github_flavored_markdown_to_html(
             text,
@@ -415,10 +421,15 @@ def create_env():
     env.globals["metadata"] = metadata_module
     env.globals["read_json"] = read_json
     env.globals["read_yaml"] = read_yaml
-    env.globals["pie"] = {"yaml": pie.yaml}
+    env.globals["pie"] = {
+        "yaml": pie.yaml,
+        "utils": pie.utils,
+        "flashoffer": pie.flashoffer,
+    }
     env.globals["render_jinja"] = render_jinja
     env.globals["to_alpha_index"] = to_alpha_index
     env.filters["press"] = render_press
+    env.filters["emojize"] = emojize
     env.globals["anchor"] = env.get_template(
         "macros.jinja"
     ).module.anchor

@@ -67,6 +67,7 @@ services:
     # Useful in avoiding conflicts from multiple active instances of press projects.
     container_name: press-dragonfly
 
+
   shell:
     image: press-shell
     build: ./app/shell
@@ -104,3 +105,67 @@ services:
     volumes:
       - ./app/shell/py/pie:/pie
     profiles: ["pdoc"]
+
+  analytics-db:
+    build: ./app/analytics-db
+    environment:
+      POSTGRES_USER: analytics
+      POSTGRES_PASSWORD: analytics
+      POSTGRES_DB: analytics
+    ports:
+      - "5433:5432"
+    volumes:
+      - analytics_data:/var/lib/postgresql/data
+
+  analytics-backend:
+    build:
+      context: .
+      dockerfile: ./app/analytics-backend/Dockerfile
+    environment:
+      DATABASE_HOST: analytics-db
+      DATABASE_PORT: 5432
+      DATABASE_USER: analytics
+      DATABASE_PASSWORD: analytics
+      DATABASE_NAME: analytics
+      CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-http://localhost:5173,http://localhost:4173}
+    depends_on:
+      - analytics-db
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./app/analytics-backend:/app
+
+  flashoffer:
+    build:
+      context: .
+      dockerfile: ./app/flashoffer/Dockerfile
+      target: production
+    environment:
+      PORT: ${FLASHOFFER_PORT:-4173}
+      VITE_FLASHOFFER_ANALYTICS_ENDPOINT: ${FLASHOFFER_ANALYTICS_ENDPOINT:-http://localhost:8001/events}
+      VITE_FLASHOFFER_ANALYTICS_RECENT_URL: ${FLASHOFFER_ANALYTICS_RECENT_URL:-http://localhost:8001/events/recent}
+    ports:
+      - "${FLASHOFFER_PORT:-4173}:4173"
+      - "80:80"
+    volumes:
+      - ./:/workspace
+
+  flashoffer-dev:
+    build:
+      context: .
+      dockerfile: ./app/flashoffer/Dockerfile.dev
+    environment:
+      FLASHOFFER_MODE: dev
+      PORT: ${FLASHOFFER_DEV_PORT:-5173}
+      CHOKIDAR_USEPOLLING: "true"
+      VITE_FLASHOFFER_ANALYTICS_ENDPOINT: ${FLASHOFFER_ANALYTICS_ENDPOINT:-http://localhost:8001/events}
+      VITE_FLASHOFFER_ANALYTICS_RECENT_URL: ${FLASHOFFER_ANALYTICS_RECENT_URL:-http://localhost:8001/events/recent}
+    ports:
+      - "${FLASHOFFER_DEV_PORT:-5173}:5173"
+    volumes:
+      - ./:/workspace
+    depends_on:
+      - analytics-backend
+
+volumes:
+  analytics_data:

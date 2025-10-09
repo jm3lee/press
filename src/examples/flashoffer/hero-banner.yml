@@ -1,0 +1,17 @@
+doc:
+  author: Brian Lee
+  breadcrumbs:
+  - title: Home
+    url: /
+  - title: Examples
+    url: /examples/
+  - title: Flashoffer
+    url: /examples/flashoffer/
+  - title: Hero banner
+  pubdate: Sep 28, 2025
+  title: hero banner
+html:
+  navbar: false
+  scripts: []
+id: flashoffer-hero-banner
+schema: v1

@@ -5,8 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 DEFAULT_SCHEMA = "v1"
+V2_SCHEMA = "v2"
 
-__all__ = ["Schema", "DEFAULT_SCHEMA"]
+__all__ = ["Schema", "DEFAULT_SCHEMA", "V2_SCHEMA"]
 
 
 @dataclass

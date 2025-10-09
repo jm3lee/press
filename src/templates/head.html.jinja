@@ -47,12 +47,23 @@
   <!-- The main stylesheet has to be included here because mobile browsers
           don't seem to apply the stylesheet otherwise, and fonts are too
           small. -->
+  <link
+    rel="preconnect"
+    href="https://cdn.jsdelivr.net"
+  />
+  <link rel="dns-prefetch" href="//cdn.jsdelivr.net" />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+    crossorigin="anonymous"
+  />
   {% for css in css %}
   <link rel="stylesheet" href="{{ css }}" />
   {% endfor %}
   <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+    rel="icon"
+    type="image/x-icon"
+    href="https://seattlefigurestudio.sfo3.cdn.digitaloceanspaces.com/landing/favicon.ico"
   />
 </head>
 
