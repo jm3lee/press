@@ -76,6 +76,22 @@ const themePresets: Record<ThemePreset, ThemePresetConfig> = {
       }
     }
   },
+  sunriseGlow: {
+    preset: "sunriseGlow"
+  },
+  midnightPulse: {
+    preset: "midnightPulse",
+    colorMode: "dark"
+  },
+  oceanBreeze: {
+    preset: "oceanBreeze"
+  },
+  forestCanopy: {
+    preset: "forestCanopy"
+  },
+  monochromeFocus: {
+    preset: "monochromeFocus"
+  },
   spaciousLight: {
     preset: "spaciousTypography",
     colorMode: "light"

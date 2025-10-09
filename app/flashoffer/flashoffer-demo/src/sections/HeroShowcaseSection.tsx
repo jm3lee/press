@@ -23,6 +23,26 @@ const HERO_GRADIENT_OVERRIDES: Record<
     "--flashoffer-hero-gradient-start": "#1e293b",
     "--flashoffer-hero-gradient-stop": "#0f172a"
   },
+  sunriseGlow: {
+    "--flashoffer-hero-gradient-start": "rgba(249, 115, 22, 0.22)",
+    "--flashoffer-hero-gradient-stop": "rgba(234, 179, 8, 0.28)"
+  },
+  midnightPulse: {
+    "--flashoffer-hero-gradient-start": "rgba(99, 102, 241, 0.35)",
+    "--flashoffer-hero-gradient-stop": "rgba(15, 23, 42, 0.92)"
+  },
+  oceanBreeze: {
+    "--flashoffer-hero-gradient-start": "rgba(14, 165, 233, 0.18)",
+    "--flashoffer-hero-gradient-stop": "rgba(20, 184, 166, 0.24)"
+  },
+  forestCanopy: {
+    "--flashoffer-hero-gradient-start": "rgba(34, 197, 94, 0.18)",
+    "--flashoffer-hero-gradient-stop": "rgba(15, 118, 110, 0.28)"
+  },
+  monochromeFocus: {
+    "--flashoffer-hero-gradient-start": "rgba(15, 23, 42, 0.12)",
+    "--flashoffer-hero-gradient-stop": "rgba(15, 23, 42, 0.32)"
+  },
   spaciousLight: {
     "--flashoffer-hero-gradient-start": "rgba(29, 78, 216, 0.14)",
     "--flashoffer-hero-gradient-stop": "rgba(219, 39, 119, 0.18)"
