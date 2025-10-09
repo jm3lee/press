@@ -1,2 +1,2 @@
 #!/bin/bash
-docker compose up "$@" campaign-manager
+docker compose up --remove-orphans "$@" campaign-manager
