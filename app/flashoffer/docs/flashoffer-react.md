@@ -282,5 +282,3 @@ TypeScript project settings defined in `tsconfig.docs.json`.
 - `npm run lint:ci`: run the ESLint gate used in CI, which fails if any
   function exceeds the hard ceiling of `complexity > 10`.
 
-See `dep.mk` for details on how the top-level build copies the generated
-artifacts into the monorepo distribution directories.
