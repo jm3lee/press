@@ -1,0 +1,33 @@
+services:
+  campaign-backend:
+    build:
+      context: .
+      dockerfile: ./app/flashoffer/campaign-backend/Dockerfile
+    environment:
+      DATABASE_HOST: analytics-db
+      DATABASE_PORT: 5432
+      DATABASE_USER: analytics
+      DATABASE_PASSWORD: analytics
+      DATABASE_NAME: analytics
+      CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-http://localhost:5173,http://localhost:4173}
+    depends_on:
+      - analytics-db
+    volumes:
+      - ./app/flashoffer/campaign-backend:/app
+
+  # Flashoffer campaign manager provides CRUD tooling for campaign metadata.
+  campaign-manager:
+    build:
+      context: .
+      dockerfile: ./app/flashoffer/campaign-manager/Dockerfile
+    environment:
+      CAMPAIGN_MANAGER_ANALYTICS_BASE: http://analytics-backend:8000
+      DATABASE_HOST: analytics-db
+      DATABASE_PORT: 5432
+      DATABASE_USER: analytics
+      DATABASE_PASSWORD: analytics
+      DATABASE_NAME: analytics
+    depends_on:
+      - analytics-backend
+    ports:
+      - "10000:4173"

@@ -1,0 +1,18 @@
+services:
+  quiz-backend:
+    build:
+      context: .
+      dockerfile: ./app/flashoffer/quiz-backend/Dockerfile
+    environment:
+      DATABASE_HOST: analytics-db
+      DATABASE_PORT: 5432
+      DATABASE_USER: analytics
+      DATABASE_PASSWORD: analytics
+      DATABASE_NAME: analytics
+      CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-http://localhost:5173,http://localhost:4173}
+    depends_on:
+      - analytics-db
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./app/flashoffer/quiz-backend:/app

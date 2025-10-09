@@ -1,2 +1,2 @@
 #!/bin/bash
-docker compose up "$@" flashoffer-dev
+docker compose up --remove-orphans "$@" flashoffer-dev
