@@ -16,6 +16,9 @@ import { CampaignDashboard } from "./components/CampaignDashboard";
 import { LoginView } from "./components/LoginView";
 import type { CampaignPayload, CampaignSummary, Credentials, LoginResult } from "./types";
 
+/**
+ * Authentication payload stored locally for automatic session restoration.
+ */
 interface AuthState {
   token: string;
   expiresAt: string;
@@ -23,6 +26,13 @@ interface AuthState {
 
 const STORAGE_KEY = "flashoffer.campaignManager.auth";
 
+/**
+ * Reads the persisted authentication payload from `localStorage` when
+ * available.
+ *
+ * @returns Parsed authentication state or `null` when the data is missing or
+ * invalid.
+ */
 function loadStoredAuth(): AuthState | null {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -44,6 +54,11 @@ function loadStoredAuth(): AuthState | null {
   }
 }
 
+/**
+ * Persists authentication state to `localStorage` to enable silent logins.
+ *
+ * @param state - Authentication payload or `null` to clear the storage entry.
+ */
 function persistAuth(state: AuthState | null): void {
   if (!state) {
     window.localStorage.removeItem(STORAGE_KEY);
@@ -52,6 +67,12 @@ function persistAuth(state: AuthState | null): void {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
+/**
+ * Root Flashoffer campaign manager application with authentication and CRUD
+ * workflows.
+ *
+ * @returns React component rendering the dashboard or login form.
+ */
 const App = (): JSX.Element => {
   const [auth, setAuth] = useState<AuthState | null>(() => loadStoredAuth());
   const [campaigns, setCampaigns] = useState<CampaignSummary[]>([]);

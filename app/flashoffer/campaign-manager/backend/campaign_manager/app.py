@@ -28,6 +28,8 @@ from .schemas import (
 
 
 def _load_secret() -> str:
+    """Fetch the signing secret for issued tokens from the environment."""
+
     secret = os.getenv("CAMPAIGN_MANAGER_SECRET_KEY")
     if not secret:
         raise RuntimeError("CAMPAIGN_MANAGER_SECRET_KEY must be set")
@@ -35,6 +37,8 @@ def _load_secret() -> str:
 
 
 def _password_path() -> Path:
+    """Return the filesystem path storing the generated admin password."""
+
     raw_path = os.getenv("CAMPAIGN_MANAGER_ADMIN_PASSWORD_FILE")
     if not raw_path:
         raise RuntimeError("CAMPAIGN_MANAGER_ADMIN_PASSWORD_FILE must be set")
@@ -42,11 +46,15 @@ def _password_path() -> Path:
 
 
 def _static_dir() -> Path:
+    """Resolve the directory containing the compiled frontend bundle."""
+
     raw_path = os.getenv("CAMPAIGN_MANAGER_STATIC_DIR", "/app/static")
     return Path(raw_path)
 
 
 def _analytics_recent_url() -> str:
+    """Build the analytics endpoint URL used to fetch recent events."""
+
     raw_recent = os.getenv("CAMPAIGN_MANAGER_ANALYTICS_RECENT_URL", "").strip()
     if raw_recent:
         return raw_recent
@@ -61,6 +69,8 @@ def _analytics_recent_url() -> str:
 
 
 def _create_auth_manager() -> AuthManager:
+    """Instantiate the shared authentication helper for admin logins."""
+
     username = os.getenv("CAMPAIGN_MANAGER_ADMIN_USERNAME", "admin")
     return AuthManager(
         username=username,
@@ -70,11 +80,15 @@ def _create_auth_manager() -> AuthManager:
 
 
 def _create_repository() -> CampaignRepository:
+    """Construct the campaign repository backed by PostgreSQL."""
+
     config = DatabaseConfig.from_env()
     return CampaignRepository(config)
 
 
 def _as_response(record: CampaignRecord) -> CampaignResponse:
+    """Convert a database record to the API response schema."""
+
     return CampaignResponse(
         campaign_id=record.campaign_id,
         name=record.name,
@@ -115,6 +129,8 @@ def create_app() -> FastAPI:
     def _require_token(
         credentials: HTTPAuthorizationCredentials | None = Depends(security),
     ) -> str:
+        """Validate the bearer token supplied in the Authorization header."""
+
         if credentials is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -282,6 +298,8 @@ def create_app() -> FastAPI:
 
 
 def _normalize_name(name: str | None) -> str | None:
+    """Strip whitespace and coerce empty campaign names to `None`."""
+
     if name is None:
         return None
     stripped = name.strip()

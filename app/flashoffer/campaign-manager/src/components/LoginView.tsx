@@ -19,6 +19,12 @@ interface LoginViewProps {
   onSubmit: (credentials: Credentials) => Promise<void>;
 }
 
+/**
+ * Captures administrator credentials and forwards them to the backend.
+ *
+ * @param props - Loading state and submission callback.
+ * @returns Section prompting the operator to authenticate.
+ */
 export const LoginView = ({ loading, onSubmit }: LoginViewProps): JSX.Element => {
   const [username, setUsername] = useState("admin");
   const [password, setPassword] = useState("");
