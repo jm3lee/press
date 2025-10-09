@@ -105,6 +105,17 @@ export async function updateCampaign(
   return mapCampaign(response);
 }
 
+/**
+ * Builds the events endpoint URL for a campaign using the configured API base.
+ *
+ * @param campaignId - Unique identifier for the campaign to inspect.
+ * @returns URL that can be requested to retrieve recent campaign events.
+ */
+export function buildCampaignEventsUrl(campaignId: string): string {
+  const encodedId = encodeURIComponent(campaignId);
+  return `${API_BASE}/api/campaigns/${encodedId}/events`;
+}
+
 function mapCampaign(payload: ApiCampaign): CampaignSummary {
   return {
     campaignId: payload.campaign_id,

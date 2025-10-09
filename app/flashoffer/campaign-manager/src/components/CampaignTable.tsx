@@ -5,8 +5,8 @@
 
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import { DataGrid, type GridColDef } from "@mui/x-data-grid";
-import { useMemo } from "react";
+import { DataGrid, type GridColDef, type GridRowSelectionModel } from "@mui/x-data-grid";
+import { useCallback, useMemo } from "react";
 
 import type { CampaignSummary } from "../types";
 import { formatTimestampForDisplay } from "../utils";
@@ -15,12 +15,16 @@ interface CampaignTableProps {
   campaigns: CampaignSummary[];
   loading: boolean;
   onEdit: (campaign: CampaignSummary) => void;
+  onSelect?: (campaign: CampaignSummary | null) => void;
+  selectedCampaignId?: string | null;
 }
 
 export const CampaignTable = ({
   campaigns,
   loading,
   onEdit,
+  onSelect,
+  selectedCampaignId,
 }: CampaignTableProps): JSX.Element => {
   const rows = useMemo(
     () =>
@@ -53,7 +57,10 @@ export const CampaignTable = ({
           <Button
             variant="outlined"
             size="small"
-            onClick={() => onEdit(params.row.campaign as CampaignSummary)}
+            onClick={(event) => {
+              event.stopPropagation();
+              onEdit(params.row.campaign as CampaignSummary);
+            }}
           >
             Edit
           </Button>
@@ -63,14 +70,30 @@ export const CampaignTable = ({
     [onEdit],
   );
 
+  const handleRowSelectionModelChange = useCallback(
+    (selection: GridRowSelectionModel) => {
+      if (!onSelect) {
+        return;
+      }
+      const [first] = selection;
+      if (!first) {
+        onSelect(null);
+        return;
+      }
+      const candidate = campaigns.find((item) => item.campaignId === String(first));
+      onSelect(candidate ?? null);
+    },
+    [campaigns, onSelect],
+  );
+
   return (
-    <Box sx={{ width: "100%", mt: 4 }}>
+    <Box sx={{ width: "100%" }}>
       <DataGrid
         rows={rows}
         columns={columns}
         autoHeight
         density="comfortable"
-        disableRowSelectionOnClick
+        disableRowSelectionOnClick={false}
         getRowId={(row) => row.id}
         loading={loading}
         pageSizeOptions={[5, 10, 25]}
@@ -78,6 +101,8 @@ export const CampaignTable = ({
           pagination: { paginationModel: { pageSize: 10, page: 0 } },
           sorting: { sortModel: [{ field: "campaignId", sort: "asc" }] },
         }}
+        onRowSelectionModelChange={handleRowSelectionModelChange}
+        rowSelectionModel={selectedCampaignId ? [selectedCampaignId] : []}
       />
     </Box>
   );
