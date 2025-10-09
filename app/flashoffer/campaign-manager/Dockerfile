@@ -57,7 +57,7 @@ RUN python - <<'PY'
 import secrets
 from pathlib import Path
 password = secrets.token_urlsafe(24)
-output_dir = Path("campaign-manager")
+output_dir = Path("campaign_manager")
 output_dir.mkdir(parents=True, exist_ok=True)
 (output_dir / "admin_password").write_text(password + "\n", encoding="utf-8")
 PY
