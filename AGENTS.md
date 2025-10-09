@@ -27,6 +27,13 @@
 - Node.js projects: modify `package.json` and `package-lock.json` only when
   the dependency list changes.
 
+## `docker-compose.yml`
+
+- Always document services with comments that explain ongoing maintenance and
+  operational expectations.
+- Group related services together and sort them alphabetically within their
+  groupings.
+
 ## Checker Scripts
 
 - When generating Codex checker scripts, always include ExcludeList support.
