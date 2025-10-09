@@ -5,14 +5,7 @@ import { useMemo } from "react";
 import { CountdownTimer, Section } from "flashoffer-react";
 
 export function CountdownShowcaseSection() {
-  const earlyAccessEnd = useMemo(
-    () => new Date(Date.now() + 1000 * 60 * 60 * 45),
-    []
-  );
-  const restockEnd = useMemo(
-    () => new Date(Date.now() + 1000 * 60 * 90),
-    []
-  );
+  const restockDurationMs = useMemo(() => 1000 * 60 * 90, []);
   const trackMeta = JSON.stringify({ variants: 2 });
 
   return (
@@ -40,7 +33,7 @@ export function CountdownShowcaseSection() {
         >
           <Box sx={{ width: "100%", maxWidth: 420 }}>
             <CountdownTimer
-              endTime={earlyAccessEnd}
+              campaignId="flashoffer-demo"
               timerLabel="Early access ends in"
               headline="Creator passes are almost gone."
               quantityRemaining={42}
@@ -49,7 +42,7 @@ export function CountdownShowcaseSection() {
           </Box>
           <Box sx={{ width: "100%", maxWidth: 420 }}>
             <CountdownTimer
-              endTime={restockEnd}
+              timeRemainingMs={restockDurationMs}
               timerLabel="Restock drops in"
               headline="Set an alert for the next batch."
             />
