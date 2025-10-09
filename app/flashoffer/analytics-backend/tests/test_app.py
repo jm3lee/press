@@ -24,6 +24,40 @@ def _build_event(event_type: str, target: str) -> dict:
     }
 
 
+def test_events_endpoint_requires_bearer_token(flask_app):
+    payload = {
+        "site": "press",
+        "session_id": str(uuid4()),
+        "events": [_build_event("interaction", "cta")],
+    }
+
+    client = flask_app.test_client()
+    response = client.post("/events", json=payload)
+
+    assert response.status_code == 401
+    assert "error" in response.get_json()
+
+
+def test_events_endpoint_rejects_invalid_token(flask_app, auth_headers):
+    payload = {
+        "site": "press",
+        "session_id": str(uuid4()),
+        "events": [_build_event("interaction", "cta")],
+    }
+
+    client = flask_app.test_client()
+    response = client.post(
+        "/events",
+        json=payload,
+        headers={
+            "Authorization": f"Bearer {auth_headers['Authorization'].split(' ', 1)[1]}-tampered",
+        },
+    )
+
+    assert response.status_code == 401
+    assert "error" in response.get_json()
+
+
 def test_event_ingest_persists_rows(client, flask_app):
     payload = {
         "site": "press",

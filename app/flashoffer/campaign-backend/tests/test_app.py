@@ -12,6 +12,27 @@ def test_healthcheck(client):
     assert response.get_json() == {"status": "ok"}
 
 
+def test_campaign_endpoint_requires_bearer_token(flask_app):
+    client = flask_app.test_client()
+    response = client.get("/api/campaign/demo/end_time")
+
+    assert response.status_code == 401
+    assert "error" in response.get_json()
+
+
+def test_campaign_endpoint_rejects_invalid_token(flask_app, auth_headers):
+    client = flask_app.test_client()
+    response = client.get(
+        "/api/campaign/demo/end_time",
+        headers={
+            "Authorization": f"Bearer {auth_headers['Authorization'].split(' ', 1)[1]}-corrupt",
+        },
+    )
+
+    assert response.status_code == 401
+    assert "error" in response.get_json()
+
+
 def test_campaign_end_time_returns_remaining_ms(client, flask_app):
     store: CampaignStore = flask_app.config["DB_POOL"]
     deadline = datetime.now(tz=timezone.utc) + timedelta(hours=1, minutes=30)

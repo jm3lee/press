@@ -2,7 +2,7 @@
 # Released under the MIT license.
 
 import os
-from typing import Iterator
+from typing import Dict, Iterator
 
 import pytest
 
@@ -26,6 +26,8 @@ def flask_app() -> Iterator:
             f"variables: {missing_list}"
         )
 
+    os.environ.setdefault("CAMPAIGN_MANAGER_SECRET_KEY", "campaign-test-secret")
+
     app = create_app()
     yield app
     store: CampaignStore = app.config["DB_POOL"]
@@ -36,5 +38,14 @@ def flask_app() -> Iterator:
 
 
 @pytest.fixture()
-def client(flask_app):
-    return flask_app.test_client()
+def auth_headers(flask_app) -> Dict[str, str]:
+    manager = flask_app.config["AUTH_MANAGER"]
+    token, _ = manager.issue_token()
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture()
+def client(flask_app, auth_headers):
+    client = flask_app.test_client()
+    client.environ_base["HTTP_AUTHORIZATION"] = auth_headers["Authorization"]
+    return client

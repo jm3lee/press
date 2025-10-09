@@ -14,7 +14,13 @@ from flask import Flask, Response, jsonify
 
 from pie.logging import logger
 
-from backend_common import DatabaseConfig, configure_cors
+from backend_common import (
+    AuthManager,
+    DatabaseConfig,
+    configure_cors,
+    load_bearer_auth_config,
+    register_bearer_token_auth,
+)
 
 from .db import CampaignStore
 
@@ -33,12 +39,20 @@ def create_app() -> Flask:
 
     app = Flask(__name__)
 
+    auth_manager = _initialise_auth()
     config = DatabaseConfig.from_env()
     storage = _initialise_storage(app, config)
     atexit.register(storage.close)
     app.config["DB_POOL"] = storage
+    app.config["AUTH_MANAGER"] = auth_manager
 
     apply_cors = configure_cors(app, component="campaign-backend")
+    register_bearer_token_auth(
+        app,
+        auth_manager,
+        exempt_paths={"/health", "/config"},
+        failure_handler=apply_cors,
+    )
 
     @app.route("/health", methods=["GET"])
     def healthcheck() -> Response:
@@ -83,6 +97,18 @@ def create_app() -> Flask:
         return apply_cors(jsonify(payload))
 
     return app
+
+
+def _initialise_auth() -> AuthManager:
+    """Construct an auth manager for campaign metadata endpoints."""
+
+    config = load_bearer_auth_config(service="campaign-backend")
+    return AuthManager(
+        username=config.username,
+        password_file=None,
+        secret_key=config.secret_key,
+        token_ttl_seconds=config.token_ttl_seconds,
+    )
 
 
 def _initialise_storage(app: Flask, config: DatabaseConfig) -> CampaignStore:

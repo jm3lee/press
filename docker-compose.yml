@@ -130,6 +130,9 @@ services:
       DATABASE_PASSWORD: analytics
       DATABASE_NAME: analytics
       CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-http://localhost:5173,http://localhost:4173}
+      CAMPAIGN_MANAGER_SECRET_KEY: ${CAMPAIGN_MANAGER_SECRET_KEY:-flashoffer-dev-secret}
+      CAMPAIGN_MANAGER_ADMIN_USERNAME: ${CAMPAIGN_MANAGER_ADMIN_USERNAME:-admin}
+      CAMPAIGN_MANAGER_TOKEN_TTL_SECONDS: ${CAMPAIGN_MANAGER_TOKEN_TTL_SECONDS:-28800}
     depends_on:
       - analytics-db
     ports:
@@ -148,6 +151,9 @@ services:
       DATABASE_PASSWORD: analytics
       DATABASE_NAME: analytics
       CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-http://localhost:5173,http://localhost:4173}
+      CAMPAIGN_MANAGER_SECRET_KEY: ${CAMPAIGN_MANAGER_SECRET_KEY:-flashoffer-dev-secret}
+      CAMPAIGN_MANAGER_ADMIN_USERNAME: ${CAMPAIGN_MANAGER_ADMIN_USERNAME:-admin}
+      CAMPAIGN_MANAGER_TOKEN_TTL_SECONDS: ${CAMPAIGN_MANAGER_TOKEN_TTL_SECONDS:-28800}
     depends_on:
       - analytics-db
     ports:
@@ -166,6 +172,9 @@ services:
       DATABASE_PASSWORD: analytics
       DATABASE_NAME: analytics
       CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-http://localhost:5173,http://localhost:4173}
+      CAMPAIGN_MANAGER_SECRET_KEY: ${CAMPAIGN_MANAGER_SECRET_KEY:-flashoffer-dev-secret}
+      CAMPAIGN_MANAGER_ADMIN_USERNAME: ${CAMPAIGN_MANAGER_ADMIN_USERNAME:-admin}
+      CAMPAIGN_MANAGER_TOKEN_TTL_SECONDS: ${CAMPAIGN_MANAGER_TOKEN_TTL_SECONDS:-28800}
     depends_on:
       - analytics-db
     volumes:
@@ -183,6 +192,9 @@ services:
       DATABASE_USER: analytics
       DATABASE_PASSWORD: analytics
       DATABASE_NAME: analytics
+      CAMPAIGN_MANAGER_SECRET_KEY: ${CAMPAIGN_MANAGER_SECRET_KEY:-flashoffer-dev-secret}
+      CAMPAIGN_MANAGER_ADMIN_USERNAME: ${CAMPAIGN_MANAGER_ADMIN_USERNAME:-admin}
+      CAMPAIGN_MANAGER_TOKEN_TTL_SECONDS: ${CAMPAIGN_MANAGER_TOKEN_TTL_SECONDS:-28800}
     depends_on:
       - analytics-db
     ports:
