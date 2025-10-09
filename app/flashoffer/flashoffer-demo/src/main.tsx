@@ -23,7 +23,11 @@ if (!rootElement) {
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <EngagementProvider site="flashoffer-demo" endpoint={analyticsEndpoint}>
+    <EngagementProvider
+      site="flashoffer-demo"
+      campaignId="flashoffer-demo"
+      endpoint={analyticsEndpoint}
+    >
       <App />
       <AutoTrack />
     </EngagementProvider>

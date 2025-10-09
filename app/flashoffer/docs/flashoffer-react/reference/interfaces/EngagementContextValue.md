@@ -4,7 +4,7 @@
 
 # Interface: EngagementContextValue
 
-Defined in: src/analytics/EngagementProvider.tsx:39
+Defined in: src/analytics/EngagementProvider.tsx:46
 
 ## Properties
 
@@ -12,7 +12,7 @@ Defined in: src/analytics/EngagementProvider.tsx:39
 
 > **register**: (`trackId`, `element`, `meta?`) => () => `void`
 
-Defined in: src/analytics/EngagementProvider.tsx:40
+Defined in: src/analytics/EngagementProvider.tsx:47
 
 #### Parameters
 
@@ -42,7 +42,7 @@ Defined in: src/analytics/EngagementProvider.tsx:40
 
 > **attachElement**: (`trackId`, `element`, `meta?`) => () => `void`
 
-Defined in: src/analytics/EngagementProvider.tsx:45
+Defined in: src/analytics/EngagementProvider.tsx:52
 
 #### Parameters
 
@@ -72,7 +72,7 @@ Defined in: src/analytics/EngagementProvider.tsx:45
 
 > **detachElement**: (`element`) => `void`
 
-Defined in: src/analytics/EngagementProvider.tsx:50
+Defined in: src/analytics/EngagementProvider.tsx:57
 
 #### Parameters
 
@@ -90,7 +90,7 @@ Defined in: src/analytics/EngagementProvider.tsx:50
 
 > **recordInteraction**: (`target`, `meta?`) => `void`
 
-Defined in: src/analytics/EngagementProvider.tsx:51
+Defined in: src/analytics/EngagementProvider.tsx:58
 
 #### Parameters
 
@@ -112,7 +112,7 @@ Defined in: src/analytics/EngagementProvider.tsx:51
 
 > **getActiveTargets**: () => `string`[]
 
-Defined in: src/analytics/EngagementProvider.tsx:52
+Defined in: src/analytics/EngagementProvider.tsx:59
 
 #### Returns
 

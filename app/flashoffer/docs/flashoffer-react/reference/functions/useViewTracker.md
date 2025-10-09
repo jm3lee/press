@@ -4,9 +4,11 @@
 
 # Function: useViewTracker()
 
-> **useViewTracker**(`trackId`, `meta`): (`node`) => `void`
+> **useViewTracker**(`trackId`, `meta?`): (`node`) => `void`
 
-Defined in: src/analytics/EngagementProvider.tsx:533
+Create a ref callback that wires intersection observers for a tracked element.
+
+Defined in: src/analytics/EngagementProvider.tsx:633
 
 ## Parameters
 
@@ -14,13 +16,13 @@ Defined in: src/analytics/EngagementProvider.tsx:533
 
 `string`
 
-### meta
+### meta?
 
-`Record`\<`string`, `unknown`\> = `{}`
+`Record`\<`string`, `unknown`\>
 
 ## Returns
 
-> (`node`): `void`
+> (`node`) => `void`
 
 ### Parameters
 

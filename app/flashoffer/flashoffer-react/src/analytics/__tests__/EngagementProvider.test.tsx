@@ -100,6 +100,60 @@ describe("EngagementProvider connection failure handling", () => {
   });
 });
 
+describe("EngagementProvider payload metadata", () => {
+  const globalScope = globalThis as GlobalWithOptionalFetch;
+  const originalFetch = globalScope.fetch;
+  let fetchMock: jest.MockedFunction<typeof fetch>;
+
+  beforeEach(() => {
+    fetchMock = jest
+      .fn(async () => ({ ok: true } as Response))
+      .mockName("fetch") as jest.MockedFunction<typeof fetch>;
+    globalScope.fetch = fetchMock;
+  });
+
+  afterEach(() => {
+    globalScope.fetch = originalFetch;
+    jest.clearAllMocks();
+  });
+
+  it("includes a sanitised campaign identifier when provided", async () => {
+    const recordRef = {
+      current: (() => undefined) as RecordFn,
+    } as MutableRefObject<RecordFn>;
+
+    const view = render(
+      <EngagementProvider
+        endpoint="/engagement"
+        site="test-site"
+        campaignId="  spring-promo  "
+        maxBatch={1}
+        flushInterval={null}
+        heartbeatInterval={60_000}
+        idleTimeout={60_000}
+        scrollThresholds={[]}
+        viewThresholds={[]}
+      >
+        <Recorder recordRef={recordRef} />
+      </EngagementProvider>
+    );
+
+    await act(async () => {
+      recordRef.current("cta-click");
+      await Promise.resolve();
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const payload = JSON.parse(fetchMock.mock.calls[0][1]?.body ?? "{}");
+    expect(payload).toMatchObject({
+      site: "test-site",
+      campaign_id: "spring-promo",
+    });
+
+    view.unmount();
+  });
+});
+
 describe("EngagementProvider lifetime", () => {
   const globalScope = globalThis as GlobalWithOptionalFetch;
   const originalFetch = globalScope.fetch;

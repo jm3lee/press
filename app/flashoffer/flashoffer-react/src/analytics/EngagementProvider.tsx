@@ -33,6 +33,7 @@ interface ActiveViewState {
 export interface EngagementProviderProps {
   endpoint?: string;
   site: string;
+  campaignId?: string;
   children: ReactNode;
   flushInterval?: number | null;
   heartbeatInterval?: number;
@@ -117,6 +118,7 @@ function calculateScrollRatio(): { ratio: number; pixels: number } {
 export function EngagementProvider({
   endpoint,
   site,
+  campaignId,
   children,
   flushInterval = 5000,
   heartbeatInterval = 15000,
@@ -125,6 +127,10 @@ export function EngagementProvider({
   viewThresholds = [0.25, 0.5, 0.75, 1],
   maxBatch = 25,
 }: EngagementProviderProps) {
+  const normalizedCampaignId = useMemo(() => {
+    const trimmed = campaignId?.trim();
+    return trimmed ? trimmed : undefined;
+  }, [campaignId]);
   const queueRef = useRef<EngagementEvent[]>([]);
   const sessionIdRef = useRef<string>(fallbackUuid());
   const trackedElementsRef = useRef(
@@ -261,19 +267,29 @@ export function EngagementProvider({
         return;
       }
       const events = queueRef.current.splice(0, queueRef.current.length);
-      const body = JSON.stringify({
+      const payload = {
         site,
         session_id: sessionIdRef.current,
         events,
         reason,
-      });
+        ...(normalizedCampaignId
+          ? { campaign_id: normalizedCampaignId }
+          : {}),
+      };
+      const body = JSON.stringify(payload);
       if (canUseBeacon(sync)) {
         deliverWithBeacon(currentEndpoint, events, body);
         return;
       }
       await deliverWithFetch(currentEndpoint, events, body, sync);
     },
-    [deliverWithBeacon, deliverWithFetch, evaluateFlushEndpoint, site]
+    [
+      deliverWithBeacon,
+      deliverWithFetch,
+      evaluateFlushEndpoint,
+      normalizedCampaignId,
+      site,
+    ]
   );
 
   useEffect(() => {

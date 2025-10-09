@@ -4,12 +4,11 @@
 
 # Function: useRecordInteraction()
 
-> **useRecordInteraction**(`defaultTarget?`, `defaultMeta?`): (`target`, `meta`) => `void`
+> **useRecordInteraction**(`defaultTarget?`, `defaultMeta?`): (`target?`, `meta?`) => `void`
 
-Returns a callback that records `interaction` events described in the
-[engagement events](../engagement-events.md) guide.
+Return a callback that records interaction events with optional defaults.
 
-Defined in: src/analytics/EngagementProvider.tsx:582
+Defined in: src/analytics/EngagementProvider.tsx:682
 
 ## Parameters
 
@@ -19,21 +18,21 @@ Defined in: src/analytics/EngagementProvider.tsx:582
 
 ### defaultMeta?
 
-`Record`\<`string`, `unknown`\> = `{}`
+`Record`\<`string`, `unknown`\>
 
 ## Returns
 
-> (`target`, `meta`): `void`
+> (`target?`, `meta?`) => `void`
 
 ### Parameters
 
-#### target
+#### target?
 
-`string` = `...`
+`string`
 
-#### meta
+#### meta?
 
-`Record`\<`string`, `unknown`\> = `defaultMeta`
+`Record`\<`string`, `unknown`\>
 
 ### Returns
 

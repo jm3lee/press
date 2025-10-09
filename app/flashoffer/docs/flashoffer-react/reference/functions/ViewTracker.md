@@ -4,16 +4,18 @@
 
 # Function: ViewTracker()
 
-> **ViewTracker**(`__namedParameters`): `ReactElement`\<`any`, `string` \| `JSXElementConstructor`\<`any`\>\>
+> **ViewTracker**(`__namedParameters`): `Element`
 
-Defined in: src/analytics/EngagementProvider.tsx:567
+Render a component that tracks when its children enter and leave the viewport.
+
+Defined in: src/analytics/EngagementProvider.tsx:667
 
 ## Parameters
 
-### \_\_namedParameters
+### __namedParameters
 
 [`ViewTrackerProps`](../interfaces/ViewTrackerProps.md)
 
 ## Returns
 
-`ReactElement`\<`any`, `string` \| `JSXElementConstructor`\<`any`\>\>
+`Element`

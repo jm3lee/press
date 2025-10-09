@@ -6,7 +6,9 @@
 
 > **useEngagement**(): [`EngagementContextValue`](../interfaces/EngagementContextValue.md)
 
-Defined in: src/analytics/EngagementProvider.tsx:525
+Convenience hook that exposes the engagement tracking context.
+
+Defined in: src/analytics/EngagementProvider.tsx:625
 
 ## Returns
 
