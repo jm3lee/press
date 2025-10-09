@@ -184,7 +184,7 @@ services:
       DATABASE_PASSWORD: analytics
       DATABASE_NAME: analytics
     depends_on:
-      - analytics-db
+      - analytics-backend
     ports:
       - "10000:4173"
 
