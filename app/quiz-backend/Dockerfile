@@ -17,13 +17,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 COPY app/quiz-backend/requirements.txt ./requirements.txt
-COPY app/backend-common/backend_common ./backend_common
+COPY app/backend-common /backend-common
 COPY app/shell/py/pie /tmp/pie
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --no-cache-dir -r requirements.txt \
     && pip install --no-cache-dir /tmp/pie dominate \
-    && rm -rf /tmp/pie
+    && rm -rf /tmp/pie /backend-common
 
 COPY app/quiz-backend/quiz_backend ./quiz_backend
 COPY app/quiz-backend/tests ./tests
