@@ -1,0 +1,1 @@
+docker compose exec analytics-db psql -U analytics -w analytics
