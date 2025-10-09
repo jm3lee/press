@@ -35,6 +35,7 @@ COPY app/flashoffer/quiz-backend/quiz_backend ./quiz_backend
 COPY app/flashoffer/quiz-backend/tests ./tests
 
 FROM base AS dev
+WORKDIR /app
 
 EXPOSE 8000
 
