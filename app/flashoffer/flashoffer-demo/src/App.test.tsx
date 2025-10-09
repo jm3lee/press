@@ -36,6 +36,19 @@ describe("Flashoffer demo", () => {
     expect(previewCards).toHaveLength(3);
   });
 
+  it("renders the countdown timer showcase", async () => {
+    render(<App />);
+
+    expect(
+      await screen.findByRole("heading", {
+        level: 2,
+        name: /drive urgency with countdowns/i
+      })
+    ).toBeInTheDocument();
+    const timers = await screen.findAllByRole("timer");
+    expect(timers.length).toBeGreaterThan(0);
+  });
+
   it("renders the quiz showcase question", async () => {
     render(<App />);
 

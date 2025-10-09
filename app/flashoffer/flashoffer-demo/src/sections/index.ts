@@ -2,6 +2,7 @@ export * from "./types";
 export * from "./CustomizationControlsSection";
 export * from "./HeroShowcaseSection";
 export * from "./OverviewSection";
+export * from "./CountdownShowcaseSection";
 export * from "./CtaShowcaseSection";
 export * from "./PreviewShowcaseSection";
 export * from "./FigureSpotlightSection";
