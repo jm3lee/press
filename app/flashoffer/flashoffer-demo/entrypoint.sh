@@ -32,14 +32,14 @@ build_package() {
   npm run build
 }
 
-ensure_dependencies "${ROOT_DIR}/app/flashoffer-react"
-ensure_dependencies "${ROOT_DIR}/app/flashoffer-demo"
+ensure_dependencies "${ROOT_DIR}/app/flashoffer/flashoffer-react"
+ensure_dependencies "${ROOT_DIR}/app/flashoffer/flashoffer-demo"
 
 if [ "${MODE}" = "dev" ]; then
-  cd "${ROOT_DIR}/app/flashoffer-demo"
+  cd "${ROOT_DIR}/app/flashoffer/flashoffer-demo"
   exec npm run dev -- --host 0.0.0.0 --port "${PORT}"
 fi
 
-build_package "${ROOT_DIR}/app/flashoffer-react"
-build_package "${ROOT_DIR}/app/flashoffer-demo"
+build_package "${ROOT_DIR}/app/flashoffer/flashoffer-react"
+build_package "${ROOT_DIR}/app/flashoffer/flashoffer-demo"
 exec npm run preview -- --host 0.0.0.0 --port "${PORT}"

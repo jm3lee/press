@@ -11,11 +11,12 @@ shipping updates to production sites.
 Install dependencies and link the local component library:
 
 ```bash
-cd app/flashoffer-demo
+cd app/flashoffer/flashoffer-demo
 npm install
 ```
 
-`flashoffer-react` is referenced through a relative `file:` dependency, so
+`flashoffer-react` (located at `app/flashoffer/flashoffer-react`) is referenced
+through a relative `file:` dependency, so
 local edits to the library are reflected the next time you start or rebuild
 the demo.
 

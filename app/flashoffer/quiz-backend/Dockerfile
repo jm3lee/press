@@ -16,8 +16,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-COPY app/quiz-backend/requirements.txt ./requirements.txt
-COPY app/backend-common /backend-common
+COPY app/flashoffer/quiz-backend/requirements.txt ./requirements.txt
+COPY app/flashoffer/backend-common /backend-common
 COPY app/shell/py/pie /tmp/pie
 
 # Maintenance: dedicate a pip cache to the quiz image so
@@ -31,8 +31,8 @@ RUN --mount=type=cache,target=/root/.cache/pip,id=quiz-backend-pip \
     && pip install /tmp/pie dominate \
     && rm -rf /tmp/pie /backend-common
 
-COPY app/quiz-backend/quiz_backend ./quiz_backend
-COPY app/quiz-backend/tests ./tests
+COPY app/flashoffer/quiz-backend/quiz_backend ./quiz_backend
+COPY app/flashoffer/quiz-backend/tests ./tests
 
 FROM base AS dev
 
@@ -56,8 +56,8 @@ RUN --mount=type=cache,target=/var/cache/apt \
 RUN --mount=type=cache,target=/root/.cache/pip,id=quiz-backend-pip \
     pip install gunicorn
 
-COPY app/quiz-backend/nginx.conf /etc/nginx/conf.d/default.conf
-COPY app/quiz-backend/entrypoint.sh /entrypoint.sh
+COPY app/flashoffer/quiz-backend/nginx.conf /etc/nginx/conf.d/default.conf
+COPY app/flashoffer/quiz-backend/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 EXPOSE 8000

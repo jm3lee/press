@@ -35,7 +35,8 @@ Build and run the Flashoffer demo with docker compose:
 docker compose up flashoffer
 ```
 
-The container compiles `app/flashoffer-react` and `app/flashoffer-demo` before
+The container compiles `app/flashoffer/flashoffer-react` and
+`app/flashoffer/flashoffer-demo` before
 serving a production preview. Access the demo at
 <http://localhost:4173>. Rebuild the image after dependency changes to keep the
 container environment in sync.
