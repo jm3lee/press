@@ -7,3 +7,5 @@
   conventions for detailed parameter and return information.
 - Author documentation with the depth and tone expected between expert
   software engineers.
+- When updating documentation, include a representative code sample whenever
+  possible.
