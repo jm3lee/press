@@ -15,6 +15,18 @@ const materialBase = toPosixPath(
 );
 const muiUtilsBase = toPosixPath(resolvePath(nodeModulesDir, "@mui/utils"));
 
+const campaignProxyTarget =
+  process.env.FLASHOFFER_CAMPAIGN_API?.trim() || "http://localhost:8003";
+const campaignProxy =
+  campaignProxyTarget !== ""
+    ? {
+        "/api/campaign": {
+          target: campaignProxyTarget,
+          changeOrigin: true
+        }
+      }
+    : undefined;
+
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -40,6 +52,12 @@ export default defineConfig({
         replacement: `${muiUtilsBase}/$1`
       }
     ]
+  },
+  server: {
+    proxy: campaignProxy
+  },
+  preview: {
+    proxy: campaignProxy
   },
   build: {
     outDir: "../build/static/js",

@@ -44,6 +44,16 @@ function normalizeEndTime(endTime: Date | string | number): number {
 }
 
 /**
+ * Converts a duration into an absolute countdown deadline.
+ *
+ * @param remainingMs - Milliseconds remaining for the countdown.
+ * @returns Unix timestamp representing when the countdown ends.
+ */
+function deriveTargetFromDuration(remainingMs: number): number {
+  return Date.now() + Math.max(0, remainingMs);
+}
+
+/**
  * Derives the remaining time segments from a millisecond timestamp.
  *
  * @param targetTimestamp - Future timestamp that represents when the offer
@@ -106,9 +116,81 @@ function formatSegmentValue(value: number): string {
   return value.toString().padStart(2, "0");
 }
 
+/**
+ * Requests the remaining time for a campaign from the backend API.
+ *
+ * @param campaign - Identifier of the campaign to query.
+ * @param signal - Optional abort controller signal.
+ * @returns Remaining milliseconds or {@code null} when unavailable.
+ */
+async function fetchCampaignTimeRemaining(
+  campaign: string,
+  signal?: AbortSignal | null
+): Promise<number | null> {
+  if (typeof fetch !== "function") {
+    return null;
+  }
+
+  const encodedId = encodeURIComponent(campaign);
+  const url = `/api/campaign/${encodedId}/time_remaining?ct=countdown-timer&cid=${encodedId}`;
+
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      signal: signal ?? undefined
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const payload = await response.json();
+    if (typeof payload !== "object" || payload === null) {
+      return null;
+    }
+
+    const candidate =
+      (payload as { time_remaining_ms?: unknown }).time_remaining_ms ??
+      (payload as { timeRemainingMs?: unknown }).timeRemainingMs ??
+      (payload as { time_remaining?: unknown }).time_remaining ??
+      (payload as { timeRemaining?: unknown }).timeRemaining;
+
+    if (typeof candidate === "number" && Number.isFinite(candidate)) {
+      return candidate;
+    }
+
+    if (typeof candidate === "string") {
+      const parsed = Number(candidate);
+      if (Number.isFinite(parsed)) {
+        return parsed;
+      }
+    }
+
+    return null;
+  } catch (error) {
+    if (
+      (typeof DOMException !== "undefined" &&
+        error instanceof DOMException &&
+        error.name === "AbortError") ||
+      (typeof error === "object" &&
+        error !== null &&
+        (error as { name?: string }).name === "AbortError")
+    ) {
+      return null;
+    }
+
+    throw error;
+  }
+}
+
 export interface CountdownTimerProps {
+  /** Identifier for a campaign whose remaining time should be fetched. */
+  campaignId?: string;
   /** Target time indicating when the promotion ends. */
-  endTime: Date | string | number;
+  endTime?: Date | string | number;
+  /** Remaining time, in milliseconds, when no campaign is provided. */
+  timeRemainingMs?: number;
   /** Optional number of items remaining for the promotion. */
   quantityRemaining?: number;
   /** Headline emphasizing the urgency of the promotion. */
@@ -129,21 +211,120 @@ const DEFAULT_QUANTITY_LABEL = "units remaining";
  * High-contrast countdown module pairing urgency copy with remaining
  * quantity.
  *
+ * When provided a `campaignId`, the component retrieves countdown data from
+ * the campaign API. Without a campaign identifier the caller must supply
+ * either `timeRemainingMs` or `endTime` to determine the countdown target.
+ *
  * @param props - Component configuration describing end time and messaging.
  * @returns A visually urgent countdown surface.
  */
 export function CountdownTimer({
+  campaignId,
   endTime,
+  timeRemainingMs,
   quantityRemaining,
   headline = DEFAULT_HEADLINE,
   timerLabel = DEFAULT_TIMER_LABEL,
   quantityLabel = DEFAULT_QUANTITY_LABEL,
   intervalMs = 1000
 }: CountdownTimerProps) {
-  const targetTimestamp = useMemo(() => normalizeEndTime(endTime), [endTime]);
+  const normalizedCampaignId =
+    typeof campaignId === "string" ? campaignId.trim() : "";
+  const hasCampaign = normalizedCampaignId !== "";
+  const hasDurationInput = typeof timeRemainingMs === "number";
+  if (hasDurationInput && !Number.isFinite(timeRemainingMs)) {
+    throw new Error(
+      "CountdownTimer received an invalid timeRemainingMs value."
+    );
+  }
+
+  const hasExplicitDuration = hasDurationInput;
+  const hasEndTime = endTime !== undefined;
+
+  if (!hasCampaign && !hasExplicitDuration && !hasEndTime) {
+    throw new Error(
+      "CountdownTimer requires either a campaignId, timeRemainingMs, or endTime."
+    );
+  }
+
+  const [targetTimestamp, setTargetTimestamp] = useState<number>(() => {
+    if (hasExplicitDuration && typeof timeRemainingMs === "number") {
+      return deriveTargetFromDuration(timeRemainingMs);
+    }
+
+    if (hasEndTime && endTime !== undefined) {
+      return normalizeEndTime(endTime);
+    }
+
+    return Date.now();
+  });
   const [segments, setSegments] = useState<CountdownSegments>(() =>
     deriveSegments(targetTimestamp)
   );
+
+  useEffect(() => {
+    if (hasCampaign) {
+      let cancelled = false;
+      const controller =
+        typeof AbortController !== "undefined" ? new AbortController() : null;
+
+      async function loadCampaignRemaining() {
+        try {
+          const remainingMs = await fetchCampaignTimeRemaining(
+            normalizedCampaignId,
+            controller?.signal
+          );
+
+          if (cancelled) {
+            return;
+          }
+
+          const safeRemaining = Math.max(0, remainingMs ?? 0);
+          setTargetTimestamp(deriveTargetFromDuration(safeRemaining));
+        } catch (error) {
+          if (cancelled) {
+            return;
+          }
+
+          if (
+            (typeof DOMException !== "undefined" &&
+              error instanceof DOMException &&
+              error.name === "AbortError") ||
+            (typeof error === "object" &&
+              error !== null &&
+              (error as { name?: string }).name === "AbortError")
+          ) {
+            return;
+          }
+
+          setTargetTimestamp(Date.now());
+        }
+      }
+
+      void loadCampaignRemaining();
+
+      return () => {
+        cancelled = true;
+        controller?.abort();
+      };
+    }
+
+    if (hasExplicitDuration && typeof timeRemainingMs === "number") {
+      setTargetTimestamp(deriveTargetFromDuration(timeRemainingMs));
+      return;
+    }
+
+    if (hasEndTime && endTime !== undefined) {
+      setTargetTimestamp(normalizeEndTime(endTime));
+    }
+  }, [
+    hasCampaign,
+    normalizedCampaignId,
+    hasExplicitDuration,
+    timeRemainingMs,
+    hasEndTime,
+    endTime
+  ]);
 
   useEffect(() => {
     setSegments(deriveSegments(targetTimestamp));
