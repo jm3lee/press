@@ -41,7 +41,7 @@ export function CountdownShowcaseSection() {
           </Box>
           <Box sx={{ width: "100%", maxWidth: 420 }}>
             <CountdownTimer
-              timeRemainingMs={restockWindowMs}
+              campaignId="flashoffer-demo-2"
               timerLabel="Restock drops in"
               headline="Set an alert for the next batch."
             />

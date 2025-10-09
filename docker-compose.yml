@@ -114,6 +114,11 @@ services:
       POSTGRES_USER: analytics
       POSTGRES_PASSWORD: analytics
       POSTGRES_DB: analytics
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
     ports:
       - "5433:5432"
     volumes:
@@ -131,7 +136,13 @@ services:
       DATABASE_NAME: analytics
       CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-http://localhost:5173,http://localhost:4173}
     depends_on:
-      - analytics-db
+      analytics-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "true"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
     ports:
       - "8001:8000"
     volumes:
@@ -150,6 +161,11 @@ services:
       CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-http://localhost:5173,http://localhost:4173}
     depends_on:
       - analytics-db
+    healthcheck:
+      test: ["CMD-SHELL", "true"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
     ports:
       - "8002:8000"
     volumes:
@@ -167,9 +183,13 @@ services:
       DATABASE_NAME: analytics
       CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-http://localhost:5173,http://localhost:4173}
     depends_on:
-      - analytics-db
-    ports:
-      - "8003:8000"
+      analytics-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "true"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
     volumes:
       - ./app/flashoffer/campaign-backend:/app
 
@@ -205,7 +225,7 @@ services:
       VITE_FLASHOFFER_ANALYTICS_ENDPOINT: ${FLASHOFFER_ANALYTICS_ENDPOINT:-http://localhost:8001/events}
       VITE_FLASHOFFER_ANALYTICS_RECENT_URL: ${FLASHOFFER_ANALYTICS_RECENT_URL:-http://localhost:8001/events/recent}
       VITE_FLASHOFFER_QUIZ_EVENTS_ENDPOINT: ${FLASHOFFER_QUIZ_EVENTS_ENDPOINT:-http://localhost:8002/api/events/quiz}
-      VITE_FLASHOFFER_CAMPAIGN_API_BASE: ${FLASHOFFER_CAMPAIGN_API_BASE:-http://localhost:8003}
+      VITE_FLASHOFFER_CAMPAIGN_API_BASE: ${FLASHOFFER_CAMPAIGN_API_BASE:-http://campaign-backend:8000}
     ports:
       - "${FLASHOFFER_DEV_PORT:-5173}:5173"
     volumes:
