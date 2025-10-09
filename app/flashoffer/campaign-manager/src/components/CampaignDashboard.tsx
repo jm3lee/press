@@ -159,7 +159,7 @@ export const CampaignDashboard = ({
   } else {
     eventPaneContent = (
       <Box sx={{ width: "100%" }}>
-        <EventConsole eventsUrl={eventsUrl} limit={50} authToken={token} />
+        <EventConsole eventsUrl={eventsUrl} limit={10} authToken={token} />
       </Box>
     );
   }

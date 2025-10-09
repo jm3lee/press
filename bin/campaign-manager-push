@@ -1,0 +1,4 @@
+#!/bin/bash
+CONTAINER_REGISTRY=registry.digitalocean.com/flashoffer
+docker tag press-campaign-manager ${CONTAINER_REGISTRY}/campaign-manager
+docker push ${CONTAINER_REGISTRY}/campaign-manager

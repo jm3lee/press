@@ -186,7 +186,7 @@ services:
     depends_on:
       - analytics-db
     ports:
-      - "4173:4173"
+      - "10000:4173"
 
   flashoffer:
     build:
