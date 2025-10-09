@@ -4,7 +4,7 @@
 
 # Interface: EngagementProviderProps
 
-Defined in: src/analytics/EngagementProvider.tsx:27
+Defined in: src/analytics/EngagementProvider.tsx:33
 
 ## Properties
 
@@ -12,7 +12,7 @@ Defined in: src/analytics/EngagementProvider.tsx:27
 
 > `optional` **endpoint**: `string`
 
-Defined in: src/analytics/EngagementProvider.tsx:28
+Defined in: src/analytics/EngagementProvider.tsx:34
 
 ***
 
@@ -20,7 +20,15 @@ Defined in: src/analytics/EngagementProvider.tsx:28
 
 > **site**: `string`
 
-Defined in: src/analytics/EngagementProvider.tsx:29
+Defined in: src/analytics/EngagementProvider.tsx:35
+
+***
+
+### campaignId?
+
+> `optional` **campaignId**: `string`
+
+Defined in: src/analytics/EngagementProvider.tsx:36
 
 ***
 
@@ -28,7 +36,7 @@ Defined in: src/analytics/EngagementProvider.tsx:29
 
 > **children**: `ReactNode`
 
-Defined in: src/analytics/EngagementProvider.tsx:30
+Defined in: src/analytics/EngagementProvider.tsx:37
 
 ***
 
@@ -36,7 +44,7 @@ Defined in: src/analytics/EngagementProvider.tsx:30
 
 > `optional` **flushInterval**: `null` \| `number`
 
-Defined in: src/analytics/EngagementProvider.tsx:31
+Defined in: src/analytics/EngagementProvider.tsx:38
 
 ***
 
@@ -44,7 +52,7 @@ Defined in: src/analytics/EngagementProvider.tsx:31
 
 > `optional` **heartbeatInterval**: `number`
 
-Defined in: src/analytics/EngagementProvider.tsx:32
+Defined in: src/analytics/EngagementProvider.tsx:39
 
 ***
 
@@ -52,7 +60,7 @@ Defined in: src/analytics/EngagementProvider.tsx:32
 
 > `optional` **idleTimeout**: `number`
 
-Defined in: src/analytics/EngagementProvider.tsx:33
+Defined in: src/analytics/EngagementProvider.tsx:40
 
 ***
 
@@ -60,7 +68,7 @@ Defined in: src/analytics/EngagementProvider.tsx:33
 
 > `optional` **scrollThresholds**: `number`[]
 
-Defined in: src/analytics/EngagementProvider.tsx:34
+Defined in: src/analytics/EngagementProvider.tsx:41
 
 ***
 
@@ -68,7 +76,7 @@ Defined in: src/analytics/EngagementProvider.tsx:34
 
 > `optional` **viewThresholds**: `number`[]
 
-Defined in: src/analytics/EngagementProvider.tsx:35
+Defined in: src/analytics/EngagementProvider.tsx:42
 
 ***
 
@@ -76,4 +84,4 @@ Defined in: src/analytics/EngagementProvider.tsx:35
 
 > `optional` **maxBatch**: `number`
 
-Defined in: src/analytics/EngagementProvider.tsx:36
+Defined in: src/analytics/EngagementProvider.tsx:43

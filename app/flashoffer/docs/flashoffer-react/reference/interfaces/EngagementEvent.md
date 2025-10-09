@@ -4,7 +4,7 @@
 
 # Interface: EngagementEvent
 
-Defined in: src/analytics/EngagementProvider.tsx:14
+Defined in: src/analytics/EngagementProvider.tsx:20
 
 ## Properties
 
@@ -12,7 +12,7 @@ Defined in: src/analytics/EngagementProvider.tsx:14
 
 > **type**: `string`
 
-Defined in: src/analytics/EngagementProvider.tsx:15
+Defined in: src/analytics/EngagementProvider.tsx:21
 
 ***
 
@@ -20,7 +20,7 @@ Defined in: src/analytics/EngagementProvider.tsx:15
 
 > **target**: `string`
 
-Defined in: src/analytics/EngagementProvider.tsx:16
+Defined in: src/analytics/EngagementProvider.tsx:22
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: src/analytics/EngagementProvider.tsx:16
 
 > **meta**: `Record`\<`string`, `unknown`\>
 
-Defined in: src/analytics/EngagementProvider.tsx:17
+Defined in: src/analytics/EngagementProvider.tsx:23
 
 ***
 
@@ -36,4 +36,4 @@ Defined in: src/analytics/EngagementProvider.tsx:17
 
 > **at**: `string`
 
-Defined in: src/analytics/EngagementProvider.tsx:18
+Defined in: src/analytics/EngagementProvider.tsx:24

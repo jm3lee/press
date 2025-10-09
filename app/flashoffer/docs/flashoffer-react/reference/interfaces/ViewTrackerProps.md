@@ -4,11 +4,7 @@
 
 # Interface: ViewTrackerProps
 
-Defined in: src/analytics/EngagementProvider.tsx:559
-
-## Indexable
-
-\[`key`: `string`\]: `unknown`
+Defined in: src/analytics/EngagementProvider.tsx:659
 
 ## Properties
 
@@ -16,7 +12,7 @@ Defined in: src/analytics/EngagementProvider.tsx:559
 
 > **trackId**: `string`
 
-Defined in: src/analytics/EngagementProvider.tsx:560
+Defined in: src/analytics/EngagementProvider.tsx:660
 
 ***
 
@@ -24,7 +20,7 @@ Defined in: src/analytics/EngagementProvider.tsx:560
 
 > `optional` **meta**: `Record`\<`string`, `unknown`\>
 
-Defined in: src/analytics/EngagementProvider.tsx:561
+Defined in: src/analytics/EngagementProvider.tsx:661
 
 ***
 
@@ -32,7 +28,7 @@ Defined in: src/analytics/EngagementProvider.tsx:561
 
 > `optional` **as**: `ElementType`
 
-Defined in: src/analytics/EngagementProvider.tsx:562
+Defined in: src/analytics/EngagementProvider.tsx:662
 
 ***
 
@@ -40,4 +36,12 @@ Defined in: src/analytics/EngagementProvider.tsx:562
 
 > `optional` **children**: `ReactNode`
 
-Defined in: src/analytics/EngagementProvider.tsx:563
+Defined in: src/analytics/EngagementProvider.tsx:663
+
+***
+
+### [key: string]
+
+> **[key: string]**: `unknown`
+
+Defined in: src/analytics/EngagementProvider.tsx:664

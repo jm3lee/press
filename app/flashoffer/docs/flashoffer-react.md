@@ -214,8 +214,8 @@ and interaction events. The helpers expose consistent metadata for downstream
 analytics services and gracefully degrade when browser APIs are unavailable.
 
 Wrap the subtree you want to measure in an `EngagementProvider`. The provider
-requires a `site` identifier and can optionally post batches to an HTTP
-`endpoint`.
+requires a `site` identifier and can optionally include a `campaignId` for
+attribution while posting batches to an HTTP `endpoint`.
 
 ```tsx
 import {
@@ -229,7 +229,11 @@ export function LandingWithAnalytics() {
   const recordInteraction = useRecordInteraction("primary-cta");
 
   return (
-    <EngagementProvider site="marketing-site" endpoint="/api/events">
+    <EngagementProvider
+      site="marketing-site"
+      campaignId="spring-preview"
+      endpoint="/api/events"
+    >
       <AutoTrack />
       <ViewTracker trackId="hero">
         <HeroBanner
