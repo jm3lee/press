@@ -197,7 +197,7 @@ services:
   campaign-manager:
     build:
       context: .
-      dockerfile: ./app/flashoffer/campaign_manager/Dockerfile
+      dockerfile: ./app/flashoffer/campaign-manager/Dockerfile
     environment:
       DATABASE_HOST: analytics-db
       DATABASE_PORT: 5432
@@ -213,7 +213,8 @@ services:
       timeout: 3s
       retries: 5
     ports:
-      - "4174:4173"
+      - "4173:4173"
+
   flashoffer:
     build:
       context: .

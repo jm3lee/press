@@ -74,7 +74,7 @@ export const CampaignForm = ({
 
     await onSubmit(normalizedId, {
       name: normalizedName ? normalizedName : null,
-      endTime: iso,
+      end_time: iso,
     });
   };
 
