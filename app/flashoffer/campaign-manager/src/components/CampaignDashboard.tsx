@@ -26,6 +26,7 @@ interface CampaignDashboardProps {
   onRefresh: () => Promise<void> | void;
   onLogout: () => void;
   expiresAt: string | null;
+  token: string;
 }
 
 type DialogState =
@@ -40,6 +41,7 @@ export const CampaignDashboard = ({
   onRefresh,
   onLogout,
   expiresAt,
+  token,
 }: CampaignDashboardProps): JSX.Element => {
   const [dialog, setDialog] = useState<DialogState | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
@@ -157,7 +159,7 @@ export const CampaignDashboard = ({
   } else {
     eventPaneContent = (
       <Box sx={{ width: "100%" }}>
-        <EventConsole eventsUrl={eventsUrl} limit={50} />
+        <EventConsole eventsUrl={eventsUrl} limit={50} authToken={token} />
       </Box>
     );
   }

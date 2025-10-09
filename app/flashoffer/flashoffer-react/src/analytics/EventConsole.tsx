@@ -7,10 +7,19 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import "./EventConsole.css";
 
+/**
+ * Properties for configuring the `EventConsole` component.
+ *
+ * @property eventsUrl - Endpoint that serves recent campaign events.
+ * @property pollInterval - Milliseconds between successive fetches.
+ * @property limit - Maximum number of events to request per poll.
+ * @property authToken - Optional bearer token for authenticated requests.
+ */
 export interface EventConsoleProps {
   eventsUrl?: string;
   pollInterval?: number;
   limit?: number;
+  authToken?: string;
 }
 
 interface CapturedEvent {
@@ -75,10 +84,14 @@ function extractEvents(
   return data.events as CapturedEvent[];
 }
 
+/**
+ * Render a live-updating console of campaign events fetched from the backend.
+ */
 export function EventConsole({
   eventsUrl,
   pollInterval = 3000,
   limit = 25,
+  authToken,
 }: EventConsoleProps) {
   const [events, setEvents] = useState<CapturedEvent[]>([]);
   const [status, setStatus] = useState<ConsoleStatus>("idle");
@@ -124,6 +137,7 @@ export function EventConsole({
         const response = await fetch(url, {
           credentials: "include",
           signal: controller.signal,
+          headers: authToken ? { Authorization: `Bearer ${authToken}` } : undefined,
         });
         if (!response.ok) {
           throw new Error(`Request failed with status ${response.status}`);
@@ -153,6 +167,7 @@ export function EventConsole({
     };
   }, [
     applyLimitParam,
+    authToken,
     eventsUrl,
     handleLoadFailure,
     handleLoadSuccess,
