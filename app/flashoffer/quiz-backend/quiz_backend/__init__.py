@@ -1,3 +1,6 @@
+# Copyright (c) Flashoffer Developers
+# Released under the MIT license.
+
 """Quiz backend service package."""
 
 from __future__ import annotations

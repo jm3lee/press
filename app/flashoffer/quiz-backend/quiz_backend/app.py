@@ -1,3 +1,6 @@
+# Copyright (c) Flashoffer Developers
+# Released under the MIT license.
+
 """Flask application providing an ingestion API for quiz events."""
 
 from __future__ import annotations

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Flashoffer Developers
+ * Released under the MIT license.
+ */
+
 import Stack from "@mui/material/Stack";
 import type { ReactNode } from "react";
 import { SectionHeader } from "./SectionHeader";

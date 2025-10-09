@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Flashoffer Developers
+ * Released under the MIT license.
+ */
+
 import { resolve as resolvePath, sep } from "node:path";
 import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vite";

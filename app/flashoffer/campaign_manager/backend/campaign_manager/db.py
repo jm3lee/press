@@ -1,3 +1,6 @@
+# Copyright (c) Flashoffer Developers
+# Released under the MIT license.
+
 """Database helpers for the campaign manager API."""
 
 from __future__ import annotations

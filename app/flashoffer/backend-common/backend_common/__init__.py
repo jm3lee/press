@@ -1,3 +1,6 @@
+# Copyright (c) Flashoffer Developers
+# Released under the MIT license.
+
 """Shared helpers for backend Flask services."""
 
 from .config import DatabaseConfig

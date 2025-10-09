@@ -1,3 +1,6 @@
+# Copyright (c) Flashoffer Developers
+# Released under the MIT license.
+
 """CORS configuration helpers."""
 
 from __future__ import annotations

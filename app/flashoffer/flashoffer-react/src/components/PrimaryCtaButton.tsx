@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Flashoffer Developers
+ * Released under the MIT license.
+ */
+
 import Button from "@mui/material/Button";
 import type { ButtonProps } from "@mui/material/Button";
 import type { AnchorHTMLAttributes, ReactNode } from "react";

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Flashoffer Developers
+ * Released under the MIT license.
+ */
+
 export * from "./types";
 export * from "./CustomizationControlsSection";
 export * from "./HeroShowcaseSection";

@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Copyright (c) Flashoffer Developers
+# Released under the MIT license.
+
 # Streaming COPY → pandas in batches (memory-safe) with psycopg v3
 
 import codecs
