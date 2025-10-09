@@ -107,7 +107,9 @@ services:
     profiles: ["pdoc"]
 
   analytics-db:
-    build: ./app/analytics-db
+    build:
+      context: .
+      dockerfile: ./app/analytics-db/Dockerfile
     environment:
       POSTGRES_USER: analytics
       POSTGRES_PASSWORD: analytics
