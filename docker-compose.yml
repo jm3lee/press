@@ -155,6 +155,24 @@ services:
     volumes:
       - ./app/flashoffer/quiz-backend:/app
 
+  campaign-backend:
+    build:
+      context: .
+      dockerfile: ./app/flashoffer/campaign-backend/Dockerfile
+    environment:
+      DATABASE_HOST: analytics-db
+      DATABASE_PORT: 5432
+      DATABASE_USER: analytics
+      DATABASE_PASSWORD: analytics
+      DATABASE_NAME: analytics
+      CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-http://localhost:5173,http://localhost:4173}
+    depends_on:
+      - analytics-db
+    ports:
+      - "8003:8000"
+    volumes:
+      - ./app/flashoffer/campaign-backend:/app
+
   flashoffer:
     build:
       context: .
@@ -165,6 +183,7 @@ services:
       VITE_FLASHOFFER_ANALYTICS_ENDPOINT: ${FLASHOFFER_ANALYTICS_ENDPOINT:-http://localhost:8001/events}
       VITE_FLASHOFFER_ANALYTICS_RECENT_URL: ${FLASHOFFER_ANALYTICS_RECENT_URL:-http://localhost:8001/events/recent}
       VITE_FLASHOFFER_QUIZ_EVENTS_ENDPOINT: ${FLASHOFFER_QUIZ_EVENTS_ENDPOINT:-http://localhost:8002/api/events/quiz}
+      VITE_FLASHOFFER_CAMPAIGN_API_BASE: ${FLASHOFFER_CAMPAIGN_API_BASE:-http://localhost:8003}
     ports:
       - "${FLASHOFFER_PORT:-4173}:4173"
       - "80:80"
@@ -173,6 +192,7 @@ services:
     depends_on:
       - analytics-backend
       - quiz-backend
+      - campaign-backend
 
   flashoffer-dev:
     build:
@@ -185,6 +205,7 @@ services:
       VITE_FLASHOFFER_ANALYTICS_ENDPOINT: ${FLASHOFFER_ANALYTICS_ENDPOINT:-http://localhost:8001/events}
       VITE_FLASHOFFER_ANALYTICS_RECENT_URL: ${FLASHOFFER_ANALYTICS_RECENT_URL:-http://localhost:8001/events/recent}
       VITE_FLASHOFFER_QUIZ_EVENTS_ENDPOINT: ${FLASHOFFER_QUIZ_EVENTS_ENDPOINT:-http://localhost:8002/api/events/quiz}
+      VITE_FLASHOFFER_CAMPAIGN_API_BASE: ${FLASHOFFER_CAMPAIGN_API_BASE:-http://localhost:8003}
     ports:
       - "${FLASHOFFER_DEV_PORT:-5173}:5173"
     volumes:
@@ -192,6 +213,7 @@ services:
     depends_on:
       - analytics-backend
       - quiz-backend
+      - campaign-backend
 
 volumes:
   analytics_data:

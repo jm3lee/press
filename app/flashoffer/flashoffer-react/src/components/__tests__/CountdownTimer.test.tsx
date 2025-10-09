@@ -13,14 +13,33 @@ import type { CountdownTimerProps } from "../CountdownTimer";
 const NOW = new Date("2024-01-01T00:00:00Z");
 
 describe("CountdownTimer", () => {
+  const originalFetch = globalThis.fetch;
+
   beforeEach(() => {
     jest.useFakeTimers();
     jest.setSystemTime(NOW);
+    jest.spyOn(console, "warn").mockImplementation(() => {});
   });
 
   afterEach(() => {
     jest.useRealTimers();
+    globalThis.fetch = originalFetch;
+    jest.restoreAllMocks();
   });
+
+  function buildProps(
+    overrides: Partial<CountdownTimerProps> = {}
+  ): CountdownTimerProps {
+    if (
+      overrides.campaignId === undefined &&
+      overrides.timeRemainingMs === undefined &&
+      overrides.endTime === undefined
+    ) {
+      return { ...overrides, endTime: NOW } as CountdownTimerProps;
+    }
+
+    return overrides as CountdownTimerProps;
+  }
 
   /**
    * Renders the countdown timer within the Flashoffer theme.
@@ -37,7 +56,7 @@ describe("CountdownTimer", () => {
         applyCssBaseline={false}
         {...providerProps}
       >
-        <CountdownTimer endTime={NOW} {...props} />
+        <CountdownTimer {...buildProps(props)} />
       </FlashofferThemeProvider>
     );
   }
@@ -96,6 +115,77 @@ describe("CountdownTimer", () => {
 
     expect(screen.getByRole("timer")).toHaveStyle(
       "border-color: rgba(34, 197, 94, 0.4)"
+    );
+  });
+
+  it("requests campaign deadlines when a campaign identifier is supplied", async () => {
+    const oneHourFromNow = new Date(NOW.getTime() + 3_600_000);
+    const mockResponse = {
+      ok: true,
+      json: async () => ({ end_time: oneHourFromNow.toISOString() })
+    } as unknown as Response;
+    const fetchSpy = jest.fn().mockResolvedValue(mockResponse);
+    globalThis.fetch = fetchSpy as unknown as typeof globalThis.fetch;
+
+    renderTimer({ campaignId: "flashoffer-demo" });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      "/api/campaign/flashoffer-demo/end_time",
+      expect.objectContaining({
+        headers: { Accept: "application/json" }
+      })
+    );
+    expect(screen.getByLabelText(/hours remaining/i)).toHaveTextContent("01");
+  });
+
+  it("falls back to zeroed segments when the campaign lookup fails", async () => {
+    const failingFetch = jest
+      .fn()
+      .mockRejectedValue(new Error("network unavailable"));
+    globalThis.fetch = failingFetch as unknown as typeof globalThis.fetch;
+
+    renderTimer({ campaignId: "flashoffer-demo" });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(screen.getByLabelText(/seconds remaining/i)).toHaveTextContent("00");
+    expect(screen.getByLabelText(/minutes remaining/i)).toHaveTextContent("00");
+  });
+
+  it("throws when combining a campaign identifier with an explicit deadline", () => {
+    expect(() =>
+      render(
+        <FlashofferThemeProvider applyCssBaseline={false}>
+          {/*
+           * Casting keeps TypeScript satisfied while intentionally supplying
+           * an invalid prop combination.
+           */}
+          <CountdownTimer
+            {...({
+              campaignId: "flashoffer-demo",
+              endTime: NOW
+            } as CountdownTimerProps)}
+          />
+        </FlashofferThemeProvider>
+      )
+    ).toThrow(/cannot mix campaignid/i);
+  });
+
+  it("throws when no campaign or time source is provided", () => {
+    expect(() =>
+      render(
+        <FlashofferThemeProvider applyCssBaseline={false}>
+          <CountdownTimer {...({} as CountdownTimerProps)} />
+        </FlashofferThemeProvider>
+      )
+    ).toThrow(
+      /requires either a campaignid or a timeremainingms\/endtime value/i
     );
   });
 });

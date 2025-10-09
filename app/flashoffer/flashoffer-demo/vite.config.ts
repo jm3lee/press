@@ -15,6 +15,17 @@ const materialBase = toPosixPath(
 );
 const muiUtilsBase = toPosixPath(resolvePath(nodeModulesDir, "@mui/utils"));
 
+const campaignProxyTarget = process.env.VITE_FLASHOFFER_CAMPAIGN_API_BASE?.trim();
+const proxyTarget = campaignProxyTarget ? campaignProxyTarget.replace(/\/$/, "") : undefined;
+const proxyConfig = proxyTarget
+  ? {
+      "/api/campaign": {
+        target: proxyTarget,
+        changeOrigin: true
+      }
+    }
+  : undefined;
+
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -40,6 +51,12 @@ export default defineConfig({
         replacement: `${muiUtilsBase}/$1`
       }
     ]
+  },
+  server: {
+    proxy: proxyConfig
+  },
+  preview: {
+    proxy: proxyConfig
   },
   build: {
     outDir: "../build/static/js",
