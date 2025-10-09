@@ -118,8 +118,10 @@ Label for the retry button. Defaults to "Try again".
 
 Defined in: src/components/MultipleChoiceQuiz.tsx:61
 
-Allows additional attempts when the initial submission is incorrect. Defaults
-to true when a correct answer is configured.
+Allows additional attempts when the initial submission is incorrect. While
+retries remain available, incorrect answers only highlight the submitted
+choice so the correct option stays hidden. Defaults to true when a correct
+answer is configured.
 
 ***
 

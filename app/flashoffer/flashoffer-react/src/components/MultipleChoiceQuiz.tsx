@@ -140,6 +140,8 @@ export function MultipleChoiceQuiz({
   }, [disabled, evaluation, hasSubmitted, resolvedAllowRetry]);
 
   const showFeedback = Boolean(hasSubmitted && correctOptionId);
+  const revealCorrectAnswer =
+    showFeedback && (evaluation === true || !resolvedAllowRetry);
   const submitDisabled =
     !selectedId ||
     disabled ||
@@ -193,8 +195,16 @@ export function MultipleChoiceQuiz({
                   const isSelected = selectedId === option.id;
                   const isAnswer = correctOptionId === option.id;
                   const isSubmittedSelection = submittedId === option.id;
-                  const highlight =
-                    showFeedback && (isAnswer || isSubmittedSelection);
+                  const highlightSelection = showFeedback && isSubmittedSelection;
+                  const highlightAnswer = revealCorrectAnswer && isAnswer;
+                  const highlight = highlightAnswer || highlightSelection;
+                  const optionState = highlight
+                    ? highlightAnswer
+                      ? "correct"
+                      : "incorrect"
+                    : isSelected
+                    ? "selected"
+                    : "default";
 
                   return (
                     <FormControlLabel
@@ -217,6 +227,7 @@ export function MultipleChoiceQuiz({
                         </Stack>
                       }
                       disabled={disableChoices}
+                      data-option-state={optionState}
                       sx={(theme) => ({
                         alignItems: "flex-start",
                         m: 0,
@@ -226,7 +237,7 @@ export function MultipleChoiceQuiz({
                         borderWidth: 1,
                         borderStyle: "solid",
                         borderColor: highlight
-                          ? isAnswer
+                          ? highlightAnswer
                             ? theme.palette.success.main
                             : theme.palette.error.main
                           : isSelected
@@ -234,7 +245,7 @@ export function MultipleChoiceQuiz({
                           : theme.palette.divider,
                         backgroundColor: highlight
                           ? alpha(
-                              isAnswer
+                              highlightAnswer
                                 ? theme.palette.success.main
                                 : theme.palette.error.main,
                               0.08
