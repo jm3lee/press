@@ -81,4 +81,38 @@ describe("MultipleChoiceQuiz", () => {
         .checked
     ).toBe(false);
   });
+
+  it("hides the correct answer highlight when retries are allowed", () => {
+    renderQuiz();
+
+    fireEvent.click(
+      screen.getByRole("radio", { name: /story taps forward/i })
+    );
+    fireEvent.click(screen.getByRole("button", { name: /check answer/i }));
+
+    const incorrectOptionLabel = screen
+      .getByText(/story taps forward/i)
+      .closest("label");
+    const correctOptionLabel = screen
+      .getByText(/saves per reel/i)
+      .closest("label");
+
+    expect(incorrectOptionLabel?.dataset.optionState).toBe("incorrect");
+    expect(correctOptionLabel?.dataset.optionState).toBe("default");
+  });
+
+  it("reveals the correct answer when retries are disabled", () => {
+    renderQuiz({ allowRetry: false });
+
+    fireEvent.click(
+      screen.getByRole("radio", { name: /story taps forward/i })
+    );
+    fireEvent.click(screen.getByRole("button", { name: /check answer/i }));
+
+    const correctOptionLabel = screen
+      .getByText(/saves per reel/i)
+      .closest("label");
+
+    expect(correctOptionLabel?.dataset.optionState).toBe("correct");
+  });
 });

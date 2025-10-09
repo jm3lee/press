@@ -50,11 +50,14 @@ through the `onAnswer` callback without rendering evaluation UI.
 ## Submission flow
 
 By default, learners can retry after an incorrect attempt when a correct
-answer is defined. The behaviour can be changed by setting `allowRetry` to
-`false`. The component disables the submit button until an option is
-selected and automatically locks choices after a correct response. Every
-submission triggers `onAnswer` with the selected option identifier and the
-computed correctness flag when available.
+answer is defined. During these retries the component only highlights the
+submitted option, keeping the correct choice hidden until the learner
+either responds accurately or retries are disabled. The behaviour can be
+changed by setting `allowRetry` to `false`. The component disables the
+submit button until an option is selected and automatically locks choices
+after a correct response. Every submission triggers `onAnswer` with the
+selected option identifier and the computed correctness flag when
+available.
 
 ## Accessibility
 
