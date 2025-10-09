@@ -30,3 +30,5 @@ services:
     volumes:
       - ./app/flashoffer/analytics-backend:/app
 
+volumes:
+  analytics_data:
