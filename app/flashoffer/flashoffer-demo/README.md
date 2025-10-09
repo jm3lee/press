@@ -44,3 +44,7 @@ the top of the page:
 To try different copy or preview cards, update the arrays declared in
 `src/App.tsx`. Reload the dev server (or rerun the build) after changing the
 sample data to ensure the generated bundle matches your updates.
+
+The countdown showcase highlights how to wire `CountdownTimer` into offer
+pages. Adjust the props in `src/sections/CountdownShowcaseSection.tsx` to try
+alternate headlines, quantities, or end times that match your promotion.

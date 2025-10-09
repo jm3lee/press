@@ -20,6 +20,12 @@ const OverviewSection = lazy(async () => ({
   default: (await import("./sections/OverviewSection")).OverviewSection
 }));
 
+const CountdownShowcaseSection = lazy(async () => ({
+  default: (
+    await import("./sections/CountdownShowcaseSection")
+  ).CountdownShowcaseSection
+}));
+
 const CtaShowcaseSection = lazy(async () => ({
   default: (await import("./sections/CtaShowcaseSection")).CtaShowcaseSection
 }));
@@ -279,6 +285,9 @@ export default function App() {
             </Suspense>
             <Suspense fallback={null}>
               <OverviewSection overviewMeta={overviewMeta} />
+            </Suspense>
+            <Suspense fallback={null}>
+              <CountdownShowcaseSection />
             </Suspense>
             <Suspense fallback={null}>
               <CtaShowcaseSection />

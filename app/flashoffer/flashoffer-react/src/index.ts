@@ -36,6 +36,9 @@ export type {
   MultipleChoiceQuizProps
 } from "./components/MultipleChoiceQuiz";
 
+export { CountdownTimer } from "./components/CountdownTimer";
+export type { CountdownTimerProps } from "./components/CountdownTimer";
+
 export { InstagramEngagementSection } from "./components/InstagramEngagementSection";
 export type { InstagramEngagementSectionProps } from "./components/InstagramEngagementSection";
 
