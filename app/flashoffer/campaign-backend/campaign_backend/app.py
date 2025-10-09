@@ -16,6 +16,9 @@ from backend_common import DatabaseConfig, configure_cors
 from .db import CampaignStore
 
 
+HEALTHCHECK_QUERY = "SELECT 1 -- verify campaign database connectivity"
+
+
 def _compute_remaining_ms(end_time: datetime) -> int:
     now = datetime.now(tz=timezone.utc)
     delta = end_time.astimezone(timezone.utc) - now
@@ -38,7 +41,7 @@ def create_app() -> Flask:
     def healthcheck() -> Response:
         with storage.connection() as conn:  # type: ignore[assignment]
             with conn.cursor() as cur:
-                cur.execute("SELECT 1")
+                cur.execute(HEALTHCHECK_QUERY)
                 cur.fetchone()
         return jsonify({"status": "ok"})
 

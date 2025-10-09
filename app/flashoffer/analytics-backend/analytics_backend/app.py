@@ -17,6 +17,9 @@ from backend_common import DatabaseConfig, configure_cors
 from .db import TimescaleDB
 
 
+HEALTHCHECK_QUERY = "SELECT 1 -- confirm database connectivity"
+
+
 def _load_event_payload(payload: Dict[str, Any]) -> Iterable[Dict[str, Any]]:
     required = {"site", "session_id", "events"}
     missing = required - payload.keys()
@@ -78,7 +81,7 @@ def create_app() -> Flask:
     def healthcheck() -> Response:
         with storage.connection() as conn:  # type: ignore[assignment]
             with conn.cursor() as cur:
-                cur.execute("SELECT 1")
+                cur.execute(HEALTHCHECK_QUERY)
                 cur.fetchone()
         return jsonify({"status": "ok"})
 
