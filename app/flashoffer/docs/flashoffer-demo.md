@@ -47,4 +47,6 @@ sample data to ensure the generated bundle matches your updates.
 
 The countdown showcase highlights how to wire `CountdownTimer` into offer
 pages. Adjust the props in `src/sections/CountdownShowcaseSection.tsx` to try
-alternate headlines, quantities, or end times that match your promotion.
+alternate headlines, quantities, or end times that match your promotion. Persist
+offer windows in UTC within the demo data and convert the UTC timestamp to the
+viewer’s local timezone before rendering friendly copy.

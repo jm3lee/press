@@ -6,6 +6,8 @@
 - All Flashoffer engineering guidance is centralized in this file.
 - All `flashoffer-react` components must be compatible with the Flashoffer
   theme provider.
+- Persist all timestamps in Coordinated Universal Time (UTC).
+- Convert UTC timestamps to a viewer's local timezone before displaying them.
 
 ## Flashoffer React Components
 

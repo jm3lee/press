@@ -70,6 +70,14 @@ and dark variants when a preset exposes them. For more granular control, call
 `--flashoffer-color-primary` and `--flashoffer-font-family`, enabling runtime
 theming through global styles.
 
+When you need direct access to preset factories outside of the Flashoffer
+provider, import helpers such as `createSunriseGlowTheme`,
+`createMidnightPulseTheme`, `createOceanBreezeTheme`,
+`createForestCanopyTheme`, or `createMonochromeFocusTheme`. Each factory
+accepts an optional `ThemeOptions` object and palette mode so host
+applications can extend the presets while keeping gradients and typography
+consistent with Flashoffer landing pages.
+
 ```tsx
 import { ThemeProvider } from "@mui/material/styles";
 import { createFlashofferTheme } from "flashoffer-react";
@@ -180,6 +188,14 @@ arbitrary attributes to the underlying Material UI primitive.
 - **`PreviewCard`** – Feature preview card with optional media and CTA row.
   Provide `primaryCta`/`secondaryCta` props to render button controls, or leave
   them undefined for a purely informational card.
+- **`MultipleChoiceQuiz`** – Lightweight quiz block that renders selectable
+  answers, highlights the chosen option, and exposes an `onSubmit` callback for
+  instrumentation. Use it to capture lightweight intent before handing a lead
+  to sales tooling.
+- **`CountdownTimer`** – Countdown surface that showcases urgency copy, time
+  segments, and optional quantity remaining. Persist offer deadlines in UTC,
+  convert them to the viewer's local time before display, and pass the UTC
+  timestamp to `endTime` so marketing pages behave consistently worldwide.
 - **`Figure`** – Responsive image container that preserves aspect ratio and
   renders an optional caption. Use `imgProps` to forward attributes such as
   `loading="lazy"` or `width`.
@@ -246,8 +262,7 @@ export function LandingWithAnalytics() {
 
 Run the TypeDoc pipeline to generate Markdown reference files for every
 component and helper exported from the library. The output lands in
-`docs/flashoffer-react/reference` so the Press documentation build can
-surface the latest props and usage guidance.
+`docs/flashoffer-react/reference` so the Press documentation build can surface
 the latest props and usage guidance.
 
 ```bash
