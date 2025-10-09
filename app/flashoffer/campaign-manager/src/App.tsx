@@ -186,6 +186,7 @@ const App = (): JSX.Element => {
               onUpdate={handleUpdate}
               onLogout={handleLogout}
               expiresAt={expiresAt}
+              token={token}
             />
           ) : (
             <LoginView loading={loading} onSubmit={handleLogin} />
