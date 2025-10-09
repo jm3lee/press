@@ -26,6 +26,14 @@ type FetchOptions = {
   body?: Record<string, unknown>;
 };
 
+/**
+ * Issues a JSON request against the campaign manager backend.
+ *
+ * @param path - API path starting with `/api`.
+ * @param options - Optional HTTP overrides including method, body, and token.
+ * @returns Parsed JSON payload typed to `T`.
+ * @throws Error when the response indicates failure.
+ */
 async function request<T>(path: string, options: FetchOptions = {}): Promise<T> {
   const url = `${API_BASE}${path}`;
   const headers: Record<string, string> = {
@@ -55,6 +63,12 @@ async function request<T>(path: string, options: FetchOptions = {}): Promise<T> 
   return data;
 }
 
+/**
+ * Attempts to extract a human-readable error message from a failed response.
+ *
+ * @param response - Fetch API response to parse.
+ * @returns Message suitable for display to the operator.
+ */
 async function extractError(response: Response): Promise<string> {
   try {
     const payload = (await response.json()) as { detail?: string; error?: string };
@@ -64,6 +78,12 @@ async function extractError(response: Response): Promise<string> {
   }
 }
 
+/**
+ * Submits administrator credentials and returns an authentication token.
+ *
+ * @param credentials - Username and password provided by the operator.
+ * @returns Token payload including the expiry timestamp.
+ */
 export async function login(credentials: Credentials): Promise<LoginResult> {
   const payload = await request<ApiLoginResponse>("/api/auth/login", {
     method: "POST",
@@ -72,6 +92,12 @@ export async function login(credentials: Credentials): Promise<LoginResult> {
   return { token: payload.token, expiresAt: payload.expires_at };
 }
 
+/**
+ * Retrieves the list of campaigns stored in the backend repository.
+ *
+ * @param token - Bearer token issued by the authentication endpoint.
+ * @returns Campaign summaries suitable for display in the dashboard.
+ */
 export async function listCampaigns(token: string): Promise<CampaignSummary[]> {
   const payload = await request<{ campaigns: ApiCampaign[] }>("/api/campaigns", {
     token,
@@ -79,6 +105,14 @@ export async function listCampaigns(token: string): Promise<CampaignSummary[]> {
   return payload.campaigns.map(mapCampaign);
 }
 
+/**
+ * Creates a new campaign record in the backend.
+ *
+ * @param token - Bearer token issued by the authentication endpoint.
+ * @param campaignId - Unique identifier for the campaign.
+ * @param payload - Campaign metadata such as name and end time.
+ * @returns Summary of the persisted campaign.
+ */
 export async function createCampaign(
   token: string,
   campaignId: string,
@@ -92,6 +126,14 @@ export async function createCampaign(
   return mapCampaign(response);
 }
 
+/**
+ * Updates an existing campaign with new metadata.
+ *
+ * @param token - Bearer token issued by the authentication endpoint.
+ * @param campaignId - Identifier of the campaign to mutate.
+ * @param payload - Mutated metadata to persist in the backend.
+ * @returns Summary of the updated campaign.
+ */
 export async function updateCampaign(
   token: string,
   campaignId: string,
@@ -116,6 +158,12 @@ export function buildCampaignEventsUrl(campaignId: string): string {
   return `${API_BASE}/api/campaigns/${encodedId}/events`;
 }
 
+/**
+ * Normalizes the backend campaign payload to the dashboard shape.
+ *
+ * @param payload - Campaign object returned by the FastAPI backend.
+ * @returns Dashboard-friendly campaign summary.
+ */
 function mapCampaign(payload: ApiCampaign): CampaignSummary {
   return {
     campaignId: payload.campaign_id,

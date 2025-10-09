@@ -33,6 +33,12 @@ type DialogState =
   | { mode: "create" }
   | { mode: "edit"; campaign: CampaignSummary };
 
+/**
+ * Displays campaign records alongside analytics and CRUD controls.
+ *
+ * @param props - Dashboard configuration and callbacks wired to the backend.
+ * @returns Section containing campaign management affordances.
+ */
 export const CampaignDashboard = ({
   campaigns,
   loading,

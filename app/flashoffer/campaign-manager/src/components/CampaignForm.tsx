@@ -26,6 +26,12 @@ interface CampaignFormProps {
   error: string | null;
 }
 
+/**
+ * Modal dialog for creating or editing a campaign.
+ *
+ * @param props - Form configuration, callbacks, and initial campaign data.
+ * @returns Dialog element with validation and submission handling.
+ */
 export const CampaignForm = ({
   mode,
   initial,

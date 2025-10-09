@@ -19,6 +19,12 @@ interface CampaignTableProps {
   selectedCampaignId?: string | null;
 }
 
+/**
+ * Renders campaign metadata in a sortable Material UI data grid.
+ *
+ * @param props - Campaign records and interaction handlers.
+ * @returns Data grid showing the available campaigns.
+ */
 export const CampaignTable = ({
   campaigns,
   loading,
