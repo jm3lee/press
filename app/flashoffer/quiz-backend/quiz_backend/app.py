@@ -14,7 +14,13 @@ from flask import Flask, Response, jsonify, request
 
 from pie.logging import logger
 
-from backend_common import DatabaseConfig, configure_cors
+from backend_common import (
+    AuthManager,
+    DatabaseConfig,
+    configure_cors,
+    load_bearer_auth_config,
+    register_bearer_token_auth,
+)
 
 from .db import QuizResultsStore
 
@@ -82,12 +88,20 @@ def create_app() -> Flask:
 
     app = Flask(__name__)
 
+    auth_manager = _initialise_auth()
     config = DatabaseConfig.from_env()
     storage = _initialise_storage(app, config)
     atexit.register(storage.close)
     app.config["DB_POOL"] = storage
+    app.config["AUTH_MANAGER"] = auth_manager
 
     apply_cors = configure_cors(app, component="quiz-backend")
+    register_bearer_token_auth(
+        app,
+        auth_manager,
+        exempt_paths={"/health", "/config"},
+        failure_handler=apply_cors,
+    )
 
     @app.route("/api/events/quiz", methods=["OPTIONS"])
     def quiz_options() -> Response:
@@ -134,6 +148,18 @@ def create_app() -> Flask:
         return Response(json.dumps(details), mimetype="application/json")
 
     return app
+
+
+def _initialise_auth() -> AuthManager:
+    """Construct an auth manager for quiz ingestion endpoints."""
+
+    config = load_bearer_auth_config(service="quiz-backend")
+    return AuthManager(
+        username=config.username,
+        password_file=None,
+        secret_key=config.secret_key,
+        token_ttl_seconds=config.token_ttl_seconds,
+    )
 
 
 def _initialise_storage(app: Flask, config: DatabaseConfig) -> QuizResultsStore:

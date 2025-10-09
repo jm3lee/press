@@ -12,7 +12,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from campaign_manager.app import create_app
-from campaign_manager.auth import InvalidTokenError
+from backend_common import InvalidTokenError
 
 
 class StubRepository:

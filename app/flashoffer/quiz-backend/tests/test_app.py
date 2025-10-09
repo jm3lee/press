@@ -29,6 +29,32 @@ def _build_payload(*, passed: bool) -> dict:
     }
 
 
+def test_quiz_endpoint_requires_bearer_token(flask_app):
+    payload = _build_payload(passed=True)
+
+    client = flask_app.test_client()
+    response = client.post("/api/events/quiz", json=payload)
+
+    assert response.status_code == 401
+    assert "error" in response.get_json()
+
+
+def test_quiz_endpoint_rejects_invalid_token(flask_app, auth_headers):
+    payload = _build_payload(passed=True)
+
+    client = flask_app.test_client()
+    response = client.post(
+        "/api/events/quiz",
+        json=payload,
+        headers={
+            "Authorization": f"Bearer {auth_headers['Authorization'].split(' ', 1)[1]}--invalid",
+        },
+    )
+
+    assert response.status_code == 401
+    assert "error" in response.get_json()
+
+
 def test_quiz_completion_is_persisted(client, flask_app):
     payload = _build_payload(passed=True)
 

@@ -15,9 +15,7 @@ from fastapi.responses import FileResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
 
-from backend_common import DatabaseConfig
-
-from .auth import AuthManager, InvalidTokenError
+from backend_common import AuthManager, DatabaseConfig, InvalidTokenError
 from .db import CampaignRecord, CampaignRepository
 from .schemas import (
     CampaignCreateRequest,
