@@ -204,7 +204,7 @@ services:
     build:
       context: .
       dockerfile: ./app/flashoffer/flashoffer-demo/Dockerfile
-      target: production
+      target: prod
     environment:
       PORT: ${FLASHOFFER_PORT:-4173}
       VITE_FLASHOFFER_ANALYTICS_ENDPOINT: ${FLASHOFFER_ANALYTICS_ENDPOINT:-http://localhost:8001/events}

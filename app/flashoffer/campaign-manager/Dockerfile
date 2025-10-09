@@ -114,7 +114,7 @@ EXPOSE 4173 5174
 
 ENTRYPOINT ["/workspace/dev-entrypoint.sh"]
 
-FROM backend-base AS production
+FROM backend-base AS prod
 
 RUN --mount=type=cache,target=/var/cache/apt,id=flashoffer-campaign-manager-prod \
     --mount=type=cache,target=/var/lib/apt/lists,id=flashoffer-campaign-manager-prod \

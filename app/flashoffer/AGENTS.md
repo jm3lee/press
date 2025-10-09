@@ -8,6 +8,8 @@
   theme provider.
 - Persist all timestamps in Coordinated Universal Time (UTC).
 - Convert UTC timestamps to a viewer's local timezone before displaying them.
+- Docker multi-stage builds must name development targets `dev` and production
+  targets `prod`.
 
 ## Flashoffer React Components
 

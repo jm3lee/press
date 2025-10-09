@@ -36,7 +36,7 @@ RUN npm run build
 
 # Runtime image for running the demo via the Vite preview server. This is
 # primarily used for local development or integration tests.
-FROM node:22-slim AS runner
+FROM node:22-slim AS dev
 ENV NODE_ENV=production
 ENV PORT=4173
 WORKDIR /workspace
@@ -49,7 +49,7 @@ ENTRYPOINT ["flashoffer-entrypoint"]
 
 # Production image served by nginx. Only the static assets are copied in,
 # keeping the container small and secure.
-FROM nginx:1.27-alpine AS production
+FROM nginx:1.27-alpine AS prod
 WORKDIR /usr/share/nginx/html
 COPY app/flashoffer/flashoffer-demo/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=flashoffer-demo-build /workspace/app/flashoffer/build/static/js ./
