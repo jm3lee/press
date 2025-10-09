@@ -25,7 +25,7 @@ WORKDIR /app
 # Copy dependency manifests and shared PIE utilities first so Docker can
 # reuse the layer when application code changes.
 COPY app/analytics-backend/requirements.txt ./requirements.txt
-COPY app/backend-common/backend_common ./backend_common
+COPY app/backend-common /backend-common
 COPY app/shell/py/pie /tmp/pie
 
 # Install application dependencies, the shared PIE package, and dominate
@@ -33,7 +33,7 @@ COPY app/shell/py/pie /tmp/pie
 # keeping duplicate source trees in the final image.
 RUN pip install --no-cache-dir -r requirements.txt \
     && pip install --no-cache-dir /tmp/pie dominate \
-    && rm -rf /tmp/pie
+    && rm -rf /tmp/pie /backend-common
 
 # Copy the application and tests as the final step so source edits only
 # invalidate the top layer.
