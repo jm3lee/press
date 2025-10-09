@@ -109,7 +109,7 @@ services:
   analytics-db:
     build:
       context: .
-      dockerfile: ./app/analytics-db/Dockerfile
+      dockerfile: ./app/flashoffer/analytics-db/Dockerfile
     environment:
       POSTGRES_USER: analytics
       POSTGRES_PASSWORD: analytics
@@ -122,7 +122,7 @@ services:
   analytics-backend:
     build:
       context: .
-      dockerfile: ./app/analytics-backend/Dockerfile
+      dockerfile: ./app/flashoffer/analytics-backend/Dockerfile
     environment:
       DATABASE_HOST: analytics-db
       DATABASE_PORT: 5432
@@ -135,12 +135,12 @@ services:
     ports:
       - "8001:8000"
     volumes:
-      - ./app/analytics-backend:/app
+      - ./app/flashoffer/analytics-backend:/app
 
   quiz-backend:
     build:
       context: .
-      dockerfile: ./app/quiz-backend/Dockerfile
+      dockerfile: ./app/flashoffer/quiz-backend/Dockerfile
     environment:
       DATABASE_HOST: analytics-db
       DATABASE_PORT: 5432
@@ -153,12 +153,12 @@ services:
     ports:
       - "8002:8000"
     volumes:
-      - ./app/quiz-backend:/app
+      - ./app/flashoffer/quiz-backend:/app
 
   flashoffer:
     build:
       context: .
-      dockerfile: ./app/flashoffer/Dockerfile
+      dockerfile: ./app/flashoffer/flashoffer-demo/Dockerfile
       target: production
     environment:
       PORT: ${FLASHOFFER_PORT:-4173}
@@ -177,7 +177,7 @@ services:
   flashoffer-dev:
     build:
       context: .
-      dockerfile: ./app/flashoffer/Dockerfile.dev
+      dockerfile: ./app/flashoffer/flashoffer-demo/Dockerfile.dev
     environment:
       FLASHOFFER_MODE: dev
       PORT: ${FLASHOFFER_DEV_PORT:-5173}

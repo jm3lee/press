@@ -11,7 +11,7 @@ build/static/index:
 
 include app/quiz/dep.mk
 include app/indextree/dep.mk
-include app/flashoffer-demo/dep.mk
+include app/flashoffer/flashoffer-demo/dep.mk
 include app/react-demo/dep.mk
 include app/magicbar/dep.mk
 

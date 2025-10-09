@@ -25,8 +25,8 @@ WORKDIR /app
 
 # Copy dependency manifests and shared PIE utilities first so Docker can
 # reuse the layer when application code changes.
-COPY app/analytics-backend/requirements.txt ./requirements.txt
-COPY app/backend-common /backend-common
+COPY app/flashoffer/analytics-backend/requirements.txt ./requirements.txt
+COPY app/flashoffer/backend-common /backend-common
 COPY app/shell/py/pie /tmp/pie
 
 # Maintenance: dedicate a pip cache to the analytics image so
@@ -42,8 +42,8 @@ RUN --mount=type=cache,target=/root/.cache/pip,id=analytics-backend-pip \
 
 # Copy the application and tests as the final step so source edits only
 # invalidate the top layer.
-COPY app/analytics-backend/analytics_backend ./analytics_backend
-COPY app/analytics-backend/tests ./tests
+COPY app/flashoffer/analytics-backend/analytics_backend ./analytics_backend
+COPY app/flashoffer/analytics-backend/tests ./tests
 
 FROM base AS dev
 
@@ -77,8 +77,8 @@ RUN --mount=type=cache,target=/root/.cache/pip,id=analytics-backend-pip \
 
 # Provide the templated nginx config and startup script used in
 # deployments.
-COPY app/analytics-backend/nginx.conf /etc/nginx/conf.d/default.conf
-COPY app/analytics-backend/entrypoint.sh /entrypoint.sh
+COPY app/flashoffer/analytics-backend/nginx.conf /etc/nginx/conf.d/default.conf
+COPY app/flashoffer/analytics-backend/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # The production container serves the app via nginx on port 8000.

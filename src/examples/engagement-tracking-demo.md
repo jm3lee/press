@@ -1,6 +1,7 @@
 
 This page shows how to embed the engagement tracking bundle generated from
-`app/flashoffer-react`. The script watches for elements tagged with `data-track-id`
+`app/flashoffer/flashoffer-react`. The script watches for elements tagged with
+`data-track-id`
 and emits view, scroll depth, interaction, and dwell events to a private
 endpoint.
 

@@ -17,4 +17,4 @@ RUN --mount=type=cache,target=/var/cache/apk \
 RUN --mount=type=cache,target=/root/.cache/pip \
   pip install --break-system-packages psycopg[binary] pandas
 
-COPY ./app/analytics-db/bin/ /root/bin/
+COPY ./app/flashoffer/analytics-db/bin/ /root/bin/

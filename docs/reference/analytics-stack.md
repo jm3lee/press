@@ -2,10 +2,10 @@
 
 ## Overview
 Press instruments engagement analytics with a trio of services that run under
-Docker Compose. React components in `app/flashoffer-react` emit batched events
-when embedded in marketing experiences, `analytics-backend` authenticates and
-validates the payload, and `analytics-timescaledb` stores the resulting
-hypertable data set. The stack
+Docker Compose. React components in `app/flashoffer/flashoffer-react` emit
+batched events when embedded in marketing experiences,
+`analytics-backend` authenticates and validates the payload, and
+`analytics-timescaledb` stores the resulting hypertable data set. The stack
 provides a reproducible environment for demos and supports production-like
 pipelines. Two JavaScript helpers, `EngagementProvider` and `AutoTrack`, sit at
 the edge of the system and funnel page activity into the ingestion API.
@@ -86,9 +86,10 @@ the provider samples and flushes data. Manual interactions call directly into
 the provider with `useRecordInteraction` to supply richer metadata.
 
 ## Demo walkthrough
-Embedding the helpers from `app/flashoffer-react` inside a marketing page
-streams engagement events into the ingestion API. Use the following walkthrough
-to see how the provider, AutoTrack helper, and live console fit together.
+Embedding the helpers from `app/flashoffer/flashoffer-react` inside a marketing
+page streams engagement events into the ingestion API. Use the following
+walkthrough to see how the provider, AutoTrack helper, and live console fit
+together.
 
 - **Hero and primary calls to action** – The hero section is tagged with
   `data-track-id="hero"` and two CTA buttons. Clicks invoke
@@ -116,11 +117,12 @@ to see how the provider, AutoTrack helper, and live console fit together.
 The analytics flow contains three stages:
 
 1. **Client instrumentation** – `EngagementProvider` aggregates samples into
-   batches and posts them to the ingestion API over HTTPS. AutoTrack observes the
-   DOM and forwards structured view events to the provider.
-2. **Ingestion API** – The Flask application in `app/analytics-backend` accepts
-   the JSON payload, applies schema validation, and inserts rows into the
-   hypertable with TimescaleDB-compatible SQL.
+   batches and posts them to the ingestion API over HTTPS. AutoTrack observes
+   the DOM and forwards structured view events to the provider.
+2. **Ingestion API** – The Flask application in
+   `app/flashoffer/analytics-backend` accepts the JSON payload, applies schema
+   validation, and inserts rows into the hypertable with TimescaleDB-compatible
+   SQL.
 3. **Persistence** – TimescaleDB stores the append-only `engagement_events`
    hypertable. Native compression and retention policies can be enabled to
    manage storage costs.
@@ -150,9 +152,9 @@ application reaches the API through the host-mapped port.
   ```
 
 ### analytics-backend
-- **Build context** – `app/analytics-backend` contains the Flask service,
-  Alembic migrations, and pytest suite. Compose mounts the directory for live
-  reloads during development.
+- **Build context** – `app/flashoffer/analytics-backend` contains the Flask
+  service, Alembic migrations, and pytest suite. Compose mounts the directory
+  for live reloads during development.
 - **Database configuration variables** – Review the summary below for the
   environment variables that control TimescaleDB connectivity.
 - **HTTP interface** –
@@ -223,21 +225,21 @@ concurrent ingestion throughput.
 #### SSL overrides
 When `DATABASE_URL` does not include every SSL parameter, or when you are using
 discrete connection settings, supply the remaining options through the
-`DATABASE_SSL*` environment variables listed above. Each value is passed directly
-to psycopg's connection factory.
+`DATABASE_SSL*` environment variables listed above. Each value is passed
+directly to psycopg's connection factory.
 
 #### `CORS_ALLOW_ORIGINS`
 `CORS_ALLOW_ORIGINS` enumerates front-end origins allowed to call the backend.
 For local development it defaults to `http://localhost:5173`.
 
 ### flashoffer-react
-- **Purpose** – `app/flashoffer-react` packages the React instrumentation
-  helpers (`EngagementProvider`, `AutoTrack`, and `EventConsole`) for
-  consumption in marketing front-ends.
+- **Purpose** – `app/flashoffer/flashoffer-react` packages the React
+  instrumentation helpers (`EngagementProvider`, `AutoTrack`, and
+  `EventConsole`) for consumption in marketing front-ends.
 - **Tooling** – Install dependencies and run the build to generate distributable
   assets:
   ```bash
-  cd app/flashoffer-react
+  cd app/flashoffer/flashoffer-react
   npm install
   npm run build
   ```
