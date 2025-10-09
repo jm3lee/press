@@ -26,6 +26,11 @@ interface CountdownSegments {
   totalMs: number;
 }
 
+type CountdownDataMode =
+  | { kind: "campaign"; campaignId: string }
+  | { kind: "time-remaining"; remainingMs: number }
+  | { kind: "end-time"; targetTimestamp: number };
+
 /**
  * Normalizes end time inputs into a Unix timestamp in milliseconds.
  *
@@ -107,8 +112,18 @@ function formatSegmentValue(value: number): string {
 }
 
 export interface CountdownTimerProps {
-  /** Target time indicating when the promotion ends. */
-  endTime: Date | string | number;
+  /** Campaign identifier whose end time is loaded from the backend. */
+  campaignId?: string;
+  /**
+   * Target time indicating when the promotion ends. Supply this when the
+   * backend is unavailable and the deadline is known upfront.
+   */
+  endTime?: Date | string | number;
+  /**
+   * Direct countdown duration in milliseconds when an end time is unavailable.
+   * Cannot be combined with `campaignId`.
+   */
+  timeRemainingMs?: number;
   /** Optional number of items remaining for the promotion. */
   quantityRemaining?: number;
   /** Headline emphasizing the urgency of the promotion. */
@@ -129,21 +144,167 @@ const DEFAULT_QUANTITY_LABEL = "units remaining";
  * High-contrast countdown module pairing urgency copy with remaining
  * quantity.
  *
- * @param props - Component configuration describing end time and messaging.
+ * Provide `campaignId` to source the deadline from the Flashoffer campaign
+ * backend. When no campaign identifier is supplied, specify either
+ * `endTime` or `timeRemainingMs` to render a static countdown.
+ *
+ * @param props - Component configuration describing end time sourcing and
+ *   messaging.
  * @returns A visually urgent countdown surface.
  */
 export function CountdownTimer({
+  campaignId,
   endTime,
+  timeRemainingMs,
   quantityRemaining,
   headline = DEFAULT_HEADLINE,
   timerLabel = DEFAULT_TIMER_LABEL,
   quantityLabel = DEFAULT_QUANTITY_LABEL,
   intervalMs = 1000
 }: CountdownTimerProps) {
-  const targetTimestamp = useMemo(() => normalizeEndTime(endTime), [endTime]);
+  const countdownMode = useMemo<CountdownDataMode>(() => {
+    const trimmedCampaignId = campaignId?.trim() ?? "";
+    const hasCampaign = trimmedCampaignId.length > 0;
+    const hasRemaining = typeof timeRemainingMs === "number";
+    const hasEndTime = typeof endTime !== "undefined";
+
+    if (hasCampaign) {
+      if (hasRemaining || hasEndTime) {
+        throw new Error(
+          "CountdownTimer cannot mix campaignId with explicit time values."
+        );
+      }
+
+      return { kind: "campaign", campaignId: trimmedCampaignId };
+    }
+
+    if (hasRemaining) {
+      const parsedRemaining = Number(timeRemainingMs);
+      if (!Number.isFinite(parsedRemaining)) {
+        throw new Error(
+          "CountdownTimer received an invalid timeRemainingMs value."
+        );
+      }
+
+      return {
+        kind: "time-remaining",
+        remainingMs: Math.max(0, parsedRemaining)
+      };
+    }
+
+    if (hasEndTime) {
+      return {
+        kind: "end-time",
+        targetTimestamp: normalizeEndTime(endTime as Date | string | number)
+      };
+    }
+
+    throw new Error(
+      "CountdownTimer requires either a campaignId or a timeRemainingMs/endTime value."
+    );
+  }, [campaignId, endTime, timeRemainingMs]);
+
+  const [targetTimestamp, setTargetTimestamp] = useState<number>(() => {
+    if (countdownMode.kind === "end-time") {
+      return countdownMode.targetTimestamp;
+    }
+
+    if (countdownMode.kind === "time-remaining") {
+      return Date.now() + countdownMode.remainingMs;
+    }
+
+    return Date.now();
+  });
+
   const [segments, setSegments] = useState<CountdownSegments>(() =>
     deriveSegments(targetTimestamp)
   );
+
+  useEffect(() => {
+    if (countdownMode.kind === "campaign") {
+      if (typeof globalThis.fetch !== "function") {
+        setTargetTimestamp(Date.now());
+        return;
+      }
+
+      let cancelled = false;
+      const AbortCtor = globalThis.AbortController;
+      const controller = typeof AbortCtor === "function" ? new AbortCtor() : null;
+
+      const resolveTarget = (data: Record<string, unknown>): number | null => {
+        const remainingCandidates = [
+          data["remainingMs"],
+          data["remaining_ms"],
+          data["remainingMilliseconds"]
+        ];
+
+        for (const candidate of remainingCandidates) {
+          if (typeof candidate === "number" && Number.isFinite(candidate)) {
+            return Date.now() + Math.max(0, candidate);
+          }
+        }
+
+        const endTimeCandidate =
+          data["endTime"] ?? data["end_time"] ?? data["deadline"];
+        if (typeof endTimeCandidate === "string" || endTimeCandidate instanceof Date) {
+          try {
+            return normalizeEndTime(endTimeCandidate);
+          } catch (error) {
+            console.warn("Failed to parse campaign end time", error);
+          }
+        } else if (typeof endTimeCandidate === "number") {
+          return normalizeEndTime(endTimeCandidate);
+        }
+
+        return null;
+      };
+
+      const fetchEndTime = async () => {
+        try {
+          const response = await globalThis.fetch(
+            `/api/campaign/${encodeURIComponent(countdownMode.campaignId)}/end_time`,
+            {
+              signal: controller?.signal,
+              headers: { Accept: "application/json" }
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`Unexpected response: ${response.status}`);
+          }
+
+          const payload = (await response.json()) as Record<string, unknown>;
+          const nextTarget = resolveTarget(payload);
+
+          if (cancelled) {
+            return;
+          }
+
+          setTargetTimestamp(nextTarget ?? Date.now());
+        } catch (error) {
+          if (cancelled) {
+            return;
+          }
+          console.warn("Failed to load campaign end time", error);
+          setTargetTimestamp(Date.now());
+        }
+      };
+
+      void fetchEndTime();
+
+      return () => {
+        cancelled = true;
+        controller?.abort();
+      };
+    }
+
+    if (countdownMode.kind === "time-remaining") {
+      setTargetTimestamp(Date.now() + countdownMode.remainingMs);
+      return;
+    }
+
+    setTargetTimestamp(countdownMode.targetTimestamp);
+  }, [countdownMode]);
 
   useEffect(() => {
     setSegments(deriveSegments(targetTimestamp));
