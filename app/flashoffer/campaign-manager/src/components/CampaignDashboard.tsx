@@ -3,12 +3,16 @@
  * Released under the MIT license.
  */
 
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { useCallback, useMemo, useState } from "react";
-import { PrimaryCtaButton, Section, SectionHeader } from "flashoffer-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { EventConsole, PrimaryCtaButton, Section, SectionHeader } from "flashoffer-react";
 
+import { buildCampaignEventsUrl } from "../api";
 import type { CampaignPayload, CampaignSummary } from "../types";
 import { formatTimestampForDisplay } from "../utils";
 import { CampaignForm } from "./CampaignForm";
@@ -40,6 +44,7 @@ export const CampaignDashboard = ({
   const [dialog, setDialog] = useState<DialogState | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [formSaving, setFormSaving] = useState(false);
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
 
   const openCreate = useCallback(() => {
     setFormError(null);
@@ -57,6 +62,16 @@ export const CampaignDashboard = ({
     }
     setDialog(null);
   }, [formSaving]);
+
+  useEffect(() => {
+    if (!selectedCampaignId) {
+      return;
+    }
+    const exists = campaigns.some((campaign) => campaign.campaignId === selectedCampaignId);
+    if (!exists) {
+      setSelectedCampaignId(null);
+    }
+  }, [campaigns, selectedCampaignId]);
 
   const handleSubmit = useCallback(
     async (campaignId: string, payload: CampaignPayload) => {
@@ -82,12 +97,70 @@ export const CampaignDashboard = ({
     [dialog, onCreate, onUpdate],
   );
 
+  const handleSelectCampaign = useCallback((campaign: CampaignSummary | null) => {
+    setSelectedCampaignId(campaign ? campaign.campaignId : null);
+  }, []);
+
   const currentExpiry = useMemo(() => {
     if (!expiresAt) {
       return null;
     }
     return formatTimestampForDisplay(expiresAt);
   }, [expiresAt]);
+
+  const selectedCampaign = useMemo(() => {
+    if (!selectedCampaignId) {
+      return null;
+    }
+    return campaigns.find((campaign) => campaign.campaignId === selectedCampaignId) ?? null;
+  }, [campaigns, selectedCampaignId]);
+
+  const eventsUrl = useMemo(() => {
+    if (!selectedCampaign) {
+      return null;
+    }
+    return buildCampaignEventsUrl(selectedCampaign.campaignId);
+  }, [selectedCampaign]);
+
+  let eventPaneContent: JSX.Element;
+  if (loading && campaigns.length === 0) {
+    eventPaneContent = (
+      <Stack spacing={2} alignItems="center" justifyContent="center" sx={{ py: 6 }}>
+        <CircularProgress size={28} />
+        <Typography variant="body2" color="text.secondary" align="center">
+          Loading campaigns…
+        </Typography>
+      </Stack>
+    );
+  } else if (campaigns.length === 0) {
+    eventPaneContent = (
+      <Stack spacing={1.5} alignItems="center" justifyContent="center" sx={{ py: 6 }}>
+        <Typography variant="h6" align="center">
+          No campaigns available
+        </Typography>
+        <Typography variant="body2" color="text.secondary" align="center">
+          Create a campaign to start monitoring incoming event activity in real time.
+        </Typography>
+      </Stack>
+    );
+  } else if (!selectedCampaign || !eventsUrl) {
+    eventPaneContent = (
+      <Stack spacing={1.5} alignItems="center" justifyContent="center" sx={{ py: 6 }}>
+        <Typography variant="h6" align="center">
+          Select a campaign to monitor events
+        </Typography>
+        <Typography variant="body2" color="text.secondary" align="center">
+          Choose a row above to review the most recent activity captured for that campaign.
+        </Typography>
+      </Stack>
+    );
+  } else {
+    eventPaneContent = (
+      <Box sx={{ width: "100%" }}>
+        <EventConsole eventsUrl={eventsUrl} limit={50} />
+      </Box>
+    );
+  }
 
   return (
     <Section>
@@ -114,7 +187,28 @@ export const CampaignDashboard = ({
           </Button>
         </Stack>
       </Stack>
-      <CampaignTable campaigns={campaigns} loading={loading} onEdit={openEdit} />
+      <Stack spacing={4} sx={{ mt: 4 }}>
+        <CampaignTable
+          campaigns={campaigns}
+          loading={loading}
+          onEdit={openEdit}
+          onSelect={handleSelectCampaign}
+          selectedCampaignId={selectedCampaignId}
+        />
+        <Paper
+          variant="outlined"
+          elevation={0}
+          sx={{
+            borderRadius: 3,
+            borderColor: "divider",
+            backgroundColor: "background.paper",
+            px: { xs: 2, sm: 3 },
+            py: { xs: 3, sm: 4 },
+          }}
+        >
+          {eventPaneContent}
+        </Paper>
+      </Stack>
       {dialog && (
         <CampaignForm
           open
