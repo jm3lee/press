@@ -7,7 +7,7 @@ import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { alpha, lighten } from "@mui/material/styles";
+import { alpha, darken, lighten } from "@mui/material/styles";
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
@@ -183,19 +183,25 @@ export function CountdownTimer({
       aria-atomic="true"
       aria-label={ariaAnnouncement}
       sx={(theme) => {
-        const errorLight = theme.palette.error.light;
-        const errorMain = theme.palette.error.main;
+        const primaryMain = theme.palette.primary.main;
+        const primaryLight =
+          theme.palette.primary.light ?? lighten(primaryMain, 0.22);
+        const primaryDark =
+          theme.palette.primary.dark ?? darken(primaryMain, 0.18);
         const surface = theme.palette.background.paper;
 
         return {
-          background: `linear-gradient(135deg, ${alpha(errorLight, 0.95)} 0%, ${alpha(
-            errorMain,
+          background: `linear-gradient(135deg, ${alpha(
+            primaryLight,
             0.95
-          )} 45%, ${alpha(surface, 0.95)} 100%)`,
+          )} 0%, ${alpha(primaryMain, 0.95)} 45%, ${alpha(
+            surface,
+            0.95
+          )} 100%)`,
           borderRadius: 6,
           border: "1px solid",
-          borderColor: errorLight,
-          boxShadow: `0 24px 40px ${alpha(errorMain, 0.35)}`,
+          borderColor: alpha(primaryMain, 0.4),
+          boxShadow: `0 24px 40px ${alpha(primaryDark, 0.35)}`,
           color: theme.palette.text.primary,
           overflow: "visible",
           p: { xs: 3, md: 4 },
@@ -214,12 +220,14 @@ export function CountdownTimer({
             <Typography
               component="p"
               variant="overline"
-              sx={{
-                color: "error.dark",
+              sx={(theme) => ({
+                color:
+                  theme.palette.primary.dark ??
+                  darken(theme.palette.primary.main, 0.25),
                 fontWeight: 700,
                 letterSpacing: 2,
                 textTransform: "uppercase"
-              }}
+              })}
             >
               {timerLabel}
             </Typography>
@@ -237,8 +245,8 @@ export function CountdownTimer({
             </Typography>
           </Stack>
           {formattedQuantity ? (
-            <Chip
-              color="error"
+              <Chip
+              color="primary"
               label={
                 <Stack spacing={0.5} alignItems="center">
                   <Typography
@@ -258,19 +266,20 @@ export function CountdownTimer({
                 </Stack>
               }
               sx={(theme) => {
-                const main = theme.palette.error.main;
-                const light = theme.palette.error.light;
+                const main = theme.palette.primary.main;
+                const light =
+                  theme.palette.primary.light ?? lighten(main, 0.18);
+                const dark =
+                  theme.palette.primary.dark ?? darken(main, 0.18);
                 return {
-                  background: `linear-gradient(135deg, ${main} 0%, ${lighten(
-                    main,
-                    0.2
-                  )} 50%, ${lighten(light, 0.1)} 100%)`,
+                  background: `linear-gradient(135deg, ${dark} 0%, ${main} 50%, ${light} 100%)`,
                   px: 2.5,
                   py: 2.5,
                   borderRadius: 4,
                   "& .MuiChip-label": {
                     px: 0,
-                    py: 0
+                    py: 0,
+                    color: theme.palette.getContrastText(main)
                   }
                 };
               }}
@@ -295,21 +304,28 @@ export function CountdownTimer({
               <Box
                 key={key}
                 sx={(theme) => {
-                  const main = theme.palette.error.main;
-                  const light = theme.palette.error.light;
+                  const main = theme.palette.primary.main;
+                  const light =
+                    theme.palette.primary.light ?? lighten(main, 0.24);
+                  const dark =
+                    theme.palette.primary.dark ?? darken(main, 0.22);
                   const surface = theme.palette.background.paper;
                   const text =
-                    theme.palette.error[
-                      theme.palette.mode === "dark" ? "light" : "dark"
-                    ] ?? main;
+                    theme.palette.mode === "dark"
+                      ? theme.palette.getContrastText(dark)
+                      : theme.palette.text.secondary;
+                  const borderColor =
+                    theme.palette.mode === "dark"
+                      ? alpha(theme.palette.common.black, 0.4)
+                      : alpha(theme.palette.common.white, 0.7);
                   return {
                     background: `linear-gradient(160deg, ${alpha(
                       surface,
                       0.9
                     )} 0%, ${alpha(light, 0.6)} 60%, ${alpha(main, 0.6)} 100%)`,
                     borderRadius: 4,
-                    border: `1px solid ${alpha(theme.palette.common.white, 0.7)}`,
-                    boxShadow: `0 20px 40px ${alpha(main, 0.35)}`,
+                    border: `1px solid ${borderColor}`,
+                    boxShadow: `0 20px 40px ${alpha(dark, 0.35)}`,
                     px: 3,
                     py: 2,
                     textAlign: "center",

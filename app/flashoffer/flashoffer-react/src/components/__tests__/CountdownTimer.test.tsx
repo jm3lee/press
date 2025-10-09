@@ -6,6 +6,7 @@
 import { act, render, screen } from "@testing-library/react";
 
 import { FlashofferThemeProvider } from "../../theme/FlashofferThemeProvider";
+import type { FlashofferThemeProviderProps } from "../../theme/FlashofferThemeProvider";
 import { CountdownTimer } from "../CountdownTimer";
 import type { CountdownTimerProps } from "../CountdownTimer";
 
@@ -21,10 +22,21 @@ describe("CountdownTimer", () => {
     jest.useRealTimers();
   });
 
-  /** Renders the countdown timer within the Flashoffer theme. */
-  function renderTimer(props: Partial<CountdownTimerProps> = {}) {
+  /**
+   * Renders the countdown timer within the Flashoffer theme.
+   *
+   * @param props - Countdown timer overrides to apply during rendering.
+   * @param providerProps - Theme provider overrides enabling palette testing.
+   */
+  function renderTimer(
+    props: Partial<CountdownTimerProps> = {},
+    providerProps: Partial<FlashofferThemeProviderProps> = {}
+  ) {
     return render(
-      <FlashofferThemeProvider applyCssBaseline={false}>
+      <FlashofferThemeProvider
+        applyCssBaseline={false}
+        {...providerProps}
+      >
         <CountdownTimer endTime={NOW} {...props} />
       </FlashofferThemeProvider>
     );
@@ -68,5 +80,22 @@ describe("CountdownTimer", () => {
 
     expect(screen.getByText(/kits left/i)).toBeInTheDocument();
     expect(screen.getByText("42")).toBeInTheDocument();
+  });
+
+  it("applies the active theme palette to urgency styling", () => {
+    renderTimer(
+      {},
+      {
+        themeOptions: {
+          palette: {
+            primary: { main: "#22c55e", contrastText: "#01220f" }
+          }
+        }
+      }
+    );
+
+    expect(screen.getByRole("timer")).toHaveStyle(
+      "border-color: rgba(34, 197, 94, 0.4)"
+    );
   });
 });
