@@ -3,9 +3,15 @@
  * Released under the MIT license.
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import "./EventConsole.css";
+
+import {
+  type CapturedEvent,
+  type ConsoleStatus,
+  useEventStream,
+} from "./hooks/useEventStream";
 
 /**
  * Properties for configuring the `EventConsole` component.
@@ -22,19 +28,11 @@ export interface EventConsoleProps {
   authToken?: string;
 }
 
-interface CapturedEvent {
-  id: string;
-  event_type: string;
-  target: string;
-  occurred_at: string;
-  received_at: string;
-  site: string;
-  session_id: string;
-  meta?: Record<string, unknown>;
-}
-
-type ConsoleStatus = "idle" | "connecting" | "updating" | "live" | "error";
-
+/**
+ * Format a timestamp for display within the event console.
+ *
+ * @param value - ISO timestamp or compatible string.
+ */
 function formatTime(value: string | null | undefined): string {
   if (!value) {
     return "—";
@@ -50,6 +48,12 @@ function formatTime(value: string | null | undefined): string {
   });
 }
 
+/**
+ * Calculate a human-readable latency between two timestamps.
+ *
+ * @param occurredAt - ISO timestamp indicating when the event occurred.
+ * @param receivedAt - ISO timestamp indicating when the event was captured.
+ */
 function describeLatency(occurredAt: string, receivedAt: string): string | null {
   const occurred = new Date(occurredAt);
   const received = new Date(receivedAt);
@@ -66,24 +70,6 @@ function describeLatency(occurredAt: string, receivedAt: string): string | null 
   return `${Math.round(delta / 60000)} min`;
 }
 
-function isAbortError(error: unknown): boolean {
-  return (
-    !!error &&
-    typeof error === "object" &&
-    "name" in error &&
-    (error as { name?: string }).name === "AbortError"
-  );
-}
-
-function extractEvents(
-  data: { events?: CapturedEvent[] } | undefined
-): CapturedEvent[] {
-  if (!data || !Array.isArray(data.events)) {
-    return [];
-  }
-  return data.events as CapturedEvent[];
-}
-
 /**
  * Render a live-updating console of campaign events fetched from the backend.
  */
@@ -93,126 +79,23 @@ export function EventConsole({
   limit = 25,
   authToken,
 }: EventConsoleProps) {
-  const [events, setEvents] = useState<CapturedEvent[]>([]);
-  const [status, setStatus] = useState<ConsoleStatus>("idle");
-  const [error, setError] = useState<Error | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
-
-  const applyLimitParam = useCallback(
-    (url: URL) => {
-      if (limit && !url.searchParams.has("limit")) {
-        url.searchParams.set("limit", String(limit));
-      }
-    },
-    [limit]
-  );
-
-  const handleLoadSuccess = useCallback((payload: CapturedEvent[]) => {
-    setEvents(payload);
-    setLastUpdated(new Date().toISOString());
-    setStatus("live");
-    setError(null);
-  }, []);
-
-  const handleLoadFailure = useCallback((cause: unknown) => {
-    setStatus("error");
-    setError(cause instanceof Error ? cause : new Error(String(cause)));
-  }, []);
-
-  useEffect(() => {
-    if (!eventsUrl) {
-      return () => undefined;
-    }
-
-    let cancelled = false;
-    let controller = new AbortController();
-
-    const load = async () => {
-      controller.abort();
-      controller = new AbortController();
-      try {
-        setStatus((current) => (current === "idle" ? "connecting" : "updating"));
-        const url = new URL(eventsUrl, window.location.href);
-        applyLimitParam(url);
-        const response = await fetch(url, {
-          credentials: "include",
-          signal: controller.signal,
-          headers: authToken ? { Authorization: `Bearer ${authToken}` } : undefined,
-        });
-        if (!response.ok) {
-          throw new Error(`Request failed with status ${response.status}`);
-        }
-        const data = (await response.json()) as { events?: CapturedEvent[] };
-        if (cancelled) {
-          return;
-        }
-        handleLoadSuccess(extractEvents(data));
-      } catch (err) {
-        if (cancelled || isAbortError(err)) {
-          return;
-        }
-        handleLoadFailure(err);
-      }
-    };
-
-    void load();
-    const interval = window.setInterval(() => {
-      void load();
-    }, pollInterval);
-
-    return () => {
-      cancelled = true;
-      controller.abort();
-      window.clearInterval(interval);
-    };
-  }, [
-    applyLimitParam,
-    authToken,
+  const { events, status, error, lastUpdated } = useEventStream({
     eventsUrl,
-    handleLoadFailure,
-    handleLoadSuccess,
     pollInterval,
-  ]);
+    limit,
+    authToken,
+  });
 
-  const summary = useMemo(() => {
-    if (events.length === 0) {
-      return "Waiting for events… Scroll the page or click a call to action.";
-    }
-    const types = new Map<string, number>();
-    events.forEach((event) => {
-      const next = (types.get(event.event_type) || 0) + 1;
-      types.set(event.event_type, next);
-    });
-    const parts = Array.from(types.entries()).map(([type, count]) => `${count} ${type}`);
-    return `Showing ${events.length} recent events (${parts.join(", ")})`;
-  }, [events]);
-
-  const statusLabel = useMemo(() => {
-    switch (status) {
-      case "live":
-        return "Live";
-      case "updating":
-        return "Updating…";
-      case "connecting":
-        return "Connecting…";
-      case "error":
-        return "Error";
-      default:
-        return "Idle";
-    }
-  }, [status]);
+  const summary = useMemo(() => buildSummary(events), [events]);
+  const statusLabel = useMemo(() => getStatusLabel(status), [status]);
 
   return (
     <section className="event-console" aria-live="polite">
-      <header className="event-console__header">
-        <div>
-          <h2>Captured events</h2>
-          <p className="event-console__summary">{summary}</p>
-        </div>
-        <div className={`event-console__badge event-console__badge--${status}`}>
-          {statusLabel}
-        </div>
-      </header>
+      <EventConsoleStatusHeader
+        summary={summary}
+        status={status}
+        statusLabel={statusLabel}
+      />
 
       {error ? (
         <p className="event-console__error">
@@ -220,48 +103,135 @@ export function EventConsole({
         </p>
       ) : null}
 
-      <ul className="event-console__list">
-        {events.map((event) => {
-          const latency = describeLatency(event.occurred_at, event.received_at);
-          return (
-            <li key={event.id} className={`event-card event-card--${event.event_type}`}>
-              <div className="event-card__meta">
-                <span className="event-card__type">{event.event_type}</span>
-                <span className="event-card__target">{event.target}</span>
-                <span className="event-card__time" title={event.occurred_at}>
-                  {formatTime(event.occurred_at)}
-                </span>
-                {latency ? <span className="event-card__latency">+{latency}</span> : null}
-              </div>
-              <dl className="event-card__details">
-                <div>
-                  <dt>Site</dt>
-                  <dd>{event.site}</dd>
-                </div>
-                <div>
-                  <dt>Session</dt>
-                  <dd>{event.session_id}</dd>
-                </div>
-                <div>
-                  <dt>Received</dt>
-                  <dd title={event.received_at}>{formatTime(event.received_at)}</dd>
-                </div>
-              </dl>
-              <pre className="event-card__payload">
-                {JSON.stringify(event.meta ?? {}, null, 2)}
-              </pre>
-            </li>
-          );
-        })}
-      </ul>
+      <EventConsoleEventList events={events} />
 
-      <footer className="event-console__footer">
-        <span>
-          Last update {lastUpdated ? formatTime(lastUpdated) : "—"}
-        </span>
-      </footer>
+      <EventConsoleFooter lastUpdated={lastUpdated} />
     </section>
   );
+}
+
+/**
+ * Render the header summarizing the event stream status.
+ *
+ * @param summary - Narrative description of the current event selection.
+ * @param status - Connectivity status for the stream.
+ * @param statusLabel - Human-readable label describing {@link status}.
+ */
+function EventConsoleStatusHeader({
+  summary,
+  status,
+  statusLabel,
+}: {
+  summary: string;
+  status: ConsoleStatus;
+  statusLabel: string;
+}) {
+  return (
+    <header className="event-console__header">
+      <div>
+        <h2>Captured events</h2>
+        <p className="event-console__summary">{summary}</p>
+      </div>
+      <div className={`event-console__badge event-console__badge--${status}`}>
+        {statusLabel}
+      </div>
+    </header>
+  );
+}
+
+/**
+ * List captured events using the canonical console styling.
+ *
+ * @param events - Event payloads to display.
+ */
+function EventConsoleEventList({ events }: { events: CapturedEvent[] }) {
+  return (
+    <ul className="event-console__list">
+      {events.map((event) => {
+        const latency = describeLatency(event.occurred_at, event.received_at);
+        return (
+          <li key={event.id} className={`event-card event-card--${event.event_type}`}>
+            <div className="event-card__meta">
+              <span className="event-card__type">{event.event_type}</span>
+              <span className="event-card__target">{event.target}</span>
+              <span className="event-card__time" title={event.occurred_at}>
+                {formatTime(event.occurred_at)}
+              </span>
+              {latency ? <span className="event-card__latency">+{latency}</span> : null}
+            </div>
+            <dl className="event-card__details">
+              <div>
+                <dt>Site</dt>
+                <dd>{event.site}</dd>
+              </div>
+              <div>
+                <dt>Session</dt>
+                <dd>{event.session_id}</dd>
+              </div>
+              <div>
+                <dt>Received</dt>
+                <dd title={event.received_at}>{formatTime(event.received_at)}</dd>
+              </div>
+            </dl>
+            <pre className="event-card__payload">
+              {JSON.stringify(event.meta ?? {}, null, 2)}
+            </pre>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+/**
+ * Present the timestamp of the most recent event update.
+ *
+ * @param lastUpdated - ISO timestamp representing the latest poll completion.
+ */
+function EventConsoleFooter({ lastUpdated }: { lastUpdated: string | null }) {
+  return (
+    <footer className="event-console__footer">
+      <span>Last update {lastUpdated ? formatTime(lastUpdated) : "—"}</span>
+    </footer>
+  );
+}
+
+/**
+ * Build a human-readable summary of the captured event stream.
+ *
+ * @param events - Events currently displayed in the console.
+ */
+function buildSummary(events: CapturedEvent[]): string {
+  if (events.length === 0) {
+    return "Waiting for events… Scroll the page or click a call to action.";
+  }
+  const types = new Map<string, number>();
+  events.forEach((event) => {
+    const next = (types.get(event.event_type) || 0) + 1;
+    types.set(event.event_type, next);
+  });
+  const parts = Array.from(types.entries()).map(([type, count]) => `${count} ${type}`);
+  return `Showing ${events.length} recent events (${parts.join(", ")})`;
+}
+
+/**
+ * Compute the label describing the current event stream status.
+ *
+ * @param status - Machine-readable connection status indicator.
+ */
+function getStatusLabel(status: ConsoleStatus): string {
+  switch (status) {
+    case "live":
+      return "Live";
+    case "updating":
+      return "Updating…";
+    case "connecting":
+      return "Connecting…";
+    case "error":
+      return "Error";
+    default:
+      return "Idle";
+  }
 }
 
 export default EventConsole;
