@@ -1,3 +1,6 @@
+# Copyright (c) Flashoffer Developers
+# Released under the MIT license.
+
 """Connection pooling primitives for backend services."""
 
 from __future__ import annotations

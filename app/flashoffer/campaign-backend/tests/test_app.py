@@ -1,3 +1,6 @@
+# Copyright (c) Flashoffer Developers
+# Released under the MIT license.
+
 from datetime import datetime, timedelta, timezone
 
 from campaign_backend.db import CampaignStore

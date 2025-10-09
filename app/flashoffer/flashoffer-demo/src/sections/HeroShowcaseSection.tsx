@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Flashoffer Developers
+ * Released under the MIT license.
+ */
+
 import Box from "@mui/material/Box";
 import { HeroBanner, Section } from "flashoffer-react";
 import type { ReactNode } from "react";

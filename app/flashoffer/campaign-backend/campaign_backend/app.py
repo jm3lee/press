@@ -1,3 +1,6 @@
+# Copyright (c) Flashoffer Developers
+# Released under the MIT license.
+
 """Flask application that exposes campaign deadline metadata."""
 
 from __future__ import annotations

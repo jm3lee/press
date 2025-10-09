@@ -1,3 +1,6 @@
+# Copyright (c) Flashoffer Developers
+# Released under the MIT license.
+
 """FastAPI application exposing campaign management endpoints."""
 
 from __future__ import annotations

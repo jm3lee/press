@@ -1,3 +1,6 @@
+# Copyright (c) Flashoffer Developers
+# Released under the MIT license.
+
 """Database configuration helpers shared across backend services."""
 
 from __future__ import annotations

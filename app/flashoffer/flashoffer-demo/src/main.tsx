@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Flashoffer Developers
+ * Released under the MIT license.
+ */
+
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { AutoTrack, EngagementProvider } from "flashoffer-react";

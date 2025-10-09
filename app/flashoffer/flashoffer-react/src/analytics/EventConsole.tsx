@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Flashoffer Developers
+ * Released under the MIT license.
+ */
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import "./EventConsole.css";

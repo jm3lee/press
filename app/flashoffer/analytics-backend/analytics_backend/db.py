@@ -1,3 +1,6 @@
+# Copyright (c) Flashoffer Developers
+# Released under the MIT license.
+
 """Database utilities for the analytics backend."""
 
 from __future__ import annotations

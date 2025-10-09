@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Flashoffer Developers
+ * Released under the MIT license.
+ */
+
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Stack from "@mui/material/Stack";

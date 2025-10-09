@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Flashoffer Developers
+ * Released under the MIT license.
+ */
+
 import { useEffect } from "react";
 import { useEngagement } from "./EngagementProvider";
 

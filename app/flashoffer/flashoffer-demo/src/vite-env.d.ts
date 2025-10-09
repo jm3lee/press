@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Flashoffer Developers
+ * Released under the MIT license.
+ */
+
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {

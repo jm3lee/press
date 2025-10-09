@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Flashoffer Developers
+ * Released under the MIT license.
+ */
+
 export { AutoTrack } from "./AutoTrack";
 export type { AutoTrackProps } from "./AutoTrack";
 

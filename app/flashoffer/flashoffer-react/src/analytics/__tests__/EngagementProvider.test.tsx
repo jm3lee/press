@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Flashoffer Developers
+ * Released under the MIT license.
+ */
+
 import { act, render } from "@testing-library/react";
 import type { MutableRefObject } from "react";
 import {
