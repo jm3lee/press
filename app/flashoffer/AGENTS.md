@@ -1,4 +1,20 @@
 # Flashoffer Workspace Guidelines
 
+## Global
+
+- All Flashoffer documentation lives under `app/flashoffer/docs`.
+- All Flashoffer engineering guidance is centralized in this file.
 - All `flashoffer-react` components must be compatible with the Flashoffer
   theme provider.
+
+## Flashoffer React Components
+
+- Prioritize responsive layouts that adapt gracefully to mobile viewports.
+- Each source file must begin with a copyright header crediting "Flashoffer
+  Developers" and noting that the library is released under the MIT license.
+- Document every function with a succinct summary of its purpose; use Typedoc
+  conventions for detailed parameter and return information.
+- Author documentation with the depth and tone expected between expert
+  software engineers.
+- When updating documentation, include a representative code sample whenever
+  possible.
