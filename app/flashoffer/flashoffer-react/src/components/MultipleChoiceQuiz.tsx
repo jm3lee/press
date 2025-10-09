@@ -16,8 +16,9 @@ import RadioGroup from "@mui/material/RadioGroup";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { alpha } from "@mui/material/styles";
-import { useId, useMemo, useState } from "react";
-import type { ReactNode } from "react";
+import type { Theme } from "@mui/material/styles";
+import { useCallback, useId, useMemo, useState } from "react";
+import type { ChangeEvent, ReactNode } from "react";
 
 export interface MultipleChoiceOption {
   /** Unique identifier used for option selection. */
@@ -70,23 +71,36 @@ const DEFAULT_ERROR = "Not quite. Give it another look.";
 const DEFAULT_SUBMIT_LABEL = "Check answer";
 const DEFAULT_TRY_AGAIN_LABEL = "Try again";
 
+type OptionState = "correct" | "incorrect" | "selected" | "default";
+
+interface QuizStateConfig {
+  allowRetry?: boolean;
+  correctOptionId?: string;
+  disabled: boolean;
+}
+
+interface QuizInteractionState {
+  selectedId: string | null;
+  submittedId: string | null;
+}
+
+interface QuizStateSnapshot {
+  hasSubmitted: boolean;
+  evaluation: boolean | undefined;
+  disableChoices: boolean;
+  showFeedback: boolean;
+  revealCorrectAnswer: boolean;
+  submitDisabled: boolean;
+  showRetryButton: boolean;
+}
+
 /**
- * Accessible multiple choice quiz with inline evaluation feedback.
+ * Derives quiz behaviour flags from author configuration and user input.
  */
-export function MultipleChoiceQuiz({
-  question,
-  options,
-  helperText,
-  correctOptionId,
-  explanation,
-  successMessage = DEFAULT_SUCCESS,
-  errorMessage = DEFAULT_ERROR,
-  onAnswer,
-  submitLabel = DEFAULT_SUBMIT_LABEL,
-  tryAgainLabel = DEFAULT_TRY_AGAIN_LABEL,
-  allowRetry,
-  disabled = false
-}: MultipleChoiceQuizProps) {
+function useQuizState(
+  { allowRetry, correctOptionId, disabled }: QuizStateConfig,
+  { selectedId, submittedId }: QuizInteractionState
+): QuizStateSnapshot {
   const resolvedAllowRetry = useMemo(() => {
     if (typeof allowRetry === "boolean") {
       return allowRetry;
@@ -94,37 +108,14 @@ export function MultipleChoiceQuiz({
     return Boolean(correctOptionId);
   }, [allowRetry, correctOptionId]);
 
-  const questionId = useId();
-  const groupId = useId();
-
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [submittedId, setSubmittedId] = useState<string | null>(null);
-
   const hasSubmitted = submittedId !== null;
+
   const evaluation = useMemo(() => {
     if (!correctOptionId || !hasSubmitted || !submittedId) {
       return undefined;
     }
     return submittedId === correctOptionId;
   }, [correctOptionId, hasSubmitted, submittedId]);
-
-  const handleSubmit = () => {
-    if (!selectedId) {
-      return;
-    }
-    setSubmittedId(selectedId);
-    onAnswer?.({
-      optionId: selectedId,
-      isCorrect: correctOptionId
-        ? selectedId === correctOptionId
-        : undefined
-    });
-  };
-
-  const handleRetry = () => {
-    setSelectedId(null);
-    setSubmittedId(null);
-  };
 
   const disableChoices = useMemo(() => {
     if (disabled) {
@@ -150,6 +141,338 @@ export function MultipleChoiceQuiz({
   const showRetryButton =
     resolvedAllowRetry && hasSubmitted && evaluation !== true;
 
+  return {
+    hasSubmitted,
+    evaluation,
+    disableChoices,
+    showFeedback,
+    revealCorrectAnswer,
+    submitDisabled,
+    showRetryButton
+  };
+}
+
+interface OptionStateInput {
+  optionId: string;
+  selectedId: string | null;
+  submittedId: string | null;
+  correctOptionId?: string;
+  showFeedback: boolean;
+  revealCorrectAnswer: boolean;
+}
+
+interface OptionStateSnapshot {
+  highlight: boolean;
+  highlightAnswer: boolean;
+  optionState: OptionState;
+  isSelected: boolean;
+}
+
+/**
+ * Computes styling state for a single option in the quiz.
+ */
+function resolveOptionState({
+  optionId,
+  selectedId,
+  submittedId,
+  correctOptionId,
+  showFeedback,
+  revealCorrectAnswer
+}: OptionStateInput): OptionStateSnapshot {
+  const isSelected = selectedId === optionId;
+  const isAnswer = correctOptionId === optionId;
+  const isSubmittedSelection = submittedId === optionId;
+  const highlightSelection = showFeedback && isSubmittedSelection;
+  const highlightAnswer = revealCorrectAnswer && isAnswer;
+  const highlight = highlightAnswer || highlightSelection;
+
+  let optionState: OptionState = "default";
+  if (highlight) {
+    optionState = highlightAnswer ? "correct" : "incorrect";
+  } else if (isSelected) {
+    optionState = "selected";
+  }
+
+  return {
+    highlight,
+    highlightAnswer,
+    optionState,
+    isSelected
+  };
+}
+
+interface OptionVisualSnapshot {
+  highlight: boolean;
+  highlightAnswer: boolean;
+  isSelected: boolean;
+}
+
+/**
+ * Derives the base color used when an option is highlighted.
+ */
+function resolveOptionHighlightColor(
+  theme: Theme,
+  { highlightAnswer }: OptionVisualSnapshot
+): string {
+  return highlightAnswer
+    ? theme.palette.success.main
+    : theme.palette.error.main;
+}
+
+/**
+ * Computes the border color for an option without relying on nested ternaries.
+ */
+function resolveOptionBorderColor(
+  theme: Theme,
+  snapshot: OptionVisualSnapshot
+): string {
+  if (snapshot.highlight) {
+    return resolveOptionHighlightColor(theme, snapshot);
+  }
+  if (snapshot.isSelected) {
+    return theme.palette.primary.main;
+  }
+  return theme.palette.divider;
+}
+
+/**
+ * Computes the option background color based on highlight state.
+ */
+function resolveOptionBackgroundColor(
+  theme: Theme,
+  snapshot: OptionVisualSnapshot
+): string {
+  if (!snapshot.highlight) {
+    return theme.palette.background.paper;
+  }
+  const highlightColor = resolveOptionHighlightColor(theme, snapshot);
+  return alpha(highlightColor, 0.08);
+}
+
+interface OptionContentProps {
+  option: MultipleChoiceOption;
+}
+
+/**
+ * Renders the visible label block for a quiz option.
+ */
+function OptionContent({ option }: OptionContentProps): ReactNode {
+  return (
+    <Stack spacing={option.description ? 0.5 : 0}>
+      <Typography variant="body1" fontWeight={600}>
+        {option.label}
+      </Typography>
+      {option.description ? (
+        <Typography variant="body2" color="text.secondary">
+          {option.description}
+        </Typography>
+      ) : null}
+    </Stack>
+  );
+}
+
+interface QuizFeedbackProps {
+  evaluation: boolean;
+  successMessage: ReactNode;
+  errorMessage: ReactNode;
+  explanation?: ReactNode;
+}
+
+/**
+ * Presents contextual feedback after a learner submits a response.
+ */
+function QuizFeedback({
+  evaluation,
+  successMessage,
+  errorMessage,
+  explanation
+}: QuizFeedbackProps): ReactNode {
+  return (
+    <Alert severity={evaluation ? "success" : "error"}>
+      <Stack spacing={1}>
+        <Typography variant="body2">
+          {evaluation ? successMessage : errorMessage}
+        </Typography>
+        {explanation ? (
+          <Typography variant="body2" color="text.secondary">
+            {explanation}
+          </Typography>
+        ) : null}
+      </Stack>
+    </Alert>
+  );
+}
+
+/**
+ * Accessible multiple choice quiz with inline evaluation feedback.
+ */
+export function MultipleChoiceQuiz({
+  question,
+  options,
+  helperText,
+  correctOptionId,
+  explanation,
+  successMessage = DEFAULT_SUCCESS,
+  errorMessage = DEFAULT_ERROR,
+  onAnswer,
+  submitLabel = DEFAULT_SUBMIT_LABEL,
+  tryAgainLabel = DEFAULT_TRY_AGAIN_LABEL,
+  allowRetry,
+  disabled = false
+}: MultipleChoiceQuizProps) {
+  const questionId = useId();
+  const groupId = useId();
+
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [submittedId, setSubmittedId] = useState<string | null>(null);
+
+  const {
+    hasSubmitted,
+    evaluation,
+    disableChoices,
+    showFeedback,
+    revealCorrectAnswer,
+    submitDisabled,
+    showRetryButton
+  } = useQuizState(
+    { allowRetry, correctOptionId, disabled },
+    { selectedId, submittedId }
+  );
+
+  const handleSelectionChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      setSelectedId(event.target.value);
+    },
+    []
+  );
+
+  const handleSubmit = useCallback(() => {
+    if (!selectedId) {
+      return;
+    }
+    setSubmittedId(selectedId);
+    onAnswer?.({
+      optionId: selectedId,
+      isCorrect: correctOptionId
+        ? selectedId === correctOptionId
+        : undefined
+    });
+  }, [correctOptionId, onAnswer, selectedId]);
+
+  const handleRetry = useCallback(() => {
+    setSelectedId(null);
+    setSubmittedId(null);
+  }, []);
+
+  const promptHelper = useMemo(() => {
+    if (!helperText) {
+      return null;
+    }
+    return (
+      <Typography variant="body2" color="text.secondary">
+        {helperText}
+      </Typography>
+    );
+  }, [helperText]);
+
+  const fallbackHelper = useMemo(() => {
+    if (helperText) {
+      return null;
+    }
+    return (
+      <FormHelperText sx={{ mt: 2 }}>
+        Select the response that best answers the question.
+      </FormHelperText>
+    );
+  }, [helperText]);
+
+  const feedbackContent = useMemo(() => {
+    if (!showFeedback || typeof evaluation !== "boolean") {
+      return null;
+    }
+    return (
+      <QuizFeedback
+        evaluation={evaluation}
+        successMessage={successMessage}
+        errorMessage={errorMessage}
+        explanation={explanation}
+      />
+    );
+  }, [errorMessage, evaluation, explanation, showFeedback, successMessage]);
+
+  const retryButton = useMemo(() => {
+    if (!showRetryButton) {
+      return null;
+    }
+    return (
+      <Button variant="outlined" onClick={handleRetry}>
+        {tryAgainLabel}
+      </Button>
+    );
+  }, [handleRetry, showRetryButton, tryAgainLabel]);
+
+  const optionItems = useMemo(
+    () =>
+      options.map((option) => {
+        const { highlight, highlightAnswer, optionState, isSelected } =
+          resolveOptionState({
+            optionId: option.id,
+            selectedId,
+            submittedId,
+            correctOptionId,
+            showFeedback,
+            revealCorrectAnswer
+          });
+
+        const visualSnapshot: OptionVisualSnapshot = {
+          highlight,
+          highlightAnswer,
+          isSelected
+        };
+
+        return (
+          <FormControlLabel
+            key={option.id}
+            value={option.id}
+            control={<Radio />}
+            label={<OptionContent option={option} />}
+            disabled={disableChoices}
+            data-option-state={optionState}
+            sx={(theme) => ({
+              alignItems: "flex-start",
+              m: 0,
+              px: 2,
+              py: 1.5,
+              borderRadius: 2,
+              borderWidth: 1,
+              borderStyle: "solid",
+              borderColor: resolveOptionBorderColor(theme, visualSnapshot),
+              backgroundColor: resolveOptionBackgroundColor(
+                theme,
+                visualSnapshot
+              ),
+              transition: theme.transitions.create([
+                "background-color",
+                "border-color"
+              ]),
+              ".MuiRadio-root": {
+                mt: 0.25
+              }
+            })}
+          />
+        );
+      }),
+    [
+      correctOptionId,
+      disableChoices,
+      options,
+      revealCorrectAnswer,
+      selectedId,
+      showFeedback,
+      submittedId
+    ]
+  );
+
   return (
     <Card component="section" elevation={3} sx={{ borderRadius: 3 }}>
       <CardContent>
@@ -163,11 +486,7 @@ export function MultipleChoiceQuiz({
             >
               {question}
             </Typography>
-            {helperText ? (
-              <Typography variant="body2" color="text.secondary">
-                {helperText}
-              </Typography>
-            ) : null}
+            {promptHelper}
           </Stack>
           <FormControl component="fieldset" disabled={disableChoices}>
             <FormLabel
@@ -186,89 +505,13 @@ export function MultipleChoiceQuiz({
               id={groupId}
               name={groupId}
               value={selectedId ?? ""}
-              onChange={(event) => {
-                setSelectedId(event.target.value);
-              }}
+              onChange={handleSelectionChange}
             >
               <Stack spacing={1.5}>
-                {options.map((option) => {
-                  const isSelected = selectedId === option.id;
-                  const isAnswer = correctOptionId === option.id;
-                  const isSubmittedSelection = submittedId === option.id;
-                  const highlightSelection = showFeedback && isSubmittedSelection;
-                  const highlightAnswer = revealCorrectAnswer && isAnswer;
-                  const highlight = highlightAnswer || highlightSelection;
-                  const optionState = highlight
-                    ? highlightAnswer
-                      ? "correct"
-                      : "incorrect"
-                    : isSelected
-                    ? "selected"
-                    : "default";
-
-                  return (
-                    <FormControlLabel
-                      key={option.id}
-                      value={option.id}
-                      control={<Radio />}
-                      label={
-                        <Stack spacing={option.description ? 0.5 : 0}>
-                          <Typography variant="body1" fontWeight={600}>
-                            {option.label}
-                          </Typography>
-                          {option.description ? (
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                            >
-                              {option.description}
-                            </Typography>
-                          ) : null}
-                        </Stack>
-                      }
-                      disabled={disableChoices}
-                      data-option-state={optionState}
-                      sx={(theme) => ({
-                        alignItems: "flex-start",
-                        m: 0,
-                        px: 2,
-                        py: 1.5,
-                        borderRadius: 2,
-                        borderWidth: 1,
-                        borderStyle: "solid",
-                        borderColor: highlight
-                          ? highlightAnswer
-                            ? theme.palette.success.main
-                            : theme.palette.error.main
-                          : isSelected
-                          ? theme.palette.primary.main
-                          : theme.palette.divider,
-                        backgroundColor: highlight
-                          ? alpha(
-                              highlightAnswer
-                                ? theme.palette.success.main
-                                : theme.palette.error.main,
-                              0.08
-                            )
-                          : theme.palette.background.paper,
-                        transition: theme.transitions.create([
-                          "background-color",
-                          "border-color"
-                        ]),
-                        ".MuiRadio-root": {
-                          mt: 0.25
-                        }
-                      })}
-                    />
-                  );
-                })}
+                {optionItems}
               </Stack>
             </RadioGroup>
-            {helperText ? null : (
-              <FormHelperText sx={{ mt: 2 }}>
-                Select the response that best answers the question.
-              </FormHelperText>
-            )}
+            {fallbackHelper}
           </FormControl>
           <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
             <Button
@@ -279,26 +522,9 @@ export function MultipleChoiceQuiz({
             >
               {submitLabel}
             </Button>
-            {showRetryButton ? (
-              <Button variant="outlined" onClick={handleRetry}>
-                {tryAgainLabel}
-              </Button>
-            ) : null}
+            {retryButton}
           </Stack>
-          {showFeedback ? (
-            <Alert severity={evaluation ? "success" : "error"}>
-              <Stack spacing={1}>
-                <Typography variant="body2">
-                  {evaluation ? successMessage : errorMessage}
-                </Typography>
-                {explanation ? (
-                  <Typography variant="body2" color="text.secondary">
-                    {explanation}
-                  </Typography>
-                ) : null}
-              </Stack>
-            </Alert>
-          ) : null}
+          {feedbackContent}
         </Stack>
       </CardContent>
     </Card>
