@@ -177,6 +177,7 @@ services:
       context: .
       dockerfile: ./app/flashoffer/campaign-manager/Dockerfile
     environment:
+      CAMPAIGN_MANAGER_ANALYTICS_BASE: http://analytics-backend:8000
       DATABASE_HOST: analytics-db
       DATABASE_PORT: 5432
       DATABASE_USER: analytics

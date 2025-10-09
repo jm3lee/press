@@ -7,6 +7,9 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from typing import Any, Dict
+
+import httpx
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.responses import FileResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -45,6 +48,20 @@ def _static_dir() -> Path:
     return Path(raw_path)
 
 
+def _analytics_recent_url() -> str:
+    raw_recent = os.getenv("CAMPAIGN_MANAGER_ANALYTICS_RECENT_URL", "").strip()
+    if raw_recent:
+        return raw_recent
+
+    raw_base = os.getenv("CAMPAIGN_MANAGER_ANALYTICS_BASE", "http://analytics-backend:8000").strip()
+    if not raw_base:
+        raise RuntimeError(
+            "CAMPAIGN_MANAGER_ANALYTICS_BASE must be configured with a valid URL",
+        )
+    base = raw_base.rstrip("/")
+    return f"{base}/events/recent"
+
+
 def _create_auth_manager() -> AuthManager:
     username = os.getenv("CAMPAIGN_MANAGER_ADMIN_USERNAME", "admin")
     return AuthManager(
@@ -73,12 +90,24 @@ def create_app() -> FastAPI:
 
     repository = _create_repository()
     auth_manager = _create_auth_manager()
+    analytics_url = _analytics_recent_url()
 
     repository.initialize()
     auth_manager.reload_password()
 
     app = FastAPI(title="Flashoffer Campaign Manager", version="0.1.0")
     security = HTTPBearer(auto_error=False)
+
+    analytics_client = httpx.AsyncClient(
+        timeout=httpx.Timeout(10.0, connect=5.0),
+        headers={"Accept": "application/json"},
+    )
+    app.state.analytics_recent_url = analytics_url
+    app.state.analytics_client = analytics_client
+
+    @app.on_event("shutdown")
+    async def _close_analytics_client() -> None:  # pragma: no cover - FastAPI handles lifecycle
+        await analytics_client.aclose()
 
     static_dir = _static_dir()
     assets_dir = static_dir / "assets"
@@ -180,6 +209,62 @@ def create_app() -> FastAPI:
                 detail="Failed to load updated campaign",
             )
         return _as_response(record)
+
+    @app.get("/api/campaigns/{campaign_id}/events")
+    async def campaign_events(
+        campaign_id: str,
+        limit: int | None = None,
+        _: str = Depends(_require_token),
+    ) -> Dict[str, Any]:
+        """Proxy recent engagement events from the analytics backend."""
+
+        normalized_id = campaign_id.strip()
+        if not normalized_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Campaign identifier must not be blank",
+            )
+
+        params = {"campaign_id": normalized_id}
+        if limit is not None:
+            sanitized = max(1, min(limit, 200))
+            params["limit"] = str(sanitized)
+
+        client: httpx.AsyncClient = app.state.analytics_client
+        analytics_recent_url: str = app.state.analytics_recent_url
+
+        try:
+            response = await client.get(analytics_recent_url, params=params)
+        except httpx.RequestError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=f"Failed to contact analytics backend: {exc}",
+            ) from exc
+
+        if response.status_code >= 400:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=(
+                    "Analytics backend returned unexpected status "
+                    f"{response.status_code}"
+                ),
+            )
+
+        try:
+            payload = response.json()
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="Analytics backend response was not valid JSON",
+            ) from exc
+
+        if not isinstance(payload, dict):
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="Analytics backend response must be a JSON object",
+            )
+
+        return payload
 
     index_path = static_dir / "index.html"
 
