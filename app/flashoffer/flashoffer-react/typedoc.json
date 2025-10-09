@@ -5,7 +5,7 @@
   ],
   "entryPointStrategy": "expand",
   "tsconfig": "./tsconfig.docs.json",
-  "out": "../docs/flashoffer-react/reference/flashoffer-react",
+  "out": "../docs/flashoffer-react/reference",
   "plugin": [
     "typedoc-plugin-markdown"
   ],
