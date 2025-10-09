@@ -120,6 +120,32 @@ export function SpaciousThemeProvider({
 }
 ```
 
+Flashoffer React now ships with seven presets tuned for common storytelling
+needs:
+
+- `default`: Balanced marketing palette with blue primary accents.
+- `spaciousTypography`: Expanded rhythm for editorial hero sections.
+- `sunriseGlow`: Warm gradients suited to seasonal or celebratory launches.
+- `midnightPulse`: Neon-on-dark treatment ideal for cinematic promotions.
+- `oceanBreeze`: Teal palette that feels calm for travel and wellness content.
+- `forestCanopy`: Verdant spectrum designed for sustainability narratives.
+- `monochromeFocus`: High-contrast monochrome with minimalist detailing.
+
+To experiment with one of the new presets without additional overrides, pass
+the preset name directly to the provider:
+
+```tsx
+import { FlashofferThemeProvider, HeroBanner } from "flashoffer-react";
+
+export function SeasonalSpotlight() {
+  return (
+    <FlashofferThemeProvider preset="sunriseGlow">
+      <HeroBanner />
+    </FlashofferThemeProvider>
+  );
+}
+```
+
 ### Component reference
 
 Each component ships with sensible defaults that marketing teams can override

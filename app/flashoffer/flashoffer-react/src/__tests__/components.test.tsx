@@ -1,9 +1,19 @@
+/*
+ * Copyright (c) Flashoffer Developers
+ * Released under the MIT license.
+ */
+
 import { render, screen } from "@testing-library/react";
 import Typography from "@mui/material/Typography";
 import {
   FlashofferThemeProvider,
   createFlashofferTheme,
-  createSpaciousTypographyTheme
+  createSpaciousTypographyTheme,
+  createSunriseGlowTheme,
+  createMidnightPulseTheme,
+  createOceanBreezeTheme,
+  createForestCanopyTheme,
+  createMonochromeFocusTheme
 } from "../index";
 import { Footer } from "../components/Footer";
 import { HeroBanner } from "../components/HeroBanner";
@@ -15,6 +25,7 @@ import { SectionHeader } from "../components/SectionHeader";
 import { Figure } from "../components/Figure";
 import { useTheme } from "@mui/material/styles";
 import type { ReactElement } from "react";
+import type { FlashofferThemePreset } from "../index";
 
 describe("Flashoffer React primitives", () => {
   const renderWithTheme = (ui: ReactElement) =>
@@ -207,6 +218,20 @@ describe("Flashoffer React primitives", () => {
     expect(darkTheme.palette.background.default).toBe("#0b1120");
   });
 
+  it("exposes standalone creators for each preset", () => {
+    const sunrise = createSunriseGlowTheme();
+    const midnight = createMidnightPulseTheme("dark");
+    const ocean = createOceanBreezeTheme();
+    const forest = createForestCanopyTheme("dark");
+    const monochrome = createMonochromeFocusTheme();
+
+    expect(sunrise.palette.primary.main).toBe("#f97316");
+    expect(midnight.palette.background.default).toBe("#020617");
+    expect(ocean.palette.secondary.main).toBe("#14b8a6");
+    expect(forest.palette.primary.main).toBe("#34d399");
+    expect(monochrome.palette.text.primary).toBe("#0f172a");
+  });
+
   it("propagates custom theme options through provider", () => {
     function ThemeProbe() {
       const theme = useTheme();
@@ -259,4 +284,47 @@ describe("Flashoffer React primitives", () => {
     expect(probe).toHaveAttribute("data-line-height", "1.75");
     expect(probe).toHaveAttribute("data-background", "#0b1120");
   });
+
+  it.each([
+    ["sunriseGlow", "light", "#f97316", "#fff7ed"],
+    ["midnightPulse", "dark", "#6366f1", "#020617"],
+    ["oceanBreeze", "dark", "#38bdf8", "#0f172a"],
+    ["forestCanopy", "light", "#15803d", "#f7fee7"],
+    ["monochromeFocus", "dark", "#e2e8f0", "#0f172a"]
+  ])(
+    "allows selecting the %s preset",
+    (
+      preset,
+      colorMode,
+      expectedPrimary,
+      expectedBackground
+    ) => {
+      function ThemeProbe() {
+        const theme = useTheme();
+        return (
+          <span
+            data-testid={`preset-${preset}`}
+            data-mode={theme.palette.mode}
+            data-primary={theme.palette.primary.main}
+            data-background={theme.palette.background.default}
+          />
+        );
+      }
+
+      render(
+        <FlashofferThemeProvider
+          applyCssBaseline={false}
+          preset={preset as FlashofferThemePreset}
+          colorMode={colorMode as "light" | "dark"}
+        >
+          <ThemeProbe />
+        </FlashofferThemeProvider>
+      );
+
+      const probe = screen.getByTestId(`preset-${preset}`);
+      expect(probe).toHaveAttribute("data-mode", colorMode);
+      expect(probe).toHaveAttribute("data-primary", expectedPrimary);
+      expect(probe).toHaveAttribute("data-background", expectedBackground);
+    }
+  );
 });
