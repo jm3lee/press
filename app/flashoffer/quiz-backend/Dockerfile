@@ -47,8 +47,8 @@ ENV GUNICORN_WORKERS=4 \
 
 # Install nginx for reverse proxying and keep apt metadata cached during
 # builds to speed up rebuilds without bloating the runtime image.
-RUN --mount=type=cache,target=/var/cache/apt \
-    --mount=type=cache,target=/var/lib/apt/lists \
+RUN --mount=type=cache,target=/var/cache/apt,id=quiz-backend \
+    --mount=type=cache,target=/var/lib/apt/lists,id=quiz-backend \
     apt-get update \
     && apt-get install --no-install-recommends -y nginx \
     && rm -rf /var/lib/apt/lists/*

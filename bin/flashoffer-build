@@ -1,0 +1,1 @@
+docker compose build "$@" analytics-db analytics-backend quiz-backend flashoffer

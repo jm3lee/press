@@ -64,8 +64,8 @@ ENV GUNICORN_WORKERS=4 \
 # Install nginx for reverse proxying and clean up apt metadata to keep the
 # image size in check. Caching apt metadata dramatically speeds up rebuilds
 # while still ensuring the runtime layer stays slim.
-RUN --mount=type=cache,target=/var/cache/apt \
-    --mount=type=cache,target=/var/lib/apt/lists \
+RUN --mount=type=cache,target=/var/cache/apt,id=analytics-backend \
+    --mount=type=cache,target=/var/lib/apt/lists,id=analytics-backend \
     apt-get update \
     && apt-get install --no-install-recommends -y nginx \
     && rm -rf /var/lib/apt/lists/*

@@ -11,10 +11,10 @@
 # extension and recommended configuration out of the box.
 FROM timescale/timescaledb:latest-pg14
 
-RUN --mount=type=cache,target=/var/cache/apk \
+RUN --mount=type=cache,target=/var/cache/apk,id=analytics-db \
   apk add --no-cache s3cmd python3 py3-pip postgresql-client ipython
 
-RUN --mount=type=cache,target=/root/.cache/pip \
+RUN --mount=type=cache,target=/root/.cache/pip,id=analytics-db \
   pip install --break-system-packages psycopg[binary] pandas
 
 COPY ./app/flashoffer/analytics-db/bin/ /root/bin/
