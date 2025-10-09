@@ -246,7 +246,8 @@ export function LandingWithAnalytics() {
 
 Run the TypeDoc pipeline to generate Markdown reference files for every
 component and helper exported from the library. The output lands in
-`docs/reference/flashoffer-react` so the Press documentation build can surface
+`docs/flashoffer-react/reference/flashoffer-react` so the Press
+documentation build can surface the latest props and usage guidance.
 the latest props and usage guidance.
 
 ```bash

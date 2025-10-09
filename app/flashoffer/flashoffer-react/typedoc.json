@@ -1,16 +1,27 @@
 {
   "$schema": "https://typedoc.org/schema.json",
-  "entryPoints": ["./src/index.ts"],
+  "entryPoints": [
+    "./src/index.ts"
+  ],
   "entryPointStrategy": "expand",
   "tsconfig": "./tsconfig.docs.json",
-  "out": "./docs/reference/flashoffer-react",
-  "plugin": ["typedoc-plugin-markdown"],
+  "out": "../docs/flashoffer-react/reference/flashoffer-react",
+  "plugin": [
+    "typedoc-plugin-markdown"
+  ],
   "readme": "none",
   "hideBreadcrumbs": true,
   "categorizeByGroup": false,
   "excludeExternals": true,
-  "externalPattern": ["**/node_modules/@mui/**", "**/node_modules/@emotion/**"],
-  "exclude": ["**/__tests__/**", "**/*.test.ts", "**/*.test.tsx"],
+  "externalPattern": [
+    "**/node_modules/@mui/**",
+    "**/node_modules/@emotion/**"
+  ],
+  "exclude": [
+    "**/__tests__/**",
+    "**/*.test.ts",
+    "**/*.test.tsx"
+  ],
   "excludeInternal": true,
   "excludePrivate": true,
   "excludeProtected": true,
@@ -18,5 +29,8 @@
     "inherited": false,
     "external": false
   },
-  "sort": ["kind", "source-order"]
+  "sort": [
+    "kind",
+    "source-order"
+  ]
 }
