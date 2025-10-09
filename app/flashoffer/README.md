@@ -9,6 +9,8 @@ shared documentation that now lives in a single location.
 - `analytics-backend/` – Event ingestion APIs and supporting workers.
 - `analytics-db/` – Database schema and migrations for analytics workloads.
 - `backend-common/` – Shared backend utilities and domain models.
+- `campaign-backend/` – Countdown metadata API consumed by widgets.
+- `campaign_manager/` – React + FastAPI admin experience for campaign CRUD.
 - `flashoffer-demo/` – Reference deployment that exercises the full stack.
 - `flashoffer-react/` – Public React component library for Flashoffer embeds.
 - `quiz-backend/` – Services that deliver quiz content and record responses.
