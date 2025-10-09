@@ -3,11 +3,25 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from importlib import resources
 from typing import Any, Dict
 
 from psycopg2.extras import Json
 
 from backend_common import DatabaseConfig, PostgresPool
+
+
+def _load_sql(filename: str) -> str:
+    """Return the contents of an embedded SQL file."""
+
+    return (
+        resources.files(__package__).joinpath("sql", filename).read_text(encoding="utf-8").strip()
+    )
+
+
+CREATE_QUIZ_RESULTS_TABLE_SQL = _load_sql("create_quiz_results_table.sql")
+
+INSERT_QUIZ_RESULT_SQL = _load_sql("insert_quiz_result.sql")
 
 
 class QuizResultsStore(PostgresPool):
@@ -16,22 +30,7 @@ class QuizResultsStore(PostgresPool):
     def initialize(self) -> None:
         with self.connection() as conn:  # type: ignore[assignment]
             with conn.cursor() as cur:
-                cur.execute(
-                    """
-                    CREATE TABLE IF NOT EXISTS quiz_results (
-                        id BIGSERIAL PRIMARY KEY,
-                        quiz_id TEXT NOT NULL,
-                        user_id TEXT NOT NULL,
-                        attempt_id TEXT,
-                        occurred_at TIMESTAMPTZ NOT NULL,
-                        attempts INTEGER NOT NULL,
-                        passes INTEGER NOT NULL,
-                        fails INTEGER NOT NULL,
-                        payload JSONB NOT NULL DEFAULT '{}'::jsonb,
-                        received_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-                    )
-                    """
-                )
+                cur.execute(CREATE_QUIZ_RESULTS_TABLE_SQL)
             conn.commit()
 
     def record_completion(self, result: Dict[str, Any]) -> Dict[str, Any]:
@@ -44,19 +43,7 @@ class QuizResultsStore(PostgresPool):
         with self.connection() as conn:  # type: ignore[assignment]
             with conn.cursor() as cur:
                 cur.execute(
-                    """
-                    INSERT INTO quiz_results (
-                        quiz_id,
-                        user_id,
-                        attempt_id,
-                        occurred_at,
-                        attempts,
-                        passes,
-                        fails,
-                        payload
-                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                    RETURNING id, received_at
-                    """,
+                    INSERT_QUIZ_RESULT_SQL,
                     (
                         result["quiz_id"],
                         result["user_id"],

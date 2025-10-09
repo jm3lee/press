@@ -16,6 +16,9 @@ from backend_common import DatabaseConfig, configure_cors
 from .db import QuizResultsStore
 
 
+HEALTHCHECK_QUERY = "SELECT 1 -- confirm quiz database connectivity"
+
+
 def _coerce_bool(value: Any, *, field: str) -> bool:
     if isinstance(value, bool):
         return value
@@ -91,7 +94,7 @@ def create_app() -> Flask:
     def healthcheck() -> Response:
         with storage.connection() as conn:  # type: ignore[assignment]
             with conn.cursor() as cur:
-                cur.execute("SELECT 1")
+                cur.execute(HEALTHCHECK_QUERY)
                 cur.fetchone()
         return jsonify({"status": "ok"})
 

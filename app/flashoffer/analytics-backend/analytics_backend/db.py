@@ -3,11 +3,37 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from importlib import resources
 from typing import Any, Dict, Iterable, List, Sequence
 
 from psycopg2.extras import Json, execute_values
 
 from backend_common import DatabaseConfig, PostgresPool
+
+
+def _load_sql(filename: str) -> str:
+    """Return the contents of an embedded SQL file."""
+
+    return (
+        resources.files(__package__).joinpath("sql", filename).read_text(encoding="utf-8").strip()
+    )
+
+
+CREATE_TIMESCALE_EXTENSION_SQL = _load_sql("create_timescale_extension.sql")
+
+CREATE_ENGAGEMENT_EVENTS_TABLE_SQL = _load_sql("create_engagement_events_table.sql")
+
+CREATE_ENGAGEMENT_EVENTS_HYPERTABLE_SQL = _load_sql(
+    "create_engagement_events_hypertable.sql"
+)
+
+INSERT_ENGAGEMENT_EVENTS_SQL = _load_sql("insert_engagement_events.sql")
+
+TRUNCATE_ENGAGEMENT_EVENTS_SQL = _load_sql("truncate_engagement_events.sql")
+
+FETCH_RECENT_ENGAGEMENT_EVENTS_SQL = _load_sql(
+    "fetch_recent_engagement_events.sql"
+)
 
 
 class TimescaleDB(PostgresPool):
@@ -18,26 +44,9 @@ class TimescaleDB(PostgresPool):
 
         with self.connection() as conn:  # type: ignore[assignment]
             with conn.cursor() as cur:
-                cur.execute("CREATE EXTENSION IF NOT EXISTS timescaledb")
-                cur.execute(
-                    """
-                    CREATE TABLE IF NOT EXISTS engagement_events (
-                        id BIGSERIAL NOT NULL,
-                        site TEXT NOT NULL,
-                        session_id UUID NOT NULL,
-                        event_type TEXT NOT NULL,
-                        target TEXT NOT NULL,
-                        occurred_at TIMESTAMPTZ NOT NULL,
-                        meta JSONB NOT NULL,
-                        received_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                        PRIMARY KEY (occurred_at, id)
-                    )
-                    """
-                )
-                cur.execute(
-                    "SELECT create_hypertable('engagement_events', 'occurred_at', "
-                    "if_not_exists => TRUE)"
-                )
+                cur.execute(CREATE_TIMESCALE_EXTENSION_SQL)
+                cur.execute(CREATE_ENGAGEMENT_EVENTS_TABLE_SQL)
+                cur.execute(CREATE_ENGAGEMENT_EVENTS_HYPERTABLE_SQL)
             conn.commit()
 
     def insert_events(
@@ -68,16 +77,7 @@ class TimescaleDB(PostgresPool):
             with conn.cursor() as cur:
                 execute_values(
                     cur,
-                    """
-                    INSERT INTO engagement_events (
-                        site,
-                        session_id,
-                        event_type,
-                        target,
-                        occurred_at,
-                        meta
-                    ) VALUES %s
-                    """,
+                    INSERT_ENGAGEMENT_EVENTS_SQL,
                     rows,
                 )
             conn.commit()
@@ -86,30 +86,14 @@ class TimescaleDB(PostgresPool):
     def truncate_events(self) -> None:
         with self.connection() as conn:  # type: ignore[assignment]
             with conn.cursor() as cur:
-                cur.execute("TRUNCATE engagement_events")
+                cur.execute(TRUNCATE_ENGAGEMENT_EVENTS_SQL)
             conn.commit()
 
     def fetch_recent_events(self, limit: int = 25) -> List[Dict[str, Any]]:
         limit = max(1, min(limit, 200))
         with self.connection() as conn:  # type: ignore[assignment]
             with conn.cursor() as cur:
-                cur.execute(
-                    """
-                    SELECT
-                        id,
-                        site,
-                        session_id,
-                        event_type,
-                        target,
-                        occurred_at,
-                        meta,
-                        received_at
-                    FROM engagement_events
-                    ORDER BY received_at DESC
-                    LIMIT %s
-                    """,
-                    (limit,),
-                )
+                cur.execute(FETCH_RECENT_ENGAGEMENT_EVENTS_SQL, (limit,))
                 rows = cur.fetchall()
 
         events: List[Dict[str, Any]] = []

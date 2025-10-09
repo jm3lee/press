@@ -3,9 +3,25 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from importlib import resources
 from typing import Any
 
 from backend_common import DatabaseConfig, PostgresPool
+
+
+def _load_sql(filename: str) -> str:
+    """Return the contents of an embedded SQL file."""
+
+    return (
+        resources.files(__package__).joinpath("sql", filename).read_text(encoding="utf-8").strip()
+    )
+
+
+CREATE_CAMPAIGN_TABLE_SQL = _load_sql("create_campaign_table.sql")
+
+UPSERT_CAMPAIGN_SQL = _load_sql("upsert_campaign.sql")
+
+FETCH_CAMPAIGN_END_TIME_SQL = _load_sql("fetch_campaign_end_time.sql")
 
 
 class CampaignStore(PostgresPool):
@@ -16,16 +32,7 @@ class CampaignStore(PostgresPool):
 
         with self.connection() as conn:  # type: ignore[assignment]
             with conn.cursor() as cur:
-                cur.execute(
-                    """
-                    CREATE TABLE IF NOT EXISTS campaign (
-                        id TEXT PRIMARY KEY,
-                        name TEXT,
-                        end_time TIMESTAMPTZ NOT NULL,
-                        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-                    )
-                    """
-                )
+                cur.execute(CREATE_CAMPAIGN_TABLE_SQL)
             conn.commit()
 
     def upsert_campaign(self, campaign_id: str, *, end_time: datetime) -> None:
@@ -34,16 +41,7 @@ class CampaignStore(PostgresPool):
         normalized = _ensure_utc(end_time)
         with self.connection() as conn:  # type: ignore[assignment]
             with conn.cursor() as cur:
-                cur.execute(
-                    """
-                    INSERT INTO campaign (id, end_time)
-                    VALUES (%s, %s)
-                    ON CONFLICT (id)
-                    DO UPDATE SET end_time = EXCLUDED.end_time,
-                        updated_at = NOW()
-                    """,
-                    (campaign_id, normalized),
-                )
+                cur.execute(UPSERT_CAMPAIGN_SQL, (campaign_id, normalized))
             conn.commit()
 
     def fetch_end_time(self, campaign_id: str) -> datetime | None:
@@ -51,10 +49,7 @@ class CampaignStore(PostgresPool):
 
         with self.connection() as conn:  # type: ignore[assignment]
             with conn.cursor() as cur:
-                cur.execute(
-                    "SELECT end_time FROM campaign WHERE id = %s",
-                    (campaign_id,),
-                )
+                cur.execute(FETCH_CAMPAIGN_END_TIME_SQL, (campaign_id,))
                 row = cur.fetchone()
 
         if not row:
