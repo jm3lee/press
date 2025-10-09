@@ -66,6 +66,7 @@ export interface QuizCompletionPayload {
   isCorrect?: boolean;
   question: string;
   attempt: number;
+  campaignId?: string;
 }
 
 export async function logQuizCompletion(
@@ -90,6 +91,7 @@ export async function logQuizCompletion(
       attempt: payload.attempt,
     },
     occurred_at: new Date().toISOString(),
+    ...(payload.campaignId ? { campaign_id: payload.campaignId } : {}),
   };
 
   try {

@@ -61,6 +61,7 @@ def configured_app(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     monkeypatch.setattr("campaign_manager.app._create_repository", lambda: repository)
     monkeypatch.setattr("campaign_manager.app._create_auth_manager", lambda: auth_manager)
     monkeypatch.setenv("CAMPAIGN_MANAGER_ANALYTICS_RECENT_URL", "http://analytics.test/events/recent")
+    monkeypatch.setenv("CAMPAIGN_MANAGER_QUIZ_RECENT_URL", "http://quiz.test/api/events/quiz")
     monkeypatch.setenv("CAMPAIGN_MANAGER_STATIC_DIR", str(tmp_path))
 
     app = create_app()
@@ -75,10 +76,44 @@ def test_campaign_events_successfully_proxies_response(configured_app):
     app, auth_manager = configured_app
 
     async def fake_get(url: str, params=None, headers=None):
-        assert url == "http://analytics.test/events/recent"
         assert params == {"campaign_id": "launch", "limit": "200"}
-        request = httpx.Request("GET", url)
-        return httpx.Response(status_code=200, json={"events": ["ok"]}, request=request)
+        request = httpx.Request("GET", url, params=params)
+        if url == "http://analytics.test/events/recent":
+            payload = {
+                "events": [
+                    {
+                        "id": "eng-1",
+                        "event_type": "cta_click",
+                        "target": "hero",
+                        "occurred_at": "2024-04-01T12:00:00Z",
+                        "received_at": "2024-04-01T12:00:01Z",
+                        "site": "press",
+                        "session_id": "sess-1",
+                        "meta": {"cta": "hero"},
+                    }
+                ]
+            }
+            return httpx.Response(status_code=200, json=payload, request=request)
+        if url == "http://quiz.test/api/events/quiz":
+            payload = {
+                "results": [
+                    {
+                        "id": 42,
+                        "quiz_id": "knowledge-check",
+                        "user_id": "user-7",
+                        "attempt_id": "attempt-9",
+                        "campaign_id": "launch",
+                        "occurred_at": "2024-04-01T11:59:59Z",
+                        "received_at": "2024-04-01T12:00:00Z",
+                        "attempts": 1,
+                        "passes": 1,
+                        "fails": 0,
+                        "payload": {"score": 100},
+                    }
+                ]
+            }
+            return httpx.Response(status_code=200, json=payload, request=request)
+        raise AssertionError(f"Unexpected URL {url}")
 
     app.state.analytics_client.get = fake_get  # type: ignore[assignment]
 
@@ -89,15 +124,29 @@ def test_campaign_events_successfully_proxies_response(configured_app):
         )
 
     assert response.status_code == 200
-    assert response.json() == {"events": ["ok"]}
+    data = response.json()
+    assert len(data["events"]) == 2
+    assert data["events"][0]["id"] == "eng-1"
+    quiz_event = next(event for event in data["events"] if event["event_type"] == "quiz-complete")
+    assert quiz_event["id"] == "quiz-42"
+    assert quiz_event["target"] == "knowledge-check"
+    assert quiz_event["session_id"] == "user-7"
+    assert quiz_event["meta"]["campaign_id"] == "launch"
+    assert quiz_event["meta"]["payload"] == {"score": 100}
 
 
 def test_campaign_events_returns_bad_gateway_on_error_status(configured_app):
     app, auth_manager = configured_app
 
     async def fake_get(url: str, params=None, headers=None):
-        request = httpx.Request("GET", url)
-        return httpx.Response(status_code=503, request=request)
+        request = httpx.Request("GET", url, params=params)
+        if url == "http://analytics.test/events/recent":
+            return httpx.Response(status_code=503, request=request)
+        return httpx.Response(
+            status_code=200,
+            json={"results": []},
+            request=request,
+        )
 
     app.state.analytics_client.get = fake_get  # type: ignore[assignment]
 
@@ -115,7 +164,7 @@ def test_campaign_events_handles_request_exceptions(configured_app):
     app, auth_manager = configured_app
 
     async def fake_get(url: str, params=None, headers=None):
-        request = httpx.Request("GET", url)
+        request = httpx.Request("GET", url, params=params)
         raise httpx.ConnectError("boom", request=request)
 
     app.state.analytics_client.get = fake_get  # type: ignore[assignment]
@@ -127,14 +176,16 @@ def test_campaign_events_handles_request_exceptions(configured_app):
         )
 
     assert response.status_code == 502
-    assert "Failed to contact analytics backend" in response.json()["detail"]
+    assert "analytics services" in response.json()["detail"]
 
 
 def test_campaign_events_rejects_non_object_payloads(configured_app):
     app, auth_manager = configured_app
 
     async def fake_get(url: str, params=None, headers=None):
-        request = httpx.Request("GET", url)
+        request = httpx.Request("GET", url, params=params)
+        if url == "http://analytics.test/events/recent":
+            return httpx.Response(status_code=200, json={"events": []}, request=request)
         return httpx.Response(status_code=200, content=b"[]", request=request)
 
     app.state.analytics_client.get = fake_get  # type: ignore[assignment]

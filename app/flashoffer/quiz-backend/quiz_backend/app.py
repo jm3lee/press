@@ -58,6 +58,12 @@ def _load_quiz_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
     if attempt_id is not None:
         attempt_id = str(attempt_id)
 
+    campaign_id = payload.get("campaign_id")
+    if campaign_id is not None:
+        campaign_id = str(campaign_id).strip()
+        if not campaign_id:
+            campaign_id = None
+
     details = dict(metadata)
     if payload.get("score") is not None:
         details["score"] = payload["score"]
@@ -69,6 +75,7 @@ def _load_quiz_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
         "quiz_id": str(payload["quiz_id"]),
         "user_id": str(payload["user_id"]),
         "attempt_id": attempt_id,
+        "campaign_id": campaign_id,
         "occurred_at": payload.get("occurred_at"),
         "attempts": 1,
         "passes": 1 if passed else 0,
@@ -121,6 +128,22 @@ def create_app() -> Flask:
 
         record = storage.record_completion(result)
         return jsonify({"result": record}), 201
+
+    @app.route("/api/events/quiz", methods=["GET"])
+    def list_quiz_events() -> Response:
+        try:
+            limit = int(request.args.get("limit", "25"))
+        except (TypeError, ValueError):
+            limit = 25
+        limit = max(1, min(limit, 200))
+
+        raw_campaign_id = request.args.get("campaign_id")
+        campaign_id = raw_campaign_id.strip() if raw_campaign_id else None
+        if campaign_id == "":
+            campaign_id = None
+
+        results = storage.fetch_recent_results(limit=limit, campaign_id=campaign_id)
+        return jsonify({"results": results})
 
     @app.route("/config", methods=["GET"])
     def config_dump() -> Response:
