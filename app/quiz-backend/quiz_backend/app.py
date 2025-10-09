@@ -1,12 +1,11 @@
-"""Flask application providing an ingestion API for analytics events."""
+"""Flask application providing an ingestion API for quiz events."""
 
 from __future__ import annotations
 
 import atexit
 import json
-import os
 import time
-from typing import Any, Dict, Iterable
+from typing import Any, Dict
 
 from flask import Flask, Response, jsonify, request
 
@@ -14,47 +13,62 @@ from pie.logging import logger
 
 from backend_common import DatabaseConfig, configure_cors
 
-from .db import TimescaleDB
+from .db import QuizResultsStore
 
 
-def _load_event_payload(payload: Dict[str, Any]) -> Iterable[Dict[str, Any]]:
-    required = {"site", "session_id", "events"}
+def _coerce_bool(value: Any, *, field: str) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        if value in {0, 1}:
+            return bool(value)
+    if isinstance(value, str):
+        lowered = value.strip().lower()
+        if lowered in {"true", "1", "yes"}:
+            return True
+        if lowered in {"false", "0", "no"}:
+            return False
+    raise ValueError(f"Field '{field}' must be a boolean value")
+
+
+def _load_quiz_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
+    required = {"quiz_id", "user_id", "event_type"}
     missing = required - payload.keys()
     if missing:
-        raise ValueError(f"Missing required keys: {', '.join(sorted(missing))}")
+        missing_list = ", ".join(sorted(missing))
+        raise ValueError(f"Missing required keys: {missing_list}")
 
-    events = payload["events"]
-    if not isinstance(events, list) or not events:
-        raise ValueError("'events' must be a non-empty list")
+    event_type = str(payload["event_type"]).strip().lower()
+    if event_type != "complete":
+        raise ValueError(f"Unsupported quiz event type: {payload['event_type']}")
 
-    normalised = []
-    for index, event in enumerate(events):
-        if not isinstance(event, dict):
-            raise ValueError(f"Event #{index} must be an object")
-        if "target" not in event:
-            raise ValueError(f"Missing 'target' in event #{index}")
+    passed = _coerce_bool(payload.get("passed"), field="passed")
 
-        event_type = event.get("event_type") or event.get("type")
-        if not event_type:
-            raise ValueError(f"Missing 'type' in event #{index}")
+    metadata = payload.get("metadata") or payload.get("payload") or {}
+    if not isinstance(metadata, dict):
+        raise ValueError("'metadata' must be a JSON object when provided")
 
-        occurred_at = event.get("occurred_at") or event.get("at")
+    attempt_id = payload.get("attempt_id")
+    if attempt_id is not None:
+        attempt_id = str(attempt_id)
 
-        meta = event.get("meta", {})
-        if meta is None:
-            meta = {}
-        if not isinstance(meta, dict):
-            raise ValueError(f"'meta' must be an object in event #{index}")
+    details = dict(metadata)
+    if payload.get("score") is not None:
+        details["score"] = payload["score"]
+    if payload.get("duration_seconds") is not None:
+        details["duration_seconds"] = payload["duration_seconds"]
+    details["passed"] = passed
 
-        normalised.append(
-            {
-                "event_type": str(event_type),
-                "target": str(event["target"]),
-                "occurred_at": occurred_at,
-                "meta": meta,
-            }
-        )
-    return normalised
+    return {
+        "quiz_id": str(payload["quiz_id"]),
+        "user_id": str(payload["user_id"]),
+        "attempt_id": attempt_id,
+        "occurred_at": payload.get("occurred_at"),
+        "attempts": 1,
+        "passes": 1 if passed else 0,
+        "fails": 0 if passed else 1,
+        "payload": details,
+    }
 
 
 def create_app() -> Flask:
@@ -67,11 +81,10 @@ def create_app() -> Flask:
     atexit.register(storage.close)
     app.config["DB_POOL"] = storage
 
-    apply_cors = configure_cors(app, component="analytics-backend")
+    apply_cors = configure_cors(app, component="quiz-backend")
 
-    @app.route("/events", methods=["OPTIONS"])
-    @app.route("/events/recent", methods=["OPTIONS"])
-    def options_handler() -> Response:
+    @app.route("/api/events/quiz", methods=["OPTIONS"])
+    def quiz_options() -> Response:
         return apply_cors(Response(status=204))
 
     @app.route("/health", methods=["GET"])
@@ -82,8 +95,8 @@ def create_app() -> Flask:
                 cur.fetchone()
         return jsonify({"status": "ok"})
 
-    @app.route("/events", methods=["POST"])
-    def ingest_events() -> Response:
+    @app.route("/api/events/quiz", methods=["POST"])
+    def ingest_quiz_event() -> Response:
         if not request.data:
             return jsonify({"error": "request body required"}), 400
 
@@ -96,31 +109,15 @@ def create_app() -> Flask:
             return jsonify({"error": "payload must be a JSON object"}), 400
 
         try:
-            events = list(_load_event_payload(payload))
+            result = _load_quiz_payload(payload)
         except ValueError as exc:
             return jsonify({"error": str(exc)}), 400
 
-        inserted = storage.insert_events(
-            site=payload["site"],
-            session_id=payload["session_id"],
-            events=events,
-        )
-        return jsonify({"inserted": inserted}), 201
-
-    @app.route("/events/recent", methods=["GET"])
-    def recent_events() -> Response:
-        try:
-            limit = int(request.args.get("limit", "25"))
-        except ValueError:
-            limit = 25
-        limit = max(1, min(limit, 200))
-        events = storage.fetch_recent_events(limit)
-        return jsonify({"events": events})
+        record = storage.record_completion(result)
+        return jsonify({"result": record}), 201
 
     @app.route("/config", methods=["GET"])
     def config_dump() -> Response:
-        """Return a limited subset of runtime configuration."""
-
         details = {
             "database": {
                 "host": config.host,
@@ -133,9 +130,7 @@ def create_app() -> Flask:
     return app
 
 
-def _initialise_storage(app: Flask, config: DatabaseConfig) -> TimescaleDB:
-    """Initialise the database connection with retry semantics."""
-
+def _initialise_storage(app: Flask, config: DatabaseConfig) -> QuizResultsStore:
     retry_interval = 5.0
     timeout = 300.0
     start_time = time.monotonic()
@@ -143,15 +138,15 @@ def _initialise_storage(app: Flask, config: DatabaseConfig) -> TimescaleDB:
     attempt = 1
 
     storage_logger = logger.bind(
-        component="analytics-backend",
+        component="quiz-backend",
         operation="database-initialisation",
         flask_app=app.name,
     )
 
     while True:
-        storage: TimescaleDB | None = None
+        storage: QuizResultsStore | None = None
         try:
-            storage = TimescaleDB(config)
+            storage = QuizResultsStore(config)
             storage.initialize()
         except Exception as exc:  # noqa: BLE001 - must propagate original error
             if storage is not None:
