@@ -8,13 +8,13 @@ from __future__ import annotations
 from contextlib import contextmanager
 from typing import Iterator
 
-from psycopg2.pool import SimpleConnectionPool
+from psycopg_pool import SimpleConnectionPool
 
 from .config import DatabaseConfig
 
 
 class PostgresPool:
-    """Simple connection pool wrapper around psycopg2."""
+    """Simple connection pool wrapper around psycopg."""
 
     def __init__(self, config: DatabaseConfig) -> None:
         self._config = config

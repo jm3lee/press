@@ -9,7 +9,8 @@ from datetime import datetime, timezone
 from importlib import resources
 from typing import Any, Dict, Iterable, List, Sequence
 
-from psycopg2.extras import Json, execute_values
+from psycopg.extras import execute_values
+from psycopg.types.json import Json
 
 from backend_common import DatabaseConfig, PostgresPool
 

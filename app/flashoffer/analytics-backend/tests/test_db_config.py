@@ -6,7 +6,7 @@ from __future__ import annotations
 import pytest
 
 pytest.importorskip("flask")
-pytest.importorskip("psycopg2")
+pytest.importorskip("psycopg")
 
 from analytics_backend.db import DatabaseConfig
 
