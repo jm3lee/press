@@ -26,7 +26,7 @@ COPY app/shell/py/pie /tmp/pie
 # Install application dependencies, the shared PIE package, and
 # dominate to support HTML email rendering. Cleaning the temporary
 # directory avoids keeping duplicate source trees in the final image.
-RUN --mount=type=cache,target=/root/.cache/pip,id=quiz-backend-pip \
+RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
     pip install -r requirements.txt \
     && pip install /tmp/pie dominate \
     && rm -rf /tmp/pie /backend-common
@@ -48,13 +48,13 @@ ENV GUNICORN_WORKERS=4 \
 
 # Install nginx for reverse proxying and keep apt metadata cached during
 # builds to speed up rebuilds without bloating the runtime image.
-RUN --mount=type=cache,target=/var/cache/apt,id=quiz-backend \
-    --mount=type=cache,target=/var/lib/apt/lists,id=quiz-backend \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
     apt-get update \
     && apt-get install --no-install-recommends -y nginx \
     && rm -rf /var/lib/apt/lists/*
 
-RUN --mount=type=cache,target=/root/.cache/pip,id=quiz-backend-pip \
+RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
     pip install gunicorn
 
 COPY app/flashoffer/quiz-backend/nginx.conf /etc/nginx/conf.d/default.conf
