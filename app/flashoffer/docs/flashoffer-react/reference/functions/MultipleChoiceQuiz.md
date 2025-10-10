@@ -59,6 +59,15 @@ after a correct response. Every submission triggers `onAnswer` with the
 selected option identifier and the computed correctness flag when
 available.
 
+## Deadlines and tallies
+
+Provide an `endTime` to automatically close the quiz at a scheduled
+deadline. Once the current time surpasses the end time, the component locks
+interactions, surfaces the configured `closedMessage` (or a default note),
+and displays the tallies attached to each option via the `tally` field.
+Tallies should represent the total number of submissions recorded for each
+choice.
+
 ## Accessibility
 
 The quiz wraps its content in semantic form elements and keeps the prompt

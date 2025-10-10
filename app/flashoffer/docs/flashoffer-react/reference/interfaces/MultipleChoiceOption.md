@@ -35,3 +35,13 @@ Primary label describing the answer choice.
 Defined in: src/components/MultipleChoiceQuiz.tsx:28
 
 Optional supporting copy rendered beneath the label.
+
+***
+
+### tally?
+
+> `optional` **tally**: `number`
+
+Defined in: src/components/MultipleChoiceQuiz.tsx:31
+
+Number of submissions associated with the answer choice.

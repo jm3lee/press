@@ -3,36 +3,41 @@
  * Released under the MIT license.
  */
 
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 
 import { FlashofferThemeProvider } from "../../theme/FlashofferThemeProvider";
 import { MultipleChoiceQuiz } from "../MultipleChoiceQuiz";
 import type { MultipleChoiceQuizProps } from "../MultipleChoiceQuiz";
 
 describe("MultipleChoiceQuiz", () => {
+  const BASE_OPTIONS: MultipleChoiceQuizProps["options"] = [
+    {
+      id: "story",
+      label: "Story taps forward",
+      description: "Viewers who tap forward without exiting.",
+      tally: 18
+    },
+    {
+      id: "save",
+      label: "Saves per reel",
+      description: "Average number of saves across promoted reels.",
+      tally: 42
+    },
+    {
+      id: "session",
+      label: "Average session duration",
+      description: "Time spent engaging with bundled offers.",
+      tally: 9
+    }
+  ];
+
   function renderQuiz(props: Partial<MultipleChoiceQuizProps> = {}) {
     return render(
       <FlashofferThemeProvider applyCssBaseline={false}>
         <MultipleChoiceQuiz
           question="Which metric indicates the strongest engagement lift?"
           helperText="Select the option that best demonstrates sustained performance."
-          options={[
-            {
-              id: "story",
-              label: "Story taps forward",
-              description: "Viewers who tap forward without exiting."
-            },
-            {
-              id: "save",
-              label: "Saves per reel",
-              description: "Average number of saves across promoted reels."
-            },
-            {
-              id: "session",
-              label: "Average session duration",
-              description: "Time spent engaging with bundled offers."
-            }
-          ]}
+          options={BASE_OPTIONS}
           correctOptionId="save"
           {...props}
         />
@@ -114,5 +119,47 @@ describe("MultipleChoiceQuiz", () => {
       .closest("label");
 
     expect(correctOptionLabel?.dataset.optionState).toBe("correct");
+  });
+
+  it("disables interactions and displays tallies when the quiz is closed", () => {
+    const pastDeadline = new Date(Date.now() - 1000);
+    renderQuiz({ endTime: pastDeadline });
+
+    expect(screen.getByText(/this quiz closed on/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("radio", { name: /saves per reel/i })
+    ).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: /check answer/i })
+    ).toBeDisabled();
+    expect(screen.getByText(/42 responses/i)).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /try again/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Select the response that best answers the question./i)
+    ).not.toBeInTheDocument();
+  });
+
+  it("automatically closes once the deadline passes", () => {
+    jest.useFakeTimers();
+    const now = new Date("2024-01-01T00:00:00Z");
+    jest.setSystemTime(now);
+
+    try {
+      renderQuiz({ endTime: new Date(now.getTime() + 2500) });
+
+      expect(
+        screen.queryByText(/this quiz closed on/i)
+      ).not.toBeInTheDocument();
+
+      act(() => {
+        jest.advanceTimersByTime(3000);
+      });
+
+      expect(screen.getByText(/this quiz closed on/i)).toBeInTheDocument();
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });

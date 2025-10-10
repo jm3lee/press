@@ -35,7 +35,7 @@ Collection of answer choices presented to the learner.
 Defined in: src/components/MultipleChoiceQuiz.tsx:45
 
 Helper text that expands on the question prompt. Falls back to a default
-instruction when omitted.
+instruction when omitted while the quiz remains open.
 
 ***
 
@@ -132,3 +132,24 @@ answer is configured.
 Defined in: src/components/MultipleChoiceQuiz.tsx:66
 
 Disables interactions with the quiz component.
+
+***
+
+### endTime?
+
+> `optional` **endTime**: `Date` | `string` | `number`
+
+Defined in: src/components/MultipleChoiceQuiz.tsx:70
+
+Deadline after which the quiz stops accepting new responses and displays
+aggregated tallies.
+
+***
+
+### closedMessage?
+
+> `optional` **closedMessage**: `ReactNode`
+
+Defined in: src/components/MultipleChoiceQuiz.tsx:72
+
+Custom message announced to learners once the quiz has closed.
