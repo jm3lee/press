@@ -7,12 +7,12 @@ ENV NODE_ENV=development
 FROM base AS flashoffer-react-deps
 WORKDIR /workspace/app/flashoffer/flashoffer-react
 COPY app/flashoffer/flashoffer-react/package.json app/flashoffer/flashoffer-react/package-lock.json ./
-RUN npm ci --include=dev
+RUN --mount=type=cache,target=/root/.npm,sharing=locked npm ci --include=dev
 
 FROM base AS flashoffer-demo-deps
 WORKDIR /workspace/app/flashoffer/flashoffer-demo
 COPY app/flashoffer/flashoffer-demo/package.json app/flashoffer/flashoffer-demo/package-lock.json ./
-RUN npm ci --include=dev
+RUN --mount=type=cache,target=/root/.npm,sharing=locked npm ci --include=dev
 
 FROM base AS dev
 ENV FLASHOFFER_MODE=dev

@@ -19,7 +19,7 @@ WORKDIR /workspace
 FROM base AS flashoffer-react-deps
 WORKDIR /workspace/app/flashoffer/flashoffer-react
 COPY app/flashoffer/flashoffer-react/package.json app/flashoffer/flashoffer-react/package-lock.json ./
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm,sharing=locked npm ci
 
 # Build the production Flashoffer React bundle.
 FROM flashoffer-react-deps AS flashoffer-react-build
@@ -30,7 +30,7 @@ RUN npm run build
 FROM flashoffer-react-build AS flashoffer-demo-build
 WORKDIR /workspace/app/flashoffer/flashoffer-demo
 COPY app/flashoffer/flashoffer-demo/package.json app/flashoffer/flashoffer-demo/package-lock.json ./
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm,sharing=locked npm ci
 COPY app/flashoffer/flashoffer-demo ./
 RUN npm run build
 
