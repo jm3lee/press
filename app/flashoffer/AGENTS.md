@@ -8,6 +8,7 @@
   theme provider.
 - Persist all timestamps in Coordinated Universal Time (UTC).
 - Convert UTC timestamps to a viewer's local timezone before displaying them.
+- Pin all Flashoffer Docker Node base images to `node:22-slim`.
 
 ## Flashoffer React Components
 
