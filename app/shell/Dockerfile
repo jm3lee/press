@@ -7,7 +7,7 @@
 # -------------------------------------------------------------------
 
 # Base image: lightweight Python runtime
-FROM python:3.13-slim
+FROM python:3.14-slim
 
 # -------------------------------------------------------------------
 # System preparation
