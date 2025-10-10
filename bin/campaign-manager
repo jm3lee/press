@@ -1,2 +1,3 @@
 #!/bin/bash
+export COMPOSE_FILE=docker-compose.yml:app/flashoffer/docker/analytics.yml:app/flashoffer/docker/quiz.yml:app/flashoffer/docker/campaign.yml
 docker compose up --remove-orphans "$@" campaign-manager
