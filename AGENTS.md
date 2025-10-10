@@ -27,6 +27,11 @@
 - Node.js projects: modify `package.json` and `package-lock.json` only when
   the dependency list changes.
 
+## Docker Images
+
+- Pin all Node.js Docker base images to `node:22-slim`.
+- Pin all Python Docker base images to `python:3.14-slim`.
+
 ## `docker-compose.yml`
 
 - Always document services with comments that explain ongoing maintenance and

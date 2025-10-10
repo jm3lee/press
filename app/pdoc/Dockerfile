@@ -8,7 +8,7 @@
 
 # Start from the slim Python base to reduce image size while retaining pip
 # and build tooling.
-FROM python:3.11-slim
+FROM python:3.14-slim
 
 WORKDIR /pie
 
