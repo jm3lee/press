@@ -35,7 +35,7 @@ COPY app/shell/py/pie /tmp/pie
 # Install application dependencies, the shared PIE package, and
 # dominate (used to render HTML emails). Cleaning the temporary
 # directory avoids keeping duplicate source trees in the final image.
-RUN --mount=type=cache,target=/root/.cache/pip,id=analytics-backend-pip \
+RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
     pip install -r requirements.txt \
     && pip install /tmp/pie dominate \
     && rm -rf /tmp/pie /backend-common
@@ -64,15 +64,15 @@ ENV GUNICORN_WORKERS=4 \
 # Install nginx for reverse proxying and clean up apt metadata to keep the
 # image size in check. Caching apt metadata dramatically speeds up rebuilds
 # while still ensuring the runtime layer stays slim.
-RUN --mount=type=cache,target=/var/cache/apt,id=analytics-backend \
-    --mount=type=cache,target=/var/lib/apt/lists,id=analytics-backend \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
     apt-get update \
     && apt-get install --no-install-recommends -y nginx \
     && rm -rf /var/lib/apt/lists/*
 
 # Gunicorn is only required in the production image, so install it here to
 # avoid bloating the base stage.
-RUN --mount=type=cache,target=/root/.cache/pip,id=analytics-backend-pip \
+RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
     pip install gunicorn
 
 # Provide the templated nginx config and startup script used in

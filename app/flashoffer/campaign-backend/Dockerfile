@@ -20,7 +20,7 @@ COPY app/flashoffer/campaign-backend/requirements.txt ./requirements.txt
 COPY app/flashoffer/backend-common /backend-common
 COPY app/shell/py/pie /tmp/pie
 
-RUN --mount=type=cache,target=/root/.cache/pip,id=campaign-backend-pip \
+RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
     pip install -r requirements.txt \
     && pip install /tmp/pie dominate \
     && rm -rf /tmp/pie /backend-common
@@ -39,13 +39,13 @@ FROM base AS prod
 ENV GUNICORN_WORKERS=4 \
     GUNICORN_BIND=unix:/tmp/gunicorn.sock
 
-RUN --mount=type=cache,target=/var/cache/apt,id=campaign-backend \
-    --mount=type=cache,target=/var/lib/apt/lists,id=campaign-backend \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
     apt-get update \
     && apt-get install --no-install-recommends -y nginx \
     && rm -rf /var/lib/apt/lists/*
 
-RUN --mount=type=cache,target=/root/.cache/pip,id=campaign-backend-pip \
+RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
     pip install gunicorn
 
 COPY app/flashoffer/campaign-backend/nginx.conf /etc/nginx/conf.d/default.conf

@@ -11,7 +11,7 @@ WORKDIR /frontend
 
 COPY app/flashoffer/campaign-manager/package.json ./package.json
 COPY app/flashoffer/campaign-manager/package-lock.json ./package-lock.json
-RUN --mount=type=cache,target=/root/.npm,id=flashoffer-campaign-manager npm ci
+RUN --mount=type=cache,target=/root/.npm,sharing=locked npm ci
 
 COPY app/flashoffer/campaign-manager/tsconfig.json ./tsconfig.json
 COPY app/flashoffer/campaign-manager/tsconfig.node.json ./tsconfig.node.json
@@ -19,7 +19,7 @@ COPY app/flashoffer/campaign-manager/vite.config.ts ./vite.config.ts
 COPY app/flashoffer/campaign-manager/index.html ./index.html
 COPY app/flashoffer/campaign-manager/src ./src
 COPY app/flashoffer/flashoffer-react ./flashoffer-react
-RUN --mount=type=cache,target=/root/.npm,id=flashoffer-campaign-manager npm run build
+RUN --mount=type=cache,target=/root/.npm,sharing=locked npm run build
 
 FROM python:3.11-slim AS runtime
 
@@ -28,8 +28,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-RUN --mount=type=cache,target=/var/cache/apt,id=flashoffer-campaign-manager \
-    --mount=type=cache,target=/var/lib/apt/lists,id=flashoffer-campaign-manager \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
     apt-get update \
     && apt-get install --no-install-recommends -y build-essential libpq-dev \
     && rm -rf /var/lib/apt/lists/*
@@ -38,7 +38,7 @@ COPY app/flashoffer/campaign-manager/backend/requirements.txt ./requirements.txt
 COPY app/flashoffer/backend-common /backend-common
 COPY app/shell/py/pie /tmp/pie
 
-RUN --mount=type=cache,target=/root/.cache/pip,id=flashoffer-campaign-manager-pip \
+RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
     pip install --no-cache-dir -r requirements.txt \
     && pip install /tmp/pie dominate flask loguru \
     && rm -rf /tmp/pie /backend-common
