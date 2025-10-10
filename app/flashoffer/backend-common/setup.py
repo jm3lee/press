@@ -9,4 +9,7 @@ setup(
     description="Shared helpers for backend Flask services.",
     packages=find_packages(),
     python_requires=">=3.11",
+    install_requires=[
+        "psycopg[pool]>=3.2,<4",
+    ],
 )
