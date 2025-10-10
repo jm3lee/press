@@ -36,8 +36,10 @@ The demo seeds each section with neutral imagery and placeholder URLs. You
 can experiment with different palettes or hero layouts using the controls at
 the top of the page:
 
-- **Palette selector** toggles between the default Flashoffer theme and two
-  sample overrides (sunset and midnight).
+- **Palette selector** cycles through the default Ocean preset plus nine
+  additional themes (Sunset, Midnight, Sunrise Glow, Midnight Pulse, Ocean
+  Breeze, Forest Canopy, Monochrome Focus, Spacious Typography Light, and
+  Spacious Typography Dark).
 - **Hero alignment** demonstrates how the hero banner adjusts copy, CTAs,
   and media when switching between centered and left-aligned presentations.
 
