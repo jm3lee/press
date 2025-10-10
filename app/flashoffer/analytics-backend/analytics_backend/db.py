@@ -9,7 +9,6 @@ from datetime import datetime, timezone
 from importlib import resources
 from typing import Any, Dict, Iterable, List, Sequence
 
-from psycopg.extras import execute_values
 from psycopg.types.json import Json
 
 from backend_common import DatabaseConfig, PostgresPool
@@ -79,11 +78,7 @@ class TimescaleDB(PostgresPool):
 
         with self.connection() as conn:  # type: ignore[assignment]
             with conn.cursor() as cur:
-                execute_values(
-                    cur,
-                    INSERT_ENGAGEMENT_EVENTS_SQL,
-                    rows,
-                )
+                _execute_values(cur, INSERT_ENGAGEMENT_EVENTS_SQL, rows)
             conn.commit()
         return len(rows)
 
@@ -132,6 +127,24 @@ def _parse_timestamp(value: Any) -> datetime:
             parsed = parsed.replace(tzinfo=timezone.utc)
         return parsed.astimezone(timezone.utc)
     return datetime.now(tz=timezone.utc)
+
+
+def _execute_values(cur: Any, sql: str, rows: Sequence[Sequence[Any]]) -> None:
+    """Lightweight replacement for psycopg.extras.execute_values."""
+
+    try:
+        prefix, suffix = sql.split("%s", 1)
+    except ValueError as exc:  # pragma: no cover - defensive guard
+        raise ValueError("Expected a single %s placeholder in SQL template") from exc
+
+    placeholder_segments = []
+    flat_params: List[Any] = []
+    for row in rows:
+        placeholder_segments.append("(" + ", ".join(["%s"] * len(row)) + ")")
+        flat_params.extend(row)
+
+    values_clause = ", ".join(placeholder_segments)
+    cur.execute(prefix + values_clause + suffix, flat_params)
 
 
 __all__ = ["DatabaseConfig", "TimescaleDB"]

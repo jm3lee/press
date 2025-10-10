@@ -8,7 +8,8 @@ from __future__ import annotations
 from contextlib import contextmanager
 from typing import Iterator
 
-from psycopg_pool import SimpleConnectionPool
+from psycopg import conninfo
+from psycopg_pool import ConnectionPool
 
 from .config import DatabaseConfig
 
@@ -18,22 +19,20 @@ class PostgresPool:
 
     def __init__(self, config: DatabaseConfig) -> None:
         self._config = config
-        self._pool = SimpleConnectionPool(
-            config.minconn,
-            config.maxconn,
-            **config.connection_kwargs(),
+        dsn = conninfo.make_conninfo(**config.connection_kwargs())
+        self._pool = ConnectionPool(
+            conninfo=dsn,
+            min_size=config.minconn,
+            max_size=config.maxconn,
         )
 
     @contextmanager
     def connection(self) -> Iterator:
-        conn = self._pool.getconn()
-        try:
+        with self._pool.connection() as conn:
             yield conn
-        finally:
-            self._pool.putconn(conn)
 
     def close(self) -> None:
-        self._pool.closeall()
+        self._pool.close()
 
     def initialize(self) -> None:  # pragma: no cover - optional override
         """Hook for subclasses that need to ensure schema state."""
