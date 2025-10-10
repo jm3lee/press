@@ -6,7 +6,7 @@
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MultipleChoiceQuiz, Section } from "flashoffer-react";
 import type { MultipleChoiceAnswer } from "flashoffer-react";
 import { logQuizCompletion } from "../quizAnalytics";
@@ -17,19 +17,22 @@ const QUIZ_OPTIONS = [
     label: "A personalized reminder with a refreshed CTA",
     description:
       "Highlights the offer expiry, reinforces value, and links back to the " +
-      "landing page."
+      "landing page.",
+    tally: 264
   },
   {
     id: "case-study",
     label: "A case study download gate",
     description:
-      "Shares social proof but interrupts momentum with an additional form."
+      "Shares social proof but interrupts momentum with an additional form.",
+    tally: 86
   },
   {
     id: "survey",
     label: "A follow-up survey",
     description:
-      "Collects insights yet delays the decision to activate the promotion."
+      "Collects insights yet delays the decision to activate the promotion.",
+    tally: 41
   }
 ];
 
@@ -42,7 +45,15 @@ const QUIZ_QUESTION =
   "After a prospect explores a Flashoffer landing page, what follow-up drives " +
   "the highest conversion lift?";
 
+const DEMO_CAMPAIGN_ID = "flashoffer-demo";
+
 export function QuizShowcaseSection() {
+  const campaignApiBase =
+    typeof import.meta.env.VITE_FLASHOFFER_CAMPAIGN_API_BASE === "string" &&
+    import.meta.env.VITE_FLASHOFFER_CAMPAIGN_API_BASE.trim() !== ""
+      ? import.meta.env.VITE_FLASHOFFER_CAMPAIGN_API_BASE.trim()
+      : undefined;
+  const [campaignEndTime, setCampaignEndTime] = useState<Date | null>(null);
   const attemptRef = useRef(0);
 
   const handleAnswer = (answer: MultipleChoiceAnswer) => {
@@ -53,9 +64,63 @@ export function QuizShowcaseSection() {
       selectedOptionId: answer.optionId,
       correctOptionId: "reminder",
       isCorrect: answer.isCorrect,
-      campaignId: "flashoffer-demo",
+      campaignId: DEMO_CAMPAIGN_ID,
     });
   };
+
+  useEffect(() => {
+    if (!campaignApiBase || typeof fetch !== "function") {
+      return;
+    }
+
+    let cancelled = false;
+    const AbortCtor = typeof AbortController === "function" ? AbortController : null;
+    const controller = AbortCtor ? new AbortCtor() : null;
+    const baseUrl = campaignApiBase.replace(/\/+$/, "");
+    const endpoint = `${baseUrl}/api/campaign/${DEMO_CAMPAIGN_ID}/end_time`;
+
+    const loadDeadline = async () => {
+      try {
+        const response = await fetch(endpoint, {
+          method: "GET",
+          headers: { Accept: "application/json" },
+          signal: controller?.signal
+        });
+
+        if (!response.ok) {
+          throw new Error(`Campaign API responded with ${response.status}`);
+        }
+
+        const data = (await response.json()) as Record<string, unknown>;
+        if (cancelled) {
+          return;
+        }
+
+        const endTimeCandidate = data["end_time"] ?? data["endTime"];
+        if (typeof endTimeCandidate === "string") {
+          const parsed = new Date(endTimeCandidate);
+          if (Number.isFinite(parsed.getTime())) {
+            setCampaignEndTime(parsed);
+            return;
+          }
+        }
+
+        const remainingCandidate = data["remaining_ms"] ?? data["remainingMs"];
+        if (typeof remainingCandidate === "number" && Number.isFinite(remainingCandidate)) {
+          setCampaignEndTime(new Date(Date.now() + Math.max(0, remainingCandidate)));
+        }
+      } catch (error) {
+        console.warn("Unable to load flashoffer-demo campaign deadline", error);
+      }
+    };
+
+    void loadDeadline();
+
+    return () => {
+      cancelled = true;
+      controller?.abort();
+    };
+  }, [campaignApiBase]);
 
   return (
     <Box
@@ -87,6 +152,7 @@ export function QuizShowcaseSection() {
               successMessage="Exactly. Reinforcing urgency while keeping the path clear sustains conversion lift."
               errorMessage="Think about which follow-up reduces friction instead of adding new steps."
               onAnswer={handleAnswer}
+              endTime={campaignEndTime ?? undefined}
             />
           </Grid>
         </Grid>

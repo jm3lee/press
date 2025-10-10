@@ -190,8 +190,9 @@ arbitrary attributes to the underlying Material UI primitive.
   them undefined for a purely informational card.
 - **`MultipleChoiceQuiz`** – Lightweight quiz block that renders selectable
   answers, highlights the chosen option, and exposes an `onSubmit` callback for
-  instrumentation. Use it to capture lightweight intent before handing a lead
-  to sales tooling.
+  instrumentation. Provide `endTime` to automatically close the quiz and
+  display tallies sourced from each option's `tally` value. Use it to capture
+  lightweight intent before handing a lead to sales tooling.
 - **`CountdownTimer`** – Countdown surface that showcases urgency copy, time
   segments, and optional quantity remaining. Persist offer deadlines in UTC,
   convert them to the viewer's local time before display, and pass the UTC

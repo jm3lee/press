@@ -17,7 +17,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { alpha } from "@mui/material/styles";
 import type { Theme } from "@mui/material/styles";
-import { useCallback, useId, useMemo, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import type { ChangeEvent, ReactNode } from "react";
 
 export interface MultipleChoiceOption {
@@ -27,6 +27,8 @@ export interface MultipleChoiceOption {
   label: ReactNode;
   /** Optional supporting copy rendered beneath the label. */
   description?: ReactNode;
+  /** Number of submissions associated with the answer choice. */
+  tally?: number;
 }
 
 export interface MultipleChoiceAnswer {
@@ -64,6 +66,10 @@ export interface MultipleChoiceQuizProps {
   allowRetry?: boolean;
   /** Disables interactions with the quiz component. */
   disabled?: boolean;
+  /** Deadline after which the quiz stops accepting new responses. */
+  endTime?: Date | string | number;
+  /** Custom message announced when the quiz is closed. */
+  closedMessage?: ReactNode;
 }
 
 const DEFAULT_SUCCESS = "Great job! That answer is correct.";
@@ -139,7 +145,7 @@ function useQuizState(
     (hasSubmitted && !resolvedAllowRetry) ||
     evaluation === true;
   const showRetryButton =
-    resolvedAllowRetry && hasSubmitted && evaluation !== true;
+    resolvedAllowRetry && hasSubmitted && evaluation !== true && !disabled;
 
   return {
     hasSubmitted,
@@ -251,14 +257,20 @@ function resolveOptionBackgroundColor(
 
 interface OptionContentProps {
   option: MultipleChoiceOption;
+  showTallies: boolean;
+  totalTallies: number;
 }
 
 /**
  * Renders the visible label block for a quiz option.
  */
-function OptionContent({ option }: OptionContentProps): ReactNode {
-  return (
-    <Stack spacing={option.description ? 0.5 : 0}>
+function OptionContent({
+  option,
+  showTallies,
+  totalTallies
+}: OptionContentProps): ReactNode {
+  const labelBlock = (
+    <Stack spacing={option.description ? 0.5 : 0} flex={1} minWidth={0}>
       <Typography variant="body1" fontWeight={600}>
         {option.label}
       </Typography>
@@ -267,6 +279,48 @@ function OptionContent({ option }: OptionContentProps): ReactNode {
           {option.description}
         </Typography>
       ) : null}
+    </Stack>
+  );
+
+  if (!showTallies) {
+    return labelBlock;
+  }
+
+  const tally = Math.max(0, option.tally ?? 0);
+  const countFormatter =
+    typeof Intl !== "undefined"
+      ? new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 })
+      : null;
+  const percentFormatter =
+    typeof Intl !== "undefined"
+      ? new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 })
+      : null;
+  const formattedCount = countFormatter ? countFormatter.format(tally) : `${tally}`;
+  const responseLabel = tally === 1 ? "response" : "responses";
+  const percentage = totalTallies > 0 ? (tally / totalTallies) * 100 : 0;
+  const formattedPercent = percentFormatter
+    ? percentFormatter.format(percentage)
+    : `${Math.round(percentage)}`;
+
+  return (
+    <Stack
+      direction="row"
+      spacing={2}
+      justifyContent="space-between"
+      alignItems="flex-start"
+      sx={{ width: "100%" }}
+    >
+      {labelBlock}
+      <Stack spacing={0} alignItems="flex-end">
+        <Typography variant="body2" fontWeight={600}>
+          {formattedCount} {responseLabel}
+        </Typography>
+        {totalTallies > 0 ? (
+          <Typography variant="caption" color="text.secondary">
+            {formattedPercent}% of responses
+          </Typography>
+        ) : null}
+      </Stack>
     </Stack>
   );
 }
@@ -318,13 +372,70 @@ export function MultipleChoiceQuiz({
   submitLabel = DEFAULT_SUBMIT_LABEL,
   tryAgainLabel = DEFAULT_TRY_AGAIN_LABEL,
   allowRetry,
-  disabled = false
+  disabled = false,
+  endTime,
+  closedMessage
 }: MultipleChoiceQuizProps) {
   const questionId = useId();
   const groupId = useId();
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [submittedId, setSubmittedId] = useState<string | null>(null);
+
+  const endTimestamp = useMemo(() => {
+    if (typeof endTime === "undefined" || endTime === null) {
+      return null;
+    }
+    if (endTime instanceof Date) {
+      const value = endTime.getTime();
+      return Number.isFinite(value) ? value : null;
+    }
+    if (typeof endTime === "number") {
+      return Number.isFinite(endTime) ? endTime : null;
+    }
+    if (typeof endTime === "string") {
+      const parsed = new Date(endTime);
+      const value = parsed.getTime();
+      return Number.isFinite(value) ? value : null;
+    }
+    return null;
+  }, [endTime]);
+
+  const [isClosed, setIsClosed] = useState(() => {
+    if (!endTimestamp) {
+      return false;
+    }
+    return Date.now() >= endTimestamp;
+  });
+
+  useEffect(() => {
+    if (!endTimestamp) {
+      setIsClosed(false);
+      return;
+    }
+
+    const now = Date.now();
+    if (now >= endTimestamp) {
+      setIsClosed(true);
+      return;
+    }
+
+    setIsClosed(false);
+
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setIsClosed(true);
+    }, endTimestamp - now);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [endTimestamp]);
+
+  const resolvedDisabled = disabled || isClosed;
 
   const {
     hasSubmitted,
@@ -335,7 +446,7 @@ export function MultipleChoiceQuiz({
     submitDisabled,
     showRetryButton
   } = useQuizState(
-    { allowRetry, correctOptionId, disabled },
+    { allowRetry, correctOptionId, disabled: resolvedDisabled },
     { selectedId, submittedId }
   );
 
@@ -347,7 +458,7 @@ export function MultipleChoiceQuiz({
   );
 
   const handleSubmit = useCallback(() => {
-    if (!selectedId) {
+    if (!selectedId || isClosed) {
       return;
     }
     setSubmittedId(selectedId);
@@ -357,7 +468,7 @@ export function MultipleChoiceQuiz({
         ? selectedId === correctOptionId
         : undefined
     });
-  }, [correctOptionId, onAnswer, selectedId]);
+  }, [correctOptionId, isClosed, onAnswer, selectedId]);
 
   const handleRetry = useCallback(() => {
     setSelectedId(null);
@@ -376,7 +487,7 @@ export function MultipleChoiceQuiz({
   }, [helperText]);
 
   const fallbackHelper = useMemo(() => {
-    if (helperText) {
+    if (helperText || isClosed) {
       return null;
     }
     return (
@@ -384,7 +495,7 @@ export function MultipleChoiceQuiz({
         Select the response that best answers the question.
       </FormHelperText>
     );
-  }, [helperText]);
+  }, [helperText, isClosed]);
 
   const feedbackContent = useMemo(() => {
     if (!showFeedback || typeof evaluation !== "boolean") {
@@ -411,6 +522,18 @@ export function MultipleChoiceQuiz({
     );
   }, [handleRetry, showRetryButton, tryAgainLabel]);
 
+  const totalTallies = useMemo(
+    () =>
+      options.reduce((total, option) => {
+        const tally = Number(option.tally ?? 0);
+        if (!Number.isFinite(tally)) {
+          return total;
+        }
+        return total + Math.max(0, tally);
+      }, 0),
+    [options]
+  );
+
   const optionItems = useMemo(
     () =>
       options.map((option) => {
@@ -435,7 +558,13 @@ export function MultipleChoiceQuiz({
             key={option.id}
             value={option.id}
             control={<Radio />}
-            label={<OptionContent option={option} />}
+            label={
+              <OptionContent
+                option={option}
+                showTallies={isClosed}
+                totalTallies={totalTallies}
+              />
+            }
             disabled={disableChoices}
             data-option-state={optionState}
             sx={(theme) => ({
@@ -469,9 +598,46 @@ export function MultipleChoiceQuiz({
       revealCorrectAnswer,
       selectedId,
       showFeedback,
-      submittedId
+      submittedId,
+      isClosed,
+      totalTallies
     ]
   );
+
+  const closureNotice = useMemo(() => {
+    if (!isClosed) {
+      return null;
+    }
+
+    const formattedDeadline = endTimestamp
+      ? new Date(endTimestamp).toLocaleString(undefined, {
+          dateStyle: "medium",
+          timeStyle: "short"
+        })
+      : null;
+
+    const defaultMessage = (
+      <Typography component="span" variant="body2">
+        This quiz closed on{" "}
+        <Typography component="span" variant="body2" fontWeight={600}>
+          {formattedDeadline ?? "the scheduled deadline"}
+        </Typography>
+        . Review the response tallies below.
+      </Typography>
+    );
+
+    return (
+      <Alert severity="info">
+        {closedMessage ? (
+          <Typography variant="body2" component="span">
+            {closedMessage}
+          </Typography>
+        ) : (
+          defaultMessage
+        )}
+      </Alert>
+    );
+  }, [closedMessage, endTimestamp, isClosed]);
 
   return (
     <Card component="section" elevation={3} sx={{ borderRadius: 3 }}>
@@ -488,6 +654,7 @@ export function MultipleChoiceQuiz({
             </Typography>
             {promptHelper}
           </Stack>
+          {closureNotice}
           <FormControl component="fieldset" disabled={disableChoices}>
             <FormLabel
               htmlFor={groupId}
