@@ -21,7 +21,7 @@ COPY app/flashoffer/campaign-manager/src ./src
 COPY app/flashoffer/flashoffer-react ./flashoffer-react
 RUN --mount=type=cache,target=/root/.npm,sharing=locked npm run build
 
-FROM python:3.11-slim AS runtime
+FROM python:3.14-slim AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1

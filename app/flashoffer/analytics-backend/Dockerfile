@@ -10,7 +10,7 @@
 
 # Use the slim Python image to keep the base layer small while still
 # providing the tooling required to install Python wheels.
-FROM python:3.11-slim AS base
+FROM python:3.14-slim AS base
 
 # Disable bytecode generation to reduce container filesystem churn and set
 # defaults used by both the dev and prod entrypoints.
