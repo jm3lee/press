@@ -1,0 +1,4 @@
+#!/bin/bash
+CONTAINER_REGISTRY=registry.digitalocean.com/flashoffer
+docker tag press-analytics-backend ${CONTAINER_REGISTRY}/analytics-backend
+docker push ${CONTAINER_REGISTRY}/analytics-backend

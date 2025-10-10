@@ -68,7 +68,7 @@ def _quiz_recent_url() -> str:
     if raw_recent:
         return raw_recent
 
-    raw_base = os.getenv("CAMPAIGN_MANAGER_QUIZ_BASE", "http://quiz-backend:8080").strip()
+    raw_base = os.getenv("CAMPAIGN_MANAGER_QUIZ_BASE", "http://quiz-backend:8000").strip()
     if not raw_base:
         raise RuntimeError(
             "CAMPAIGN_MANAGER_QUIZ_BASE must be configured with a valid URL",

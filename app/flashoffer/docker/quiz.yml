@@ -9,7 +9,7 @@ services:
       DATABASE_USER: analytics
       DATABASE_PASSWORD: analytics
       DATABASE_NAME: analytics
-      CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-http://localhost:5173,http://localhost:4173}
+      CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-http://localhost:5173,http://localhost:4173,http://localhost:10000}
     depends_on:
       - analytics-db
     ports:

@@ -6,7 +6,7 @@
 # that serves campaign management endpoints.
 ######################################################################
 
-FROM node:20-slim AS frontend-deps
+FROM node:22-slim AS frontend-deps
 WORKDIR /frontend
 
 COPY app/flashoffer/campaign-manager/package.json ./package.json
