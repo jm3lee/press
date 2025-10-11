@@ -10,6 +10,7 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import type { FormEvent, ReactNode } from "react";
 import { useCallback, useState } from "react";
+import { JSX } from "react";
 
 import { Section } from "./Section";
 
