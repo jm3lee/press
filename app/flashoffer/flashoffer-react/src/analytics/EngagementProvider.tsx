@@ -115,6 +115,35 @@ function calculateScrollRatio(): { ratio: number; pixels: number } {
   return { ratio: Math.min(1, ratio), pixels: Math.round(scrollY) };
 }
 
+function measurePageLoadDuration(): number | null {
+  if (typeof performance === "undefined") {
+    return null;
+  }
+  if (typeof performance.getEntriesByType === "function") {
+    const [entry] = performance.getEntriesByType("navigation");
+    if (entry) {
+      const timing = entry as PerformanceNavigationTiming;
+      const duration = Math.round(timing.loadEventEnd - timing.startTime);
+      if (Number.isFinite(duration) && duration >= 0) {
+        return duration;
+      }
+    }
+  }
+  const navigationTiming = (performance as Performance & {
+    timing?: PerformanceTiming;
+  }).timing;
+  if (!navigationTiming) {
+    return null;
+  }
+  const duration = Math.round(
+    navigationTiming.loadEventEnd - navigationTiming.navigationStart
+  );
+  if (Number.isFinite(duration) && duration >= 0) {
+    return duration;
+  }
+  return null;
+}
+
 export function EngagementProvider({
   endpoint,
   site,
@@ -295,6 +324,45 @@ export function EngagementProvider({
   useEffect(() => {
     flushRef.current = flush;
   }, [flush]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return undefined;
+    }
+    let hasFired = false;
+
+    const emitPageLoad = () => {
+      if (hasFired || disabledRef.current) {
+        return;
+      }
+      hasFired = true;
+      const meta: Record<string, unknown> = {};
+      const loadDuration = measurePageLoadDuration();
+      if (loadDuration !== null) {
+        meta.load_duration_ms = loadDuration;
+      }
+      enqueue({
+        type: "page-load",
+        target: "page",
+        meta,
+        at: nowIso(),
+      });
+    };
+
+    if (document.readyState === "complete") {
+      emitPageLoad();
+      return () => {
+        hasFired = true;
+      };
+    }
+
+    window.addEventListener("load", emitPageLoad, { once: true });
+
+    return () => {
+      hasFired = true;
+      window.removeEventListener("load", emitPageLoad);
+    };
+  }, [enqueue]);
 
   useEffect(() => {
     if (typeof window === "undefined") {

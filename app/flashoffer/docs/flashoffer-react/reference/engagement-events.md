@@ -68,3 +68,14 @@ activity resumes.
 Each `dwell` event includes `interval_ms`, the heartbeat interval duration, so
 analytics consumers can aggregate the total engaged time by summing the
 intervals.
+
+## `page-load`
+
+The `page-load` event fires once per session when the current document finishes
+loading. It uses the `page` target so downstream analytics can pinpoint when a
+visitor first became active on the site.
+
+When the Navigation Timing API is available, the provider includes
+`load_duration_ms` in the `meta` object. The value reports the rounded interval
+between the navigation start and the browser’s load event; the field is omitted
+when timing data cannot be measured.

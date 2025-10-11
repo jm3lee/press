@@ -62,6 +62,14 @@ describe("EngagementProvider connection failure handling", () => {
       </EngagementProvider>
     );
 
+    await act(async () => {
+      window.dispatchEvent(new Event("load"));
+      await Promise.resolve();
+    });
+
+    expect(fetchMock).toHaveBeenCalled();
+    fetchMock.mockClear();
+
     const expectFetchIncrease = async (run: () => void) => {
       const before = fetchMock.mock.calls.length;
       await act(async () => {
@@ -80,7 +88,8 @@ describe("EngagementProvider connection failure handling", () => {
       expect(fetchMock.mock.calls.length).toBe(before);
     };
 
-    for (let i = 0; i < 10; i += 1) {
+    // Page-load emission counts toward the consecutive failure limit.
+    for (let i = 0; i < 9; i += 1) {
       await expectFetchIncrease(() => {
         recordRef.current(`event-${i}`);
       });
@@ -117,6 +126,51 @@ describe("EngagementProvider payload metadata", () => {
     jest.clearAllMocks();
   });
 
+  it("emits a page-load event when the window load event fires", async () => {
+    let readyStateValue = "loading";
+    const readyStateSpy = jest
+      .spyOn(document, "readyState", "get")
+      .mockImplementation(() => readyStateValue);
+
+    const view = render(
+      <EngagementProvider
+        endpoint="/engagement"
+        site="test-site"
+        maxBatch={1}
+        flushInterval={null}
+        heartbeatInterval={60_000}
+        idleTimeout={60_000}
+        scrollThresholds={[]}
+        viewThresholds={[]}
+      >
+        <div />
+      </EngagementProvider>
+    );
+
+    try {
+      expect(fetchMock).not.toHaveBeenCalled();
+
+      readyStateValue = "complete";
+      await act(async () => {
+        window.dispatchEvent(new Event("load"));
+        await Promise.resolve();
+      });
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const payload = JSON.parse(fetchMock.mock.calls[0][1]?.body ?? "{}");
+      expect(payload.events).toHaveLength(1);
+      expect(payload.events[0]).toMatchObject({
+        type: "page-load",
+        target: "page",
+        meta: expect.any(Object),
+      });
+      expect(typeof payload.events[0].at).toBe("string");
+    } finally {
+      view.unmount();
+      readyStateSpy.mockRestore();
+    }
+  });
+
   it("includes a sanitised campaign identifier when provided", async () => {
     const recordRef = {
       current: (() => undefined) as RecordFn,
@@ -137,6 +191,13 @@ describe("EngagementProvider payload metadata", () => {
         <Recorder recordRef={recordRef} />
       </EngagementProvider>
     );
+
+    await act(async () => {
+      window.dispatchEvent(new Event("load"));
+      await Promise.resolve();
+    });
+
+    fetchMock.mockClear();
 
     await act(async () => {
       recordRef.current("cta-click");
@@ -192,6 +253,13 @@ describe("EngagementProvider lifetime", () => {
         <Recorder recordRef={recordRef} />
       </EngagementProvider>
     );
+
+    await act(async () => {
+      window.dispatchEvent(new Event("load"));
+      await Promise.resolve();
+    });
+
+    fetchMock.mockClear();
 
     await act(async () => {
       recordRef.current("before-timeout");
@@ -324,6 +392,13 @@ describe("EngagementProvider view tracking", () => {
         <ViewTracker trackId="hero" meta={{ section: "hero" }} />
       </EngagementProvider>
     );
+
+    await act(async () => {
+      window.dispatchEvent(new Event("load"));
+      await Promise.resolve();
+    });
+
+    fetchMock.mockClear();
 
     const observer =
       observers.find((candidate) => candidate.observed.size > 0) ??
