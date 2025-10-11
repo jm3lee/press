@@ -31,6 +31,9 @@ export type { SectionHeaderProps } from "./components/SectionHeader";
 export { Section } from "./components/Section";
 export type { SectionProps } from "./components/Section";
 
+export { LoginView } from "./components/LoginView";
+export type { LoginViewProps, LoginCredentials } from "./components/LoginView";
+
 export { PreviewCard } from "./components/PreviewCard";
 export type { PreviewCardProps } from "./components/PreviewCard";
 
