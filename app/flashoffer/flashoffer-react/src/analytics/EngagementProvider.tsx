@@ -277,11 +277,21 @@ export function EngagementProvider({
   );
 
   const enqueue = useCallback(
-    (event: EngagementEvent) => {
+    (
+      event: EngagementEvent,
+      options: {
+        flushReason?: string;
+        flushOptions?: { sync?: boolean };
+      } = {}
+    ) => {
       if (disabledRef.current) {
         return;
       }
       queueRef.current.push(event);
+      if (options.flushReason) {
+        flushRef.current?.(options.flushReason, options.flushOptions);
+        return;
+      }
       if (queueRef.current.length >= maxBatchRef.current) {
         flushRef.current?.("capacity");
       }
@@ -341,12 +351,15 @@ export function EngagementProvider({
       if (loadDuration !== null) {
         meta.load_duration_ms = loadDuration;
       }
-      enqueue({
-        type: "page-load",
-        target: "page",
-        meta,
-        at: nowIso(),
-      });
+      enqueue(
+        {
+          type: "page-load",
+          target: "page",
+          meta,
+          at: nowIso(),
+        },
+        { flushReason: "page-load" }
+      );
     };
 
     if (document.readyState === "complete") {

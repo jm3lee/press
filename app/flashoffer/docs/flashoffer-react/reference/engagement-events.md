@@ -78,4 +78,7 @@ visitor first became active on the site.
 When the Navigation Timing API is available, the provider includes
 `load_duration_ms` in the `meta` object. The value reports the rounded interval
 between the navigation start and the browser’s load event; the field is omitted
-when timing data cannot be measured.
+when timing data cannot be measured. After emitting `page-load`, the provider
+flushes the event queue immediately using the `page-load` flush reason so
+downstream systems capture the initial activity without waiting for the next
+interval.

@@ -164,6 +164,7 @@ describe("EngagementProvider payload metadata", () => {
         target: "page",
         meta: expect.any(Object),
       });
+      expect(payload.reason).toBe("page-load");
       expect(typeof payload.events[0].at).toBe("string");
     } finally {
       view.unmount();
