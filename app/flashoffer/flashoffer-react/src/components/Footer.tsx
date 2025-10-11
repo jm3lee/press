@@ -43,10 +43,8 @@ export function Footer({
       component="footer"
       role="contentinfo"
       sx={{
-        borderTop: "1px solid var(--flashoffer-footer-border, #e5e7eb)",
-        mt: 8,
-        pt: 4,
-        pb: 6
+        padding: 4,
+        pb: 6,
       }}
     >
       <Stack spacing={2} alignItems="center" textAlign="center">
