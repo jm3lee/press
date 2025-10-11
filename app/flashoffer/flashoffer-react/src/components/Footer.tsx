@@ -7,6 +7,8 @@ import Box from "@mui/material/Box";
 import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import type { BoxProps } from "@mui/material/Box";
+import type { SxProps, Theme } from "@mui/material/styles";
 import type { ReactNode } from "react";
 
 export interface FooterLink {
@@ -16,7 +18,7 @@ export interface FooterLink {
   rel?: string;
 }
 
-export interface FooterProps {
+export interface FooterProps extends Omit<BoxProps, "children"> {
   /** Optional set of navigational links rendered in the footer. */
   links?: FooterLink[];
   /** Copyright or attribution text shown below the links. */
@@ -36,16 +38,28 @@ const DEFAULT_COPYRIGHT = "© Flashoffer. All rights reserved.";
  */
 export function Footer({
   links = DEFAULT_LINKS,
-  copyrightText = DEFAULT_COPYRIGHT
+  copyrightText = DEFAULT_COPYRIGHT,
+  sx,
+  component = "footer",
+  role = "contentinfo",
+  ...boxProps
 }: FooterProps) {
+  const baseSx = { padding: 4, pb: 6 };
+  let mergedSx: SxProps<Theme>;
+  if (Array.isArray(sx)) {
+    mergedSx = [baseSx, ...sx];
+  } else if (sx) {
+    mergedSx = [baseSx, sx];
+  } else {
+    mergedSx = baseSx;
+  }
+
   return (
     <Box
-      component="footer"
-      role="contentinfo"
-      sx={{
-        padding: 4,
-        pb: 6,
-      }}
+      component={component}
+      role={role}
+      sx={mergedSx}
+      {...boxProps}
     >
       <Stack spacing={2} alignItems="center" textAlign="center">
         {links?.length ? (
