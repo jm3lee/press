@@ -189,10 +189,11 @@ arbitrary attributes to the underlying Material UI primitive.
   Provide `primaryCta`/`secondaryCta` props to render button controls, or leave
   them undefined for a purely informational card.
 - **`MultipleChoiceQuiz`** – Lightweight quiz block that renders selectable
-  answers, highlights the chosen option, and exposes an `onSubmit` callback for
-  instrumentation. Provide `endTime` to automatically close the quiz and
-  display tallies sourced from each option's `tally` value. Use it to capture
-  lightweight intent before handing a lead to sales tooling.
+  answers, highlights the chosen option, exposes an `onSubmit` callback for
+  instrumentation, and can trigger confetti celebrations via the `confetti`
+  prop. Provide `endTime` to automatically close the quiz and display tallies
+  sourced from each option's `tally` value. Use it to capture lightweight
+  intent before handing a lead to sales tooling.
 - **`CountdownTimer`** – Countdown surface that showcases urgency copy, time
   segments, and optional quantity remaining. Persist offer deadlines in UTC,
   convert them to the viewer's local time before display, and pass the UTC
@@ -213,6 +214,32 @@ arbitrary attributes to the underlying Material UI primitive.
 `flashoffer-react` also ships instrumentation utilities that record viewability
 and interaction events. The helpers expose consistent metadata for downstream
 analytics services and gracefully degrade when browser APIs are unavailable.
+
+### Quiz celebrations
+
+`QuizCelebrations` powers the confetti experiences surfaced by
+`MultipleChoiceQuiz`. Import the `QuizConfettiOptions` type and attach a preset
+to the `confetti` prop to select the animation learners see after correct
+submissions. The helper defaults to the "classic" preset when enabled.
+
+```tsx
+import { MultipleChoiceQuiz } from "flashoffer-react";
+
+<MultipleChoiceQuiz
+  question="How quickly can Flashoffer launch a promotion?"
+  options={[
+    { id: "days", label: "A few days" },
+    { id: "hours", label: "Under an hour" },
+    { id: "weeks", label: "Two weeks" }
+  ]}
+  correctOptionId="hours"
+  confetti={{ enabled: true, preset: "streamers" }}
+/>;
+```
+
+For custom experiences, call `launchConfetti("burst")` to fire the animation on
+any event or run `resolveConfettiOptions()` to normalise user configuration
+before passing it to bespoke logic.
 
 Wrap the subtree you want to measure in an `EngagementProvider`. The provider
 requires a `site` identifier and can optionally include a `campaignId` for

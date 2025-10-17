@@ -19,6 +19,9 @@ const materialBase = toPosixPath(
   resolvePath(nodeModulesDir, "@mui/material")
 );
 const muiUtilsBase = toPosixPath(resolvePath(nodeModulesDir, "@mui/utils"));
+const confettiEntry = toPosixPath(
+  resolvePath(nodeModulesDir, "canvas-confetti/dist/confetti.module.mjs")
+);
 
 const campaignProxyTarget = process.env.VITE_FLASHOFFER_CAMPAIGN_API_BASE?.trim();
 const proxyTarget = campaignProxyTarget ? campaignProxyTarget.replace(/\/$/, "") : undefined;
@@ -54,6 +57,10 @@ export default defineConfig({
       {
         find: /^@mui\/utils\/(.*)$/i,
         replacement: `${muiUtilsBase}/$1`
+      },
+      {
+        find: /^canvas-confetti$/,
+        replacement: confettiEntry
       }
     ]
   },

@@ -42,6 +42,9 @@ the top of the page:
   Spacious Typography Dark).
 - **Hero alignment** demonstrates how the hero banner adjusts copy, CTAs,
   and media when switching between centered and left-aligned presentations.
+- **Quiz celebration** showcases the confetti presets wired into
+  `MultipleChoiceQuiz` so you can gauge how each animation feels before
+  shipping it to production.
 
 To try different copy or preview cards, update the arrays declared in
 `src/App.tsx`. Reload the dev server (or rerun the build) after changing the

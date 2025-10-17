@@ -21,6 +21,7 @@
 - [MultipleChoiceAnswer](interfaces/MultipleChoiceAnswer.md)
 - [MultipleChoiceOption](interfaces/MultipleChoiceOption.md)
 - [MultipleChoiceQuizProps](interfaces/MultipleChoiceQuizProps.md)
+- [QuizConfettiOptions](interfaces/QuizConfettiOptions.md)
 - [QuizAnalyticsOptions](interfaces/QuizAnalyticsOptions.md)
 - [QuizCompletionPayload](interfaces/QuizCompletionPayload.md)
 - [PreviewCardProps](interfaces/PreviewCardProps.md)
@@ -31,6 +32,7 @@
 ## Type Aliases
 
 - [FlashofferThemePreset](type-aliases/FlashofferThemePreset.md)
+- [QuizConfettiPreset](type-aliases/QuizConfettiPreset.md)
 - [OutlineCtaButtonProps](type-aliases/OutlineCtaButtonProps.md)
 - [PrimaryCtaButtonProps](type-aliases/PrimaryCtaButtonProps.md)
 

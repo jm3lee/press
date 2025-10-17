@@ -153,3 +153,15 @@ aggregated tallies.
 Defined in: src/components/MultipleChoiceQuiz.tsx:72
 
 Custom message announced to learners once the quiz has closed.
+
+***
+
+### confetti?
+
+> `optional` **confetti**: [`QuizConfettiOptions`](QuizConfettiOptions.md)
+
+Defined in: src/components/MultipleChoiceQuiz.tsx:77
+
+Configures the celebratory confetti animation shown after correct answers. Set
+`enabled` to `false` to disable the animation or provide a preset from
+`QuizCelebrations` to change the effect.

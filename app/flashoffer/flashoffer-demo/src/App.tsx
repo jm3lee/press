@@ -10,7 +10,11 @@ import type { PaletteMode, ThemeOptions } from "@mui/material/styles";
 import { Suspense, lazy, startTransition, useMemo, useState } from "react";
 import { FlashofferThemeProvider } from "flashoffer-react";
 import type { FlashofferThemePreset } from "flashoffer-react";
-import type { HeroAlignment, ThemePreset } from "./sections/types";
+import type {
+  HeroAlignment,
+  QuizCelebrationSelection,
+  ThemePreset
+} from "./sections/types";
 import { THEME_PRESET_LABELS } from "./sections/types";
 
 const CustomizationControlsSection = lazy(async () => ({
@@ -216,6 +220,8 @@ const heroMedia = (
 export default function App() {
   const [palettePreset, setPalettePreset] = useState<ThemePreset>("ocean");
   const [heroAlignment, setHeroAlignment] = useState<HeroAlignment>("center");
+  const [quizCelebrationPreset, setQuizCelebrationPreset] =
+    useState<QuizCelebrationSelection>("classic");
 
   const themeConfig = useMemo(
     () => themePresets[palettePreset],
@@ -227,9 +233,10 @@ export default function App() {
       JSON.stringify({
         palette: palettePreset,
         presetLabel: THEME_PRESET_LABELS[palettePreset],
-        heroAlignment
+        heroAlignment,
+        quizCelebrationPreset
       }),
-    [heroAlignment, palettePreset]
+    [heroAlignment, palettePreset, quizCelebrationPreset]
   );
 
   const heroMeta = useMemo(
@@ -293,6 +300,12 @@ export default function App() {
                     setHeroAlignment(nextAlignment);
                   });
                 }}
+                quizCelebrationPreset={quizCelebrationPreset}
+                onQuizCelebrationPresetChange={(nextPreset) => {
+                  startTransition(() => {
+                    setQuizCelebrationPreset(nextPreset);
+                  });
+                }}
                 controlsMeta={controlsMeta}
               />
             </Suspense>
@@ -320,7 +333,9 @@ export default function App() {
               <FigureSpotlightSection />
             </Suspense>
             <Suspense fallback={null}>
-              <QuizShowcaseSection />
+              <QuizShowcaseSection
+                celebrationPreset={quizCelebrationPreset}
+              />
             </Suspense>
             <Suspense fallback={null}>
               <FooterSection />

@@ -47,6 +47,24 @@ alerts after each submission. The messaging can be tuned using the
 answer is configured, the component still surfaces the learner's selection
 through the `onAnswer` callback without rendering evaluation UI.
 
+To celebrate correct answers, provide the `confetti` prop with a
+`QuizConfettiOptions` object. The helper resolves presets declared in
+`QuizCelebrations` and automatically disables animations when `enabled` is set
+to `false`.
+
+```tsx
+<MultipleChoiceQuiz
+  question="Which preset ships the boldest Flashoffer gradients?"
+  options={[
+    { id: "forest", label: "Forest Canopy" },
+    { id: "monochrome", label: "Monochrome Focus" },
+    { id: "midnight", label: "Midnight Pulse" }
+  ]}
+  correctOptionId="midnight"
+  confetti={{ enabled: true, preset: "burst" }}
+/>;
+```
+
 ## Submission flow
 
 By default, learners can retry after an incorrect attempt when a correct

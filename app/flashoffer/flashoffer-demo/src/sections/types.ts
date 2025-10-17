@@ -3,6 +3,8 @@
  * Released under the MIT license.
  */
 
+import type { QuizConfettiPreset } from "flashoffer-react";
+
 export type ThemePreset =
   | "ocean"
   | "sunset"
@@ -15,6 +17,7 @@ export type ThemePreset =
   | "spaciousLight"
   | "spaciousDark";
 export type HeroAlignment = "left" | "center";
+export type QuizCelebrationSelection = "disabled" | QuizConfettiPreset;
 
 export const THEME_PRESET_ORDER: readonly ThemePreset[] = [
   "ocean",
@@ -40,4 +43,21 @@ export const THEME_PRESET_LABELS: Record<ThemePreset, string> = {
   monochromeFocus: "Monochrome focus",
   spaciousLight: "Spacious typography (light)",
   spaciousDark: "Spacious typography (dark)"
+};
+
+export const QUIZ_CELEBRATION_ORDER: readonly QuizCelebrationSelection[] = [
+  "classic",
+  "streamers",
+  "burst",
+  "disabled"
+];
+
+export const QUIZ_CELEBRATION_LABELS: Record<
+  QuizCelebrationSelection,
+  string
+> = {
+  classic: "Classic confetti",
+  streamers: "Streamers",
+  burst: "Firework burst",
+  disabled: "Disabled"
 };

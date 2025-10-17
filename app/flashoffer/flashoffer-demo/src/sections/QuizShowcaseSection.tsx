@@ -6,13 +6,15 @@
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   MultipleChoiceQuiz,
   Section,
   logQuizCompletion,
 } from "flashoffer-react";
 import type { MultipleChoiceAnswer } from "flashoffer-react";
+import type { QuizConfettiOptions } from "flashoffer-react";
+import type { QuizCelebrationSelection } from "./types";
 
 const QUIZ_OPTIONS = [
   {
@@ -50,18 +52,19 @@ const QUIZ_ANALYTICS_CONFIG = {
   endpoint: QUIZ_EVENTS_ENDPOINT,
 };
 
-const QUIZ_META = JSON.stringify({
-  question: "Best follow-up after a Flashoffer engagement",
-  options: QUIZ_OPTIONS.map((option) => option.id)
-});
-
 const QUIZ_QUESTION =
   "After a prospect explores a Flashoffer landing page, what follow-up drives " +
   "the highest conversion lift?";
 
 const DEMO_CAMPAIGN_ID = "flashoffer-demo";
 
-export function QuizShowcaseSection() {
+export interface QuizShowcaseSectionProps {
+  celebrationPreset: QuizCelebrationSelection;
+}
+
+export function QuizShowcaseSection({
+  celebrationPreset,
+}: QuizShowcaseSectionProps) {
   const campaignApiBase =
     typeof import.meta.env.VITE_FLASHOFFER_CAMPAIGN_API_BASE === "string" &&
     import.meta.env.VITE_FLASHOFFER_CAMPAIGN_API_BASE.trim() !== ""
@@ -69,6 +72,24 @@ export function QuizShowcaseSection() {
       : undefined;
   const [campaignEndTime, setCampaignEndTime] = useState<Date | null>(null);
   const attemptRef = useRef(0);
+
+  const confettiOptions = useMemo<QuizConfettiOptions>(
+    () =>
+      celebrationPreset === "disabled"
+        ? { enabled: false }
+        : { enabled: true, preset: celebrationPreset },
+    [celebrationPreset]
+  );
+
+  const quizMeta = useMemo(
+    () =>
+      JSON.stringify({
+        question: "Best follow-up after a Flashoffer engagement",
+        options: QUIZ_OPTIONS.map((option) => option.id),
+        celebrationPreset,
+      }),
+    [celebrationPreset]
+  );
 
   const handleAnswer = (answer: MultipleChoiceAnswer) => {
     attemptRef.current += 1;
@@ -141,7 +162,7 @@ export function QuizShowcaseSection() {
       component="section"
       data-track-id="quiz-showcase"
       data-track-label="Interactive quiz showcase"
-      data-track-meta={QUIZ_META}
+      data-track-meta={quizMeta}
     >
       <Section
         eyebrow="INTERACTIVE"
@@ -167,6 +188,7 @@ export function QuizShowcaseSection() {
               errorMessage="Think about which follow-up reduces friction instead of adding new steps."
               onAnswer={handleAnswer}
               endTime={campaignEndTime ?? undefined}
+              confetti={confettiOptions}
             />
           </Grid>
         </Grid>
