@@ -17,8 +17,11 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { alpha } from "@mui/material/styles";
 import type { Theme } from "@mui/material/styles";
-import { useCallback, useEffect, useId, useMemo, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import type { ChangeEvent, ReactNode } from "react";
+
+import type { QuizConfettiOptions } from "./QuizCelebrations";
+import { launchConfetti, resolveConfettiOptions } from "./QuizCelebrations";
 
 export interface MultipleChoiceOption {
   /** Unique identifier used for option selection. */
@@ -70,6 +73,8 @@ export interface MultipleChoiceQuizProps {
   endTime?: Date | string | number;
   /** Custom message announced when the quiz is closed. */
   closedMessage?: ReactNode;
+  /** Configures confetti celebrations for correct answers. */
+  confetti?: QuizConfettiOptions;
 }
 
 const DEFAULT_SUCCESS = "Great job! That answer is correct.";
@@ -374,7 +379,8 @@ export function MultipleChoiceQuiz({
   allowRetry,
   disabled = false,
   endTime,
-  closedMessage
+  closedMessage,
+  confetti
 }: MultipleChoiceQuizProps) {
   const questionId = useId();
   const groupId = useId();
@@ -449,6 +455,34 @@ export function MultipleChoiceQuiz({
     { allowRetry, correctOptionId, disabled: resolvedDisabled },
     { selectedId, submittedId }
   );
+
+  const resolvedConfetti = useMemo(() => resolveConfettiOptions(confetti), [confetti]);
+  const { enabled: confettiEnabled, preset: confettiPreset } = resolvedConfetti;
+  const hasCelebratedRef = useRef(false);
+
+  useEffect(() => {
+    if (!confettiEnabled) {
+      hasCelebratedRef.current = false;
+      return;
+    }
+
+    const shouldCelebrate = hasSubmitted && evaluation === true;
+    if (!shouldCelebrate) {
+      hasCelebratedRef.current = false;
+      return;
+    }
+
+    if (hasCelebratedRef.current) {
+      return;
+    }
+
+    launchConfetti(confettiPreset).catch((error) => {
+      if (process.env.NODE_ENV !== "production") {
+        console.warn("Failed to launch quiz confetti", error);
+      }
+    });
+    hasCelebratedRef.current = true;
+  }, [confettiEnabled, confettiPreset, evaluation, hasSubmitted]);
 
   const handleSelectionChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -697,3 +731,5 @@ export function MultipleChoiceQuiz({
     </Card>
   );
 }
+
+export type { QuizConfettiOptions, QuizConfettiPreset } from "./QuizCelebrations";

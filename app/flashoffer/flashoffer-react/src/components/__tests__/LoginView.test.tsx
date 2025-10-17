@@ -5,9 +5,9 @@
 
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
-import { FlashofferThemeProvider } from "../../../theme/FlashofferThemeProvider";
-import { LoginView } from "../../LoginView";
-import type { LoginViewProps } from "../../LoginView";
+import { FlashofferThemeProvider } from "../../theme/FlashofferThemeProvider";
+import { LoginView } from "../LoginView";
+import type { LoginViewProps } from "../LoginView";
 
 describe("LoginView", () => {
   function renderLoginView(props: Partial<LoginViewProps> = {}) {

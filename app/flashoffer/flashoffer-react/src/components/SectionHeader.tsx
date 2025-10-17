@@ -12,23 +12,28 @@ export interface SectionHeaderProps {
   eyebrow?: ReactNode;
   /** Main heading text. Defaults to Flashoffer marketing copy. */
   title?: ReactNode;
+  /** Supporting copy rendered beneath the section title. */
+  subtitle?: ReactNode;
   /** Horizontal alignment for the text stack. Defaults to "center". */
   align?: "left" | "center";
 }
 
 const DEFAULT_EYEBROW = "FLASHOFFER";
 const DEFAULT_TITLE = "Launch faster with reusable content blocks.";
+const DEFAULT_SUBTITLE = "";
 
 /**
- * Section heading with optional eyebrow and configurable alignment.
+ * Section heading with optional eyebrow, subtitle, and configurable alignment.
  *
  * Defaults render the "FLASHOFFER" eyebrow and the "Launch faster with
  * reusable content blocks." title. Text is centered unless `align="left"` is
- * provided, and either content slot can be omitted by passing `null`.
+ * provided. Eyebrow, title, or subtitle content can be omitted by passing
+ * `null`.
  */
 export function SectionHeader({
   eyebrow = DEFAULT_EYEBROW,
   title = DEFAULT_TITLE,
+  subtitle = DEFAULT_SUBTITLE,
   align = "center"
 }: SectionHeaderProps) {
   return (
@@ -46,6 +51,11 @@ export function SectionHeader({
       <Typography variant="h2">
         {title}
       </Typography>
+      {subtitle ? (
+        <Typography variant="body1" color="text.secondary">
+          {subtitle}
+        </Typography>
+      ) : null}
     </Stack>
   );
 }
