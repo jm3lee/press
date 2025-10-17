@@ -3,7 +3,8 @@
  * Released under the MIT license.
  */
 
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { act } from "react";
 
 import { FlashofferThemeProvider } from "../../theme/FlashofferThemeProvider";
 import { MultipleChoiceQuiz } from "../MultipleChoiceQuiz";
