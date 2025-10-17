@@ -1,2 +1,0 @@
-export COMPOSE_FILE=docker-compose.yml:app/flashoffer/docker/analytics.yml:app/flashoffer/docker/quiz.yml:app/flashoffer/docker/campaign.yml:app/flashoffer/docker/flashoffer.yml
-docker compose build "$@" analytics-db analytics-backend quiz-backend campaign-backend flashoffer-dev

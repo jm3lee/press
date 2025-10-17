@@ -1,0 +1,70 @@
+{
+  "registry_env": "CONTAINER_REGISTRY",
+  "registry_default": "registry.digitalocean.com/flashoffer",
+  "services": {
+    "flashoffer-dev": {
+      "compose_files": [
+        "docker-compose.yml",
+        "app/flashoffer/docker/analytics.yml",
+        "app/flashoffer/docker/quiz.yml",
+        "app/flashoffer/docker/campaign.yml",
+        "app/flashoffer/docker/flashoffer.yml"
+      ],
+      "shared_services": [
+        "analytics-db",
+        "analytics-backend",
+        "quiz-backend",
+        "campaign-backend"
+      ],
+      "image": "press-flashoffer-dev",
+      "remote_suffix": "flashoffer-dev",
+      "supports": {
+        "install": true,
+        "npm": true,
+        "coverage": true,
+        "post_build_install": true
+      },
+      "npm_workdir": "/workspace/app/flashoffer/flashoffer-react"
+    },
+    "flashoffer": {
+      "compose_files": [
+        "docker-compose.yml",
+        "app/flashoffer/docker/analytics.yml",
+        "app/flashoffer/docker/quiz.yml",
+        "app/flashoffer/docker/campaign.yml",
+        "app/flashoffer/docker/flashoffer.yml"
+      ],
+      "shared_services": [
+        "analytics-db",
+        "analytics-backend",
+        "quiz-backend",
+        "campaign-backend"
+      ],
+      "image": "press-flashoffer",
+      "remote_suffix": "flashoffer",
+      "supports": {
+        "install": false,
+        "npm": false,
+        "coverage": false,
+        "post_build_install": false
+      }
+    },
+    "quiz-backend": {
+      "compose_files": [
+        "app/flashoffer/docker/analytics.yml",
+        "app/flashoffer/docker/quiz.yml"
+      ],
+      "shared_services": [
+        "analytics-db"
+      ],
+      "image": "press-quiz-backend",
+      "remote_suffix": "quiz-backend",
+      "supports": {
+        "install": false,
+        "npm": false,
+        "coverage": false,
+        "post_build_install": false
+      }
+    }
+  }
+}
