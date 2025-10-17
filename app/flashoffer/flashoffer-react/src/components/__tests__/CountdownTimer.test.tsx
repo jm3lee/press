@@ -3,8 +3,7 @@
  * Released under the MIT license.
  */
 
-import { render, screen } from "@testing-library/react";
-import { act } from "react";
+import { act, render, screen } from "@testing-library/react";
 
 import { FlashofferThemeProvider } from "../../theme/FlashofferThemeProvider";
 import type { FlashofferThemeProviderProps } from "../../theme/FlashofferThemeProvider";
