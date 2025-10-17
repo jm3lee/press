@@ -30,6 +30,8 @@
     "lint": "eslint --ext .ts,.tsx src",
     "lint:ci": "eslint --ext .ts,.tsx src --rule \"complexity: ['error', { 'max': 10 }]\" --quiet",
     "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:coverage:ci": "jest --coverage --coverageReporters=text-summary --coverageReporters=lcov",
     "test:watch": "jest --watch"
   },
   "dependencies": {
