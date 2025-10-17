@@ -105,6 +105,10 @@ case "$command" in
   help|-h|--help)
     usage
     ;;
+  bash)
+    ensure_compose
+    docker compose run --entrypoint bash --rm --remove-orphans "$SERVICE"
+    ;;
   up)
     ensure_compose
     docker compose up --remove-orphans "$@" "${SHARED_SERVICES[@]}" "$SERVICE"
