@@ -130,6 +130,7 @@ case "$command" in
       exit 1
     fi
     docker compose run --rm \
+      --workdir /workspace/app/flashoffer/flashoffer-react \
       --entrypoint npm \
       -u "$(id -u)" \
       "$SERVICE" run test:coverage
@@ -145,6 +146,7 @@ case "$command" in
       exit 1
     fi
     docker compose run --rm \
+      --workdir /workspace/app/flashoffer/flashoffer-react \
       --entrypoint npm \
       -u "$(id -u)" \
       "$SERVICE" "$@"
