@@ -13,7 +13,14 @@ const config: Config = {
   testMatch: ["<rootDir>/src/**/__tests__/**/*.test.(ts|tsx)"],
   moduleNameMapper: {
     "\\.(css|less|sass|scss)$": "<rootDir>/test/__mocks__/styleMock.ts"
-  }
+  },
+  collectCoverageFrom: [
+    "<rootDir>/src/**/*.{ts,tsx}",
+    "!<rootDir>/src/**/index.{ts,tsx}"
+  ],
+  coverageDirectory: "<rootDir>/coverage",
+  coverageProvider: "v8",
+  coverageReporters: ["text", "text-summary", "lcov", "html"]
 };
 
 export default config;
