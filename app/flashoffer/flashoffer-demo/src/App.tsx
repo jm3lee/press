@@ -327,7 +327,7 @@ export default function App() {
             backgroundImage: "none"
           }}
         >
-          <Toolbar sx={{ justifyContent: "flex-end" }}>
+          <Toolbar>
             <Stack direction="row" spacing={2}>
               <Typography>
                 Palette
