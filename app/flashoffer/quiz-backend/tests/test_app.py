@@ -3,8 +3,10 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from uuid import uuid4
+
+from psycopg.types.json import Json
 
 from quiz_backend.db import QuizResultsStore
 
@@ -97,3 +99,55 @@ def test_quiz_events_endpoint_returns_recent_results(client):
     assert result["quiz_id"] == "algebra-basics"
     assert result["user_id"]
     assert result["attempts"] == 1
+
+
+def test_quiz_question_today_returns_active_question(client, flask_app):
+    pool: QuizResultsStore = flask_app.config["DB_POOL"]
+    options = [
+        {
+            "id": "reminder",
+            "label": "Personalized reminder",
+            "description": "Keep the offer top of mind."
+        },
+        {
+            "id": "survey",
+            "label": "Follow-up survey",
+            "description": "Collects feedback but slows momentum."
+        }
+    ]
+    with pool.connection() as conn:  # type: ignore[assignment]
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO quiz_questions (
+                    slug,
+                    question,
+                    helper_text,
+                    explanation,
+                    success_message,
+                    error_message,
+                    options,
+                    correct_option_id,
+                    published_on
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """,
+                (
+                    "flashoffer-demo",
+                    "Which follow-up sustains conversion lift?",
+                    "Think about friction-free follow-ups.",
+                    "Reminders reinforce urgency without blockers.",
+                    "Exactly. Reinforce urgency to keep momentum.",
+                    "Consider what keeps prospects moving forward.",
+                    Json(options),
+                    "reminder",
+                    date.today(),
+                ),
+            )
+        conn.commit()
+
+    response = client.get("/api/quiz/today")
+    assert response.status_code == 200
+    body = response.get_json()
+    assert body["question"]["slug"] == "flashoffer-demo"
+    assert body["question"]["correct_option_id"] == "reminder"
+    assert len(body["question"]["options"]) == 2

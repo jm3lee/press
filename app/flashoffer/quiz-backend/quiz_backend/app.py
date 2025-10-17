@@ -97,6 +97,7 @@ def create_app() -> Flask:
     apply_cors = configure_cors(app, component="quiz-backend")
 
     quiz_events_path = "/api/quiz/events"
+    quiz_question_today_path = "/api/quiz/today"
 
     @app.route(quiz_events_path, methods=["OPTIONS"])
     def quiz_options() -> Response:
@@ -146,6 +147,17 @@ def create_app() -> Flask:
 
         results = storage.fetch_recent_results(limit=limit, campaign_id=campaign_id)
         return jsonify({"results": results})
+
+    @app.route(quiz_question_today_path, methods=["OPTIONS"])
+    def quiz_question_today_options() -> Response:
+        return apply_cors(Response(status=204))
+
+    @app.route(quiz_question_today_path, methods=["GET"])
+    def quiz_question_today() -> Response:
+        question = storage.fetch_question_of_day()
+        if question is None:
+            return jsonify({"error": "question_not_available"}), 404
+        return jsonify({"question": question})
 
     @app.route("/config", methods=["GET"])
     def config_dump() -> Response:

@@ -9,6 +9,7 @@ services:
       VITE_FLASHOFFER_ANALYTICS_ENDPOINT: ${FLASHOFFER_ANALYTICS_ENDPOINT:-http://localhost:8001/events}
       VITE_FLASHOFFER_ANALYTICS_RECENT_URL: ${FLASHOFFER_ANALYTICS_RECENT_URL:-http://localhost:8001/events/recent}
       VITE_FLASHOFFER_QUIZ_EVENTS_ENDPOINT: ${FLASHOFFER_QUIZ_EVENTS_ENDPOINT:-http://localhost:8002/api/quiz/events}
+      VITE_FLASHOFFER_QUIZ_API_BASE: ${FLASHOFFER_QUIZ_API_BASE:-http://localhost:8002}
       VITE_FLASHOFFER_CAMPAIGN_API_BASE: ${FLASHOFFER_CAMPAIGN_API_BASE:-http://localhost:8003}
     ports:
       - "${FLASHOFFER_PORT:-4173}:4173"
@@ -32,6 +33,7 @@ services:
       VITE_FLASHOFFER_ANALYTICS_ENDPOINT: ${FLASHOFFER_ANALYTICS_ENDPOINT:-http://localhost:8001/events}
       VITE_FLASHOFFER_ANALYTICS_RECENT_URL: ${FLASHOFFER_ANALYTICS_RECENT_URL:-http://localhost:8001/events/recent}
       VITE_FLASHOFFER_QUIZ_EVENTS_ENDPOINT: ${FLASHOFFER_QUIZ_EVENTS_ENDPOINT:-http://localhost:8002/api/quiz/events}
+      VITE_FLASHOFFER_QUIZ_API_BASE: ${FLASHOFFER_QUIZ_API_BASE:-http://quiz-backend:8000}
       VITE_FLASHOFFER_CAMPAIGN_API_BASE: ${FLASHOFFER_CAMPAIGN_API_BASE:-http://campaign-backend:8000}
     ports:
       - "${FLASHOFFER_DEV_PORT:-5173}:5173"
@@ -41,4 +43,3 @@ services:
       - analytics-backend
       - quiz-backend
       - campaign-backend
-

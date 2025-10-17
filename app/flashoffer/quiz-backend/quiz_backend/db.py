@@ -1,11 +1,11 @@
 # Copyright (c) Flashoffer Developers
 # Released under the MIT license.
 
-"""Persistence layer for quiz completion events."""
+"""Persistence layer for quiz completion events and metadata."""
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from importlib import resources
 from typing import Any, Dict, List, Optional
 
@@ -30,6 +30,12 @@ FETCH_RECENT_QUIZ_RESULTS_SQL = _load_sql("fetch_recent_quiz_results.sql")
 
 ENSURE_CAMPAIGN_ID_COLUMN_SQL = _load_sql("ensure_campaign_id_column.sql")
 
+CREATE_QUIZ_QUESTIONS_TABLE_SQL = _load_sql("create_quiz_questions_table.sql")
+
+FETCH_QUESTION_OF_DAY_SQL = _load_sql("fetch_question_of_day.sql")
+
+ENSURE_QUIZ_QUESTIONS_INDEX_SQL = _load_sql("ensure_quiz_questions_index.sql")
+
 
 class QuizResultsStore(PostgresPool):
     """Store that manages quiz completion tallies."""
@@ -39,6 +45,8 @@ class QuizResultsStore(PostgresPool):
             with conn.cursor() as cur:
                 cur.execute(CREATE_QUIZ_RESULTS_TABLE_SQL)
                 cur.execute(ENSURE_CAMPAIGN_ID_COLUMN_SQL)
+                cur.execute(CREATE_QUIZ_QUESTIONS_TABLE_SQL)
+                cur.execute(ENSURE_QUIZ_QUESTIONS_INDEX_SQL)
             conn.commit()
 
     def record_completion(self, result: Dict[str, Any]) -> Dict[str, Any]:
@@ -119,6 +127,70 @@ class QuizResultsStore(PostgresPool):
             )
 
         return results
+
+    def fetch_question_of_day(
+        self,
+        *,
+        today: Optional[date] = None,
+    ) -> Optional[Dict[str, Any]]:
+        target_date = today or datetime.now(tz=timezone.utc).date()
+
+        row = None
+        with self.connection() as conn:  # type: ignore[assignment]
+            with conn.cursor() as cur:
+                cur.execute(
+                    FETCH_QUESTION_OF_DAY_SQL,
+                    (
+                        target_date,
+                        target_date,
+                    ),
+                )
+                row = cur.fetchone()
+
+        if row is None:
+            return None
+
+        (
+            question_id,
+            slug,
+            question,
+            helper_text,
+            explanation,
+            success_message,
+            error_message,
+            options,
+            correct_option_id,
+            published_on,
+            expires_on,
+        ) = row
+
+        normalized_options: List[Dict[str, Any]] = []
+        if isinstance(options, (list, tuple)):
+            for option in options:
+                if isinstance(option, dict):
+                    normalized_options.append(option)
+
+        return {
+            "id": question_id,
+            "slug": slug,
+            "question": question,
+            "helper_text": helper_text,
+            "explanation": explanation,
+            "success_message": success_message,
+            "error_message": error_message,
+            "options": normalized_options,
+            "correct_option_id": correct_option_id,
+            "published_on": (
+                published_on.isoformat()
+                if hasattr(published_on, "isoformat")
+                else str(published_on)
+            ),
+            "expires_on": (
+                expires_on.isoformat()
+                if hasattr(expires_on, "isoformat") and expires_on is not None
+                else None
+            ),
+        }
 
 
 def _parse_timestamp(value: Any) -> datetime:

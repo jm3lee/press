@@ -27,7 +27,28 @@ import {
   type QuizCelebrationSelection
 } from "./types";
 
-const QUIZ_OPTIONS = [
+interface QuizOption {
+  id: string;
+  label: string;
+  description?: string;
+  tally?: number;
+}
+
+interface QuestionOfDay {
+  id?: number;
+  slug: string;
+  question: string;
+  helperText?: string;
+  explanation?: string;
+  successMessage?: string;
+  errorMessage?: string;
+  options: QuizOption[];
+  correctOptionId: string;
+  publishedOn?: string;
+  expiresOn?: string | null;
+}
+
+const FALLBACK_OPTIONS: QuizOption[] = [
   {
     id: "reminder",
     label: "A personalized reminder with a refreshed CTA",
@@ -52,22 +73,125 @@ const QUIZ_OPTIONS = [
   }
 ];
 
+const FALLBACK_QUESTION: QuestionOfDay = {
+  id: undefined,
+  slug: "flashoffer-demo.best-follow-up",
+  question:
+    "After a prospect explores a Flashoffer landing page, what follow-up drives " +
+    "the highest conversion lift?",
+  helperText:
+    "Consider which option keeps momentum without adding friction.",
+  explanation:
+    "Timely reminders build on existing intent and keep the offer top of mind without introducing blockers.",
+  successMessage:
+    "Exactly. Reinforcing urgency while keeping the path clear sustains conversion lift.",
+  errorMessage:
+    "Think about which follow-up reduces friction instead of adding new steps.",
+  options: FALLBACK_OPTIONS,
+  correctOptionId: "reminder",
+  publishedOn: undefined,
+  expiresOn: undefined
+};
+
 const QUIZ_EVENTS_ENDPOINT =
   typeof import.meta.env.VITE_FLASHOFFER_QUIZ_EVENTS_ENDPOINT === "string" &&
   import.meta.env.VITE_FLASHOFFER_QUIZ_EVENTS_ENDPOINT.trim() !== ""
     ? import.meta.env.VITE_FLASHOFFER_QUIZ_EVENTS_ENDPOINT
     : undefined;
 
-const QUIZ_ANALYTICS_CONFIG = {
-  quizId: "flashoffer-demo.best-follow-up",
-  endpoint: QUIZ_EVENTS_ENDPOINT,
-};
-
-const QUIZ_QUESTION =
-  "After a prospect explores a Flashoffer landing page, what follow-up drives " +
-  "the highest conversion lift?";
-
 const DEMO_CAMPAIGN_ID = "flashoffer-demo";
+
+function normalizeQuestionOfDay(payload: unknown): QuestionOfDay | null {
+  if (!payload || typeof payload !== "object") {
+    return null;
+  }
+  const envelope = payload as Record<string, unknown>;
+  const questionPayload = envelope["question"];
+  if (!questionPayload || typeof questionPayload !== "object") {
+    return null;
+  }
+
+  const questionRecord = questionPayload as Record<string, unknown>;
+  const optionsPayload = questionRecord["options"];
+  if (!Array.isArray(optionsPayload)) {
+    return null;
+  }
+
+  const normalizedOptions: QuizOption[] = [];
+  for (const entry of optionsPayload) {
+    if (!entry || typeof entry !== "object") {
+      continue;
+    }
+    const option = entry as Record<string, unknown>;
+    const idCandidate = option["id"];
+    const labelCandidate = option["label"];
+    if (typeof idCandidate !== "string" || !idCandidate.trim()) {
+      continue;
+    }
+    const labelText =
+      typeof labelCandidate === "string" && labelCandidate.trim() !== ""
+        ? labelCandidate
+        : typeof labelCandidate === "number"
+        ? String(labelCandidate)
+        : undefined;
+    if (!labelText) {
+      continue;
+    }
+    normalizedOptions.push({
+      id: idCandidate,
+      label: labelText,
+      description:
+        typeof option["description"] === "string"
+          ? option["description"]
+          : undefined,
+      tally:
+        typeof option["tally"] === "number"
+          ? option["tally"]
+          : undefined
+    });
+  }
+
+  if (normalizedOptions.length === 0) {
+    return null;
+  }
+
+  const questionText = questionRecord["question"];
+  if (typeof questionText !== "string" || !questionText.trim()) {
+    return null;
+  }
+
+  const resolveString = (value: unknown) =>
+    typeof value === "string" && value.trim() !== "" ? value : undefined;
+
+  return {
+    id: typeof questionRecord["id"] === "number"
+      ? questionRecord["id"]
+      : undefined,
+    slug: resolveString(questionRecord["slug"]) ??
+      FALLBACK_QUESTION.slug,
+    question: questionText,
+    helperText: resolveString(
+      questionRecord["helper_text"] ?? questionRecord["helperText"]
+    ),
+    explanation: resolveString(questionRecord["explanation"]),
+    successMessage: resolveString(
+      questionRecord["success_message"] ?? questionRecord["successMessage"]
+    ),
+    errorMessage: resolveString(
+      questionRecord["error_message"] ?? questionRecord["errorMessage"]
+    ),
+    options: normalizedOptions,
+    correctOptionId: resolveString(
+      questionRecord["correct_option_id"] ?? questionRecord["correctOptionId"]
+    ) ?? FALLBACK_QUESTION.correctOptionId,
+    publishedOn: resolveString(
+      questionRecord["published_on"] ?? questionRecord["publishedOn"]
+    ),
+    expiresOn: resolveString(
+      questionRecord["expires_on"] ?? questionRecord["expiresOn"]
+    )
+  };
+}
 
 export interface QuizShowcaseSectionProps {
   quizCelebration: QuizCelebrationSelection;
@@ -80,6 +204,13 @@ export function QuizShowcaseSection({
   quizCelebration,
   onQuizCelebrationChange,
 }: QuizShowcaseSectionProps) {
+  const quizApiBase =
+    typeof import.meta.env.VITE_FLASHOFFER_QUIZ_API_BASE === "string" &&
+    import.meta.env.VITE_FLASHOFFER_QUIZ_API_BASE.trim() !== ""
+      ? import.meta.env.VITE_FLASHOFFER_QUIZ_API_BASE.trim()
+      : undefined;
+  const [questionOfDay, setQuestionOfDay] =
+    useState<QuestionOfDay>(FALLBACK_QUESTION);
   const campaignApiBase =
     typeof import.meta.env.VITE_FLASHOFFER_CAMPAIGN_API_BASE === "string" &&
     import.meta.env.VITE_FLASHOFFER_CAMPAIGN_API_BASE.trim() !== ""
@@ -88,15 +219,45 @@ export function QuizShowcaseSection({
   const [campaignEndTime, setCampaignEndTime] = useState<Date | null>(null);
   const attemptRef = useRef(0);
 
+  const quizOptions = useMemo(
+    () =>
+      questionOfDay.options.length > 0
+        ? questionOfDay.options
+        : FALLBACK_QUESTION.options,
+    [questionOfDay]
+  );
+  const questionSlug = questionOfDay.slug || FALLBACK_QUESTION.slug;
+  const questionText =
+    questionOfDay.question || FALLBACK_QUESTION.question;
+  const helperText =
+    questionOfDay.helperText ?? FALLBACK_QUESTION.helperText;
+  const explanation =
+    questionOfDay.explanation ?? FALLBACK_QUESTION.explanation;
+  const successMessage =
+    questionOfDay.successMessage ?? FALLBACK_QUESTION.successMessage;
+  const errorMessage =
+    questionOfDay.errorMessage ?? FALLBACK_QUESTION.errorMessage;
+  const correctOptionId =
+    questionOfDay.correctOptionId || FALLBACK_QUESTION.correctOptionId;
+
+  const quizAnalyticsConfig = useMemo(
+    () => ({
+      quizId: questionSlug,
+      endpoint: QUIZ_EVENTS_ENDPOINT,
+    }),
+    [questionSlug]
+  );
+
   const quizMeta = useMemo(
     () =>
       JSON.stringify({
-        question: "Best follow-up after a Flashoffer engagement",
-        options: QUIZ_OPTIONS.map((option) => option.id),
+        question: questionText,
+        slug: questionSlug,
+        options: quizOptions.map((option) => option.id),
         celebration: quizCelebration,
         celebrationLabel: QUIZ_CELEBRATION_LABELS[quizCelebration]
       }),
-    [quizCelebration]
+    [quizCelebration, questionText, questionSlug, quizOptions]
   );
 
   const quizCelebrationMeta = useMemo(
@@ -119,16 +280,62 @@ export function QuizShowcaseSection({
     };
   }, [quizCelebration]);
 
+  useEffect(() => {
+    if (!quizApiBase || typeof fetch !== "function") {
+      return;
+    }
+
+    let cancelled = false;
+    const AbortCtor =
+      typeof AbortController === "function" ? AbortController : null;
+    const controller = AbortCtor ? new AbortCtor() : null;
+    const baseUrl = quizApiBase.replace(/\/+$/, "");
+    const endpoint = `${baseUrl}/api/quiz/today`;
+
+    const loadQuestion = async () => {
+      try {
+        const response = await fetch(endpoint, {
+          method: "GET",
+          headers: { Accept: "application/json" },
+          signal: controller?.signal
+        });
+
+        if (!response.ok) {
+          throw new Error(`Quiz API responded with ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (cancelled) {
+          return;
+        }
+
+        const normalized = normalizeQuestionOfDay(data);
+        if (normalized) {
+          setQuestionOfDay(normalized);
+        }
+      } catch (error) {
+        console.warn("Unable to load question of the day", error);
+      }
+    };
+
+    void loadQuestion();
+
+    return () => {
+      cancelled = true;
+      controller?.abort();
+    };
+  }, [quizApiBase]);
+
   const handleAnswer = (answer: MultipleChoiceAnswer) => {
     attemptRef.current += 1;
     void logQuizCompletion({
       attempt: attemptRef.current,
-      question: QUIZ_QUESTION,
+      question: questionText,
       selectedOptionId: answer.optionId,
-      correctOptionId: "reminder",
+      correctOptionId,
       isCorrect: answer.isCorrect,
       campaignId: DEMO_CAMPAIGN_ID,
-    }, QUIZ_ANALYTICS_CONFIG);
+    }, quizAnalyticsConfig);
   };
 
   useEffect(() => {
@@ -235,13 +442,13 @@ export function QuizShowcaseSection({
                 </FormControl>
               </Box>
               <MultipleChoiceQuiz
-                question={QUIZ_QUESTION}
-                helperText="Consider which option keeps momentum without adding friction."
-                options={QUIZ_OPTIONS}
-                correctOptionId="reminder"
-                explanation="Timely reminders build on existing intent and keep the offer top of mind without introducing blockers."
-                successMessage="Exactly. Reinforcing urgency while keeping the path clear sustains conversion lift."
-                errorMessage="Think about which follow-up reduces friction instead of adding new steps."
+                question={questionText}
+                helperText={helperText}
+                options={quizOptions}
+                correctOptionId={correctOptionId}
+                explanation={explanation}
+                successMessage={successMessage}
+                errorMessage={errorMessage}
                 onAnswer={handleAnswer}
                 endTime={campaignEndTime ?? undefined}
                 confetti={quizConfetti}

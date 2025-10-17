@@ -20,16 +20,36 @@ const materialBase = toPosixPath(
 );
 const muiUtilsBase = toPosixPath(resolvePath(nodeModulesDir, "@mui/utils"));
 
-const campaignProxyTarget = process.env.VITE_FLASHOFFER_CAMPAIGN_API_BASE?.trim();
-const proxyTarget = campaignProxyTarget ? campaignProxyTarget.replace(/\/$/, "") : undefined;
-const proxyConfig = proxyTarget
-  ? {
-      "/api/campaign": {
-        target: proxyTarget,
-        changeOrigin: true
-      }
-    }
+const campaignProxyTarget =
+  process.env.VITE_FLASHOFFER_CAMPAIGN_API_BASE?.trim();
+const campaignProxy = campaignProxyTarget
+  ? campaignProxyTarget.replace(/\/$/, "")
   : undefined;
+
+const quizProxyTarget = process.env.VITE_FLASHOFFER_QUIZ_API_BASE?.trim();
+const quizProxy = quizProxyTarget ? quizProxyTarget.replace(/\/$/, "") : undefined;
+
+const proxyConfig =
+  campaignProxy || quizProxy
+    ? {
+        ...(campaignProxy
+          ? {
+              "/api/campaign": {
+                target: campaignProxy,
+                changeOrigin: true
+              }
+            }
+          : {}),
+        ...(quizProxy
+          ? {
+              "/api/quiz": {
+                target: quizProxy,
+                changeOrigin: true
+              }
+            }
+          : {})
+      }
+    : undefined;
 
 export default defineConfig({
   plugins: [react()],

@@ -34,6 +34,7 @@ def flask_app() -> Iterator:
     with pool.connection() as conn:  # type: ignore[assignment]
         with conn.cursor() as cur:
             cur.execute("TRUNCATE quiz_results")
+            cur.execute("TRUNCATE quiz_questions")
         conn.commit()
 
 

@@ -121,6 +121,50 @@ Servers should treat unspecified `campaign_id` fields as optional and may ignore
 `2xx` to acknowledge the event; otherwise the helper logs a warning and the
 caller can retry manually if needed.
 
+## Question of the day endpoint
+
+`flashoffer-react` surfaces the daily multiple choice prompt by issuing a GET
+request to `/api/quiz/today`. The handler should respond with the active
+question payload or `404` when no prompt is scheduled for the caller's date.
+Responses must be JSON encoded and should include every field required to
+render `MultipleChoiceQuiz`.
+
+Example response:
+
+```json
+{
+  "question": {
+    "id": 42,
+    "slug": "flashoffer-demo.best-follow-up",
+    "question": "After a prospect explores a Flashoffer landing page, what follow-up drives the highest conversion lift?",
+    "helper_text": "Consider which option keeps momentum without adding friction.",
+    "explanation": "Timely reminders build on existing intent and keep the offer top of mind without introducing blockers.",
+    "success_message": "Exactly. Reinforcing urgency while keeping the path clear sustains conversion lift.",
+    "error_message": "Think about which follow-up reduces friction instead of adding new steps.",
+    "options": [
+      {
+        "id": "reminder",
+        "label": "A personalized reminder with a refreshed CTA",
+        "description": "Highlights the offer expiry and links back to the landing page.",
+        "tally": 264
+      },
+      {
+        "id": "case-study",
+        "label": "A case study download gate",
+        "description": "Shares social proof but interrupts momentum with an additional form."
+      }
+    ],
+    "correct_option_id": "reminder",
+    "published_on": "2025-10-17",
+    "expires_on": "2025-10-18"
+  }
+}
+```
+
+Clients may cache the response for the duration of the published day. Backend
+implementations should return `Cache-Control` headers reflecting that policy
+and update the payload atomically when rotating to the next daily question.
+
 ## End-to-end integration example
 
 The snippet below wires the primary endpoints together. It loads the campaign
