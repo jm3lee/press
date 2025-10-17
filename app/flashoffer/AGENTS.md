@@ -25,3 +25,4 @@
 - Avoid complex ternary expressions in component logic. When branching exceeds
   a single simple condition, extract the logic into a named helper instead of
   nesting ternaries.
+- After modifying `flashoffer-react`, run `npm test` to verify the package.
