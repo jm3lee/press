@@ -41,6 +41,14 @@ export interface AutoTrackProps {
   selector?: string;
 }
 
+/**
+ * Watches the document for nodes that expose tracking metadata and wires them
+ * up to the engagement provider. Elements matching the `selector` (defaults to
+ * `[data-track-id]`) are connected when they appear and automatically
+ * disconnected when they are removed.
+ *
+ * @param selector - CSS selector that identifies trackable elements.
+ */
 export function AutoTrack({ selector = DEFAULT_SELECTOR }: AutoTrackProps) {
   const { attachElement, detachElement } = useEngagement();
 
