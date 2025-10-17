@@ -1,2 +1,162 @@
-#!/bin/bash
-docker compose up --remove-orphans "$@" flashoffer-dev
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Management script for Flashoffer services. Inspired by the status
+# dashboard helper so developers can orchestrate Docker workflows from a
+# single entry point.
+#
+# Usage:
+#   bin/flashoffer [command] [options]
+#
+# Commands:
+#   up [-- ARGS]          Start the development server with docker compose up.
+#   build [-- ARGS]       Build Flashoffer services and dependencies.
+#   install               Install npm dependencies inside the dev container.
+#   npm <args...>         Run an arbitrary npm command in the dev container.
+#   push [--tag <image>]  Tag and push the Flashoffer image to a registry.
+#   help                  Display this help message.
+#
+# Default command is "up".
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
+
+DEFAULT_COMPOSE_FILES="docker-compose.yml:app/flashoffer/docker/analytics.yml:app/flashoffer/docker/quiz.yml:app/flashoffer/docker/campaign.yml:app/flashoffer/docker/flashoffer.yml"
+if [[ -z "${COMPOSE_FILE:-}" ]]; then
+  export COMPOSE_FILE="$DEFAULT_COMPOSE_FILES"
+fi
+
+SERVICE="flashoffer-dev"
+CONTAINER_REGISTRY="${CONTAINER_REGISTRY:-registry.digitalocean.com/flashoffer}"
+
+usage() {
+  cat <<'USAGE'
+Usage: bin/flashoffer [command] [options]
+
+Global options:
+  --prod                Target the flashoffer service instead of flashoffer-dev.
+
+Commands:
+  up [-- ARGS]          Start the development server with docker compose up.
+  build [-- ARGS]       Build Flashoffer services and dependencies.
+  install               Install npm dependencies inside the dev container.
+  npm <args...>         Run an arbitrary npm command in the dev container.
+  push [--tag <image>]  Tag and push the Flashoffer image to a registry.
+  help                  Display this help message.
+
+Default command is "up". Unknown options after a command are passed directly to
+docker compose.
+USAGE
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --prod)
+      SERVICE="flashoffer"
+      shift
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+IMAGE_NAME="press-${SERVICE}"
+DEFAULT_REMOTE_IMAGE="${CONTAINER_REGISTRY}/${SERVICE}"
+
+ensure_compose() {
+  if ! command -v docker >/dev/null 2>&1; then
+    echo "docker must be installed to run ${SERVICE} commands" >&2
+    exit 1
+  fi
+}
+
+SHARED_SERVICES=(
+  analytics-db
+  analytics-backend
+  quiz-backend
+  campaign-backend
+)
+
+run_install() {
+  if [[ "$SERVICE" == "flashoffer" ]]; then
+    echo "install is only available for the flashoffer-dev service" >&2
+    exit 1
+  fi
+  ensure_compose
+  docker compose run --rm \
+    --entrypoint npm \
+    -u "$(id -u)" \
+    "$SERVICE" install
+}
+
+command="${1:-up}"
+if [[ $# -gt 0 ]]; then
+  shift
+fi
+
+case "$command" in
+  help|-h|--help)
+    usage
+    ;;
+  up)
+    ensure_compose
+    docker compose up --remove-orphans "$@" "${SHARED_SERVICES[@]}" "$SERVICE"
+    ;;
+  build)
+    ensure_compose
+    docker compose build "$@" "${SHARED_SERVICES[@]}" "$SERVICE"
+    if [[ "$SERVICE" != "flashoffer" ]]; then
+      run_install
+    fi
+    ;;
+  install)
+    run_install
+    ;;
+  npm)
+    ensure_compose
+    if [[ "$SERVICE" == "flashoffer" ]]; then
+      echo "npm commands are not available for the flashoffer service" >&2
+      exit 1
+    fi
+    if [[ $# -eq 0 ]]; then
+      echo "npm command requires arguments" >&2
+      exit 1
+    fi
+    docker compose run --rm \
+      --entrypoint npm \
+      -u "$(id -u)" \
+      "$SERVICE" "$@"
+    ;;
+  push)
+    ensure_compose
+    remote_image="$DEFAULT_REMOTE_IMAGE"
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --tag)
+          if [[ $# -lt 2 ]]; then
+            echo "--tag requires an argument" >&2
+            exit 1
+          fi
+          remote_image="$2"
+          shift 2
+          ;;
+        *)
+          echo "Unknown push option: $1" >&2
+          exit 1
+          ;;
+      esac
+    done
+    docker tag "$IMAGE_NAME" "$remote_image"
+    docker push "$remote_image"
+    ;;
+  *)
+    echo "Unknown command: $command" >&2
+    usage
+    exit 1
+    ;;
+esac
