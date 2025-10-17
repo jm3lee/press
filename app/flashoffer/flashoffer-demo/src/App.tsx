@@ -3,15 +3,25 @@
  * Released under the MIT license.
  */
 
+import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Stack from "@mui/material/Stack";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
 import type { PaletteMode, ThemeOptions } from "@mui/material/styles";
-import { Suspense, lazy, startTransition, useMemo, useState } from "react";
+import {
+  Suspense,
+  lazy,
+  startTransition,
+  useEffect,
+  useMemo,
+  useState
+} from "react";
 import { FlashofferThemeProvider } from "flashoffer-react";
 import type { FlashofferThemePreset } from "flashoffer-react";
 import type { HeroAlignment, ThemePreset } from "./sections/types";
-import { THEME_PRESET_LABELS } from "./sections/types";
+import { THEME_PRESET_LABELS, THEME_PRESET_ORDER } from "./sections/types";
 
 const CustomizationControlsSection = lazy(async () => ({
   default: (await import("./sections/CustomizationControlsSection")).CustomizationControlsSection
@@ -56,6 +66,8 @@ interface ThemePresetConfig {
   colorMode?: PaletteMode;
   themeOptions?: ThemeOptions;
 }
+
+const THEME_STORAGE_KEY = "flashoffer-demo:palette-preset";
 
 const themePresets: Record<ThemePreset, ThemePresetConfig> = {
   ocean: {},
@@ -111,6 +123,22 @@ const themePresets: Record<ThemePreset, ThemePresetConfig> = {
     preset: "spaciousTypography",
     colorMode: "dark"
   }
+};
+
+const isThemePreset = (value: string): value is ThemePreset =>
+  value in themePresets;
+
+const getInitialPalettePreset = (): ThemePreset => {
+  if (typeof window === "undefined") {
+    return "ocean";
+  }
+
+  const storedPreset = window.localStorage.getItem(THEME_STORAGE_KEY);
+  if (storedPreset && isThemePreset(storedPreset)) {
+    return storedPreset;
+  }
+
+  return "ocean";
 };
 
 const PREVIEW_CARD_COUNT = 3;
@@ -214,8 +242,18 @@ const heroMedia = (
 );
 
 export default function App() {
-  const [palettePreset, setPalettePreset] = useState<ThemePreset>("ocean");
+  const [palettePreset, setPalettePreset] = useState<ThemePreset>(
+    getInitialPalettePreset
+  );
   const [heroAlignment, setHeroAlignment] = useState<HeroAlignment>("center");
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    window.localStorage.setItem(THEME_STORAGE_KEY, palettePreset);
+  }, [palettePreset]);
 
   const themeConfig = useMemo(
     () => themePresets[palettePreset],
@@ -277,16 +315,58 @@ export default function App() {
         data-track-label="Flashoffer demo surface"
         data-track-meta={pageMeta}
       >
-        <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 } }}>
-          <Stack spacing={10}>
-            <Suspense fallback={null}>
-              <CustomizationControlsSection
-                palettePreset={palettePreset}
-                onPalettePresetChange={(nextPreset) => {
+        <AppBar
+          position="sticky"
+          color="transparent"
+          elevation={0}
+          sx={{
+            backgroundColor: "transparent",
+            color: "inherit",
+            borderBottom: "1px solid rgba(148, 163, 184, 0.24)",
+            backdropFilter: "blur(12px)",
+            backgroundImage: "none"
+          }}
+        >
+          <Toolbar sx={{ justifyContent: "flex-end" }}>
+            <Box sx={{ display: "flex", flexDirection: "column" }}>
+              <Typography variant="overline" color="text.secondary">
+                Palette
+              </Typography>
+              <select
+                value={palettePreset}
+                onChange={(event) => {
+                  const nextPreset = event.target.value as ThemePreset;
                   startTransition(() => {
                     setPalettePreset(nextPreset);
                   });
                 }}
+                aria-label="Select theme palette"
+                style={{
+                  marginTop: "0.5rem",
+                  padding: "0.5rem 0.75rem",
+                  borderRadius: "0.75rem",
+                  border: "1px solid rgba(148, 163, 184, 0.4)",
+                  backgroundColor: "var(--flashoffer-color-surface)",
+                  color: "var(--flashoffer-color-text-primary)",
+                  fontSize: "0.95rem"
+                }}
+                data-track-id="palette-selector"
+                data-track-label="Palette selector"
+                data-track-meta={JSON.stringify({ palette: palettePreset })}
+              >
+                {THEME_PRESET_ORDER.map((value) => (
+                  <option key={value} value={value}>
+                    {THEME_PRESET_LABELS[value]}
+                  </option>
+                ))}
+              </select>
+            </Box>
+          </Toolbar>
+        </AppBar>
+        <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 } }}>
+          <Stack spacing={10}>
+            <Suspense fallback={null}>
+              <CustomizationControlsSection
                 heroAlignment={heroAlignment}
                 onHeroAlignmentChange={(nextAlignment) => {
                   startTransition(() => {

@@ -6,7 +6,13 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import App from "./App";
 
+const THEME_STORAGE_KEY = "flashoffer-demo:palette-preset";
+
 describe("Flashoffer demo", () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
   it("renders the hero banner from the component library", async () => {
     render(<App />);
 
@@ -130,4 +136,26 @@ describe("Flashoffer demo", () => {
       });
     }
   );
+
+  it("restores the saved palette preset from local storage", async () => {
+    window.localStorage.setItem(THEME_STORAGE_KEY, "midnight");
+
+    render(<App />);
+
+    const paletteSelect = (await screen.findByLabelText(
+      /select theme palette/i
+    )) as HTMLSelectElement;
+    expect(paletteSelect.value).toBe("midnight");
+  });
+
+  it("persists the selected palette preset to local storage", async () => {
+    render(<App />);
+
+    const paletteSelect = await screen.findByLabelText(/select theme palette/i);
+    fireEvent.change(paletteSelect, { target: { value: "sunset" } });
+
+    await waitFor(() => {
+      expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe("sunset");
+    });
+  });
 });
