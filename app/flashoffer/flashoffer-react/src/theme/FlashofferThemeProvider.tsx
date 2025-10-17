@@ -205,6 +205,10 @@ export function createFlashofferTheme(overrides?: ThemeOptions): Theme {
   return createTheme(deepmerge(baseThemeOptions, overrides));
 }
 
+/**
+ * Create a spacious typography-first preset with mode-specific palettes and
+ * optional overrides for fine-grained adjustments.
+ */
 export function createSpaciousTypographyTheme(
   mode: PaletteMode = "light",
   overrides?: ThemeOptions
