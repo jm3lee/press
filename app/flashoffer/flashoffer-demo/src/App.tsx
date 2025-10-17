@@ -328,8 +328,8 @@ export default function App() {
           }}
         >
           <Toolbar sx={{ justifyContent: "flex-end" }}>
-            <Box sx={{ display: "flex", flexDirection: "column" }}>
-              <Typography variant="overline" color="text.secondary">
+            <Stack direction="row" spacing={2}>
+              <Typography>
                 Palette
               </Typography>
               <select
@@ -360,7 +360,7 @@ export default function App() {
                   </option>
                 ))}
               </select>
-            </Box>
+            </Stack>
           </Toolbar>
         </AppBar>
         <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 } }}>
