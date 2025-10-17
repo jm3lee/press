@@ -406,7 +406,7 @@ export function CountdownTimer({
             </Typography>
           </Stack>
           {formattedQuantity ? (
-              <Chip
+            <Chip
               color="primary"
               label={
                 <Stack spacing={0.5} alignItems="center">
@@ -434,13 +434,20 @@ export function CountdownTimer({
                   theme.palette.primary.dark ?? darken(main, 0.18);
                 return {
                   background: `linear-gradient(135deg, ${dark} 0%, ${main} 50%, ${light} 100%)`,
+                  alignItems: "center",
+                  display: "flex",
+                  justifyContent: "center",
+                  minHeight: 88,
+                  minWidth: 200,
                   px: 2.5,
                   py: 2.5,
                   borderRadius: 4,
                   "& .MuiChip-label": {
                     px: 0,
                     py: 0,
-                    color: theme.palette.getContrastText(main)
+                    color: theme.palette.getContrastText(main),
+                    display: "block",
+                    width: "100%"
                   }
                 };
               }}
@@ -452,10 +459,10 @@ export function CountdownTimer({
           sx={{
             display: "grid",
             gap: 2,
+            gridAutoRows: "minmax(152px, auto)",
             gridTemplateColumns: {
-              xs: "repeat(1, minmax(0, 1fr))",
-              sm: "repeat(2, minmax(0, 1fr))",
-              lg: "repeat(4, minmax(0, 1fr))"
+              xs: "repeat(auto-fit, minmax(168px, 1fr))",
+              lg: "repeat(auto-fit, minmax(184px, 1fr))"
             }
           }}
         >
@@ -492,8 +499,10 @@ export function CountdownTimer({
                     flexDirection: "column",
                     gap: 1,
                     justifyContent: "center",
-                    px: 3,
-                    py: 2,
+                    minHeight: 152,
+                    minWidth: 168,
+                    px: 3.5,
+                    py: 3,
                     textAlign: "center",
                     "& .CountdownTimer-segmentLabel": {
                       color: text
@@ -510,7 +519,8 @@ export function CountdownTimer({
                     fontFeatureSettings: '"tnum" on, "ss01" on',
                     fontWeight: 800,
                     letterSpacing: -1,
-                    lineHeight: 1
+                    lineHeight: 1,
+                    wordBreak: "break-word"
                   }}
                 >
                   {formatSegmentValue(value)}
