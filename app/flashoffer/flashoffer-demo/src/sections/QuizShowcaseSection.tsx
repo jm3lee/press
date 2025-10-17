@@ -4,15 +4,28 @@
  */
 
 import Box from "@mui/material/Box";
+import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
+import type { SelectChangeEvent } from "@mui/material/Select";
+import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   MultipleChoiceQuiz,
   Section,
   logQuizCompletion,
 } from "flashoffer-react";
-import type { MultipleChoiceAnswer } from "flashoffer-react";
+import type {
+  MultipleChoiceAnswer,
+  QuizConfettiOptions
+} from "flashoffer-react";
+import {
+  QUIZ_CELEBRATION_LABELS,
+  QUIZ_CELEBRATION_OPTIONS,
+  type QuizCelebrationSelection
+} from "./types";
 
 const QUIZ_OPTIONS = [
   {
@@ -50,18 +63,23 @@ const QUIZ_ANALYTICS_CONFIG = {
   endpoint: QUIZ_EVENTS_ENDPOINT,
 };
 
-const QUIZ_META = JSON.stringify({
-  question: "Best follow-up after a Flashoffer engagement",
-  options: QUIZ_OPTIONS.map((option) => option.id)
-});
-
 const QUIZ_QUESTION =
   "After a prospect explores a Flashoffer landing page, what follow-up drives " +
   "the highest conversion lift?";
 
 const DEMO_CAMPAIGN_ID = "flashoffer-demo";
 
-export function QuizShowcaseSection() {
+export interface QuizShowcaseSectionProps {
+  quizCelebration: QuizCelebrationSelection;
+  onQuizCelebrationChange: (
+    nextCelebration: QuizCelebrationSelection
+  ) => void;
+}
+
+export function QuizShowcaseSection({
+  quizCelebration,
+  onQuizCelebrationChange,
+}: QuizShowcaseSectionProps) {
   const campaignApiBase =
     typeof import.meta.env.VITE_FLASHOFFER_CAMPAIGN_API_BASE === "string" &&
     import.meta.env.VITE_FLASHOFFER_CAMPAIGN_API_BASE.trim() !== ""
@@ -69,6 +87,37 @@ export function QuizShowcaseSection() {
       : undefined;
   const [campaignEndTime, setCampaignEndTime] = useState<Date | null>(null);
   const attemptRef = useRef(0);
+
+  const quizMeta = useMemo(
+    () =>
+      JSON.stringify({
+        question: "Best follow-up after a Flashoffer engagement",
+        options: QUIZ_OPTIONS.map((option) => option.id),
+        celebration: quizCelebration,
+        celebrationLabel: QUIZ_CELEBRATION_LABELS[quizCelebration]
+      }),
+    [quizCelebration]
+  );
+
+  const quizCelebrationMeta = useMemo(
+    () =>
+      JSON.stringify({
+        celebration: quizCelebration,
+        celebrationLabel: QUIZ_CELEBRATION_LABELS[quizCelebration]
+      }),
+    [quizCelebration]
+  );
+
+  const quizConfetti = useMemo<QuizConfettiOptions | undefined>(() => {
+    if (quizCelebration === "off") {
+      return { enabled: false };
+    }
+
+    return {
+      enabled: true,
+      preset: quizCelebration
+    };
+  }, [quizCelebration]);
 
   const handleAnswer = (answer: MultipleChoiceAnswer) => {
     attemptRef.current += 1;
@@ -141,7 +190,7 @@ export function QuizShowcaseSection() {
       component="section"
       data-track-id="quiz-showcase"
       data-track-label="Interactive quiz showcase"
-      data-track-meta={QUIZ_META}
+      data-track-meta={quizMeta}
     >
       <Section
         eyebrow="INTERACTIVE"
@@ -157,17 +206,47 @@ export function QuizShowcaseSection() {
             </Typography>
           </Grid>
           <Grid size={{ xs: 12, md: 7 }}>
-            <MultipleChoiceQuiz
-              question={QUIZ_QUESTION}
-              helperText="Consider which option keeps momentum without adding friction."
-              options={QUIZ_OPTIONS}
-              correctOptionId="reminder"
-              explanation="Timely reminders build on existing intent and keep the offer top of mind without introducing blockers."
-              successMessage="Exactly. Reinforcing urgency while keeping the path clear sustains conversion lift."
-              errorMessage="Think about which follow-up reduces friction instead of adding new steps."
-              onAnswer={handleAnswer}
-              endTime={campaignEndTime ?? undefined}
-            />
+            <Stack spacing={2}>
+              <Box>
+                <Typography variant="overline" color="text.secondary">
+                  Celebration effect
+                </Typography>
+                <FormControl fullWidth sx={{ mt: 1.5 }}>
+                  <Select
+                    value={quizCelebration}
+                    onChange={(
+                      event: SelectChangeEvent<QuizCelebrationSelection>
+                    ) => {
+                      const nextCelebration =
+                        event.target.value as QuizCelebrationSelection;
+                      onQuizCelebrationChange(nextCelebration);
+                    }}
+                    inputProps={{ "aria-label": "Select quiz celebration" }}
+                    data-track-id="quiz-celebration"
+                    data-track-label="Quiz celebration selector"
+                    data-track-meta={quizCelebrationMeta}
+                  >
+                    {QUIZ_CELEBRATION_OPTIONS.map((value) => (
+                      <MenuItem key={value} value={value}>
+                        {QUIZ_CELEBRATION_LABELS[value]}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+              <MultipleChoiceQuiz
+                question={QUIZ_QUESTION}
+                helperText="Consider which option keeps momentum without adding friction."
+                options={QUIZ_OPTIONS}
+                correctOptionId="reminder"
+                explanation="Timely reminders build on existing intent and keep the offer top of mind without introducing blockers."
+                successMessage="Exactly. Reinforcing urgency while keeping the path clear sustains conversion lift."
+                errorMessage="Think about which follow-up reduces friction instead of adding new steps."
+                onAnswer={handleAnswer}
+                endTime={campaignEndTime ?? undefined}
+                confetti={quizConfetti}
+              />
+            </Stack>
           </Grid>
         </Grid>
       </Section>

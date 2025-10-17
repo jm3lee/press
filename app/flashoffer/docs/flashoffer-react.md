@@ -192,7 +192,21 @@ arbitrary attributes to the underlying Material UI primitive.
   answers, highlights the chosen option, and exposes an `onSubmit` callback for
   instrumentation. Provide `endTime` to automatically close the quiz and
   display tallies sourced from each option's `tally` value. Use it to capture
-  lightweight intent before handing a lead to sales tooling.
+  lightweight intent before handing a lead to sales tooling. Wire the
+  `confetti` prop to `QuizCelebrations` so correct answers trigger an
+  accessible animation when the quiz resolves.
+
+  ```tsx
+  import { MultipleChoiceQuiz } from "flashoffer-react";
+
+  <MultipleChoiceQuiz
+    question="Which preset should we launch?"
+    options={options}
+    correctOptionId="streamers"
+    confetti={{ enabled: true, preset: "streamers" }}
+    onAnswer={handleAnswer}
+  />;
+  ```
 - **`CountdownTimer`** – Countdown surface that showcases urgency copy, time
   segments, and optional quantity remaining. Persist offer deadlines in UTC,
   convert them to the viewer's local time before display, and pass the UTC
@@ -207,6 +221,31 @@ arbitrary attributes to the underlying Material UI primitive.
 - **`Footer`** – Content info footer that renders navigation links followed by
   attribution copy. Customize the `links` array or `copyrightText` while the
   layout stays consistent.
+
+### Quiz celebrations
+
+`QuizCelebrations` ships helper utilities for launching the confetti animation
+backing `MultipleChoiceQuiz`. Pass `{ enabled: true }` to keep the default
+`"classic"` preset, or select `"streamers"` and `"burst"` when you want a
+stronger reveal. The helpers load `canvas-confetti` lazily, cache the instance
+between submissions, and expose type-safe presets so marketing engineers can
+standardize the experience across campaigns.
+
+```tsx
+import { MultipleChoiceQuiz } from "flashoffer-react";
+
+<MultipleChoiceQuiz
+  question="What follow-up closes the loop?"
+  options={options}
+  correctOptionId="reminder"
+  confetti={{ enabled: true, preset: "burst" }}
+/>;
+```
+
+When an experience should skip celebratory effects (for example in low-motion
+contexts), pass `confetti={{ enabled: false }}` or omit the prop entirely. The
+component checks browser capabilities before playing animations and logs a
+warning if the underlying canvas helper fails to load.
 
 ### Analytics helpers
 
