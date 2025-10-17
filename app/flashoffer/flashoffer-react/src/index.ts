@@ -60,6 +60,7 @@ export {
   AutoTrack,
   EngagementProvider,
   EventConsole,
+  logQuizCompletion,
   useEngagement,
   useRecordInteraction,
   useViewTracker,
@@ -71,5 +72,7 @@ export type {
   EngagementEvent,
   EngagementProviderProps,
   EventConsoleProps,
+  QuizAnalyticsOptions,
+  QuizCompletionPayload,
   ViewTrackerProps,
 } from "./analytics";
