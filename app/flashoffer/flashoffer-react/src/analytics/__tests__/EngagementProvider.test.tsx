@@ -3,7 +3,8 @@
  * Released under the MIT license.
  */
 
-import { act, render } from "@testing-library/react";
+import { render } from "@testing-library/react";
+import { act } from "react";
 import type { MutableRefObject } from "react";
 import {
   EngagementProvider,
