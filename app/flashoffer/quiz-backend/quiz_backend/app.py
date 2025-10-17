@@ -96,7 +96,9 @@ def create_app() -> Flask:
 
     apply_cors = configure_cors(app, component="quiz-backend")
 
-    @app.route("/api/events/quiz", methods=["OPTIONS"])
+    quiz_events_path = "/api/quiz/events"
+
+    @app.route(quiz_events_path, methods=["OPTIONS"])
     def quiz_options() -> Response:
         return apply_cors(Response(status=204))
 
@@ -108,7 +110,7 @@ def create_app() -> Flask:
                 cur.fetchone()
         return jsonify({"status": "ok"})
 
-    @app.route("/api/events/quiz", methods=["POST"])
+    @app.route(quiz_events_path, methods=["POST"])
     def ingest_quiz_event() -> Response:
         if not request.data:
             return jsonify({"error": "request body required"}), 400
@@ -129,7 +131,7 @@ def create_app() -> Flask:
         record = storage.record_completion(result)
         return jsonify({"result": record}), 201
 
-    @app.route("/api/events/quiz", methods=["GET"])
+    @app.route(quiz_events_path, methods=["GET"])
     def list_quiz_events() -> Response:
         try:
             limit = int(request.args.get("limit", "25"))
