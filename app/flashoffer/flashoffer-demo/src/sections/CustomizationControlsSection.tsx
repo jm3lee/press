@@ -46,29 +46,27 @@ export function CustomizationControlsSection({
           </Typography>
         </Section>
         <Divider flexItem sx={{ borderColor: "divider" }} />
-        <Stack direction={{ xs: "column", sm: "row" }} spacing={3}>
-          <Box>
-            <Typography variant="overline" color="text.secondary">
-              Hero alignment
-            </Typography>
-            <FormControl fullWidth sx={{ mt: 1.5 }}>
-              <Select
-                value={heroAlignment}
-                onChange={(event: SelectChangeEvent<HeroAlignment>) => {
-                  const nextAlignment = event.target.value as HeroAlignment;
-                  onHeroAlignmentChange(nextAlignment);
-                }}
-                aria-label="Select hero alignment"
-                data-track-id="hero-alignment"
-                data-track-label="Hero alignment selector"
-                data-track-meta={JSON.stringify({ alignment: heroAlignment })}
-              >
-                <MenuItem value="center">Centered</MenuItem>
-                <MenuItem value="left">Left aligned</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-        </Stack>
+        <Box maxWidth={280}>
+          <Typography variant="overline" color="text.secondary">
+            Hero alignment
+          </Typography>
+          <FormControl fullWidth sx={{ mt: 1.5 }}>
+            <Select
+              value={heroAlignment}
+              onChange={(event: SelectChangeEvent<HeroAlignment>) => {
+                const nextAlignment = event.target.value as HeroAlignment;
+                onHeroAlignmentChange(nextAlignment);
+              }}
+              inputProps={{ "aria-label": "Select hero alignment" }}
+              data-track-id="hero-alignment"
+              data-track-label="Hero alignment selector"
+              data-track-meta={JSON.stringify({ alignment: heroAlignment })}
+            >
+              <MenuItem value="center">Centered</MenuItem>
+              <MenuItem value="left">Left aligned</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
       </Stack>
     </Paper>
   );

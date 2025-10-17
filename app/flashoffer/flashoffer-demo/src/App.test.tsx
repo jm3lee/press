@@ -3,10 +3,24 @@
  * Released under the MIT license.
  */
 
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import App from "./App";
+import type { ThemePreset } from "./sections/types";
+import { THEME_PRESET_LABELS } from "./sections/types";
 
 const THEME_STORAGE_KEY = "flashoffer-demo:palette-preset";
+
+async function selectPalettePreset(value: ThemePreset) {
+  const paletteSelect = await screen.findByLabelText(/select theme palette/i);
+  fireEvent.mouseDown(paletteSelect);
+  const listbox = await screen.findByRole("listbox");
+  fireEvent.click(
+    within(listbox).getByRole("option", {
+      name: THEME_PRESET_LABELS[value]
+    })
+  );
+  return paletteSelect;
+}
 
 describe("Flashoffer demo", () => {
   beforeEach(() => {
@@ -80,8 +94,7 @@ describe("Flashoffer demo", () => {
   it("updates the hero banner gradient tokens for the midnight theme", async () => {
     render(<App />);
 
-    const paletteSelect = await screen.findByLabelText(/select theme palette/i);
-    fireEvent.change(paletteSelect, { target: { value: "midnight" } });
+    const paletteSelect = await selectPalettePreset("midnight");
 
     const heroBanner = await screen.findByRole("banner", {
       name: /launch coordinated offers/i
@@ -115,10 +128,7 @@ describe("Flashoffer demo", () => {
     async (preset, gradientStart, gradientStop) => {
       render(<App />);
 
-      const paletteSelect = await screen.findByLabelText(
-        /select theme palette/i
-      );
-      fireEvent.change(paletteSelect, { target: { value: preset } });
+      await selectPalettePreset(preset as ThemePreset);
 
       const heroWrapper = (await screen.findByTestId("hero-banner-wrapper")) as HTMLElement;
 
@@ -142,17 +152,16 @@ describe("Flashoffer demo", () => {
 
     render(<App />);
 
-    const paletteSelect = (await screen.findByLabelText(
-      /select theme palette/i
-    )) as HTMLSelectElement;
-    expect(paletteSelect.value).toBe("midnight");
+    const paletteSelect = await screen.findByLabelText(/select theme palette/i);
+    await waitFor(() => {
+      expect(paletteSelect).toHaveTextContent(/midnight/i);
+    });
   });
 
   it("persists the selected palette preset to local storage", async () => {
     render(<App />);
 
-    const paletteSelect = await screen.findByLabelText(/select theme palette/i);
-    fireEvent.change(paletteSelect, { target: { value: "sunset" } });
+    await selectPalettePreset("sunset");
 
     await waitFor(() => {
       expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe("sunset");

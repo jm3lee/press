@@ -24,8 +24,16 @@ import {
 } from "react";
 import { FlashofferThemeProvider } from "flashoffer-react";
 import type { FlashofferThemePreset } from "flashoffer-react";
-import type { HeroAlignment, ThemePreset } from "./sections/types";
-import { THEME_PRESET_LABELS, THEME_PRESET_ORDER } from "./sections/types";
+import type {
+  HeroAlignment,
+  QuizCelebrationSelection,
+  ThemePreset
+} from "./sections/types";
+import {
+  QUIZ_CELEBRATION_LABELS,
+  THEME_PRESET_LABELS,
+  THEME_PRESET_ORDER
+} from "./sections/types";
 
 const CustomizationControlsSection = lazy(async () => ({
   default: (await import("./sections/CustomizationControlsSection")).CustomizationControlsSection
@@ -250,6 +258,8 @@ export default function App() {
     getInitialPalettePreset
   );
   const [heroAlignment, setHeroAlignment] = useState<HeroAlignment>("center");
+  const [quizCelebration, setQuizCelebration] =
+    useState<QuizCelebrationSelection>("classic");
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -298,9 +308,11 @@ export default function App() {
     () =>
       JSON.stringify({
         palette: palettePreset,
-        presetLabel: THEME_PRESET_LABELS[palettePreset]
+        presetLabel: THEME_PRESET_LABELS[palettePreset],
+        quizCelebration,
+        celebrationLabel: QUIZ_CELEBRATION_LABELS[quizCelebration]
       }),
-    [palettePreset]
+    [palettePreset, quizCelebration]
   );
 
   return (
@@ -345,7 +357,7 @@ export default function App() {
                       setPalettePreset(nextPreset);
                     });
                   }}
-                  aria-label="Select theme palette"
+                  inputProps={{ "aria-label": "Select theme palette" }}
                   data-track-id="palette-selector"
                   data-track-label="Palette selector"
                   data-track-meta={JSON.stringify({ palette: palettePreset })}
@@ -397,7 +409,14 @@ export default function App() {
               <FigureSpotlightSection />
             </Suspense>
             <Suspense fallback={null}>
-              <QuizShowcaseSection />
+              <QuizShowcaseSection
+                quizCelebration={quizCelebration}
+                onQuizCelebrationChange={(nextCelebration) => {
+                  startTransition(() => {
+                    setQuizCelebration(nextCelebration);
+                  });
+                }}
+              />
             </Suspense>
             <Suspense fallback={null}>
               <FooterSection />
