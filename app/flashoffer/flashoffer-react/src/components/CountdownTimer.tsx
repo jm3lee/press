@@ -480,6 +480,7 @@ export function CountdownTimer({
                       ? alpha(theme.palette.common.black, 0.4)
                       : alpha(theme.palette.common.white, 0.7);
                   return {
+                    alignItems: "center",
                     background: `linear-gradient(160deg, ${alpha(
                       surface,
                       0.9
@@ -487,6 +488,10 @@ export function CountdownTimer({
                     borderRadius: 4,
                     border: `1px solid ${borderColor}`,
                     boxShadow: `0 20px 40px ${alpha(dark, 0.35)}`,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 1,
+                    justifyContent: "center",
                     px: 3,
                     py: 2,
                     textAlign: "center",
@@ -505,8 +510,7 @@ export function CountdownTimer({
                     fontFeatureSettings: '"tnum" on, "ss01" on',
                     fontWeight: 800,
                     letterSpacing: -1,
-                    lineHeight: 1,
-                    mb: 1
+                    lineHeight: 1
                   }}
                 >
                   {formatSegmentValue(value)}
