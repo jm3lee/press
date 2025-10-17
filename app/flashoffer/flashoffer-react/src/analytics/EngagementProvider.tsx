@@ -144,6 +144,23 @@ function measurePageLoadDuration(): number | null {
   return null;
 }
 
+/**
+ * Provides engagement tracking context for descendants, collecting scroll,
+ * view, and interaction events and batching them to the ingestion endpoint.
+ *
+ * @param props.endpoint Optional override for the ingestion endpoint when the
+ *   default transport is unsuitable.
+ * @param props.flushInterval Milliseconds between scheduled flushes; set to
+ *   `null` to disable the timer.
+ * @returns React element that wires engagement tracking for the subtree.
+ *
+ * @example
+ * ```tsx
+ * <EngagementProvider site="press" campaignId="spring">
+ *   <LandingPage />
+ * </EngagementProvider>
+ * ```
+ */
 export function EngagementProvider({
   endpoint,
   site,
@@ -703,6 +720,18 @@ export function EngagementProvider({
   );
 }
 
+/**
+ * Returns the engagement context that exposes registration and recording
+ * primitives. Throws when invoked outside an `EngagementProvider` boundary.
+ *
+ * @returns Active engagement context bound to the nearest provider.
+ *
+ * @example
+ * ```tsx
+ * const { recordInteraction } = useEngagement();
+ * recordInteraction("cta", { variant: "control" });
+ * ```
+ */
 export function useEngagement(): EngagementContextValue {
   const context = useContext(EngagementContext);
   if (!context) {
@@ -711,6 +740,20 @@ export function useEngagement(): EngagementContextValue {
   return context;
 }
 
+/**
+ * Creates a ref callback that registers an element for view tracking and
+ * updates metadata when dependencies change.
+ *
+ * @param trackId Stable identifier used to correlate view events.
+ * @param meta Supplemental metadata persisted with each observation.
+ * @returns Ref callback to attach to the observed element.
+ *
+ * @example
+ * ```tsx
+ * const trackRef = useViewTracker("hero", { position: "top" });
+ * return <section ref={trackRef}>...</section>;
+ * ```
+ */
 export function useViewTracker(
   trackId: string,
   meta: Record<string, unknown> = {}
@@ -745,6 +788,20 @@ export interface ViewTrackerProps {
   [key: string]: unknown;
 }
 
+/**
+ * Renders an element that is automatically registered for view tracking using
+ * `useViewTracker`, exposing a data attribute for debugging.
+ *
+ * @param props.trackId Stable identifier used by the analytics pipeline.
+ * @param props.as Optional component type when a non-`div` root is required.
+ *
+ * @example
+ * ```tsx
+ * <ViewTracker as="section" trackId="hero" meta={{ position: "top" }}>
+ *   <Hero />
+ * </ViewTracker>
+ * ```
+ */
 export function ViewTracker({
   trackId,
   meta = {},
@@ -760,6 +817,20 @@ export function ViewTracker({
   );
 }
 
+/**
+ * Provides a memoized helper that records interaction events with optional
+ * defaults for the target identifier and metadata payload.
+ *
+ * @param defaultTarget Fallback target name when callers omit the argument.
+ * @param defaultMeta Baseline metadata merged into every emitted event.
+ * @returns Callback that records the interaction through the provider.
+ *
+ * @example
+ * ```tsx
+ * const record = useRecordInteraction("cta", { surface: "hero" });
+ * record();
+ * ```
+ */
 export function useRecordInteraction(
   defaultTarget?: string,
   defaultMeta: Record<string, unknown> = {}
