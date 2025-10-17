@@ -12,6 +12,7 @@ set -euo pipefail
 #   up [-- ARGS]          Start the development server with docker compose up.
 #   build [-- ARGS]       Build Flashoffer services and dependencies.
 #   install               Install npm dependencies inside the dev container.
+#   cov                   Run the Flashoffer React coverage suite.
 #   npm <args...>         Run an arbitrary npm command in the dev container.
 #   push [--tag <image>]  Tag and push the Flashoffer image to a registry.
 #   help                  Display this help message.
@@ -40,6 +41,7 @@ Commands:
   up [-- ARGS]          Start the development server with docker compose up.
   build [-- ARGS]       Build Flashoffer services and dependencies.
   install               Install npm dependencies inside the dev container.
+  cov                   Run the Flashoffer React coverage suite.
   npm <args...>         Run an arbitrary npm command in the dev container.
   push [--tag <image>]  Tag and push the Flashoffer image to a registry.
   help                  Display this help message.
@@ -116,6 +118,17 @@ case "$command" in
     ;;
   install)
     run_install
+    ;;
+  cov)
+    ensure_compose
+    if [[ "$SERVICE" == "flashoffer" ]]; then
+      echo "cov command is only available for the flashoffer-dev service" >&2
+      exit 1
+    fi
+    docker compose run --rm \
+      --entrypoint npm \
+      -u "$(id -u)" \
+      "$SERVICE" run test:coverage
     ;;
   npm)
     ensure_compose
