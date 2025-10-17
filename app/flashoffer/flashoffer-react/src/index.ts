@@ -41,7 +41,9 @@ export { MultipleChoiceQuiz } from "./components/MultipleChoiceQuiz";
 export type {
   MultipleChoiceAnswer,
   MultipleChoiceOption,
-  MultipleChoiceQuizProps
+  MultipleChoiceQuizProps,
+  QuizConfettiOptions,
+  QuizConfettiPreset
 } from "./components/MultipleChoiceQuiz";
 
 export { CountdownTimer } from "./components/CountdownTimer";

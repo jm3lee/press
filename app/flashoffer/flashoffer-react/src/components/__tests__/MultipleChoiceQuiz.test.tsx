@@ -8,8 +8,24 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { FlashofferThemeProvider } from "../../theme/FlashofferThemeProvider";
 import { MultipleChoiceQuiz } from "../MultipleChoiceQuiz";
 import type { MultipleChoiceQuizProps } from "../MultipleChoiceQuiz";
+import { launchConfetti } from "../QuizCelebrations";
+
+jest.mock("../QuizCelebrations", () => {
+  const actual = jest.requireActual("../QuizCelebrations");
+  return {
+    ...actual,
+    launchConfetti: jest.fn().mockResolvedValue(undefined)
+  };
+});
 
 describe("MultipleChoiceQuiz", () => {
+  const launchConfettiMock =
+    launchConfetti as jest.MockedFunction<typeof launchConfetti>;
+
+  beforeEach(() => {
+    launchConfettiMock.mockClear();
+  });
+
   const BASE_OPTIONS: MultipleChoiceQuizProps["options"] = [
     {
       id: "story",
@@ -61,6 +77,34 @@ describe("MultipleChoiceQuiz", () => {
     expect(
       screen.getByText(/great job! that answer is correct\./i)
     ).toBeInTheDocument();
+  });
+
+  it("triggers confetti when a correct answer is submitted", async () => {
+    renderQuiz({ confetti: { enabled: true, preset: "streamers" } });
+
+    fireEvent.click(
+      screen.getByRole("radio", { name: /saves per reel/i })
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /check answer/i }));
+    });
+
+    expect(launchConfettiMock).toHaveBeenCalledWith("streamers");
+  });
+
+  it("does not launch confetti for incorrect submissions", async () => {
+    renderQuiz({ confetti: { enabled: true } });
+
+    fireEvent.click(
+      screen.getByRole("radio", { name: /story taps forward/i })
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /check answer/i }));
+    });
+
+    expect(launchConfettiMock).not.toHaveBeenCalled();
   });
 
   it("allows retrying incorrect responses", () => {
