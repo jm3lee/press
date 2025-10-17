@@ -5,7 +5,11 @@
 
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
+import FormControl from "@mui/material/FormControl";
+import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
+import Select from "@mui/material/Select";
+import type { SelectChangeEvent } from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { Section } from "flashoffer-react";
@@ -47,29 +51,22 @@ export function CustomizationControlsSection({
             <Typography variant="overline" color="text.secondary">
               Hero alignment
             </Typography>
-            <select
-              value={heroAlignment}
-              onChange={(event) => {
-                const nextAlignment = event.target.value as HeroAlignment;
-                onHeroAlignmentChange(nextAlignment);
-              }}
-              aria-label="Select hero alignment"
-              style={{
-                marginTop: "0.5rem",
-                padding: "0.5rem 0.75rem",
-                borderRadius: "0.75rem",
-                border: "1px solid rgba(148, 163, 184, 0.4)",
-                backgroundColor: "var(--flashoffer-color-surface)",
-                color: "var(--flashoffer-color-text-primary)",
-                fontSize: "0.95rem"
-              }}
-              data-track-id="hero-alignment"
-              data-track-label="Hero alignment selector"
-              data-track-meta={JSON.stringify({ alignment: heroAlignment })}
-            >
-              <option value="center">Centered</option>
-              <option value="left">Left aligned</option>
-            </select>
+            <FormControl fullWidth sx={{ mt: 1.5 }}>
+              <Select
+                value={heroAlignment}
+                onChange={(event: SelectChangeEvent<HeroAlignment>) => {
+                  const nextAlignment = event.target.value as HeroAlignment;
+                  onHeroAlignmentChange(nextAlignment);
+                }}
+                aria-label="Select hero alignment"
+                data-track-id="hero-alignment"
+                data-track-label="Hero alignment selector"
+                data-track-meta={JSON.stringify({ alignment: heroAlignment })}
+              >
+                <MenuItem value="center">Centered</MenuItem>
+                <MenuItem value="left">Left aligned</MenuItem>
+              </Select>
+            </FormControl>
           </Box>
         </Stack>
       </Stack>

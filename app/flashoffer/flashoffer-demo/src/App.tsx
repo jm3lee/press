@@ -6,10 +6,14 @@
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
+import FormControl from "@mui/material/FormControl";
+import MenuItem from "@mui/material/MenuItem";
 import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import type { PaletteMode, ThemeOptions } from "@mui/material/styles";
+import Select from "@mui/material/Select";
+import type { SelectChangeEvent } from "@mui/material/Select";
 import {
   Suspense,
   lazy,
@@ -327,39 +331,32 @@ export default function App() {
             backgroundImage: "none"
           }}
         >
-          <Toolbar>
-            <Stack direction="row" spacing={2}>
+          <Toolbar sx={{ justifyContent: "flex-end" }}>
+            <Stack direction="row" spacing={2} alignItems="center">
               <Typography>
                 Palette
               </Typography>
-              <select
-                value={palettePreset}
-                onChange={(event) => {
-                  const nextPreset = event.target.value as ThemePreset;
-                  startTransition(() => {
-                    setPalettePreset(nextPreset);
-                  });
-                }}
-                aria-label="Select theme palette"
-                style={{
-                  marginTop: "0.5rem",
-                  padding: "0.5rem 0.75rem",
-                  borderRadius: "0.75rem",
-                  border: "1px solid rgba(148, 163, 184, 0.4)",
-                  backgroundColor: "var(--flashoffer-color-surface)",
-                  color: "var(--flashoffer-color-text-primary)",
-                  fontSize: "0.95rem"
-                }}
-                data-track-id="palette-selector"
-                data-track-label="Palette selector"
-                data-track-meta={JSON.stringify({ palette: palettePreset })}
-              >
-                {THEME_PRESET_ORDER.map((value) => (
-                  <option key={value} value={value}>
-                    {THEME_PRESET_LABELS[value]}
-                  </option>
-                ))}
-              </select>
+              <FormControl size="small" sx={{ minWidth: 180 }}>
+                <Select
+                  value={palettePreset}
+                  onChange={(event: SelectChangeEvent<ThemePreset>) => {
+                    const nextPreset = event.target.value as ThemePreset;
+                    startTransition(() => {
+                      setPalettePreset(nextPreset);
+                    });
+                  }}
+                  aria-label="Select theme palette"
+                  data-track-id="palette-selector"
+                  data-track-label="Palette selector"
+                  data-track-meta={JSON.stringify({ palette: palettePreset })}
+                >
+                  {THEME_PRESET_ORDER.map((value) => (
+                    <MenuItem key={value} value={value}>
+                      {THEME_PRESET_LABELS[value]}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Stack>
           </Toolbar>
         </AppBar>
