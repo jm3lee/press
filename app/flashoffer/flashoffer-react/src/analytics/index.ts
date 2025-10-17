@@ -22,3 +22,9 @@ export type {
 
 export { EventConsole } from "./EventConsole";
 export type { EventConsoleProps } from "./EventConsole";
+
+export { logQuizCompletion } from "./QuizAnalytics";
+export type {
+  QuizAnalyticsOptions,
+  QuizCompletionPayload,
+} from "./QuizAnalytics";

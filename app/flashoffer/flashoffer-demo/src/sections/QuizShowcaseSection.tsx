@@ -7,9 +7,12 @@ import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import { useEffect, useRef, useState } from "react";
-import { MultipleChoiceQuiz, Section } from "flashoffer-react";
+import {
+  MultipleChoiceQuiz,
+  Section,
+  logQuizCompletion,
+} from "flashoffer-react";
 import type { MultipleChoiceAnswer } from "flashoffer-react";
-import { logQuizCompletion } from "../quizAnalytics";
 
 const QUIZ_OPTIONS = [
   {
@@ -35,6 +38,17 @@ const QUIZ_OPTIONS = [
     tally: 41
   }
 ];
+
+const QUIZ_EVENTS_ENDPOINT =
+  typeof import.meta.env.VITE_FLASHOFFER_QUIZ_EVENTS_ENDPOINT === "string" &&
+  import.meta.env.VITE_FLASHOFFER_QUIZ_EVENTS_ENDPOINT.trim() !== ""
+    ? import.meta.env.VITE_FLASHOFFER_QUIZ_EVENTS_ENDPOINT
+    : undefined;
+
+const QUIZ_ANALYTICS_CONFIG = {
+  quizId: "flashoffer-demo.best-follow-up",
+  endpoint: QUIZ_EVENTS_ENDPOINT,
+};
 
 const QUIZ_META = JSON.stringify({
   question: "Best follow-up after a Flashoffer engagement",
@@ -65,7 +79,7 @@ export function QuizShowcaseSection() {
       correctOptionId: "reminder",
       isCorrect: answer.isCorrect,
       campaignId: DEMO_CAMPAIGN_ID,
-    });
+    }, QUIZ_ANALYTICS_CONFIG);
   };
 
   useEffect(() => {
