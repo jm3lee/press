@@ -23,7 +23,8 @@ services:
   flashoffer-dev:
     build:
       context: .
-      dockerfile: ./app/flashoffer/flashoffer-demo/Dockerfile.dev
+      dockerfile: ./app/flashoffer/flashoffer-demo/Dockerfile
+      target: runner
     environment:
       FLASHOFFER_MODE: dev
       PORT: ${FLASHOFFER_DEV_PORT:-5173}

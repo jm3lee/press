@@ -42,8 +42,8 @@ ENV PORT=4173
 WORKDIR /workspace
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
-    apt-get update \
-    && apt-get install --no-install-recommends -y git
+    apt update \
+    && apt install --no-install-recommends -y git
 COPY --from=flashoffer-react-build /workspace/app/flashoffer/flashoffer-react /workspace/app/flashoffer/flashoffer-react
 COPY --from=flashoffer-demo-build /workspace/app/flashoffer/flashoffer-demo /workspace/app/flashoffer/flashoffer-demo
 COPY app/flashoffer/flashoffer-demo/entrypoint.sh /usr/local/bin/flashoffer-entrypoint
