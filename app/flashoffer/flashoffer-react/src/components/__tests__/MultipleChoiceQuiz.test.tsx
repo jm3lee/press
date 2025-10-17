@@ -107,6 +107,19 @@ describe("MultipleChoiceQuiz", () => {
     expect(launchConfettiMock).not.toHaveBeenCalled();
   });
 
+  it("renders the explanation when feedback is shown", () => {
+    renderQuiz({ explanation: "The save rate exceeded projections." });
+
+    fireEvent.click(
+      screen.getByRole("radio", { name: /saves per reel/i })
+    );
+    fireEvent.click(screen.getByRole("button", { name: /check answer/i }));
+
+    expect(
+      screen.getByText(/the save rate exceeded projections\./i)
+    ).toBeInTheDocument();
+  });
+
   it("allows retrying incorrect responses", () => {
     renderQuiz();
 
@@ -205,5 +218,153 @@ describe("MultipleChoiceQuiz", () => {
     } finally {
       jest.useRealTimers();
     }
+  });
+
+  it.each([
+    ["numeric", () => Date.now() - 5000],
+    [
+      "iso string",
+      () => new Date(Date.now() - 5000).toISOString()
+    ]
+  ])("closes quizzes for %s endTime values", (_, resolveEndTime) => {
+    jest.useFakeTimers();
+    const now = new Date("2024-02-12T00:00:00Z");
+    jest.setSystemTime(now);
+
+    try {
+      renderQuiz({ endTime: resolveEndTime() as Date | string | number });
+      expect(screen.getByText(/this quiz closed on/i)).toBeInTheDocument();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("skips scheduling deadlines when the window object is unavailable", () => {
+    jest.useFakeTimers();
+    const originalWindow = globalThis.window;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (globalThis as any).window = undefined;
+
+    try {
+      expect(() =>
+        renderQuiz({ endTime: new Date(Date.now() + 5000) })
+      ).not.toThrow();
+    } finally {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (globalThis as any).window = originalWindow;
+      jest.useRealTimers();
+    }
+  });
+
+  it("logs a warning when confetti effects fail outside production", async () => {
+    const confettiError = new Error("render-failure");
+    launchConfettiMock.mockRejectedValueOnce(confettiError);
+    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+
+    try {
+      renderQuiz({ confetti: { enabled: true } });
+
+      fireEvent.click(
+        screen.getByRole("radio", { name: /saves per reel/i })
+      );
+
+      await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: /check answer/i }));
+      });
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        "Failed to launch quiz confetti",
+        confettiError
+      );
+    } finally {
+      launchConfettiMock.mockResolvedValue(undefined);
+      warnSpy.mockRestore();
+    }
+  });
+
+  it("ignores submit attempts when no option is selected", () => {
+    const handleAnswer = jest.fn();
+    renderQuiz({ onAnswer: handleAnswer });
+
+    const submitButton = screen.getByRole("button", { name: /check answer/i });
+    submitButton.removeAttribute("disabled");
+    fireEvent.click(submitButton);
+
+    expect(handleAnswer).not.toHaveBeenCalled();
+  });
+
+  it("prevents submissions once the quiz closes", () => {
+    const handleAnswer = jest.fn();
+    jest.useFakeTimers();
+    const now = new Date("2024-03-10T00:00:00Z");
+    jest.setSystemTime(now);
+
+    try {
+      renderQuiz({
+        onAnswer: handleAnswer,
+        endTime: new Date(now.getTime() + 1500)
+      });
+
+      fireEvent.click(
+        screen.getByRole("radio", { name: /saves per reel/i })
+      );
+
+      act(() => {
+        jest.advanceTimersByTime(2000);
+      });
+
+      const submitButton = screen.getByRole("button", { name: /check answer/i });
+      expect(submitButton).toBeDisabled();
+      submitButton.removeAttribute("disabled");
+      fireEvent.click(submitButton);
+
+      expect(handleAnswer).not.toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("shows a fallback helper message when helper text is omitted", () => {
+    renderQuiz({ helperText: undefined });
+
+    expect(
+      screen.getByText(/select the response that best answers the question./i)
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/sustained performance/i)
+    ).not.toBeInTheDocument();
+  });
+
+  it("retains tallies when ignoring non-finite values", () => {
+    const now = new Date(Date.now() - 1000);
+    renderQuiz({
+      endTime: now,
+      options: [
+        {
+          id: "story",
+          label: "Story taps forward",
+          tally: Number.NaN
+        },
+        {
+          id: "save",
+          label: "Saves per reel",
+          tally: 12
+        }
+      ]
+    });
+
+    expect(screen.getByText(/12 responses/i)).toBeInTheDocument();
+    expect(screen.getByText(/100% of responses/i)).toBeInTheDocument();
+  });
+
+  it("renders a custom closure message when provided", () => {
+    const closedCopy = "This quiz is now closed to new responses.";
+    renderQuiz({
+      endTime: new Date(Date.now() - 1000),
+      closedMessage: closedCopy
+    });
+
+    expect(screen.getByText(closedCopy)).toBeInTheDocument();
   });
 });
