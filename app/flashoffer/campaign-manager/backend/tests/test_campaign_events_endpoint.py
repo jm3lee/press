@@ -61,7 +61,9 @@ def configured_app(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     monkeypatch.setattr("campaign_manager.app._create_repository", lambda: repository)
     monkeypatch.setattr("campaign_manager.app._create_auth_manager", lambda: auth_manager)
     monkeypatch.setenv("CAMPAIGN_MANAGER_ANALYTICS_RECENT_URL", "http://analytics.test/events/recent")
-    monkeypatch.setenv("CAMPAIGN_MANAGER_QUIZ_RECENT_URL", "http://quiz.test/api/events/quiz")
+    monkeypatch.setenv(
+        "CAMPAIGN_MANAGER_QUIZ_RECENT_URL", "http://quiz.test/api/quiz/events"
+    )
     monkeypatch.setenv("CAMPAIGN_MANAGER_STATIC_DIR", str(tmp_path))
 
     app = create_app()
@@ -94,7 +96,7 @@ def test_campaign_events_successfully_proxies_response(configured_app):
                 ]
             }
             return httpx.Response(status_code=200, json=payload, request=request)
-        if url == "http://quiz.test/api/events/quiz":
+        if url == "http://quiz.test/api/quiz/events":
             payload = {
                 "results": [
                     {

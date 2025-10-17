@@ -67,3 +67,4 @@
 ## Guides
 
 - [Engagement events](engagement-events.md)
+- [Flashoffer React API endpoints](api-endpoints.md)

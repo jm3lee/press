@@ -33,7 +33,7 @@ def _build_payload(*, passed: bool, campaign_id: str | None = None) -> dict:
 def test_quiz_completion_is_persisted(client, flask_app):
     payload = _build_payload(passed=True, campaign_id="launch-2024")
 
-    response = client.post("/api/events/quiz", json=payload)
+    response = client.post("/api/quiz/events", json=payload)
     assert response.status_code == 201
     body = response.get_json()
     assert body["result"]["passes"] == 1
@@ -62,7 +62,7 @@ def test_invalid_event_type_returns_error(client):
     payload = _build_payload(passed=True)
     payload["event_type"] = "start"
 
-    response = client.post("/api/events/quiz", json=payload)
+    response = client.post("/api/quiz/events", json=payload)
     assert response.status_code == 400
     data = response.get_json()
     assert "Unsupported" in data["error"]
@@ -72,7 +72,7 @@ def test_missing_passed_flag_returns_error(client):
     payload = _build_payload(passed=True)
     payload.pop("passed")
 
-    response = client.post("/api/events/quiz", json=payload)
+    response = client.post("/api/quiz/events", json=payload)
     assert response.status_code == 400
     data = response.get_json()
     assert "passed" in data["error"]
@@ -81,10 +81,12 @@ def test_missing_passed_flag_returns_error(client):
 def test_quiz_events_endpoint_returns_recent_results(client):
     first = _build_payload(passed=True, campaign_id="alpha")
     second = _build_payload(passed=False, campaign_id="beta")
-    client.post("/api/events/quiz", json=first)
-    client.post("/api/events/quiz", json=second)
+    client.post("/api/quiz/events", json=first)
+    client.post("/api/quiz/events", json=second)
 
-    response = client.get("/api/events/quiz", query_string={"campaign_id": "alpha", "limit": "5"})
+    response = client.get(
+        "/api/quiz/events", query_string={"campaign_id": "alpha", "limit": "5"}
+    )
 
     assert response.status_code == 200
     body = response.get_json()

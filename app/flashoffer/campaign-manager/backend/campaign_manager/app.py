@@ -74,7 +74,7 @@ def _quiz_recent_url() -> str:
             "CAMPAIGN_MANAGER_QUIZ_BASE must be configured with a valid URL",
         )
     base = raw_base.rstrip("/")
-    return f"{base}/api/events/quiz"
+    return f"{base}/api/quiz/events"
 
 
 def _create_auth_manager() -> AuthManager:
