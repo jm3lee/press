@@ -9,20 +9,15 @@ import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { Section } from "flashoffer-react";
-import type { HeroAlignment, ThemePreset } from "./types";
-import { THEME_PRESET_LABELS, THEME_PRESET_ORDER } from "./types";
+import type { HeroAlignment } from "./types";
 
 export interface CustomizationControlsSectionProps {
-  palettePreset: ThemePreset;
-  onPalettePresetChange: (nextPreset: ThemePreset) => void;
   heroAlignment: HeroAlignment;
   onHeroAlignmentChange: (nextAlignment: HeroAlignment) => void;
   controlsMeta: string;
 }
 
 export function CustomizationControlsSection({
-  palettePreset,
-  onPalettePresetChange,
   heroAlignment,
   onHeroAlignmentChange,
   controlsMeta
@@ -47,43 +42,7 @@ export function CustomizationControlsSection({
           </Typography>
         </Section>
         <Divider flexItem sx={{ borderColor: "divider" }} />
-        <Stack
-          direction={{ xs: "column", sm: "row" }}
-          spacing={3}
-          divider={<Divider orientation="vertical" flexItem sx={{ display: { xs: "none", sm: "block" } }} />}
-          useFlexGap
-        >
-          <Box>
-            <Typography variant="overline" color="text.secondary">
-              Palette
-            </Typography>
-            <select
-              value={palettePreset}
-              onChange={(event) => {
-                const nextPreset = event.target.value as ThemePreset;
-                onPalettePresetChange(nextPreset);
-              }}
-              aria-label="Select theme palette"
-              style={{
-                marginTop: "0.5rem",
-                padding: "0.5rem 0.75rem",
-                borderRadius: "0.75rem",
-                border: "1px solid rgba(148, 163, 184, 0.4)",
-                backgroundColor: "var(--flashoffer-color-surface)",
-                color: "var(--flashoffer-color-text-primary)",
-                fontSize: "0.95rem"
-              }}
-              data-track-id="palette-selector"
-              data-track-label="Palette selector"
-              data-track-meta={JSON.stringify({ palette: palettePreset })}
-            >
-              {THEME_PRESET_ORDER.map((value) => (
-                <option key={value} value={value}>
-                  {THEME_PRESET_LABELS[value]}
-                </option>
-              ))}
-            </select>
-          </Box>
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={3}>
           <Box>
             <Typography variant="overline" color="text.secondary">
               Hero alignment
