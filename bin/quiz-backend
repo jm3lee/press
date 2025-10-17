@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Unified Flashoffer developer tooling CLI."""
+"""Wrapper around the Flashoffer CLI for the quiz-backend service."""
 
 from __future__ import annotations
 
@@ -15,10 +15,10 @@ from flashoffer_cli.cli import CLIError, main  # noqa: E402
 def run() -> int:
     try:
         return main(
-            default_service="flashoffer-dev",
-            allow_prod_switch=True,
-            allowed_services=None,
-            program_name="flashoffer",
+            default_service="quiz-backend",
+            allow_prod_switch=False,
+            allowed_services=["quiz-backend"],
+            program_name="quiz-backend",
         )
     except CLIError as exc:
         print(f"Error: {exc}", file=sys.stderr)
