@@ -26,6 +26,8 @@ CREATE_QUIZ_RESULTS_TABLE_SQL = _load_sql("create_quiz_results_table.sql")
 
 INSERT_QUIZ_RESULT_SQL = _load_sql("insert_quiz_result.sql")
 
+INSERT_QUIZ_QUESTION_SQL = _load_sql("insert_quiz_question.sql")
+
 FETCH_RECENT_QUIZ_RESULTS_SQL = _load_sql("fetch_recent_quiz_results.sql")
 
 ENSURE_CAMPAIGN_ID_COLUMN_SQL = _load_sql("ensure_campaign_id_column.sql")
@@ -33,6 +35,8 @@ ENSURE_CAMPAIGN_ID_COLUMN_SQL = _load_sql("ensure_campaign_id_column.sql")
 CREATE_QUIZ_QUESTIONS_TABLE_SQL = _load_sql("create_quiz_questions_table.sql")
 
 FETCH_QUESTION_OF_DAY_SQL = _load_sql("fetch_question_of_day.sql")
+
+LIST_QUIZ_QUESTIONS_SQL = _load_sql("list_quiz_questions.sql")
 
 ENSURE_QUIZ_QUESTIONS_INDEX_SQL = _load_sql("ensure_quiz_questions_index.sql")
 
@@ -128,6 +132,65 @@ class QuizResultsStore(PostgresPool):
 
         return results
 
+    def create_question(self, question: Dict[str, Any]) -> Dict[str, Any]:
+        published_on = _parse_date(question["published_on"], field="published_on")
+        expires_on_value = question.get("expires_on")
+        expires_on = (
+            _parse_date(expires_on_value, field="expires_on")
+            if expires_on_value is not None
+            else None
+        )
+
+        if expires_on is not None and expires_on <= published_on:
+            raise ValueError("Field 'expires_on' must be after 'published_on'")
+
+        with self.connection() as conn:  # type: ignore[assignment]
+            with conn.cursor() as cur:
+                cur.execute(
+                    INSERT_QUIZ_QUESTION_SQL,
+                    (
+                        question["slug"],
+                        question["question"],
+                        question.get("helper_text"),
+                        question.get("explanation"),
+                        question.get("success_message"),
+                        question.get("error_message"),
+                        Json(question["options"]),
+                        question["correct_option_id"],
+                        published_on,
+                        expires_on,
+                    ),
+                )
+                row = cur.fetchone()
+            conn.commit()
+
+        if row is None:
+            raise RuntimeError("Failed to insert quiz question")
+
+        return _serialize_question_row(row)
+
+    def list_questions(
+        self,
+        *,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> List[Dict[str, Any]]:
+        normalized_limit = max(1, min(limit, 200))
+        normalized_offset = max(0, offset)
+
+        with self.connection() as conn:  # type: ignore[assignment]
+            with conn.cursor() as cur:
+                cur.execute(
+                    LIST_QUIZ_QUESTIONS_SQL,
+                    (
+                        normalized_limit,
+                        normalized_offset,
+                    ),
+                )
+                rows = cur.fetchall()
+
+        return [_serialize_question_row(row) for row in rows]
+
     def fetch_question_of_day(
         self,
         *,
@@ -150,47 +213,73 @@ class QuizResultsStore(PostgresPool):
         if row is None:
             return None
 
-        (
-            question_id,
-            slug,
-            question,
-            helper_text,
-            explanation,
-            success_message,
-            error_message,
-            options,
-            correct_option_id,
-            published_on,
-            expires_on,
-        ) = row
-
-        normalized_options: List[Dict[str, Any]] = []
-        if isinstance(options, (list, tuple)):
-            for option in options:
-                if isinstance(option, dict):
-                    normalized_options.append(option)
-
+        serialized = _serialize_question_row(row)
         return {
-            "id": question_id,
-            "slug": slug,
-            "question": question,
-            "helper_text": helper_text,
-            "explanation": explanation,
-            "success_message": success_message,
-            "error_message": error_message,
-            "options": normalized_options,
-            "correct_option_id": correct_option_id,
-            "published_on": (
-                published_on.isoformat()
-                if hasattr(published_on, "isoformat")
-                else str(published_on)
-            ),
-            "expires_on": (
-                expires_on.isoformat()
-                if hasattr(expires_on, "isoformat") and expires_on is not None
-                else None
-            ),
+            "id": serialized["id"],
+            "slug": serialized["slug"],
+            "question": serialized["question"],
+            "helper_text": serialized["helper_text"],
+            "explanation": serialized["explanation"],
+            "success_message": serialized["success_message"],
+            "error_message": serialized["error_message"],
+            "options": serialized["options"],
+            "correct_option_id": serialized["correct_option_id"],
+            "published_on": serialized["published_on"],
+            "expires_on": serialized["expires_on"],
         }
+
+
+def _normalize_options(raw_options: Any) -> List[Dict[str, Any]]:
+    normalized: List[Dict[str, Any]] = []
+    if isinstance(raw_options, (list, tuple)):
+        for option in raw_options:
+            if isinstance(option, dict):
+                normalized.append(option)
+    return normalized
+
+
+def _serialize_question_row(row: Any) -> Dict[str, Any]:
+    (
+        question_id,
+        slug,
+        prompt,
+        helper_text,
+        explanation,
+        success_message,
+        error_message,
+        options,
+        correct_option_id,
+        stored_published_on,
+        stored_expires_on,
+        created_at,
+        updated_at,
+    ) = row
+
+    normalized_options = _normalize_options(options)
+
+    return {
+        "id": question_id,
+        "slug": slug,
+        "question": prompt,
+        "helper_text": helper_text,
+        "explanation": explanation,
+        "success_message": success_message,
+        "error_message": error_message,
+        "options": normalized_options,
+        "correct_option_id": correct_option_id,
+        "published_on": (
+            stored_published_on.isoformat()
+            if hasattr(stored_published_on, "isoformat")
+            else str(stored_published_on)
+        ),
+        "expires_on": (
+            stored_expires_on.isoformat()
+            if stored_expires_on is not None and hasattr(stored_expires_on, "isoformat")
+            else (str(stored_expires_on) if stored_expires_on is not None else None)
+        ),
+        "created_at": _parse_timestamp(created_at).isoformat(),
+        "updated_at": _parse_timestamp(updated_at).isoformat(),
+    }
 
 
 def _parse_timestamp(value: Any) -> datetime:
@@ -205,6 +294,20 @@ def _parse_timestamp(value: Any) -> datetime:
             parsed = parsed.replace(tzinfo=timezone.utc)
         return parsed.astimezone(timezone.utc)
     return datetime.now(tz=timezone.utc)
+
+
+def _parse_date(value: Any, *, field: str) -> date:
+    if isinstance(value, date):
+        return value
+    if isinstance(value, str):
+        cleaned = value.strip()
+        try:
+            return date.fromisoformat(cleaned)
+        except ValueError as exc:  # noqa: B904 - retain original context
+            raise ValueError(
+                f"Field '{field}' must be formatted as YYYY-MM-DD"
+            ) from exc
+    raise ValueError(f"Field '{field}' must be formatted as YYYY-MM-DD")
 
 
 __all__ = ["DatabaseConfig", "QuizResultsStore"]

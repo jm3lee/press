@@ -1,0 +1,54 @@
+body {
+  margin: 0;
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  background-color: #0d1520;
+  color: #f5f8ff;
+}
+
+main {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.quiz-manager {
+  max-width: 720px;
+  width: 100%;
+  padding: 1.5rem;
+  background-color: #132032;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+.quiz-manager__preview {
+  max-height: 320px;
+  overflow: auto;
+  background-color: #060b12;
+  color: #95c4ff;
+  padding: 1rem;
+  border-radius: 4px;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.quiz-manager__table {
+  max-height: 320px;
+  border-radius: 6px;
+  overflow: auto;
+  background-color: rgba(6, 11, 18, 0.6);
+}
+
+.quiz-manager__table table {
+  min-width: 720px;
+}
+
+.quiz-manager__loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+}

@@ -32,6 +32,30 @@ def _build_payload(*, passed: bool, campaign_id: str | None = None) -> dict:
     }
 
 
+def _build_question_payload(*, slug: str, published_on: date, correct_option_id: str = "reminder") -> dict:
+    return {
+        "slug": slug,
+        "question": f"Prompt for {slug}?",
+        "helper_text": "Think through the conversion funnel.",
+        "options": [
+            {
+                "id": "reminder",
+                "label": "Send reminder",
+                "description": "Keeps the offer front of mind."
+            },
+            {
+                "id": "survey",
+                "label": "Send survey",
+                "description": "Collects feedback but slows momentum."
+            }
+        ],
+        "correct_option_id": correct_option_id,
+        "published_on": published_on.isoformat(),
+        "success_message": "Exactly right.",
+        "error_message": "Not quite.",
+    }
+
+
 def test_quiz_completion_is_persisted(client, flask_app):
     payload = _build_payload(passed=True, campaign_id="launch-2024")
 
@@ -151,3 +175,55 @@ def test_quiz_question_today_returns_active_question(client, flask_app):
     assert body["question"]["slug"] == "flashoffer-demo"
     assert body["question"]["correct_option_id"] == "reminder"
     assert len(body["question"]["options"]) == 2
+
+
+def test_create_quiz_question_persists_payload(client, flask_app):
+    payload = _build_question_payload(slug="new-question", published_on=date.today())
+
+    response = client.post("/api/quiz/questions", json=payload)
+    assert response.status_code == 201
+    body = response.get_json()
+    created = body["question"]
+    assert created["slug"] == payload["slug"]
+    assert created["correct_option_id"] == payload["correct_option_id"]
+    assert created["published_on"] == payload["published_on"]
+    assert len(created["options"]) == 2
+
+    pool: QuizResultsStore = flask_app.config["DB_POOL"]
+    with pool.connection() as conn:  # type: ignore[assignment]
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT slug, correct_option_id, published_on
+                FROM quiz_questions
+                WHERE slug = %s
+                """,
+                (payload["slug"],),
+            )
+            row = cur.fetchone()
+    assert row is not None
+    assert row[0] == payload["slug"]
+    assert row[1] == payload["correct_option_id"]
+    assert row[2].isoformat() == payload["published_on"]
+
+
+def test_list_quiz_questions_supports_pagination(client):
+    older = _build_question_payload(slug="alpha-question", published_on=date(2024, 7, 1))
+    newer = _build_question_payload(slug="beta-question", published_on=date(2024, 8, 1))
+
+    client.post("/api/quiz/questions", json=older)
+    client.post("/api/quiz/questions", json=newer)
+
+    first_page = client.get("/api/quiz/questions", query_string={"limit": "1"})
+    assert first_page.status_code == 200
+    first_payload = first_page.get_json()
+    assert first_payload["pagination"]["count"] == 1
+    assert first_payload["questions"][0]["slug"] == "beta-question"
+
+    second_page = client.get(
+        "/api/quiz/questions",
+        query_string={"limit": "1", "offset": "1"},
+    )
+    assert second_page.status_code == 200
+    second_payload = second_page.get_json()
+    assert second_payload["questions"][0]["slug"] == "alpha-question"

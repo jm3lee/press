@@ -1,28 +1,14 @@
-/**
- * @fileoverview
- * Entry point for the SearchIndex React application.
- *
- * This module waits for the DOM to be fully loaded, locates the
- * `#quiz-root` element, and renders the [`SearchIndex`](./SearchIndex) component
- * into it, passing along any `data-name` attribute as a prop.
- */
-
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import Quiz from './Quiz';
 
 /**
- * Bootstraps and renders the SearchIndex component into the DOM.
- *
- * Waits for the `DOMContentLoaded` event, then:
- * 1. Queries the `#quiz-root` element.
- * 2. If found, creates a React root and renders the application.
- * 3. Passes the element's `data-name` attribute as the `name` prop.
+ * Mount the Quiz component as soon as the DOM is ready.
  *
  * @returns {void}
  */
-function initializeSearchIndex() {
+function bootstrapQuiz() {
   const mount = document.getElementById('quiz-root');
   if (!mount) {
     return;
@@ -36,4 +22,4 @@ function initializeSearchIndex() {
   );
 }
 
-window.addEventListener('DOMContentLoaded', initializeSearchIndex);
+window.addEventListener('DOMContentLoaded', bootstrapQuiz);

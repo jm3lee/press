@@ -94,3 +94,32 @@ Both the site CSS (`src/css/style.css`) and the React bundle’s stylesheet (`ap
 2. `app/quiz/dep.mk` compiles the React app and copies quizzes to `build/quiz/`.
 3. The React `Quiz` component fetches the built JSON for an interactive version and is included via `quiz.js`.
 
+## Quiz Manager
+
+Operational teams can seed the live quiz catalog without touching the build
+pipeline by using the Quiz Manager UI.
+
+- The standalone React app lives in `app/quiz-manager` and renders into `#root`.
+- Launch it with `docker compose up quiz-manager` to get a dev server on port
+  5173.
+- Upload a JSON blob that matches the backend schema. Arrays are supported when
+  they contain exactly one question.
+- The viewer panel calls `GET /api/quiz/questions` to list recent entries for
+  quick validation and pagination.
+- On submit the UI POSTs to `/api/quiz/questions`, which inserts the question
+  into `quiz_questions`.
+
+### Expected Payload
+
+The backend accepts JSON with the following keys. Required fields are marked
+with an asterisk.
+
+- `slug`* — unique identifier for the question.
+- `question`* — prompt shown to end users.
+- `options`* — array of objects that each include an `id`. Optional helper
+  fields like `label` and `description` are preserved verbatim.
+- `correct_option_id`* — must match an option `id`.
+- `published_on`* — ISO date `YYYY-MM-DD`.
+- `expires_on` — ISO date after `published_on`.
+- `helper_text`, `explanation`, `success_message`, `error_message` — optional
+  strings rendered alongside the question.

@@ -24,6 +24,16 @@ services:
       - ./build:/usr/share/nginx/html
     restart: unless-stopped
 
+  # Runs the standalone quiz manager React server used for question ingestion.
+  # Rebuild the container when dependencies change to keep npm modules fresh.
+  quiz-manager:
+    build:
+      context: ./app/quiz-manager
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    restart: unless-stopped
+
   sync:
     build: ./app/s3
     container_name: press-sync
