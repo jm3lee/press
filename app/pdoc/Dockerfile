@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 ######################################################################
 # PIE documentation server image
 #
