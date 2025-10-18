@@ -104,6 +104,8 @@ pipeline by using the Quiz Manager UI.
   5173.
 - Upload a JSON blob that matches the backend schema. Arrays are supported when
   they contain exactly one question.
+- Use the form controls to edit the slug, prompt, helper copy, and answer
+  options before saving.
 - The viewer panel calls `GET /api/quiz/questions` to list recent entries for
   quick validation and pagination.
 - On submit the UI POSTs to `/api/quiz/questions`, which inserts the question

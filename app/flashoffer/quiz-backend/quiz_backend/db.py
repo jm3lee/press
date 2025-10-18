@@ -38,6 +38,8 @@ FETCH_QUESTION_OF_DAY_SQL = _load_sql("fetch_question_of_day.sql")
 
 LIST_QUIZ_QUESTIONS_SQL = _load_sql("list_quiz_questions.sql")
 
+UPDATE_QUIZ_QUESTION_SQL = _load_sql("update_quiz_question.sql")
+
 ENSURE_QUIZ_QUESTIONS_INDEX_SQL = _load_sql("ensure_quiz_questions_index.sql")
 
 
@@ -166,6 +168,43 @@ class QuizResultsStore(PostgresPool):
 
         if row is None:
             raise RuntimeError("Failed to insert quiz question")
+
+        return _serialize_question_row(row)
+
+    def update_question(self, slug: str, question: Dict[str, Any]) -> Dict[str, Any]:
+        published_on = _parse_date(question["published_on"], field="published_on")
+        expires_on_value = question.get("expires_on")
+        expires_on = (
+            _parse_date(expires_on_value, field="expires_on")
+            if expires_on_value is not None
+            else None
+        )
+
+        if expires_on is not None and expires_on <= published_on:
+            raise ValueError("Field 'expires_on' must be after 'published_on'")
+
+        with self.connection() as conn:  # type: ignore[assignment]
+            with conn.cursor() as cur:
+                cur.execute(
+                    UPDATE_QUIZ_QUESTION_SQL,
+                    (
+                        question["question"],
+                        question.get("helper_text"),
+                        question.get("explanation"),
+                        question.get("success_message"),
+                        question.get("error_message"),
+                        Json(question["options"]),
+                        question["correct_option_id"],
+                        published_on,
+                        expires_on,
+                        slug,
+                    ),
+                )
+                row = cur.fetchone()
+            conn.commit()
+
+        if row is None:
+            raise ValueError(f"Quiz question '{slug}' not found")
 
         return _serialize_question_row(row)
 

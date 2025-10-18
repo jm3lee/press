@@ -227,3 +227,34 @@ def test_list_quiz_questions_supports_pagination(client):
     assert second_page.status_code == 200
     second_payload = second_page.get_json()
     assert second_payload["questions"][0]["slug"] == "alpha-question"
+
+
+def test_update_quiz_question_overwrites_prompt(client):
+    slug = "update-me"
+    original = _build_question_payload(slug=slug, published_on=date(2024, 9, 1))
+    updated = {
+        **original,
+        "question": "Updated prompt about conversion levers?",
+        "options": [
+            {
+                "id": "nudge",
+                "label": "Send reminder",
+                "description": "Keeps audience engaged."
+            },
+            {
+                "id": "delay",
+                "label": "Delay outreach",
+                "description": "Risk losing momentum."
+            }
+        ],
+        "correct_option_id": "nudge",
+    }
+
+    client.post("/api/quiz/questions", json=original)
+
+    response = client.put(f"/api/quiz/questions/{slug}", json=updated)
+    assert response.status_code == 200
+    body = response.get_json()
+    assert body["question"]["question"] == updated["question"]
+    assert body["question"]["correct_option_id"] == "nudge"
+    assert len(body["question"]["options"]) == 2

@@ -175,6 +175,7 @@ def create_app() -> Flask:
     quiz_events_path = "/api/quiz/events"
     quiz_question_today_path = "/api/quiz/today"
     quiz_questions_path = "/api/quiz/questions"
+    quiz_question_detail_path = "/api/quiz/questions/<slug>"
 
     @app.route(quiz_events_path, methods=["OPTIONS"])
     def quiz_options() -> Response:
@@ -240,6 +241,10 @@ def create_app() -> Flask:
     def quiz_questions_options() -> Response:
         return apply_cors(Response(status=204))
 
+    @app.route(quiz_question_detail_path, methods=["OPTIONS"])
+    def quiz_question_detail_options(slug: str) -> Response:  # noqa: ARG001 - required by Flask
+        return apply_cors(Response(status=204))
+
     @app.route(quiz_questions_path, methods=["GET"])
     def list_quiz_questions() -> Response:
         try:
@@ -293,6 +298,36 @@ def create_app() -> Flask:
             return jsonify({"error": "failed_to_create_question"}), 500
 
         return jsonify({"question": record}), 201
+
+    @app.route(quiz_question_detail_path, methods=["PUT"])
+    def update_quiz_question(slug: str) -> Response:
+        if not request.data:
+            return jsonify({"error": "request body required"}), 400
+
+        try:
+            payload = request.get_json(force=True)
+        except Exception as exc:  # noqa: BLE001 - propagate error context
+            return jsonify({"error": f"invalid JSON payload: {exc}"}), 400
+
+        if not isinstance(payload, dict):
+            return jsonify({"error": "payload must be a JSON object"}), 400
+
+        try:
+            question_payload = _load_question_payload(payload)
+            if question_payload["slug"] != slug:
+                return jsonify({"error": "slug mismatch"}), 400
+            record = storage.update_question(slug, question_payload)
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
+        except Exception:
+            logger.bind(
+                component="quiz-backend",
+                operation="update-question",
+                slug=slug,
+            ).exception("Failed to update quiz question")
+            return jsonify({"error": "failed_to_update_question"}), 500
+
+        return jsonify({"question": record})
 
     @app.route("/config", methods=["GET"])
     def config_dump() -> Response:

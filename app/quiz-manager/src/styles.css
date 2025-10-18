@@ -14,12 +14,23 @@ main {
 }
 
 .quiz-manager {
-  max-width: 720px;
+  max-width: 960px;
   width: 100%;
+}
+
+.quiz-manager__panel {
+  background-color: rgba(19, 32, 50, 0.95);
   padding: 1.5rem;
-  background-color: #132032;
   border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+.quiz-manager__form {
+  width: 100%;
+}
+
+.quiz-manager__option {
+  padding: 1rem;
+  background-color: rgba(6, 11, 18, 0.5);
 }
 
 .quiz-manager__preview {
@@ -33,6 +44,10 @@ main {
   font-size: 0.85rem;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.quiz-manager__table-wrapper {
+  background-color: transparent;
 }
 
 .quiz-manager__table {
