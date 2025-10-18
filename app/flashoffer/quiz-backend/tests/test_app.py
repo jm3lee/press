@@ -258,3 +258,16 @@ def test_update_quiz_question_overwrites_prompt(client):
     assert body["question"]["question"] == updated["question"]
     assert body["question"]["correct_option_id"] == "nudge"
     assert len(body["question"]["options"]) == 2
+
+
+def test_generate_quiz_question_requires_api_key(client, monkeypatch):
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+
+    response = client.post(
+        "/api/quiz/questions/generate",
+        json={"prompt": "Create a finance question."}
+    )
+
+    assert response.status_code == 503
+    body = response.get_json()
+    assert body["error"] == "openai_api_key_missing"

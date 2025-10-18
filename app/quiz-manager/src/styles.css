@@ -24,6 +24,12 @@ main {
   border-radius: 12px;
 }
 
+.quiz-manager__generator {
+  background-color: rgba(6, 11, 18, 0.4);
+  padding: 1rem;
+  border-radius: 8px;
+}
+
 .quiz-manager__form {
   width: 100%;
 }

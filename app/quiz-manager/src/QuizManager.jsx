@@ -72,8 +72,16 @@ export default function QuizManager({
   const [questionsStatus, setQuestionsStatus] = useState('idle');
   const [questionsError, setQuestionsError] = useState('');
   const [selectedSlug, setSelectedSlug] = useState('');
+  const [generatorPrompt, setGeneratorPrompt] = useState('');
+  const [generatorStatus, setGeneratorStatus] = useState('idle');
+  const [generatorError, setGeneratorError] = useState('');
 
-  const questionsEndpoint = listEndpoint ?? uploadEndpoint;
+  const normalizedUploadEndpoint = useMemo(
+    () => uploadEndpoint.replace(/\/+$/, ''),
+    [uploadEndpoint]
+  );
+  const generatorEndpoint = `${normalizedUploadEndpoint}/generate`;
+  const questionsEndpoint = listEndpoint ?? normalizedUploadEndpoint;
 
   const normalizeOptions = useCallback((options) => {
     if (!Array.isArray(options) || options.length === 0) {
@@ -239,14 +247,26 @@ export default function QuizManager({
       }))
       .filter((option) => option.id || option.label);
 
-    if (preparedOptions.length < 3) {
+    const normalizedOptions = preparedOptions.map((option) => {
+      const nextOption = {
+        id: option.id,
+        label: option.label || option.id,
+      };
+      const desc = option.description.trim();
+      if (desc) {
+        nextOption.description = desc;
+      }
+      return nextOption;
+    });
+
+    if (normalizedOptions.length < 3) {
       if (!silent) {
         setFormError('Provide at least three answer options.');
       }
       return null;
     }
 
-    const optionIds = preparedOptions.map((option) => option.id);
+    const optionIds = normalizedOptions.map((option) => option.id);
     if (optionIds.some((value) => !value)) {
       if (!silent) {
         setFormError('Each option must include a non-empty id.');
@@ -264,7 +284,7 @@ export default function QuizManager({
 
     let correctOptionId = form.correct_option_id.trim();
     if (!correctOptionId) {
-      correctOptionId = preparedOptions[0].id;
+      correctOptionId = normalizedOptions[0].id;
     }
 
     if (!uniqueIds.has(correctOptionId)) {
@@ -291,7 +311,7 @@ export default function QuizManager({
       explanation: form.explanation.trim() || undefined,
       success_message: form.success_message.trim() || undefined,
       error_message: form.error_message.trim() || undefined,
-      options: preparedOptions,
+      options: normalizedOptions,
       correct_option_id: correctOptionId,
       published_on: publishedOn,
       expires_on: expiresOn ? expiresOn : undefined
@@ -317,8 +337,8 @@ export default function QuizManager({
 
     const targetUrl =
       formMode === 'update'
-        ? `${uploadEndpoint}/${encodeURIComponent(payload.slug)}`
-        : uploadEndpoint;
+        ? `${normalizedUploadEndpoint}/${encodeURIComponent(payload.slug)}`
+        : normalizedUploadEndpoint;
     const method = formMode === 'update' ? 'PUT' : 'POST';
 
     setFormStatus('submitting');
@@ -360,8 +380,8 @@ export default function QuizManager({
     buildPayload,
     fetchQuestions,
     formMode,
-    resetForm,
-    uploadEndpoint
+    normalizedUploadEndpoint,
+    resetForm
   ]);
 
   const handleFileChange = useCallback((event) => {
@@ -404,6 +424,51 @@ export default function QuizManager({
     applyQuestionToForm(question, 'update');
   }, [applyQuestionToForm]);
 
+  const handleGeneratorPromptChange = useCallback((event) => {
+    setGeneratorPrompt(event.target.value);
+  }, []);
+
+  const handleGenerate = useCallback(async () => {
+    setGeneratorError('');
+    setFormError('');
+    setFormSuccess('');
+    setGeneratorStatus('loading');
+
+    try {
+      const response = await fetch(generatorEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          prompt: generatorPrompt.trim() || undefined
+        })
+      });
+
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const message = body?.error ?? `Generation failed (${response.status})`;
+        throw new Error(message);
+      }
+
+      if (!body?.question) {
+        throw new Error('Generation did not return a question payload');
+      }
+
+      applyQuestionToForm(body.question, 'create');
+      setFormMode('create');
+      setFormSuccess(`Drafted question ${body.question.slug}`);
+    } catch (error) {
+      setGeneratorError(error instanceof Error ? error.message : 'Generation failed');
+    } finally {
+      setGeneratorStatus('idle');
+    }
+  }, [
+    applyQuestionToForm,
+    generatorEndpoint,
+    generatorPrompt
+  ]);
+
   const formDisabled = formStatus === 'submitting';
   const canSubmit = Boolean(form.slug.trim() && form.question.trim());
 
@@ -443,8 +508,8 @@ export default function QuizManager({
           </Stack>
 
           <Typography variant="body1" color="textSecondary">
-            Fill in the form to craft a quiz question, or import an existing JSON
-            payload. Save to create a new entry or update the selected slug.
+            Fill in the form to craft a quiz question, import an existing JSON payload,
+            or draft one with GPT-5 when an OpenAI API key is available.
           </Typography>
 
           {fileName ? (
@@ -466,6 +531,31 @@ export default function QuizManager({
           ) : null}
 
           <Divider light />
+
+          <Stack spacing={2} className="quiz-manager__generator">
+            <TextField
+              label="AI Prompt (optional)"
+              value={generatorPrompt}
+              onChange={handleGeneratorPromptChange}
+              placeholder="e.g., Highlight best practices for nurturing mid-funnel prospects."
+              multiline
+              minRows={3}
+              fullWidth
+            />
+            {generatorError ? (
+              <Alert severity="error">{generatorError}</Alert>
+            ) : null}
+            <Stack direction="row" spacing={2} justifyContent="flex-end">
+              <Button
+                variant="outlined"
+                color="inherit"
+                onClick={handleGenerate}
+                disabled={generatorStatus === 'loading'}
+              >
+                {generatorStatus === 'loading' ? 'Generating…' : 'Generate with GPT-5'}
+              </Button>
+            </Stack>
+          </Stack>
 
           <Stack spacing={2} className="quiz-manager__form">
             <Stack direction="row" spacing={2}>

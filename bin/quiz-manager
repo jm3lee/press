@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+"""Wrapper around the Flashoffer CLI for the quiz-manager service."""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT_DIR / "src"))
+
+from flashoffer_cli.cli import CLIError, main  # noqa: E402
+
+
+def run() -> int:
+    try:
+        return main(
+            default_service="quiz-manager",
+            allow_prod_switch=True,
+            allowed_services=["quiz-manager"],
+            program_name="quiz-manager",
+        )
+    except CLIError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(run())

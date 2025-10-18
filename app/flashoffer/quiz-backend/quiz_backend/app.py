@@ -7,7 +7,9 @@ from __future__ import annotations
 
 import atexit
 import json
+import os
 import time
+from datetime import datetime, timezone
 from typing import Any, Dict
 
 from flask import Flask, Response, jsonify, request
@@ -17,6 +19,11 @@ from pie.logging import logger
 from backend_common import DatabaseConfig, configure_cors
 
 from .db import QuizResultsStore
+
+try:
+    from openai import OpenAI  # type: ignore
+except Exception:  # noqa: BLE001 - optional dependency
+    OpenAI = None  # type: ignore[misc]
 
 
 HEALTHCHECK_QUERY = "SELECT 1 -- confirm quiz database connectivity"
@@ -160,6 +167,31 @@ def _load_question_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+_DEFAULT_GENERATION_USER_PROMPT = (
+    "Create a question about digital marketing measurement best practices."
+)
+
+
+def _build_generation_system_prompt() -> str:
+    today = datetime.now(tz=timezone.utc).date().isoformat()
+    return (
+        "You are Flashoffer's quiz authoring assistant. "
+        "Produce exactly one JSON object describing a multiple-choice quiz question. "
+        "The JSON must NOT be wrapped in any additional words or Markdown. "
+        "Structure the object with these keys: slug, question, helper_text, explanation, "
+        "success_message, error_message, options, correct_option_id, published_on, expires_on. "
+        "Rules: slug must be lowercase kebab-case (letters, digits, hyphen) with a maximum length of 48 characters. "
+        "question should be concise plain text without HTML. "
+        "Provide helper_text, explanation, success_message, and error_message when useful; otherwise use null. "
+        "options must contain at least three entries. Each entry needs id (lowercase string), label (answer text), "
+        "and optional description (<= 140 characters). "
+        "correct_option_id must exactly match one option id. "
+        f"Use '{today}' for published_on unless instructed otherwise. "
+        "Set expires_on to null unless a future ISO date is explicitly requested. "
+        "Return valid JSON only, with proper escaping and no comments."
+    )
+
+
 def create_app() -> Flask:
     """Create and configure the Flask application instance."""
 
@@ -176,6 +208,7 @@ def create_app() -> Flask:
     quiz_question_today_path = "/api/quiz/today"
     quiz_questions_path = "/api/quiz/questions"
     quiz_question_detail_path = "/api/quiz/questions/<slug>"
+    quiz_questions_generate_path = "/api/quiz/questions/generate"
 
     @app.route(quiz_events_path, methods=["OPTIONS"])
     def quiz_options() -> Response:
@@ -241,6 +274,10 @@ def create_app() -> Flask:
     def quiz_questions_options() -> Response:
         return apply_cors(Response(status=204))
 
+    @app.route(quiz_questions_generate_path, methods=["OPTIONS"])
+    def quiz_questions_generate_options() -> Response:
+        return apply_cors(Response(status=204))
+
     @app.route(quiz_question_detail_path, methods=["OPTIONS"])
     def quiz_question_detail_options(slug: str) -> Response:  # noqa: ARG001 - required by Flask
         return apply_cors(Response(status=204))
@@ -298,6 +335,75 @@ def create_app() -> Flask:
             return jsonify({"error": "failed_to_create_question"}), 500
 
         return jsonify({"question": record}), 201
+
+    @app.route(quiz_questions_generate_path, methods=["POST"])
+    def generate_quiz_question() -> Response:
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            return jsonify({"error": "openai_api_key_missing"}), 503
+
+        if OpenAI is None:
+            return jsonify({"error": "openai_client_not_available"}), 500
+
+        try:
+            payload = request.get_json(force=False, silent=True) or {}
+        except Exception as exc:  # noqa: BLE001 - propagate context
+            return jsonify({"error": f"invalid JSON payload: {exc}"}), 400
+
+        if not isinstance(payload, dict):
+            return jsonify({"error": "payload must be a JSON object"}), 400
+
+        user_prompt = payload.get("prompt") or ""
+        if not isinstance(user_prompt, str):
+            return jsonify({"error": "prompt must be a string"}), 400
+
+        model = str(payload.get("model") or "gpt-5").strip() or "gpt-5"
+
+        client = OpenAI(api_key=api_key)  # type: ignore[misc]
+        system_prompt = _build_generation_system_prompt()
+        prompt_messages = [
+            {"role": "system", "content": system_prompt},
+            {
+                "role": "user",
+                "content": user_prompt.strip() or _DEFAULT_GENERATION_USER_PROMPT,
+            },
+        ]
+
+        try:
+            completion = client.chat.completions.create(  # type: ignore[attr-defined]
+                model=model,
+                messages=prompt_messages,
+                temperature=0.4,
+                response_format={"type": "json_object"},
+            )
+        except Exception as exc:  # noqa: BLE001 - surface API error
+            logger.bind(component="quiz-backend", operation="ai-generate").exception(
+                "OpenAI request failed"
+            )
+            return jsonify({"error": f"openai_request_failed: {exc}"}), 502
+
+        try:
+            content = completion.choices[0].message.content  # type: ignore[index]
+        except Exception as exc:  # noqa: BLE001 - guard against SDK changes
+            return jsonify({"error": f"unexpected_openai_response: {exc}"}), 502
+
+        if not content:
+            return jsonify({"error": "empty_completion"}), 502
+
+        try:
+            generated = json.loads(content)
+        except json.JSONDecodeError as exc:
+            return jsonify({"error": f"invalid_json_from_model: {exc}"}), 502
+
+        if not isinstance(generated, dict):
+            return jsonify({"error": "model_output_must_be_object"}), 502
+
+        try:
+            question_payload = _load_question_payload(generated)
+        except ValueError as exc:
+            return jsonify({"error": f"model_output_invalid: {exc}"}), 502
+
+        return jsonify({"question": question_payload, "raw": generated})
 
     @app.route(quiz_question_detail_path, methods=["PUT"])
     def update_quiz_question(slug: str) -> Response:

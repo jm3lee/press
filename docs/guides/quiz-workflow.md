@@ -106,6 +106,10 @@ pipeline by using the Quiz Manager UI.
   they contain exactly one question.
 - Use the form controls to edit the slug, prompt, helper copy, and answer
   options before saving.
+- Provide an `OPENAI_API_KEY` in the environment to unlock the “Generate with
+  GPT-5” flow. Enter a user prompt, and the manager calls
+  `POST /api/quiz/questions/generate` to draft a compliant JSON payload that
+  can be refined before saving.
 - The viewer panel calls `GET /api/quiz/questions` to list recent entries for
   quick validation and pagination.
 - On submit the UI POSTs to `/api/quiz/questions`, which inserts the question

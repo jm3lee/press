@@ -65,6 +65,23 @@
         "coverage": false,
         "post_build_install": false
       }
+    },
+    "quiz-manager": {
+      "compose_files": [
+        "docker-compose.yml"
+      ],
+      "shared_services": [
+        "quiz-backend"
+      ],
+      "image": "press-quiz-manager",
+      "remote_suffix": "quiz-manager",
+      "supports": {
+        "install": true,
+        "npm": true,
+        "coverage": false,
+        "post_build_install": false
+      },
+      "npm_workdir": "/app"
     }
   }
 }
