@@ -28,7 +28,7 @@ services:
   # Rebuild the container when dependencies change to keep npm modules fresh.
   quiz-manager:
     build:
-      context: ./app/quiz-manager
+      context: ./app/flashoffer/quiz-manager
       dockerfile: Dockerfile
     ports:
       - "5173:5173"
