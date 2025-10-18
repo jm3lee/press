@@ -68,9 +68,12 @@
     },
     "quiz-manager": {
       "compose_files": [
-        "docker-compose.yml"
+        "docker-compose.yml",
+        "app/flashoffer/docker/analytics.yml",
+        "app/flashoffer/docker/quiz.yml"
       ],
       "shared_services": [
+        "analytics-db",
         "quiz-backend"
       ],
       "image": "press-quiz-manager",

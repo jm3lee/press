@@ -23,8 +23,12 @@ def test_quiz_manager_service_present(cli_config: CLIConfig) -> None:
     assert "quiz-manager" in cli_config.services
     service = cli_config.services["quiz-manager"]
     assert isinstance(service, ServiceConfig)
-    assert service.compose_files == ["docker-compose.yml"]
-    assert service.shared_services == ["quiz-backend"]
+    assert service.compose_files == [
+        "docker-compose.yml",
+        "app/flashoffer/docker/analytics.yml",
+        "app/flashoffer/docker/quiz.yml",
+    ]
+    assert service.shared_services == ["analytics-db", "quiz-backend"]
     assert service.image == "press-quiz-manager"
     assert service.remote_suffix == "quiz-manager"
     assert service.supports_npm is True
