@@ -26,11 +26,15 @@ RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
     && rm -rf /tmp/pie /backend-common
 
 COPY app/flashoffer/campaign-backend/campaign_backend ./campaign_backend
-COPY app/flashoffer/campaign-backend/tests ./tests
+
+# Tests live in dev-oriented stages so the production image stays lean.
 
 FROM base AS dev
 
 EXPOSE 8000
+
+# Provide the test suite for developers running pytest inside this target.
+COPY app/flashoffer/campaign-backend/tests ./tests
 
 CMD ["flask", "--app", "campaign_backend.app:create_app", "run", "--host=0.0.0.0", "--port=8000"]
 

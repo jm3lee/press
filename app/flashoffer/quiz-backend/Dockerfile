@@ -32,12 +32,16 @@ RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
     && rm -rf /tmp/pie /backend-common
 
 COPY app/flashoffer/quiz-backend/quiz_backend ./quiz_backend
-COPY app/flashoffer/quiz-backend/tests ./tests
+
+# Defer copying tests to dev-oriented stages so production images exclude them.
 
 FROM base AS dev
 WORKDIR /app
 
 EXPOSE 8000
+
+# Surface the quiz test suite for local workflows executed inside the dev image.
+COPY app/flashoffer/quiz-backend/tests ./tests
 
 CMD ["flask", "--app", "quiz_backend.app:create_app", "run", "--host=0.0.0.0", "--port=8000"]
 
