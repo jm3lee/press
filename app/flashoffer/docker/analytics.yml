@@ -2,7 +2,7 @@ services:
   analytics-db:
     build:
       context: .
-      dockerfile: ./app/flashoffer/analytics-db/Dockerfile
+      dockerfile: ./app/flashoffer/analytics/db/Dockerfile
     environment:
       POSTGRES_USER: analytics
       POSTGRES_PASSWORD: analytics
@@ -15,7 +15,7 @@ services:
   analytics-backend:
     build:
       context: .
-      dockerfile: ./app/flashoffer/analytics-backend/Dockerfile
+      dockerfile: ./app/flashoffer/analytics/backend/Dockerfile
       target: dev
     environment:
       DATABASE_HOST: analytics-db
@@ -29,7 +29,7 @@ services:
     ports:
       - "8001:8000"
     volumes:
-      - ./app/flashoffer/analytics-backend:/app
+      - ./app/flashoffer/analytics/backend:/app
 
 volumes:
   analytics_data:

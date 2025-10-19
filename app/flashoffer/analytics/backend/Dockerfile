@@ -25,8 +25,8 @@ WORKDIR /app
 
 # Copy dependency manifests and shared PIE utilities first so Docker can
 # reuse the layer when application code changes.
-COPY app/flashoffer/analytics-backend/requirements.txt ./requirements.txt
-COPY app/flashoffer/analytics-backend/requirements-dev.txt ./requirements-dev.txt
+COPY app/flashoffer/analytics/backend/requirements.txt ./requirements.txt
+COPY app/flashoffer/analytics/backend/requirements-dev.txt ./requirements-dev.txt
 COPY app/flashoffer/backend-common /backend-common
 COPY app/shell/py/pie /tmp/pie
 
@@ -44,14 +44,20 @@ RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
 # Copy the application as the final step so source edits only invalidate the
 # top layer. Tests are copied into dedicated development stages so production
 # images remain slim.
-COPY app/flashoffer/analytics-backend/analytics_backend ./analytics_backend
+COPY app/flashoffer/analytics/backend/analytics_backend ./analytics_backend
 
 FROM base AS dev
+
+# Reintroduce backend-common so relative requirements resolve inside the dev
+# layer. Remove the copy once dependencies are installed to keep the image
+# compact.
+COPY app/flashoffer/backend-common /backend-common
 
 # Install the development requirements so pytest and related tooling remain
 # available inside the dev container.
 RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
-    pip install -r requirements-dev.txt
+    pip install -r requirements-dev.txt \
+    && rm -rf /backend-common
 
 # The development target exposes Flask's default port for the live reload
 # server.
@@ -59,7 +65,7 @@ EXPOSE 8000
 
 # Include the test suite for local workflows that execute pytest within the
 # dev container.
-COPY app/flashoffer/analytics-backend/tests ./tests
+COPY app/flashoffer/analytics/backend/tests ./tests
 
 # Run the Flask development server by default to support local workflows.
 CMD ["flask", "--app", "analytics_backend.app:create_app", "run", "--host=0.0.0.0", "--port=8000"]
@@ -87,8 +93,8 @@ RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
 
 # Provide the templated nginx config and startup script used in
 # deployments.
-COPY app/flashoffer/analytics-backend/nginx.conf /etc/nginx/conf.d/default.conf
-COPY app/flashoffer/analytics-backend/entrypoint.sh /entrypoint.sh
+COPY app/flashoffer/analytics/backend/nginx.conf /etc/nginx/conf.d/default.conf
+COPY app/flashoffer/analytics/backend/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # The production container serves the app via nginx on port 8000.

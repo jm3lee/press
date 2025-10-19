@@ -6,8 +6,8 @@ shared documentation that now lives in a single location.
 
 ## Directory Overview
 
-- `analytics-backend/` – Event ingestion APIs and supporting workers.
-- `analytics-db/` – Database schema and migrations for analytics workloads.
+- `analytics/backend/` – Event ingestion APIs and supporting workers.
+- `analytics/db/` – Database schema and migrations for analytics workloads.
 - `backend-common/` – Shared backend utilities and domain models.
 - `campaign-backend/` – Countdown metadata API consumed by widgets.
 - `campaign-manager/` – React + FastAPI admin experience for campaign CRUD.

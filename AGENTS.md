@@ -31,6 +31,8 @@
 
 - Pin all Node.js Docker base images to `node:22-slim`.
 - Pin all Python Docker base images to `python:3.14-slim`.
+- Validate Dockerfile changes by building all relevant images before sending
+  a PR.
 
 ## `docker-compose.yml`
 

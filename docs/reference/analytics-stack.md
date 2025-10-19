@@ -120,7 +120,7 @@ The analytics flow contains three stages:
    batches and posts them to the ingestion API over HTTPS. AutoTrack observes
    the DOM and forwards structured view events to the provider.
 2. **Ingestion API** – The Flask application in
-   `app/flashoffer/analytics-backend` accepts the JSON payload, applies schema
+   `app/flashoffer/analytics/backend` accepts the JSON payload, applies schema
    validation, and inserts rows into the hypertable with TimescaleDB-compatible
    SQL.
 3. **Persistence** – TimescaleDB stores the append-only `engagement_events`
@@ -152,7 +152,7 @@ application reaches the API through the host-mapped port.
   ```
 
 ### analytics-backend
-- **Build context** – `app/flashoffer/analytics-backend` contains the Flask
+- **Build context** – `app/flashoffer/analytics/backend` contains the Flask
   service, Alembic migrations, and pytest suite. Compose mounts the directory
   for live reloads during development.
 - **Database configuration variables** – Review the summary below for the
