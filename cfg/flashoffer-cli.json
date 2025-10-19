@@ -49,6 +49,29 @@
         "post_build_install": false
       }
     },
+    "campaign-manager": {
+      "compose_files": [
+        "docker-compose.yml",
+        "app/flashoffer/docker/analytics.yml",
+        "app/flashoffer/docker/quiz.yml",
+        "app/flashoffer/docker/campaign.yml"
+      ],
+      "shared_services": [
+        "analytics-db",
+        "analytics-backend",
+        "quiz-backend",
+        "campaign-backend"
+      ],
+      "image": "press-campaign-manager",
+      "remote_suffix": "campaign-manager",
+      "supports": {
+        "install": true,
+        "npm": true,
+        "coverage": false,
+        "post_build_install": false
+      },
+      "npm_workdir": "/app"
+    },
     "quiz-backend": {
       "compose_files": [
         "app/flashoffer/docker/analytics.yml",

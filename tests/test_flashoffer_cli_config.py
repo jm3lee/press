@@ -36,7 +36,31 @@ def test_quiz_manager_service_present(cli_config: CLIConfig) -> None:
     assert service.npm_workdir == "/app"
 
 
+def test_campaign_manager_service_present(cli_config: CLIConfig) -> None:
+    assert "campaign-manager" in cli_config.services
+    service = cli_config.services["campaign-manager"]
+    assert isinstance(service, ServiceConfig)
+    assert service.compose_files == [
+        "docker-compose.yml",
+        "app/flashoffer/docker/analytics.yml",
+        "app/flashoffer/docker/quiz.yml",
+        "app/flashoffer/docker/campaign.yml",
+    ]
+    assert service.shared_services == [
+        "analytics-db",
+        "analytics-backend",
+        "quiz-backend",
+        "campaign-backend",
+    ]
+    assert service.image == "press-campaign-manager"
+    assert service.remote_suffix == "campaign-manager"
+    assert service.supports_npm is True
+    assert service.supports_install is True
+    assert service.npm_workdir == "/app"
+
+
 def test_allowed_services_filters(cli_config: CLIConfig) -> None:
-    subset = cli_config.allowed_services(["quiz-manager"])
-    assert list(subset.keys()) == ["quiz-manager"]
+    subset = cli_config.allowed_services(["quiz-manager", "campaign-manager"])
+    assert list(subset.keys()) == ["quiz-manager", "campaign-manager"]
     assert subset["quiz-manager"].name == "quiz-manager"
+    assert subset["campaign-manager"].name == "campaign-manager"
