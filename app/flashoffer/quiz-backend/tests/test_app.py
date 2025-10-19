@@ -357,3 +357,56 @@ def test_generate_quiz_question_uses_https_without_proxy(client, monkeypatch):
     assert base_url.startswith("https://")
     assert used_client.closed
     assert used_client.kwargs.get("trust_env") is False
+
+
+def test_generate_quiz_question_rejects_non_string_prompt(client, monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "unit-test-key")
+
+    response = client.post("/api/quiz/questions/generate", json={"prompt": 17})
+
+    assert response.status_code == 400
+    body = response.get_json()
+    assert body["error"] == "prompt must be a string"
+
+
+def test_generate_quiz_question_handles_openai_error(client, monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "unit-test-key")
+
+    class DummyHttpClient:
+        instances: list["DummyHttpClient"] = []
+
+        def __init__(self, *args, **kwargs):
+            self.kwargs = kwargs
+            self.closed = False
+            DummyHttpClient.instances.append(self)
+
+        def close(self):
+            self.closed = True
+
+    class FailingOpenAI:
+        def __init__(self, *, api_key, base_url, http_client):  # noqa: D401 - behaviour obvious
+            self.api_key = api_key
+            self.base_url = base_url
+            self.http_client = http_client
+            self.chat = SimpleNamespace(
+                completions=SimpleNamespace(
+                    create=_raise_generation_error,
+                )
+            )
+
+    def _raise_generation_error(**_kwargs):  # noqa: D401 - helper within test context
+        raise RuntimeError("model boom")
+
+    monkeypatch.setattr("quiz_backend.app.httpx.Client", DummyHttpClient)
+    monkeypatch.setattr("quiz_backend.app.OpenAI", FailingOpenAI)
+
+    response = client.post(
+        "/api/quiz/questions/generate",
+        json={"prompt": "Give me a test question."},
+    )
+
+    assert response.status_code == 502
+    body = response.get_json()
+    assert body["error"] == "openai_request_failed: model boom"
+    assert DummyHttpClient.instances
+    assert DummyHttpClient.instances[0].closed
