@@ -1,6 +1,5 @@
 # Copyright (c) Flashoffer Developers
 # Released under the MIT license.
-
 """Flask application providing an ingestion API for quiz events."""
 
 from __future__ import annotations
@@ -9,11 +8,12 @@ import atexit
 import json
 import os
 import time
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Dict
 
 import httpx
-from flask import Flask, Response, jsonify, request
+from flask import Flask, Request, Response, jsonify, request
 
 from pie.logging import logger
 
@@ -173,6 +173,22 @@ _DEFAULT_GENERATION_USER_PROMPT = (
 )
 
 
+class GenerationRequestError(ValueError):
+    """Raised when an inbound generation request is invalid."""
+
+
+class GenerationModelError(RuntimeError):
+    """Raised when the OpenAI response cannot be converted into a question."""
+
+
+@dataclass(frozen=True)
+class GenerationRequest:
+    """Validated parameters for generating a quiz question."""
+
+    prompt: str
+    model: str
+
+
 def _build_generation_system_prompt() -> str:
     today = datetime.now(tz=timezone.utc).date().isoformat()
     return (
@@ -209,6 +225,76 @@ def _initialise_openai_client(api_key: str) -> tuple["OpenAI", httpx.Client]:  #
     )
     client = OpenAI(api_key=api_key, base_url=base_url, http_client=http_client)  # type: ignore[misc]
     return client, http_client
+
+
+def _load_generation_payload(flask_request: Request) -> Dict[str, Any]:
+    try:
+        payload = flask_request.get_json(force=False, silent=True)
+    except Exception as exc:  # noqa: BLE001 - propagate context for clients
+        raise GenerationRequestError(f"invalid JSON payload: {exc}") from exc
+
+    if payload is None:
+        return {}
+
+    if not isinstance(payload, dict):
+        raise GenerationRequestError("payload must be a JSON object")
+
+    return payload
+
+
+def _parse_generation_request(flask_request: Request) -> GenerationRequest:
+    payload = _load_generation_payload(flask_request)
+
+    prompt_value = payload.get("prompt")
+    if prompt_value is None:
+        prompt = ""
+    elif isinstance(prompt_value, str):
+        prompt = prompt_value
+    else:
+        raise GenerationRequestError("prompt must be a string")
+
+    model = str(payload.get("model") or "gpt-5").strip() or "gpt-5"
+
+    return GenerationRequest(prompt=prompt, model=model)
+
+
+def _request_generated_question(
+    client: "OpenAI", *, model: str, prompt: str
+) -> tuple[Dict[str, Any], Dict[str, Any]]:  # type: ignore[name-defined]
+    system_prompt = _build_generation_system_prompt()
+    user_prompt = prompt.strip() or _DEFAULT_GENERATION_USER_PROMPT
+
+    completion = client.chat.completions.create(  # type: ignore[attr-defined]
+        model=model,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+        response_format={"type": "json_object"},
+    )
+
+    try:
+        content = completion.choices[0].message.content  # type: ignore[index]
+    except Exception as exc:  # noqa: BLE001 - guard against SDK changes
+        raise GenerationModelError(f"unexpected_openai_response: {exc}") from exc
+
+    if not content:
+        raise GenerationModelError("empty_completion")
+
+    try:
+        generated = json.loads(content)
+    except json.JSONDecodeError as exc:
+        raise GenerationModelError(f"invalid_json_from_model: {exc}") from exc
+
+    if not isinstance(generated, dict):
+        raise GenerationModelError("model_output_must_be_object")
+
+    try:
+        question_payload = _load_question_payload(generated)
+    except ValueError as exc:
+        raise GenerationModelError(f"model_output_invalid: {exc}") from exc
+
+    return question_payload, generated
 
 
 def create_app() -> Flask:
@@ -361,22 +447,13 @@ def create_app() -> Flask:
         if not api_key:
             return jsonify({"error": "openai_api_key_missing"}), 503
 
+        try:
+            generation_request = _parse_generation_request(request)
+        except GenerationRequestError as exc:
+            return jsonify({"error": str(exc)}), 400
+
         if OpenAI is None:
             return jsonify({"error": "openai_client_not_available"}), 500
-
-        try:
-            payload = request.get_json(force=False, silent=True) or {}
-        except Exception as exc:  # noqa: BLE001 - propagate context
-            return jsonify({"error": f"invalid JSON payload: {exc}"}), 400
-
-        if not isinstance(payload, dict):
-            return jsonify({"error": "payload must be a JSON object"}), 400
-
-        user_prompt = payload.get("prompt") or ""
-        if not isinstance(user_prompt, str):
-            return jsonify({"error": "prompt must be a string"}), 400
-
-        model = str(payload.get("model") or "gpt-5").strip() or "gpt-5"
 
         managed_http_client: httpx.Client | None = None
         try:
@@ -388,48 +465,21 @@ def create_app() -> Flask:
                 )
                 return jsonify({"error": f"openai_client_init_failed: {exc}"}), 502
 
-            system_prompt = _build_generation_system_prompt()
-            prompt_messages = [
-                {"role": "system", "content": system_prompt},
-                {
-                    "role": "user",
-                    "content": user_prompt.strip() or _DEFAULT_GENERATION_USER_PROMPT,
-                },
-            ]
-
-            completion = client.chat.completions.create(  # type: ignore[attr-defined]
-                model=model,
-                messages=prompt_messages,
-                response_format={"type": "json_object"},
-            )
-
             try:
-                content = completion.choices[0].message.content  # type: ignore[index]
-            except Exception as exc:  # noqa: BLE001 - guard against SDK changes
-                return jsonify({"error": f"unexpected_openai_response: {exc}"}), 502
-
-            if not content:
-                return jsonify({"error": "empty_completion"}), 502
-
-            try:
-                generated = json.loads(content)
-            except json.JSONDecodeError as exc:
-                return jsonify({"error": f"invalid_json_from_model: {exc}"}), 502
-
-            if not isinstance(generated, dict):
-                return jsonify({"error": "model_output_must_be_object"}), 502
-
-            try:
-                question_payload = _load_question_payload(generated)
-            except ValueError as exc:
-                return jsonify({"error": f"model_output_invalid: {exc}"}), 502
+                question_payload, generated = _request_generated_question(
+                    client,
+                    model=generation_request.model,
+                    prompt=generation_request.prompt,
+                )
+            except GenerationModelError as exc:
+                return jsonify({"error": str(exc)}), 502
+            except Exception as exc:  # noqa: BLE001 - surface API error
+                logger.bind(component="quiz-backend", operation="ai-generate").exception(
+                    "OpenAI request failed"
+                )
+                return jsonify({"error": f"openai_request_failed: {exc}"}), 502
 
             return jsonify({"question": question_payload, "raw": generated})
-        except Exception as exc:  # noqa: BLE001 - surface API error
-            logger.bind(component="quiz-backend", operation="ai-generate").exception(
-                "OpenAI request failed"
-            )
-            return jsonify({"error": f"openai_request_failed: {exc}"}), 502
         finally:
             if managed_http_client is not None:
                 managed_http_client.close()
