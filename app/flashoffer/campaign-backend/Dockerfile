@@ -17,6 +17,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 COPY app/flashoffer/campaign-backend/requirements.txt ./requirements.txt
+COPY app/flashoffer/campaign-backend/requirements-dev.txt ./requirements-dev.txt
 COPY app/flashoffer/backend-common /backend-common
 COPY app/shell/py/pie /tmp/pie
 
@@ -30,6 +31,11 @@ COPY app/flashoffer/campaign-backend/campaign_backend ./campaign_backend
 # Tests live in dev-oriented stages so the production image stays lean.
 
 FROM base AS dev
+
+# Install the dev requirements so pytest and related tooling stay available in
+# local workflows that execute commands inside this image.
+RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
+    pip install -r requirements-dev.txt
 
 EXPOSE 8000
 

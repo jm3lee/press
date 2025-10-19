@@ -167,8 +167,10 @@ application reaches the API through the host-mapped port.
   ```bash
   docker compose run --rm analytics-backend pytest
   ```
-  The suite boots TimescaleDB, applies migrations, submits sample payloads, and
-  truncates the hypertable when the run completes.
+  The dev image installs `requirements-dev.txt` on top of the runtime
+  dependencies, so pytest is ready to go. The suite boots TimescaleDB, applies
+  migrations, submits sample payloads, and truncates the hypertable when the
+  run completes.
 
 #### Database configuration summary
 - `DATABASE_URL` – Full PostgreSQL connection string that may include

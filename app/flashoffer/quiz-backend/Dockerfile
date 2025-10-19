@@ -17,6 +17,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 COPY app/flashoffer/quiz-backend/requirements.txt ./requirements.txt
+COPY app/flashoffer/quiz-backend/requirements-dev.txt ./requirements-dev.txt
 COPY app/flashoffer/backend-common /backend-common
 COPY app/shell/py/pie /tmp/pie
 
@@ -37,6 +38,11 @@ COPY app/flashoffer/quiz-backend/quiz_backend ./quiz_backend
 
 FROM base AS dev
 WORKDIR /app
+
+# Ensure pytest and the other dev dependencies are present for local workflows
+# that execute within the dev image.
+RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
+    pip install -r requirements-dev.txt
 
 EXPOSE 8000
 
