@@ -12,6 +12,7 @@ import time
 from datetime import datetime, timezone
 from typing import Any, Dict
 
+import httpx
 from flask import Flask, Response, jsonify, request
 
 from pie.logging import logger
@@ -192,6 +193,24 @@ def _build_generation_system_prompt() -> str:
     )
 
 
+def _derive_openai_base_url() -> str:
+    base_url = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1").strip()
+    if not base_url.lower().startswith("https://"):
+        raise ValueError("OpenAI base URL must use https")
+    return base_url
+
+
+def _initialise_openai_client(api_key: str) -> tuple["OpenAI", httpx.Client]:  # type: ignore[name-defined]
+    base_url = _derive_openai_base_url()
+    http_client = httpx.Client(
+        follow_redirects=True,
+        timeout=httpx.Timeout(60.0),
+        trust_env=False,
+    )
+    client = OpenAI(api_key=api_key, base_url=base_url, http_client=http_client)  # type: ignore[misc]
+    return client, http_client
+
+
 def create_app() -> Flask:
     """Create and configure the Flask application instance."""
 
@@ -359,51 +378,61 @@ def create_app() -> Flask:
 
         model = str(payload.get("model") or "gpt-5").strip() or "gpt-5"
 
-        client = OpenAI(api_key=api_key)  # type: ignore[misc]
-        system_prompt = _build_generation_system_prompt()
-        prompt_messages = [
-            {"role": "system", "content": system_prompt},
-            {
-                "role": "user",
-                "content": user_prompt.strip() or _DEFAULT_GENERATION_USER_PROMPT,
-            },
-        ]
-
+        managed_http_client: httpx.Client | None = None
         try:
+            try:
+                client, managed_http_client = _initialise_openai_client(api_key)
+            except Exception as exc:
+                logger.bind(component="quiz-backend", operation="ai-generate").exception(
+                    "Failed to initialise OpenAI client"
+                )
+                return jsonify({"error": f"openai_client_init_failed: {exc}"}), 502
+
+            system_prompt = _build_generation_system_prompt()
+            prompt_messages = [
+                {"role": "system", "content": system_prompt},
+                {
+                    "role": "user",
+                    "content": user_prompt.strip() or _DEFAULT_GENERATION_USER_PROMPT,
+                },
+            ]
+
             completion = client.chat.completions.create(  # type: ignore[attr-defined]
                 model=model,
                 messages=prompt_messages,
-                temperature=0.4,
                 response_format={"type": "json_object"},
             )
+
+            try:
+                content = completion.choices[0].message.content  # type: ignore[index]
+            except Exception as exc:  # noqa: BLE001 - guard against SDK changes
+                return jsonify({"error": f"unexpected_openai_response: {exc}"}), 502
+
+            if not content:
+                return jsonify({"error": "empty_completion"}), 502
+
+            try:
+                generated = json.loads(content)
+            except json.JSONDecodeError as exc:
+                return jsonify({"error": f"invalid_json_from_model: {exc}"}), 502
+
+            if not isinstance(generated, dict):
+                return jsonify({"error": "model_output_must_be_object"}), 502
+
+            try:
+                question_payload = _load_question_payload(generated)
+            except ValueError as exc:
+                return jsonify({"error": f"model_output_invalid: {exc}"}), 502
+
+            return jsonify({"question": question_payload, "raw": generated})
         except Exception as exc:  # noqa: BLE001 - surface API error
             logger.bind(component="quiz-backend", operation="ai-generate").exception(
                 "OpenAI request failed"
             )
             return jsonify({"error": f"openai_request_failed: {exc}"}), 502
-
-        try:
-            content = completion.choices[0].message.content  # type: ignore[index]
-        except Exception as exc:  # noqa: BLE001 - guard against SDK changes
-            return jsonify({"error": f"unexpected_openai_response: {exc}"}), 502
-
-        if not content:
-            return jsonify({"error": "empty_completion"}), 502
-
-        try:
-            generated = json.loads(content)
-        except json.JSONDecodeError as exc:
-            return jsonify({"error": f"invalid_json_from_model: {exc}"}), 502
-
-        if not isinstance(generated, dict):
-            return jsonify({"error": "model_output_must_be_object"}), 502
-
-        try:
-            question_payload = _load_question_payload(generated)
-        except ValueError as exc:
-            return jsonify({"error": f"model_output_invalid: {exc}"}), 502
-
-        return jsonify({"question": question_payload, "raw": generated})
+        finally:
+            if managed_http_client is not None:
+                managed_http_client.close()
 
     @app.route(quiz_question_detail_path, methods=["PUT"])
     def update_quiz_question(slug: str) -> Response:

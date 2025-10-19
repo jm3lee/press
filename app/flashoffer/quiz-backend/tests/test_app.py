@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 from datetime import date, datetime, timezone
+import json
+from types import SimpleNamespace
 from uuid import uuid4
 
 from psycopg.types.json import Json
@@ -271,3 +273,87 @@ def test_generate_quiz_question_requires_api_key(client, monkeypatch):
     assert response.status_code == 503
     body = response.get_json()
     assert body["error"] == "openai_api_key_missing"
+
+
+def test_generate_quiz_question_requires_https_base_url(client, monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "unit-test-key")
+    monkeypatch.setenv("OPENAI_BASE_URL", "http://insecure-endpoint")
+
+    response = client.post("/api/quiz/questions/generate", json={})
+
+    assert response.status_code == 502
+    body = response.get_json()
+    assert "openai_client_init_failed" in body["error"]
+
+
+def test_generate_quiz_question_uses_https_without_proxy(client, monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "unit-test-key")
+    monkeypatch.delenv("OPENAI_BASE_URL", raising=False)
+
+    created_http_clients = []
+
+    class DummyHttpClient:
+        def __init__(self, *args, **kwargs):
+            self.kwargs = kwargs
+            self.closed = False
+            created_http_clients.append(self)
+
+        def close(self):
+            self.closed = True
+
+    monkeypatch.setattr("quiz_backend.app.httpx.Client", DummyHttpClient)
+
+    generated_question = {
+        "slug": "draft-slug",
+        "question": "What is the call-to-action?",
+        "helper_text": None,
+        "explanation": None,
+        "success_message": None,
+        "error_message": None,
+        "options": [
+            {"id": "cta-a", "label": "Offer discount"},
+            {"id": "cta-b", "label": "Send reminder"},
+            {"id": "cta-c", "label": "Launch survey"}
+        ],
+        "correct_option_id": "cta-a",
+        "published_on": "2024-01-01",
+        "expires_on": None,
+    }
+
+    class DummyOpenAI:
+        calls: list = []
+
+        def __init__(self, *, api_key, base_url, http_client):
+            self.api_key = api_key
+            self.base_url = base_url
+            self.http_client = http_client
+            DummyOpenAI.calls.append((base_url, http_client))
+            assert base_url.startswith("https://")
+            assert isinstance(http_client, DummyHttpClient)
+            self.chat = SimpleNamespace(
+                completions=SimpleNamespace(
+                    create=lambda **kwargs: SimpleNamespace(
+                        choices=[
+                            SimpleNamespace(
+                                message=SimpleNamespace(
+                                    content=json.dumps(generated_question)
+                                )
+                            )
+                        ]
+                    )
+                )
+            )
+
+    monkeypatch.setattr("quiz_backend.app.httpx.Client", DummyHttpClient)
+    monkeypatch.setattr("quiz_backend.app.OpenAI", DummyOpenAI)
+
+    response = client.post("/api/quiz/questions/generate", json={"prompt": ""})
+
+    assert response.status_code == 200
+    body = response.get_json()
+    assert body["question"]["slug"] == "draft-slug"
+    assert len(DummyOpenAI.calls) == 1
+    base_url, used_client = DummyOpenAI.calls[0]
+    assert base_url.startswith("https://")
+    assert used_client.closed
+    assert used_client.kwargs.get("trust_env") is False
