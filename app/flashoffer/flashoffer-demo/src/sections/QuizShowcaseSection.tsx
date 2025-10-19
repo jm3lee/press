@@ -93,11 +93,22 @@ const FALLBACK_QUESTION: QuestionOfDay = {
   expiresOn: undefined
 };
 
-const QUIZ_EVENTS_ENDPOINT =
-  typeof import.meta.env.VITE_FLASHOFFER_QUIZ_EVENTS_ENDPOINT === "string" &&
-  import.meta.env.VITE_FLASHOFFER_QUIZ_EVENTS_ENDPOINT.trim() !== ""
-    ? import.meta.env.VITE_FLASHOFFER_QUIZ_EVENTS_ENDPOINT
-    : undefined;
+const QUIZ_API_PATH = "/api/quiz";
+
+/**
+ * Builds a quiz API URL by combining the standardized path with an optional
+ * origin override.
+ */
+function resolveQuizUrl(pathSuffix: string, baseUrl?: string): string {
+  const sanitizedSuffix = pathSuffix.startsWith("/")
+    ? pathSuffix
+    : `/${pathSuffix}`;
+  if (!baseUrl) {
+    return `${QUIZ_API_PATH}${sanitizedSuffix}`;
+  }
+  const normalizedBase = baseUrl.replace(/\/+$/, "");
+  return `${normalizedBase}${QUIZ_API_PATH}${sanitizedSuffix}`;
+}
 
 const DEMO_CAMPAIGN_ID = "flashoffer-demo";
 
@@ -240,12 +251,16 @@ export function QuizShowcaseSection({
   const correctOptionId =
     questionOfDay.correctOptionId || FALLBACK_QUESTION.correctOptionId;
 
+  const quizAnalyticsEndpoint = useMemo(
+    () => resolveQuizUrl("/events", quizApiBase),
+    [quizApiBase]
+  );
   const quizAnalyticsConfig = useMemo(
     () => ({
       quizId: questionSlug,
-      endpoint: QUIZ_EVENTS_ENDPOINT,
+      endpoint: quizAnalyticsEndpoint,
     }),
-    [questionSlug]
+    [questionSlug, quizAnalyticsEndpoint]
   );
 
   const quizMeta = useMemo(
@@ -281,7 +296,7 @@ export function QuizShowcaseSection({
   }, [quizCelebration]);
 
   useEffect(() => {
-    if (!quizApiBase || typeof fetch !== "function") {
+    if (typeof fetch !== "function") {
       return;
     }
 
@@ -289,8 +304,7 @@ export function QuizShowcaseSection({
     const AbortCtor =
       typeof AbortController === "function" ? AbortController : null;
     const controller = AbortCtor ? new AbortCtor() : null;
-    const baseUrl = quizApiBase.replace(/\/+$/, "");
-    const endpoint = `${baseUrl}/api/quiz/today`;
+    const endpoint = resolveQuizUrl("/today", quizApiBase);
 
     const loadQuestion = async () => {
       try {
