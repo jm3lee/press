@@ -40,16 +40,20 @@ RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
     && pip install /tmp/pie dominate \
     && rm -rf /tmp/pie /backend-common
 
-# Copy the application and tests as the final step so source edits only
-# invalidate the top layer.
+# Copy the application as the final step so source edits only invalidate the
+# top layer. Tests are copied into dedicated development stages so production
+# images remain slim.
 COPY app/flashoffer/analytics-backend/analytics_backend ./analytics_backend
-COPY app/flashoffer/analytics-backend/tests ./tests
 
 FROM base AS dev
 
 # The development target exposes Flask's default port for the live reload
 # server.
 EXPOSE 8000
+
+# Include the test suite for local workflows that execute pytest within the
+# dev container.
+COPY app/flashoffer/analytics-backend/tests ./tests
 
 # Run the Flask development server by default to support local workflows.
 CMD ["flask", "--app", "analytics_backend.app:create_app", "run", "--host=0.0.0.0", "--port=8000"]
