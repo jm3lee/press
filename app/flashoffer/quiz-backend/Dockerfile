@@ -39,10 +39,15 @@ COPY app/flashoffer/quiz-backend/quiz_backend ./quiz_backend
 FROM base AS dev
 WORKDIR /app
 
+# Restore the shared backend code so the dev requirements install succeeds
+# after the base stage cleans up build-only artifacts.
+COPY app/flashoffer/backend-common /backend-common
+
 # Ensure pytest and the other dev dependencies are present for local workflows
 # that execute within the dev image.
 RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
-    pip install -r requirements-dev.txt
+    pip install -r requirements-dev.txt \
+    && rm -rf /backend-common
 
 EXPOSE 8000
 
