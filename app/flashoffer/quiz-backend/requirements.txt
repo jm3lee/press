@@ -1,6 +1,5 @@
 Flask==2.3.3
 loguru==0.7.2
 psycopg[binary,pool]==3.2.10
-pytest==7.4.4
 ../backend-common
 openai==1.13.3

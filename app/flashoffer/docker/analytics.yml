@@ -16,6 +16,7 @@ services:
     build:
       context: .
       dockerfile: ./app/flashoffer/analytics-backend/Dockerfile
+      target: dev
     environment:
       DATABASE_HOST: analytics-db
       DATABASE_PORT: 5432

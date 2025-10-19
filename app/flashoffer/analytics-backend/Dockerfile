@@ -26,6 +26,7 @@ WORKDIR /app
 # Copy dependency manifests and shared PIE utilities first so Docker can
 # reuse the layer when application code changes.
 COPY app/flashoffer/analytics-backend/requirements.txt ./requirements.txt
+COPY app/flashoffer/analytics-backend/requirements-dev.txt ./requirements-dev.txt
 COPY app/flashoffer/backend-common /backend-common
 COPY app/shell/py/pie /tmp/pie
 
@@ -46,6 +47,11 @@ RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
 COPY app/flashoffer/analytics-backend/analytics_backend ./analytics_backend
 
 FROM base AS dev
+
+# Install the development requirements so pytest and related tooling remain
+# available inside the dev container.
+RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
+    pip install -r requirements-dev.txt
 
 # The development target exposes Flask's default port for the live reload
 # server.
