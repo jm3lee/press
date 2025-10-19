@@ -10,9 +10,23 @@ services:
       DATABASE_PASSWORD: analytics
       DATABASE_NAME: analytics
       CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-http://localhost:5173,http://localhost:4173,http://localhost:10000}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
     depends_on:
       - analytics-db
     ports:
       - "8002:8000"
     volumes:
       - ./app/flashoffer/quiz-backend:/app
+
+  # Runs the standalone quiz manager React server used for question ingestion.
+  # Rebuild the container when dependencies change to keep npm modules fresh.
+  quiz-manager:
+    build:
+      context: ./app/flashoffer/quiz-manager
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    restart: unless-stopped
+    depends_on:
+      - quiz-backend
+

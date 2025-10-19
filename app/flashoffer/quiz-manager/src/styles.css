@@ -24,6 +24,11 @@ main {
   border-radius: 12px;
 }
 
+.quiz-manager__nav {
+  background-color: rgba(19, 32, 50, 0.95);
+  border-radius: 12px;
+}
+
 .quiz-manager__generator {
   background-color: rgba(6, 11, 18, 0.4);
   padding: 1rem;

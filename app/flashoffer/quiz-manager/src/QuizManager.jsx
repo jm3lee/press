@@ -1,34 +1,19 @@
 import React, {
   useCallback,
+  useDeferredValue,
   useEffect,
   useMemo,
   useState
 } from 'react';
 import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Divider,
-  FormControl,
-  IconButton,
-  InputLabel,
-  MenuItem,
   Paper,
-  Select,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  Typography
+  Tab,
+  Tabs
 } from '@mui/material';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
-import DeleteIcon from '@mui/icons-material/Delete';
-import RefreshIcon from '@mui/icons-material/Refresh';
+import CreateQuestionPage from './pages/CreateQuestionPage.jsx';
+import ExistingQuestionsPage from './pages/ExistingQuestionsPage.jsx';
+import GeneratorPage from './pages/GeneratorPage.jsx';
 
 const emptyOption = () => ({
   id: '',
@@ -75,6 +60,7 @@ export default function QuizManager({
   const [generatorPrompt, setGeneratorPrompt] = useState('');
   const [generatorStatus, setGeneratorStatus] = useState('idle');
   const [generatorError, setGeneratorError] = useState('');
+  const [activePage, setActivePage] = useState('create');
 
   const normalizedUploadEndpoint = useMemo(
     () => uploadEndpoint.replace(/\/+$/, ''),
@@ -221,9 +207,9 @@ export default function QuizManager({
     setForm((prev) => ({ ...prev, correct_option_id: event.target.value }));
   }, []);
 
-  const buildPayload = useCallback((options = { silent: false }) => {
+  const buildPayload = useCallback((targetForm, options = { silent: false }) => {
     const { silent } = options;
-    const trimmedSlug = form.slug.trim();
+    const trimmedSlug = targetForm.slug.trim();
     if (!trimmedSlug) {
       if (!silent) {
         setFormError('Slug is required.');
@@ -231,7 +217,7 @@ export default function QuizManager({
       return null;
     }
 
-    const trimmedQuestion = form.question.trim();
+    const trimmedQuestion = targetForm.question.trim();
     if (!trimmedQuestion) {
       if (!silent) {
         setFormError('Question prompt is required.');
@@ -239,7 +225,7 @@ export default function QuizManager({
       return null;
     }
 
-    const preparedOptions = form.options
+    const preparedOptions = targetForm.options
       .map((option) => ({
         id: option.id.trim(),
         label: option.label.trim(),
@@ -282,7 +268,7 @@ export default function QuizManager({
       return null;
     }
 
-    let correctOptionId = form.correct_option_id.trim();
+    let correctOptionId = targetForm.correct_option_id.trim();
     if (!correctOptionId) {
       correctOptionId = normalizedOptions[0].id;
     }
@@ -294,7 +280,7 @@ export default function QuizManager({
       return null;
     }
 
-    const publishedOn = form.published_on.trim();
+    const publishedOn = targetForm.published_on.trim();
     if (!/^\d{4}-\d{2}-\d{2}$/.test(publishedOn)) {
       if (!silent) {
         setFormError('Published date must be in YYYY-MM-DD format.');
@@ -302,35 +288,37 @@ export default function QuizManager({
       return null;
     }
 
-    const expiresOn = form.expires_on.trim();
+    const expiresOn = targetForm.expires_on.trim();
 
     return {
       slug: trimmedSlug,
       question: trimmedQuestion,
-      helper_text: form.helper_text.trim() || undefined,
-      explanation: form.explanation.trim() || undefined,
-      success_message: form.success_message.trim() || undefined,
-      error_message: form.error_message.trim() || undefined,
+      helper_text: targetForm.helper_text.trim() || undefined,
+      explanation: targetForm.explanation.trim() || undefined,
+      success_message: targetForm.success_message.trim() || undefined,
+      error_message: targetForm.error_message.trim() || undefined,
       options: normalizedOptions,
       correct_option_id: correctOptionId,
       published_on: publishedOn,
       expires_on: expiresOn ? expiresOn : undefined
     };
-  }, [form]);
+  }, []);
+
+  const deferredForm = useDeferredValue(form);
 
   const preview = useMemo(() => {
-    const payload = buildPayload({ silent: true });
+    const payload = buildPayload(deferredForm, { silent: true });
     if (!payload) {
       return '';
     }
     return JSON.stringify(payload, null, 2);
-  }, [buildPayload]);
+  }, [buildPayload, deferredForm]);
 
   const handleSubmit = useCallback(async () => {
     setFormError('');
     setFormSuccess('');
 
-    const payload = buildPayload();
+    const payload = buildPayload(form);
     if (!payload) {
       return;
     }
@@ -379,6 +367,7 @@ export default function QuizManager({
     applyQuestionToForm,
     buildPayload,
     fetchQuestions,
+    form,
     formMode,
     normalizedUploadEndpoint,
     resetForm
@@ -422,7 +411,8 @@ export default function QuizManager({
 
   const handleSelectQuestion = useCallback((question) => {
     applyQuestionToForm(question, 'update');
-  }, [applyQuestionToForm]);
+    setActivePage('create');
+  }, [applyQuestionToForm, setActivePage]);
 
   const handleGeneratorPromptChange = useCallback((event) => {
     setGeneratorPrompt(event.target.value);
@@ -457,6 +447,7 @@ export default function QuizManager({
 
       applyQuestionToForm(body.question, 'create');
       setFormMode('create');
+      setActivePage('create');
       setFormSuccess(`Drafted question ${body.question.slug}`);
     } catch (error) {
       setGeneratorError(error instanceof Error ? error.message : 'Generation failed');
@@ -466,332 +457,74 @@ export default function QuizManager({
   }, [
     applyQuestionToForm,
     generatorEndpoint,
-    generatorPrompt
+    generatorPrompt,
+    setActivePage
   ]);
 
   const formDisabled = formStatus === 'submitting';
   const canSubmit = Boolean(form.slug.trim() && form.question.trim());
+  const handlePageChange = useCallback((event, value) => {
+    setActivePage(value);
+  }, [setActivePage]);
 
   return (
     <Stack spacing={3} className="quiz-manager">
-      <Paper elevation={6} className="quiz-manager__panel">
-        <Stack spacing={3}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Typography variant="h4" component="h1">
-              Quiz Manager
-            </Typography>
-            <Stack direction="row" spacing={1}>
-              <Button
-                variant="outlined"
-                color="secondary"
-                onClick={resetForm}
-                disabled={formDisabled}
-              >
-                New Question
-              </Button>
-              <Button
-                component="label"
-                variant="contained"
-                disableElevation
-                disabled={formDisabled}
-              >
-                Import JSON
-                <input
-                  hidden
-                  type="file"
-                  accept="application/json"
-                  onChange={handleFileChange}
-                  data-testid="quiz-manager-file-input"
-                />
-              </Button>
-            </Stack>
-          </Stack>
-
-          <Typography variant="body1" color="textSecondary">
-            Fill in the form to craft a quiz question, import an existing JSON payload,
-            or draft one with GPT-5 when an OpenAI API key is available.
-          </Typography>
-
-          {fileName ? (
-            <Typography variant="body2" color="textSecondary">
-              Imported file: {fileName}
-            </Typography>
-          ) : null}
-
-          {fileError ? (
-            <Alert severity="error">{fileError}</Alert>
-          ) : null}
-
-          {formError ? (
-            <Alert severity="error">{formError}</Alert>
-          ) : null}
-
-          {formSuccess ? (
-            <Alert severity="success">{formSuccess}</Alert>
-          ) : null}
-
-          <Divider light />
-
-          <Stack spacing={2} className="quiz-manager__generator">
-            <TextField
-              label="AI Prompt (optional)"
-              value={generatorPrompt}
-              onChange={handleGeneratorPromptChange}
-              placeholder="e.g., Highlight best practices for nurturing mid-funnel prospects."
-              multiline
-              minRows={3}
-              fullWidth
-            />
-            {generatorError ? (
-              <Alert severity="error">{generatorError}</Alert>
-            ) : null}
-            <Stack direction="row" spacing={2} justifyContent="flex-end">
-              <Button
-                variant="outlined"
-                color="inherit"
-                onClick={handleGenerate}
-                disabled={generatorStatus === 'loading'}
-              >
-                {generatorStatus === 'loading' ? 'Generating…' : 'Generate with GPT-5'}
-              </Button>
-            </Stack>
-          </Stack>
-
-          <Stack spacing={2} className="quiz-manager__form">
-            <Stack direction="row" spacing={2}>
-              <TextField
-                label="Slug"
-                value={form.slug}
-                onChange={handleFieldChange('slug')}
-                fullWidth
-                disabled={formMode === 'update'}
-              />
-              <TextField
-                label="Published On"
-                value={form.published_on}
-                onChange={handleFieldChange('published_on')}
-                type="date"
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-              />
-              <TextField
-                label="Expires On"
-                value={form.expires_on}
-                onChange={handleFieldChange('expires_on')}
-                type="date"
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-              />
-            </Stack>
-
-            <TextField
-              label="Question"
-              value={form.question}
-              onChange={handleFieldChange('question')}
-              multiline
-              minRows={3}
-              fullWidth
-            />
-
-            <Stack direction="row" spacing={2}>
-              <TextField
-                label="Helper Text"
-                value={form.helper_text}
-                onChange={handleFieldChange('helper_text')}
-                fullWidth
-              />
-              <TextField
-                label="Explanation"
-                value={form.explanation}
-                onChange={handleFieldChange('explanation')}
-                fullWidth
-              />
-            </Stack>
-
-            <Stack direction="row" spacing={2}>
-              <TextField
-                label="Success Message"
-                value={form.success_message}
-                onChange={handleFieldChange('success_message')}
-                fullWidth
-              />
-              <TextField
-                label="Error Message"
-                value={form.error_message}
-                onChange={handleFieldChange('error_message')}
-                fullWidth
-              />
-            </Stack>
-
-            <Divider light />
-
-            <Stack spacing={1}>
-              <Stack direction="row" alignItems="center" justifyContent="space-between">
-                <Typography variant="h6">Answer Options</Typography>
-                <Button
-                  variant="text"
-                  startIcon={<AddCircleIcon />}
-                  onClick={handleAddOption}
-                  disabled={formDisabled}
-                >
-                  Add Option
-                </Button>
-              </Stack>
-
-              {form.options.map((option, index) => (
-                <Paper key={index} variant="outlined" className="quiz-manager__option">
-                  <Stack spacing={1}>
-                    <Stack direction="row" spacing={2} alignItems="center">
-                      <TextField
-                        label="Option ID"
-                        value={option.id}
-                        onChange={handleOptionChange(index, 'id')}
-                        fullWidth
-                      />
-                      <IconButton
-                        aria-label="Remove option"
-                        onClick={() => handleRemoveOption(index)}
-                        disabled={form.options.length <= 3 || formDisabled}
-                        size="small"
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </Stack>
-                    <TextField
-                      label="Label"
-                      value={option.label}
-                      onChange={handleOptionChange(index, 'label')}
-                      fullWidth
-                    />
-                    <TextField
-                      label="Description"
-                      value={option.description}
-                      onChange={handleOptionChange(index, 'description')}
-                      fullWidth
-                    />
-                  </Stack>
-                </Paper>
-              ))}
-
-              <FormControl fullWidth>
-                <InputLabel id="correct-option-label">Correct Option</InputLabel>
-                <Select
-                  labelId="correct-option-label"
-                  label="Correct Option"
-                  value={form.correct_option_id}
-                  onChange={handleCorrectOptionChange}
-                >
-                  {form.options.map((option, index) => (
-                    <MenuItem
-                      key={`${option.id || option.label || 'option'}-${index}`}
-                      value={option.id}
-                    >
-                      {option.id || option.label || '(unnamed option)'}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Stack>
-
-            <Stack direction="row" spacing={2} justifyContent="flex-end">
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSubmit}
-                disabled={formDisabled || !canSubmit}
-              >
-                {formMode === 'update' ? 'Update Question' : 'Create Question'}
-              </Button>
-            </Stack>
-
-            {preview ? (
-              <Box className="quiz-manager__preview" component="pre">
-                {preview}
-              </Box>
-            ) : null}
-          </Stack>
-        </Stack>
+      <Paper elevation={6} className="quiz-manager__nav">
+        <Tabs
+          value={activePage}
+          onChange={handlePageChange}
+          variant="fullWidth"
+          textColor="inherit"
+          indicatorColor="primary"
+        >
+          <Tab label="Create Question" value="create" />
+          <Tab label="GPT Drafts" value="generate" />
+          <Tab label="Existing Questions" value="questions" />
+        </Tabs>
       </Paper>
 
-      <Paper elevation={0} className="quiz-manager__table-wrapper">
-        <Stack spacing={2}>
-          <Stack direction="row" alignItems="center" justifyContent="space-between">
-            <Typography variant="h5" component="h2">
-              Existing Questions
-            </Typography>
-            <Button
-              variant="text"
-              color="inherit"
-              startIcon={<RefreshIcon />}
-              onClick={() => fetchQuestions().catch(() => {})}
-              disabled={questionsStatus === 'loading'}
-            >
-              Refresh
-            </Button>
-          </Stack>
+      {activePage === 'create' ? (
+        <CreateQuestionPage
+          canSubmit={canSubmit}
+          fileError={fileError}
+          fileName={fileName}
+          form={form}
+          formDisabled={formDisabled}
+          formError={formError}
+          formMode={formMode}
+          formSuccess={formSuccess}
+          handleAddOption={handleAddOption}
+          handleCorrectOptionChange={handleCorrectOptionChange}
+          handleFieldChange={handleFieldChange}
+          handleFileChange={handleFileChange}
+          handleOptionChange={handleOptionChange}
+          handleRemoveOption={handleRemoveOption}
+          handleSubmit={handleSubmit}
+          preview={preview}
+          resetForm={resetForm}
+        />
+      ) : null}
 
-          {questionsStatus === 'error' ? (
-            <Alert severity="error">{questionsError}</Alert>
-          ) : null}
+      {activePage === 'generate' ? (
+        <GeneratorPage
+          generatorError={generatorError}
+          generatorPrompt={generatorPrompt}
+          generatorStatus={generatorStatus}
+          handleGenerate={handleGenerate}
+          handleGeneratorPromptChange={handleGeneratorPromptChange}
+        />
+      ) : null}
 
-          {questionsStatus === 'loading' ? (
-            <Box className="quiz-manager__loader">
-              <CircularProgress size={28} />
-            </Box>
-          ) : null}
-
-          {questionsStatus === 'success' && questions.length === 0 ? (
-            <Typography variant="body2" color="textSecondary">
-              No questions found. Upload a JSON payload or use the form to seed the
-              catalog.
-            </Typography>
-          ) : null}
-
-          {questions.length > 0 ? (
-            <TableContainer className="quiz-manager__table">
-              <Table size="small" stickyHeader>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Slug</TableCell>
-                    <TableCell>Prompt</TableCell>
-                    <TableCell>Published</TableCell>
-                    <TableCell>Expires</TableCell>
-                    <TableCell>Correct Option</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {questions.map((item) => (
-                    <TableRow
-                      key={item.id}
-                      hover
-                      selected={selectedSlug === item.slug}
-                      onClick={() => handleSelectQuestion(item)}
-                      sx={{ cursor: 'pointer' }}
-                    >
-                      <TableCell width={160} sx={{ fontWeight: 600 }}>
-                        {item.slug}
-                      </TableCell>
-                      <TableCell sx={{ maxWidth: 360 }}>
-                        <Typography
-                          variant="body2"
-                          color="textPrimary"
-                          noWrap
-                          title={item.question}
-                        >
-                          {item.question}
-                        </Typography>
-                      </TableCell>
-                      <TableCell width={120}>{item.published_on}</TableCell>
-                      <TableCell width={120}>{item.expires_on ?? '—'}</TableCell>
-                      <TableCell width={160}>{item.correct_option_id}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          ) : null}
-        </Stack>
-      </Paper>
+      {activePage === 'questions' ? (
+        <ExistingQuestionsPage
+          fetchQuestions={fetchQuestions}
+          handleSelectQuestion={handleSelectQuestion}
+          questions={questions}
+          questionsError={questionsError}
+          questionsStatus={questionsStatus}
+          selectedSlug={selectedSlug}
+        />
+      ) : null}
     </Stack>
   );
 }
