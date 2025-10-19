@@ -1,9 +1,12 @@
 # Flashoffer API Directory
 
-This document provides a high-level map of the public routes exposed by the
-Flashoffer backends. Each service is deployed independently and fronts its own
-base URL, but the path and behaviour summaries below are stable across
-environments.
+This directory collects the contract references for every public Flashoffer
+backend. Start with the overview tables below to see the available routes at a
+glance, then consult the dedicated guides for request and response details.
+
+- [Analytics backend](analytics-backend.md)
+- [Campaign backend](campaign-backend.md)
+- [Quiz backend](quiz-backend.md)
 
 ## Analytics Backend
 
