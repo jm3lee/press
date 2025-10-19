@@ -185,6 +185,29 @@ arbitrary attributes to the underlying Material UI primitive.
     <p>Integrate your CRM to close deals faster.</p>
   </Section>
   ```
+- **`LoginView`** – Opinionated authentication section that pairs `Section`
+  styling with username/password inputs and a primary submit action. Supply an
+  async `onSubmit` handler to receive trimmed credentials and surface errors by
+  throwing. Customize marketing copy with `eyebrow`, `title`, and `subtitle`
+  props, which default to "Account access", "Sign in to continue", and
+  "Enter your credentials to unlock this dashboard." Update control labels via
+  `usernameLabel`, `passwordLabel`, `submitLabel`, and `submittingLabel`
+  (default "Username", "Password", "Sign in", and "Signing in"). The
+  `helperText` slot
+  renders supporting guidance beneath the button.
+
+  ```tsx
+  import { LoginView, type LoginCredentials } from "flashoffer-react";
+
+  async function handleLogin(credentials: LoginCredentials) {
+    await authenticate(credentials.username, credentials.password);
+  }
+
+  <LoginView
+    onSubmit={handleLogin}
+    helperText={<a href="/reset">Reset your password</a>}
+  />;
+  ```
 - **`PreviewCard`** – Feature preview card with optional media and CTA row.
   Provide `primaryCta`/`secondaryCta` props to render button controls, or leave
   them undefined for a purely informational card.
