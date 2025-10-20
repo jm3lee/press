@@ -32,6 +32,8 @@ COPY app/flashoffer/campaign-backend/campaign_backend ./campaign_backend
 
 FROM base AS dev
 
+COPY app/flashoffer/backend-common /backend-common
+
 # Install the dev requirements so pytest and related tooling stay available in
 # local workflows that execute commands inside this image.
 RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
