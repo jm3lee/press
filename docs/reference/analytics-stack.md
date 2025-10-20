@@ -232,7 +232,10 @@ directly to psycopg's connection factory.
 
 #### `CORS_ALLOW_ORIGINS`
 `CORS_ALLOW_ORIGINS` enumerates front-end origins allowed to call the backend.
-For local development it defaults to `http://localhost:5173`.
+For local development it defaults to
+`http://localhost:5173`, `http://localhost:5174`, `http://localhost:5175`,
+and `http://localhost:4173` (with `http://localhost:10000` retained for
+legacy flows).
 
 ### flashoffer-react
 - **Purpose** – `app/flashoffer/flashoffer-react` packages the React

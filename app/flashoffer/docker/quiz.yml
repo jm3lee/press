@@ -10,7 +10,7 @@ services:
       DATABASE_USER: analytics
       DATABASE_PASSWORD: analytics
       DATABASE_NAME: analytics
-      CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-http://localhost:5173,http://localhost:4173,http://localhost:10000}
+      CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:4173,http://localhost:10000}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
     depends_on:
       - analytics-db
@@ -26,8 +26,7 @@ services:
       context: ./app/flashoffer/quiz-manager
       dockerfile: Dockerfile
     ports:
-      - "5173:5173"
+      - "${QUIZ_MANAGER_PORT:-5175}:5175"
     restart: unless-stopped
     depends_on:
       - quiz-backend
-
