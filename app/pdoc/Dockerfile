@@ -16,8 +16,8 @@ WORKDIR /pie
 # Install pdoc along with the PIE package dependencies to ensure modules
 # import correctly when documentation is generated.
 COPY app/shell/py/pie/requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir pdoc \
-    && pip install --no-cache-dir -r /tmp/requirements.txt
+RUN pip install pdoc \
+    && pip install -r /tmp/requirements.txt
 
 # Expose the port used by pdoc's HTTP server and configure the entrypoint to
 # render the PIE package docs on demand.

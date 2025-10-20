@@ -39,7 +39,7 @@ COPY app/flashoffer/backend-common /backend-common
 COPY app/shell/py/pie /tmp/pie
 
 RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
-    pip install --no-cache-dir -r requirements.txt \
+    pip install -r requirements.txt \
     && pip install /tmp/pie dominate flask loguru \
     && rm -rf /tmp/pie /backend-common
 

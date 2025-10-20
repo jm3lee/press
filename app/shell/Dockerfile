@@ -55,7 +55,7 @@ ENV LANG=en_US.UTF-8 \
 # /press/py
 COPY ./py/pie /press/py/pie
 
-RUN pip install --no-cache-dir --break-system-packages \
+RUN pip install --break-system-packages \
         pytest-html \
         -e /press/py/pie \
         -r /press/py/pie/requirements.txt

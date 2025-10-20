@@ -2,6 +2,6 @@ fastapi==0.115.0
 httpx==0.27.2
 itsdangerous==2.2.0
 psycopg[binary,pool]==3.2.10
-pydantic==2.9.2
 uvicorn[standard]==0.32.0
 ../backend-common
+pydantic==2.12.3
