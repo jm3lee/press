@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Flashoffer Developers
+ * Released under the MIT license.
+ */
+
 import React from 'react';
 import {
   Alert,
@@ -15,6 +20,7 @@ import {
 } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { FlashofferThemeProvider, MultipleChoiceQuiz } from 'flashoffer-react';
 
 export default function CreateQuestionPage({
   canSubmit,
@@ -33,6 +39,7 @@ export default function CreateQuestionPage({
   handleRemoveOption,
   handleSubmit,
   preview,
+  previewQuestion,
   resetForm
 }) {
   return (
@@ -244,10 +251,36 @@ export default function CreateQuestionPage({
             </Button>
           </Stack>
 
+          {previewQuestion ? (
+            <Stack spacing={1}>
+              <Typography variant="h6" component="h2">
+                Question Preview
+              </Typography>
+              <Box className="quiz-manager__quiz-preview">
+                <FlashofferThemeProvider>
+                  <MultipleChoiceQuiz
+                    question={previewQuestion.question}
+                    helperText={previewQuestion.helperText}
+                    options={previewQuestion.options}
+                    correctOptionId={previewQuestion.correctOptionId}
+                    explanation={previewQuestion.explanation}
+                    successMessage={previewQuestion.successMessage}
+                    errorMessage={previewQuestion.errorMessage}
+                  />
+                </FlashofferThemeProvider>
+              </Box>
+            </Stack>
+          ) : null}
+
           {preview ? (
-            <Box className="quiz-manager__preview" component="pre">
-              {preview}
-            </Box>
+            <Stack spacing={1}>
+              <Typography variant="h6" component="h2">
+                Request Payload
+              </Typography>
+              <Box className="quiz-manager__preview" component="pre">
+                {preview}
+              </Box>
+            </Stack>
           ) : null}
         </Stack>
       </Stack>
