@@ -57,6 +57,13 @@ main {
   word-break: break-word;
 }
 
+.quiz-manager__quiz-preview {
+  padding: 1.25rem;
+  border-radius: 8px;
+  background-color: #f5f8ff;
+  color: #091222;
+}
+
 .quiz-manager__table-wrapper {
   background-color: transparent;
 }

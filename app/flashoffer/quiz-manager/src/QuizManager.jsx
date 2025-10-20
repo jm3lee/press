@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Flashoffer Developers
+ * Released under the MIT license.
+ */
+
 import React, {
   useCallback,
   useDeferredValue,
@@ -306,13 +311,36 @@ export default function QuizManager({
 
   const deferredForm = useDeferredValue(form);
 
+  const previewPayload = useMemo(
+    () => buildPayload(deferredForm, { silent: true }),
+    [buildPayload, deferredForm]
+  );
+
   const preview = useMemo(() => {
-    const payload = buildPayload(deferredForm, { silent: true });
-    if (!payload) {
+    if (!previewPayload) {
       return '';
     }
-    return JSON.stringify(payload, null, 2);
-  }, [buildPayload, deferredForm]);
+    return JSON.stringify(previewPayload, null, 2);
+  }, [previewPayload]);
+
+  const previewQuestion = useMemo(() => {
+    if (!previewPayload) {
+      return undefined;
+    }
+    return {
+      question: previewPayload.question,
+      helperText: previewPayload.helper_text ?? undefined,
+      options: previewPayload.options.map((option) => ({
+        id: option.id,
+        label: option.label,
+        description: option.description ?? undefined
+      })),
+      correctOptionId: previewPayload.correct_option_id,
+      explanation: previewPayload.explanation ?? undefined,
+      successMessage: previewPayload.success_message ?? undefined,
+      errorMessage: previewPayload.error_message ?? undefined
+    };
+  }, [previewPayload]);
 
   const handleSubmit = useCallback(async () => {
     setFormError('');
@@ -501,6 +529,7 @@ export default function QuizManager({
           handleRemoveOption={handleRemoveOption}
           handleSubmit={handleSubmit}
           preview={preview}
+          previewQuestion={previewQuestion}
           resetForm={resetForm}
         />
       ) : null}
