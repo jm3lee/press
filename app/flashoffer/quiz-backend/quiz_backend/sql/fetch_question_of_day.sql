@@ -10,7 +10,9 @@ SELECT
     options,
     correct_option_id,
     published_on,
-    expires_on
+    expires_on,
+    created_at,
+    updated_at
 FROM quiz_questions
 WHERE published_on <= %s
   AND (expires_on IS NULL OR expires_on > %s)
