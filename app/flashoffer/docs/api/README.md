@@ -7,6 +7,7 @@ glance, then consult the dedicated guides for request and response details.
 - [Analytics backend](analytics-backend.md)
 - [Campaign backend](campaign-backend.md)
 - [Quiz backend](quiz-backend.md)
+- [Quiz question of the day](quiz-question-of-the-day.md)
 
 ## Analytics Backend
 
