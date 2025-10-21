@@ -183,3 +183,4 @@ dist/app/webp/output
 logs
 log/*
 app/*/.init
+tags
