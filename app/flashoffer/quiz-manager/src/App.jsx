@@ -15,10 +15,12 @@ import {
   Typography
 } from '@mui/material';
 import CreateQuestionContainer from './CreateQuestionContainer.jsx';
+import ExistingQuestionsContainer from './ExistingQuestionsContainer.jsx';
 import GeneratorPage from './GeneratorPage.jsx';
 
 const NAVIGATION_ITEMS = [
   { id: 'create', label: 'Create Question' },
+  { id: 'questions', label: 'Existing Questions' },
   { id: 'generate', label: 'GPT-5 Drafts' }
 ];
 
@@ -68,6 +70,9 @@ export default function App() {
   const content = useMemo(() => {
     if (activePage === 'create') {
       return <CreateQuestionContainer />;
+    }
+    if (activePage === 'questions') {
+      return <ExistingQuestionsContainer />;
     }
     return (
       <GeneratorPage
