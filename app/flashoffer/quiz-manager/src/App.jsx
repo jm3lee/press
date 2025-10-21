@@ -102,11 +102,10 @@ export default function App() {
               </Typography>
             </Box>
             <Box sx={{ flexGrow: 1 }} />
-            <Stack direction="row" spacing={1} className="quiz-manager__nav-buttons">
+            <Stack direction="column" spacing={1} className="quiz-manager__nav-buttons">
               {navigationItems.map((item) => (
                 <Button
                   key={item.id}
-                  color="inherit"
                   variant={activePage === item.id ? 'contained' : 'outlined'}
                   onClick={() => handleSelectPage(item.id)}
                 >
