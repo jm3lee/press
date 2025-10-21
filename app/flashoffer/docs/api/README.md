@@ -46,4 +46,6 @@ glance, then consult the dedicated guides for request and response details.
 | `/api/quiz/questions/<slug>` | `PUT` | Updates an existing quiz question identified by slug. |
 | `/api/quiz/questions/generate` | `OPTIONS` | CORS preflight for AI-assisted question generation. |
 | `/api/quiz/questions/generate` | `POST` | Calls the OpenAI API to draft a question and returns the raw payload. |
+| `/api/quiz/stats/<slug>` | `OPTIONS` | CORS preflight for quiz stats lookup. |
+| `/api/quiz/stats/<slug>` | `GET` | Returns cumulative correct and incorrect counts for a quiz. |
 | `/config` | `GET` | Emits a trimmed configuration snapshot (database host and port). |

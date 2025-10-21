@@ -316,6 +316,7 @@ def create_app() -> Flask:
     quiz_questions_path = "/api/quiz/questions"
     quiz_question_detail_path = "/api/quiz/questions/<slug>"
     quiz_questions_generate_path = "/api/quiz/questions/generate"
+    quiz_stats_path = "/api/quiz/stats/<slug>"
 
     @app.route(quiz_events_path, methods=["OPTIONS"])
     def quiz_options() -> Response:
@@ -389,6 +390,10 @@ def create_app() -> Flask:
     def quiz_question_detail_options(slug: str) -> Response:  # noqa: ARG001 - required by Flask
         return apply_cors(Response(status=204))
 
+    @app.route(quiz_stats_path, methods=["OPTIONS"])
+    def quiz_stats_options(slug: str) -> Response:  # noqa: ARG001 - required by Flask
+        return apply_cors(Response(status=204))
+
     @app.route(quiz_questions_path, methods=["GET"])
     def list_quiz_questions() -> Response:
         try:
@@ -414,6 +419,13 @@ def create_app() -> Flask:
             },
         }
         return jsonify(payload)
+
+    @app.route(quiz_stats_path, methods=["GET"])
+    def quiz_stats(slug: str) -> Response:
+        stats = storage.fetch_quiz_stats(slug)
+        if stats is None:
+            return jsonify({"error": "quiz_stats_not_found"}), 404
+        return jsonify({"stats": stats})
 
     @app.route(quiz_questions_path, methods=["POST"])
     def create_quiz_question() -> Response:

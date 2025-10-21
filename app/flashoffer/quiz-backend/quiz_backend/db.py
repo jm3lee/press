@@ -42,6 +42,12 @@ UPDATE_QUIZ_QUESTION_SQL = _load_sql("update_quiz_question.sql")
 
 ENSURE_QUIZ_QUESTIONS_INDEX_SQL = _load_sql("ensure_quiz_questions_index.sql")
 
+CREATE_QUIZ_STATS_TABLE_SQL = _load_sql("create_quiz_stats_table.sql")
+
+UPSERT_QUIZ_STATS_SQL = _load_sql("upsert_quiz_stats.sql")
+
+FETCH_QUIZ_STATS_SQL = _load_sql("fetch_quiz_stats.sql")
+
 
 class QuizResultsStore(PostgresPool):
     """Store that manages quiz completion tallies."""
@@ -53,6 +59,7 @@ class QuizResultsStore(PostgresPool):
                 cur.execute(ENSURE_CAMPAIGN_ID_COLUMN_SQL)
                 cur.execute(CREATE_QUIZ_QUESTIONS_TABLE_SQL)
                 cur.execute(ENSURE_QUIZ_QUESTIONS_INDEX_SQL)
+                cur.execute(CREATE_QUIZ_STATS_TABLE_SQL)
             conn.commit()
 
     def record_completion(self, result: Dict[str, Any]) -> Dict[str, Any]:
@@ -79,10 +86,22 @@ class QuizResultsStore(PostgresPool):
                     ),
                 )
                 row = cur.fetchone()
+                stats_row = None
+                cur.execute(
+                    UPSERT_QUIZ_STATS_SQL,
+                    (
+                        result["quiz_id"],
+                        passes,
+                        fails,
+                    ),
+                )
+                stats_row = cur.fetchone()
             conn.commit()
 
         if row is None:
             raise RuntimeError("Failed to insert quiz completion record")
+        if stats_row is None:
+            raise RuntimeError("Failed to update quiz stats")
 
         record = {
             "id": row[0],
@@ -265,6 +284,30 @@ class QuizResultsStore(PostgresPool):
             "correct_option_id": serialized["correct_option_id"],
             "published_on": serialized["published_on"],
             "expires_on": serialized["expires_on"],
+        }
+
+    def fetch_quiz_stats(self, quiz_id: str) -> Optional[Dict[str, Any]]:
+        with self.connection() as conn:  # type: ignore[assignment]
+            with conn.cursor() as cur:
+                cur.execute(
+                    FETCH_QUIZ_STATS_SQL,
+                    (quiz_id,),
+                )
+                row = cur.fetchone()
+
+        if row is None:
+            return None
+
+        correct_answers = int(row[1])
+        incorrect_answers = int(row[2])
+
+        return {
+            "quiz_id": row[0],
+            "correct_answers": correct_answers,
+            "incorrect_answers": incorrect_answers,
+            "total_attempts": correct_answers + incorrect_answers,
+            "created_at": _parse_timestamp(row[3]).isoformat(),
+            "updated_at": _parse_timestamp(row[4]).isoformat(),
         }
 
 

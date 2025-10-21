@@ -120,3 +120,40 @@ curl -s \
 
 The generator responds with a draft question and choices that your moderation
 workflow can review before publishing.
+
+## Tracking Quiz Performance
+
+Product teams can monitor how each quiz performs by calling
+`/api/quiz/stats/<slug>`. The endpoint aggregates every completion event and
+reports totals for correct and incorrect answers.
+
+```bash
+curl -s \
+  -H "Authorization: Bearer $QUIZ_TOKEN" \
+  https://quiz.flashoffer.example/api/quiz/stats/how-long-does-the-boost-last |
+  jq
+```
+
+Expect a payload shaped like:
+
+```json
+{
+  "stats": {
+    "quiz_id": "how-long-does-the-boost-last",
+    "correct_answers": 271,
+    "incorrect_answers": 93,
+    "total_attempts": 364,
+    "created_at": "2025-07-11T14:03:22.104230+00:00",
+    "updated_at": "2025-10-21T09:47:06.418221+00:00"
+  }
+}
+```
+
+- `correct_answers` increments whenever an attempt records `passed: true`.
+- `incorrect_answers` increments whenever an attempt records `passed: false`.
+- `total_attempts` is the sum of correct and incorrect counts for convenience.
+- `created_at` and `updated_at` follow ISO-8601 with timezone offsets.
+
+If no attempts exist for the slug the service returns `404 Not Found`. Use the
+response to power dashboards or to identify topics that need refreshed
+questions.

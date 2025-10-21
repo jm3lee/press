@@ -35,6 +35,7 @@ def flask_app() -> Iterator:
         with conn.cursor() as cur:
             cur.execute("TRUNCATE quiz_results")
             cur.execute("TRUNCATE quiz_questions")
+            cur.execute("TRUNCATE quiz_question_stats")
         conn.commit()
 
 

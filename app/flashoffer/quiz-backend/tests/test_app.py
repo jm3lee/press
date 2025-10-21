@@ -19,9 +19,14 @@ def test_healthcheck(client):
     assert response.get_json() == {"status": "ok"}
 
 
-def _build_payload(*, passed: bool, campaign_id: str | None = None) -> dict:
+def _build_payload(
+    *,
+    passed: bool,
+    campaign_id: str | None = None,
+    quiz_id: str = "algebra-basics",
+) -> dict:
     return {
-        "quiz_id": "algebra-basics",
+        "quiz_id": quiz_id,
         "user_id": str(uuid4()),
         "event_type": "complete",
         "attempt_id": str(uuid4()),
@@ -125,6 +130,33 @@ def test_quiz_events_endpoint_returns_recent_results(client):
     assert result["quiz_id"] == "algebra-basics"
     assert result["user_id"]
     assert result["attempts"] == 1
+
+
+def test_quiz_stats_endpoint_returns_aggregates(client):
+    slug = "algebra-insights"
+    client.post("/api/quiz/events", json=_build_payload(passed=True, quiz_id=slug))
+    client.post("/api/quiz/events", json=_build_payload(passed=False, quiz_id=slug))
+    client.post("/api/quiz/events", json=_build_payload(passed=True, quiz_id=slug))
+
+    response = client.get(f"/api/quiz/stats/{slug}")
+
+    assert response.status_code == 200
+    body = response.get_json()
+    stats = body["stats"]
+    assert stats["quiz_id"] == slug
+    assert stats["correct_answers"] == 2
+    assert stats["incorrect_answers"] == 1
+    assert stats["total_attempts"] == 3
+    assert "updated_at" in stats
+    assert "created_at" in stats
+
+
+def test_quiz_stats_endpoint_returns_404_for_missing_slug(client):
+    response = client.get("/api/quiz/stats/unknown-slug")
+
+    assert response.status_code == 404
+    body = response.get_json()
+    assert body["error"] == "quiz_stats_not_found"
 
 
 def test_quiz_question_today_returns_active_question(client, flask_app):
