@@ -1,0 +1,8 @@
+{
+  "name": "flashoffer-workspace",
+  "private": true,
+  "description": "Flashoffer aggregated tooling.",
+  "scripts": {
+    "lint": "npm --prefix flashoffer-react run lint && npm --prefix quiz-manager run lint"
+  }
+}

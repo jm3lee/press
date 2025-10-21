@@ -105,6 +105,72 @@ interface QuizStateSnapshot {
   showRetryButton: boolean;
 }
 
+function resolveAllowRetryValue(
+  allowRetry: boolean | undefined,
+  correctOptionId?: string
+): boolean {
+  if (typeof allowRetry === "boolean") {
+    return allowRetry;
+  }
+  return Boolean(correctOptionId);
+}
+
+function evaluateSubmission(
+  correctOptionId: string | undefined,
+  hasSubmitted: boolean,
+  submittedId: string | null
+): boolean | undefined {
+  if (!correctOptionId || !hasSubmitted || !submittedId) {
+    return undefined;
+  }
+  return submittedId === correctOptionId;
+}
+
+function resolveChoiceDisabling({
+  disabled,
+  hasSubmitted,
+  allowRetry,
+  evaluation
+}: {
+  disabled: boolean;
+  hasSubmitted: boolean;
+  allowRetry: boolean;
+  evaluation: boolean | undefined;
+}): boolean {
+  if (disabled) {
+    return true;
+  }
+  if (!hasSubmitted) {
+    return false;
+  }
+  if (!allowRetry) {
+    return true;
+  }
+  return evaluation === true;
+}
+
+function resolveSubmitDisabled({
+  selectedId,
+  disabled,
+  hasSubmitted,
+  allowRetry,
+  evaluation
+}: {
+  selectedId: string | null;
+  disabled: boolean;
+  hasSubmitted: boolean;
+  allowRetry: boolean;
+  evaluation: boolean | undefined;
+}): boolean {
+  if (!selectedId || disabled) {
+    return true;
+  }
+  if (hasSubmitted && !allowRetry) {
+    return true;
+  }
+  return evaluation === true;
+}
+
 /**
  * Derives quiz behaviour flags from author configuration and user input.
  */
@@ -112,45 +178,46 @@ function useQuizState(
   { allowRetry, correctOptionId, disabled }: QuizStateConfig,
   { selectedId, submittedId }: QuizInteractionState
 ): QuizStateSnapshot {
-  const resolvedAllowRetry = useMemo(() => {
-    if (typeof allowRetry === "boolean") {
-      return allowRetry;
-    }
-    return Boolean(correctOptionId);
-  }, [allowRetry, correctOptionId]);
+  const resolvedAllowRetry = useMemo(
+    () => resolveAllowRetryValue(allowRetry, correctOptionId),
+    [allowRetry, correctOptionId]
+  );
 
   const hasSubmitted = submittedId !== null;
 
-  const evaluation = useMemo(() => {
-    if (!correctOptionId || !hasSubmitted || !submittedId) {
-      return undefined;
-    }
-    return submittedId === correctOptionId;
-  }, [correctOptionId, hasSubmitted, submittedId]);
+  const evaluation = useMemo(
+    () => evaluateSubmission(correctOptionId, hasSubmitted, submittedId),
+    [correctOptionId, hasSubmitted, submittedId]
+  );
 
-  const disableChoices = useMemo(() => {
-    if (disabled) {
-      return true;
-    }
-    if (!hasSubmitted) {
-      return false;
-    }
-    if (!resolvedAllowRetry) {
-      return true;
-    }
-    return evaluation === true;
-  }, [disabled, evaluation, hasSubmitted, resolvedAllowRetry]);
+  const disableChoices = useMemo(
+    () =>
+      resolveChoiceDisabling({
+        disabled,
+        hasSubmitted,
+        allowRetry: resolvedAllowRetry,
+        evaluation
+      }),
+    [disabled, evaluation, hasSubmitted, resolvedAllowRetry]
+  );
 
   const showFeedback = Boolean(hasSubmitted && correctOptionId);
   const revealCorrectAnswer =
     showFeedback && (evaluation === true || !resolvedAllowRetry);
-  const submitDisabled =
-    !selectedId ||
-    disabled ||
-    (hasSubmitted && !resolvedAllowRetry) ||
-    evaluation === true;
-  const showRetryButton =
-    resolvedAllowRetry && hasSubmitted && evaluation !== true && !disabled;
+  const submitDisabled = useMemo(
+    () =>
+      resolveSubmitDisabled({
+        selectedId,
+        disabled,
+        hasSubmitted,
+        allowRetry: resolvedAllowRetry,
+        evaluation
+      }),
+    [disabled, evaluation, hasSubmitted, resolvedAllowRetry, selectedId]
+  );
+  const showRetryButton = Boolean(
+    resolvedAllowRetry && hasSubmitted && evaluation !== true && !disabled
+  );
 
   return {
     hasSubmitted,
@@ -264,6 +331,49 @@ interface OptionContentProps {
   option: MultipleChoiceOption;
   showTallies: boolean;
   totalTallies: number;
+  showDescription: boolean;
+}
+
+interface OptionTalliesSnapshot {
+  formattedCount: string;
+  responseLabel: string;
+  percentLabel: string | null;
+}
+
+function resolveOptionTallies(
+  tallyInput: MultipleChoiceOption["tally"],
+  totalTallies: number
+): OptionTalliesSnapshot {
+  const tally = Math.max(0, Number(tallyInput ?? 0));
+  const countFormatter =
+    typeof Intl !== "undefined"
+      ? new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 })
+      : null;
+  const formattedCount = countFormatter ? countFormatter.format(tally) : `${tally}`;
+  const responseLabel = tally === 1 ? "response" : "responses";
+
+  if (totalTallies <= 0) {
+    return {
+      formattedCount,
+      responseLabel,
+      percentLabel: null
+    };
+  }
+
+  const percentFormatter =
+    typeof Intl !== "undefined"
+      ? new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 })
+      : null;
+  const percentage = (tally / totalTallies) * 100;
+  const formattedPercent = percentFormatter
+    ? percentFormatter.format(percentage)
+    : `${Math.round(percentage)}`;
+
+  return {
+    formattedCount,
+    responseLabel,
+    percentLabel: `${formattedPercent}% of responses`
+  };
 }
 
 /**
@@ -272,14 +382,20 @@ interface OptionContentProps {
 function OptionContent({
   option,
   showTallies,
-  totalTallies
+  totalTallies,
+  showDescription
 }: OptionContentProps): ReactNode {
+  const hasDescription = Boolean(option.description && showDescription);
   const labelBlock = (
-    <Stack spacing={option.description ? 0.5 : 0} flex={1} minWidth={0}>
+    <Stack
+      spacing={hasDescription ? 0.5 : 0}
+      flex={1}
+      minWidth={0}
+    >
       <Typography variant="body1" fontWeight={600}>
         {option.label}
       </Typography>
-      {option.description ? (
+      {hasDescription ? (
         <Typography variant="body2" color="text.secondary">
           {option.description}
         </Typography>
@@ -291,21 +407,10 @@ function OptionContent({
     return labelBlock;
   }
 
-  const tally = Math.max(0, option.tally ?? 0);
-  const countFormatter =
-    typeof Intl !== "undefined"
-      ? new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 })
-      : null;
-  const percentFormatter =
-    typeof Intl !== "undefined"
-      ? new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 })
-      : null;
-  const formattedCount = countFormatter ? countFormatter.format(tally) : `${tally}`;
-  const responseLabel = tally === 1 ? "response" : "responses";
-  const percentage = totalTallies > 0 ? (tally / totalTallies) * 100 : 0;
-  const formattedPercent = percentFormatter
-    ? percentFormatter.format(percentage)
-    : `${Math.round(percentage)}`;
+  const { formattedCount, responseLabel, percentLabel } = resolveOptionTallies(
+    option.tally,
+    totalTallies
+  );
 
   return (
     <Stack
@@ -320,9 +425,9 @@ function OptionContent({
         <Typography variant="body2" fontWeight={600}>
           {formattedCount} {responseLabel}
         </Typography>
-        {totalTallies > 0 ? (
+        {percentLabel ? (
           <Typography variant="caption" color="text.secondary">
-            {formattedPercent}% of responses
+            {percentLabel}
           </Typography>
         ) : null}
       </Stack>
@@ -597,6 +702,7 @@ export function MultipleChoiceQuiz({
                 option={option}
                 showTallies={isClosed}
                 totalTallies={totalTallies}
+                showDescription={hasSubmitted || resolvedDisabled}
               />
             }
             disabled={disableChoices}
@@ -633,7 +739,9 @@ export function MultipleChoiceQuiz({
       selectedId,
       showFeedback,
       submittedId,
+      hasSubmitted,
       isClosed,
+      resolvedDisabled,
       totalTallies
     ]
   );

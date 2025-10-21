@@ -1,7 +1,20 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { HashRouter, Route, Routes } from 'react-router-dom';
 import QuizManager from './QuizManager.jsx';
 import './styles.css';
+
+export function App({ endpoint }) {
+  return (
+    <HashRouter>
+      <main>
+        <Routes>
+          <Route path="/*" element={<QuizManager uploadEndpoint={endpoint} />} />
+        </Routes>
+      </main>
+    </HashRouter>
+  );
+}
 
 function bootstrap() {
   const mount = document.getElementById('root');
@@ -13,9 +26,7 @@ function bootstrap() {
   const root = createRoot(mount);
   root.render(
     <StrictMode>
-      <main>
-        <QuizManager uploadEndpoint={endpoint} />
-      </main>
+      <App endpoint={endpoint} />
     </StrictMode>
   );
 }

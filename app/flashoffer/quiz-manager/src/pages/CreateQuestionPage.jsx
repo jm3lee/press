@@ -3,7 +3,6 @@
  * Released under the MIT license.
  */
 
-import React from 'react';
 import {
   Alert,
   Box,
@@ -50,8 +49,8 @@ export default function CreateQuestionPage({
           justifyContent="space-between"
           alignItems="center"
         >
-          <Typography variant="h4" component="h1">
-            Quiz Manager
+          <Typography variant="h4" component="h2">
+            Create Question
           </Typography>
           <Stack direction="row" spacing={1}>
             <Button
@@ -254,7 +253,11 @@ export default function CreateQuestionPage({
           {previewQuestion ? (
             <Stack spacing={1}>
               <Typography variant="h6" component="h2">
-                Question Preview
+                Live Preview
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                Changes appear instantly. Submit an answer to reveal option
+                descriptions.
               </Typography>
               <Box className="quiz-manager__quiz-preview">
                 <FlashofferThemeProvider>

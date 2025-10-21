@@ -3,7 +3,7 @@
  * Released under the MIT license.
  */
 
-import React, {
+import {
   useCallback,
   useDeferredValue,
   useEffect,
@@ -11,14 +11,30 @@ import React, {
   useState
 } from 'react';
 import {
+  Button,
   Paper,
   Stack,
-  Tab,
-  Tabs
+  Typography
 } from '@mui/material';
+import {
+  Link as RouterLink,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate
+} from 'react-router-dom';
 import CreateQuestionPage from './pages/CreateQuestionPage.jsx';
 import ExistingQuestionsPage from './pages/ExistingQuestionsPage.jsx';
 import GeneratorPage from './pages/GeneratorPage.jsx';
+
+const PAGE_DEFINITIONS = [
+  { id: 'create', path: '/create', label: 'Create Question' },
+  { id: 'generate', path: '/generate', label: 'GPT Drafts' },
+  { id: 'questions', path: '/questions', label: 'Existing Questions' }
+];
+
+const DEFAULT_PAGE_PATH = '/create';
 
 const emptyOption = () => ({
   id: '',
@@ -41,6 +57,326 @@ const createEmptyForm = () => ({
   options: [emptyOption(), emptyOption(), emptyOption()]
 });
 
+class FormValidationError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'FormValidationError';
+  }
+}
+
+const MIN_OPTIONS = 3;
+
+function trimValue(value) {
+  return String(value ?? '').trim();
+}
+
+function optionalTrimmed(value) {
+  const trimmed = trimValue(value);
+  return trimmed || '';
+}
+
+function isoDateValue(value, fallback) {
+  const base = trimValue(value) || fallback;
+  return base.slice(0, 10);
+}
+
+function optionalIsoDate(value) {
+  const trimmed = trimValue(value);
+  return trimmed ? trimmed.slice(0, 10) : '';
+}
+
+function normalizeOptionEntries(options) {
+  if (!Array.isArray(options) || options.length === 0) {
+    return [emptyOption(), emptyOption(), emptyOption()];
+  }
+  return options.map((option) => ({
+    id: trimValue(option.id),
+    label: trimValue(option.label),
+    description: optionalTrimmed(option.description)
+  }));
+}
+
+function buildFormStateForQuestion(question, normalizeOptionsFn) {
+  const normalizedOptions = normalizeOptionsFn(question?.options);
+  const formState = {
+    ...createEmptyForm(),
+    options: normalizedOptions
+  };
+
+  if (question) {
+    formState.slug = trimValue(question.slug);
+    formState.question = String(question.question ?? '');
+    formState.helper_text = optionalTrimmed(question.helper_text);
+    formState.explanation = optionalTrimmed(question.explanation);
+    formState.success_message = optionalTrimmed(question.success_message);
+    formState.error_message = optionalTrimmed(question.error_message);
+    formState.published_on = isoDateValue(question.published_on, todayIso());
+    formState.expires_on = optionalIsoDate(question.expires_on);
+    formState.correct_option_id = trimValue(question.correct_option_id);
+  }
+
+  if (!formState.correct_option_id && normalizedOptions.length > 0) {
+    formState.correct_option_id = normalizedOptions[0].id;
+  }
+
+  return formState;
+}
+
+function normalizePayloadOptions(formOptions) {
+  return formOptions
+    .map((option) => ({
+      id: trimValue(option.id),
+      label: trimValue(option.label),
+      description: trimValue(option.description)
+    }))
+    .filter((option) => option.id || option.label)
+    .map((option) => {
+      const nextOption = {
+        id: option.id,
+        label: option.label || option.id
+      };
+      if (option.description) {
+        nextOption.description = option.description;
+      }
+      return nextOption;
+    });
+}
+
+function normalizeAndValidateOptions(formOptions, preferredId) {
+  const normalizedOptions = normalizePayloadOptions(formOptions);
+  assertCondition(
+    normalizedOptions.length >= MIN_OPTIONS,
+    'Provide at least three answer options.'
+  );
+
+  const optionIds = normalizedOptions.map((option) => option.id);
+  assertCondition(
+    optionIds.every((value) => Boolean(value)),
+    'Each option must include a non-empty id.'
+  );
+  assertCondition(
+    new Set(optionIds).size === optionIds.length,
+    'Each option id must be unique.'
+  );
+
+  const correctOptionId = resolvePreferredCorrectId(
+    normalizedOptions,
+    trimValue(preferredId)
+  );
+  assertCondition(
+    Boolean(correctOptionId),
+    'Correct option must reference one of the option ids.'
+  );
+
+  return {
+    normalizedOptions,
+    correctOptionId
+  };
+}
+
+function handlePayloadError(error, silent, setFormError) {
+  if (!silent && error instanceof FormValidationError) {
+    setFormError(error.message);
+  }
+  if (error instanceof FormValidationError) {
+    return null;
+  }
+  throw error;
+}
+
+function assertCondition(condition, message) {
+  if (!condition) {
+    throw new FormValidationError(message);
+  }
+}
+
+function resolvePreferredCorrectId(normalizedOptions, preferredId) {
+  if (preferredId && normalizedOptions.some((option) => option.id === preferredId)) {
+    return preferredId;
+  }
+  return normalizedOptions[0]?.id ?? '';
+}
+
+function getPreviewOptionsSource(formState) {
+  if (Array.isArray(formState.options) && formState.options.length > 0) {
+    return formState.options;
+  }
+  return [emptyOption(), emptyOption(), emptyOption()];
+}
+
+function toPreviewOption(option, index) {
+  const id = trimValue(option.id);
+  const label = trimValue(option.label);
+  const description = optionalTrimmed(option.description) || undefined;
+  return {
+    id: id || `option-${index + 1}`,
+    label: label || id || `Option ${index + 1}`,
+    description
+  };
+}
+
+function previewOptionsHaveContent(options) {
+  return options.some((option) => Boolean(option.label || option.description));
+}
+
+
+function previewHasContent(parts) {
+  return parts.some(Boolean);
+}
+
+function resolvePreviewQuestion(formState) {
+  const normalizedOptions = getPreviewOptionsSource(formState).map((option, index) =>
+    toPreviewOption(option, index)
+  );
+
+  const questionText = trimValue(formState.question);
+  const helperText = optionalTrimmed(formState.helper_text);
+  const explanation = optionalTrimmed(formState.explanation);
+  const successMessage = optionalTrimmed(formState.success_message);
+  const errorMessage = optionalTrimmed(formState.error_message);
+  const hasOptionContent = previewOptionsHaveContent(normalizedOptions);
+  const hasContent = previewHasContent([
+    questionText,
+    helperText,
+    explanation,
+    successMessage,
+    errorMessage,
+    hasOptionContent
+  ]);
+
+  if (!hasContent) {
+    return undefined;
+  }
+
+  const resolvedCorrect = resolvePreferredCorrectId(
+    normalizedOptions,
+    trimValue(formState.correct_option_id)
+  );
+
+  return {
+    question: questionText || 'Untitled question',
+    helperText: helperText || undefined,
+    options: normalizedOptions,
+    correctOptionId: resolvedCorrect,
+    explanation: explanation || undefined,
+    successMessage: successMessage || undefined,
+    errorMessage: errorMessage || undefined
+  };
+}
+
+
+function resolveSubmissionMessage(mode, slug) {
+  return mode === 'update'
+    ? `Updated question ${slug}`
+    : `Created question ${slug}`;
+}
+
+function applySubmissionSideEffects({ mode, payload, resetForm, setFormSuccess }) {
+  if (mode === 'create') {
+    resetForm();
+  }
+  setFormSuccess(resolveSubmissionMessage(mode, payload.slug));
+}
+
+async function submitFormWorkflow({
+  form,
+  buildPayload,
+  formMode,
+  normalizedUploadEndpoint,
+  applyQuestionToForm,
+  resetForm,
+  setFormError,
+  setFormSuccess,
+  setFormStatus,
+  fetchQuestions
+}) {
+  setFormError('');
+  setFormSuccess('');
+
+  const payload = buildPayload(form);
+  if (!payload) {
+    return;
+  }
+
+  setFormStatus('submitting');
+
+  try {
+    const body = await submitQuestionPayload(payload, formMode, normalizedUploadEndpoint);
+
+    applyQuestionToForm(
+      body.question,
+      formMode === 'update' ? 'update' : 'create'
+    );
+    applySubmissionSideEffects({
+      mode: formMode,
+      payload,
+      resetForm,
+      setFormSuccess
+    });
+    await refreshQuestions(fetchQuestions);
+  } catch (error) {
+    setFormError(error instanceof Error ? error.message : 'Request failed');
+  } finally {
+    setFormStatus('idle');
+  }
+}
+
+async function refreshQuestions(fetchQuestions) {
+  try {
+    await fetchQuestions();
+  } catch {
+    /* handled in callers */
+  }
+}
+
+async function submitQuestionPayload(payload, mode, endpoint) {
+  const isUpdate = mode === 'update';
+  const targetUrl = isUpdate
+    ? `${endpoint}/${encodeURIComponent(payload.slug)}`
+    : endpoint;
+  const method = isUpdate ? 'PUT' : 'POST';
+
+  const response = await fetch(targetUrl, {
+    method,
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const body = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const message = body?.error ?? `Request failed (${response.status})`;
+    throw new Error(message);
+  }
+
+  return body;
+}
+
+async function requestGeneratedQuestion(endpoint, prompt) {
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      prompt: prompt || undefined
+    })
+  });
+
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const message = body?.error ?? `Generation failed (${response.status})`;
+    throw new Error(message);
+  }
+
+  if (!body?.question) {
+    throw new Error('Generation did not return a question payload');
+  }
+
+  return body;
+}
 /**
  * QuizManager allows operators to ingest quiz questions into the backend.
  *
@@ -65,7 +401,14 @@ export default function QuizManager({
   const [generatorPrompt, setGeneratorPrompt] = useState('');
   const [generatorStatus, setGeneratorStatus] = useState('idle');
   const [generatorError, setGeneratorError] = useState('');
-  const [activePage, setActivePage] = useState('create');
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const activePath = useMemo(() => {
+    const currentPath = location.pathname || DEFAULT_PAGE_PATH;
+    const matched = PAGE_DEFINITIONS.find((page) => page.path === currentPath);
+    return matched ? matched.path : DEFAULT_PAGE_PATH;
+  }, [location.pathname]);
 
   const normalizedUploadEndpoint = useMemo(
     () => uploadEndpoint.replace(/\/+$/, ''),
@@ -74,51 +417,22 @@ export default function QuizManager({
   const generatorEndpoint = `${normalizedUploadEndpoint}/generate`;
   const questionsEndpoint = listEndpoint ?? normalizedUploadEndpoint;
 
-  const normalizeOptions = useCallback((options) => {
-    if (!Array.isArray(options) || options.length === 0) {
-      return [emptyOption(), emptyOption(), emptyOption()];
-    }
-    return options.map((option) => ({
-      id: String(option.id ?? '').trim(),
-      label: String(option.label ?? '').trim(),
-      description: option.description ? String(option.description).trim() : ''
-    }));
-  }, []);
+  const normalizeOptions = useCallback(
+    (options) => normalizeOptionEntries(options),
+    []
+  );
 
   const applyQuestionToForm = useCallback((question, mode = 'update') => {
     if (!question) {
       return;
     }
-    const normalized = {
-      slug: String(question.slug ?? '').trim(),
-      question: String(question.question ?? ''),
-      helper_text: question.helper_text ? String(question.helper_text) : '',
-      explanation: question.explanation ? String(question.explanation) : '',
-      success_message: question.success_message
-        ? String(question.success_message)
-        : '',
-      error_message: question.error_message
-        ? String(question.error_message)
-        : '',
-      published_on: String(question.published_on ?? todayIso()).slice(0, 10),
-      expires_on: question.expires_on ? String(question.expires_on).slice(0, 10) : '',
-      correct_option_id: String(question.correct_option_id ?? ''),
-      options: normalizeOptions(question.options)
-    };
 
-    if (!normalized.correct_option_id && normalized.options.length > 0) {
-      normalized.correct_option_id = normalized.options[0].id;
-    }
-
+    const normalized = buildFormStateForQuestion(question, normalizeOptions);
     setForm(normalized);
     setFormMode(mode);
     setFormError('');
     setFormSuccess('');
-    if (mode === 'update') {
-      setSelectedSlug(normalized.slug);
-    } else {
-      setSelectedSlug('');
-    }
+    setSelectedSlug(mode === 'update' ? normalized.slug : '');
   }, [normalizeOptions]);
 
   const resetForm = useCallback(() => {
@@ -214,99 +528,42 @@ export default function QuizManager({
 
   const buildPayload = useCallback((targetForm, options = { silent: false }) => {
     const { silent } = options;
-    const trimmedSlug = targetForm.slug.trim();
-    if (!trimmedSlug) {
-      if (!silent) {
-        setFormError('Slug is required.');
-      }
-      return null;
-    }
 
-    const trimmedQuestion = targetForm.question.trim();
-    if (!trimmedQuestion) {
-      if (!silent) {
-        setFormError('Question prompt is required.');
-      }
-      return null;
-    }
+    try {
+      const slug = trimValue(targetForm.slug);
+      assertCondition(slug, 'Slug is required.');
 
-    const preparedOptions = targetForm.options
-      .map((option) => ({
-        id: option.id.trim(),
-        label: option.label.trim(),
-        description: option.description.trim()
-      }))
-      .filter((option) => option.id || option.label);
+      const questionText = trimValue(targetForm.question);
+      assertCondition(questionText, 'Question prompt is required.');
 
-    const normalizedOptions = preparedOptions.map((option) => {
-      const nextOption = {
-        id: option.id,
-        label: option.label || option.id,
+      const { normalizedOptions, correctOptionId } = normalizeAndValidateOptions(
+        targetForm.options,
+        targetForm.correct_option_id
+      );
+
+      const publishedOn = trimValue(targetForm.published_on);
+      assertCondition(
+        /^\d{4}-\d{2}-\d{2}$/.test(publishedOn),
+        'Published date must be in YYYY-MM-DD format.'
+      );
+
+      const expiresOn = trimValue(targetForm.expires_on);
+
+      return {
+        slug,
+        question: questionText,
+        helper_text: optionalTrimmed(targetForm.helper_text) || undefined,
+        explanation: optionalTrimmed(targetForm.explanation) || undefined,
+        success_message: optionalTrimmed(targetForm.success_message) || undefined,
+        error_message: optionalTrimmed(targetForm.error_message) || undefined,
+        options: normalizedOptions,
+        correct_option_id: correctOptionId,
+        published_on: publishedOn,
+        expires_on: expiresOn ? expiresOn : undefined
       };
-      const desc = option.description.trim();
-      if (desc) {
-        nextOption.description = desc;
-      }
-      return nextOption;
-    });
-
-    if (normalizedOptions.length < 3) {
-      if (!silent) {
-        setFormError('Provide at least three answer options.');
-      }
-      return null;
+    } catch (error) {
+      return handlePayloadError(error, silent, setFormError);
     }
-
-    const optionIds = normalizedOptions.map((option) => option.id);
-    if (optionIds.some((value) => !value)) {
-      if (!silent) {
-        setFormError('Each option must include a non-empty id.');
-      }
-      return null;
-    }
-
-    const uniqueIds = new Set(optionIds);
-    if (uniqueIds.size !== optionIds.length) {
-      if (!silent) {
-        setFormError('Each option id must be unique.');
-      }
-      return null;
-    }
-
-    let correctOptionId = targetForm.correct_option_id.trim();
-    if (!correctOptionId) {
-      correctOptionId = normalizedOptions[0].id;
-    }
-
-    if (!uniqueIds.has(correctOptionId)) {
-      if (!silent) {
-        setFormError('Correct option must reference one of the option ids.');
-      }
-      return null;
-    }
-
-    const publishedOn = targetForm.published_on.trim();
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(publishedOn)) {
-      if (!silent) {
-        setFormError('Published date must be in YYYY-MM-DD format.');
-      }
-      return null;
-    }
-
-    const expiresOn = targetForm.expires_on.trim();
-
-    return {
-      slug: trimmedSlug,
-      question: trimmedQuestion,
-      helper_text: targetForm.helper_text.trim() || undefined,
-      explanation: targetForm.explanation.trim() || undefined,
-      success_message: targetForm.success_message.trim() || undefined,
-      error_message: targetForm.error_message.trim() || undefined,
-      options: normalizedOptions,
-      correct_option_id: correctOptionId,
-      published_on: publishedOn,
-      expires_on: expiresOn ? expiresOn : undefined
-    };
   }, []);
 
   const deferredForm = useDeferredValue(form);
@@ -323,74 +580,24 @@ export default function QuizManager({
     return JSON.stringify(previewPayload, null, 2);
   }, [previewPayload]);
 
-  const previewQuestion = useMemo(() => {
-    if (!previewPayload) {
-      return undefined;
-    }
-    return {
-      question: previewPayload.question,
-      helperText: previewPayload.helper_text ?? undefined,
-      options: previewPayload.options.map((option) => ({
-        id: option.id,
-        label: option.label,
-        description: option.description ?? undefined
-      })),
-      correctOptionId: previewPayload.correct_option_id,
-      explanation: previewPayload.explanation ?? undefined,
-      successMessage: previewPayload.success_message ?? undefined,
-      errorMessage: previewPayload.error_message ?? undefined
-    };
-  }, [previewPayload]);
+  const previewQuestion = useMemo(
+    () => resolvePreviewQuestion(deferredForm),
+    [deferredForm]
+  );
 
   const handleSubmit = useCallback(async () => {
-    setFormError('');
-    setFormSuccess('');
-
-    const payload = buildPayload(form);
-    if (!payload) {
-      return;
-    }
-
-    const targetUrl =
-      formMode === 'update'
-        ? `${normalizedUploadEndpoint}/${encodeURIComponent(payload.slug)}`
-        : normalizedUploadEndpoint;
-    const method = formMode === 'update' ? 'PUT' : 'POST';
-
-    setFormStatus('submitting');
-
-    try {
-      const response = await fetch(targetUrl, {
-        method,
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-
-      const body = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        const message = body?.error ?? `Request failed (${response.status})`;
-        throw new Error(message);
-      }
-
-      applyQuestionToForm(body.question, formMode === 'update' ? 'update' : 'create');
-      if (formMode === 'create') {
-        resetForm();
-      }
-      setFormSuccess(
-        formMode === 'update'
-          ? `Updated question ${payload.slug}`
-          : `Created question ${payload.slug}`
-      );
-      await fetchQuestions().catch(() => {
-        /* handled */
-      });
-    } catch (error) {
-      setFormError(error instanceof Error ? error.message : 'Request failed');
-    } finally {
-      setFormStatus('idle');
-    }
+    await submitFormWorkflow({
+      form,
+      buildPayload,
+      formMode,
+      normalizedUploadEndpoint,
+      applyQuestionToForm,
+      resetForm,
+      setFormError,
+      setFormSuccess,
+      setFormStatus,
+      fetchQuestions
+    });
   }, [
     applyQuestionToForm,
     buildPayload,
@@ -398,7 +605,10 @@ export default function QuizManager({
     form,
     formMode,
     normalizedUploadEndpoint,
-    resetForm
+    resetForm,
+    setFormError,
+    setFormSuccess,
+    setFormStatus
   ]);
 
   const handleFileChange = useCallback((event) => {
@@ -439,8 +649,8 @@ export default function QuizManager({
 
   const handleSelectQuestion = useCallback((question) => {
     applyQuestionToForm(question, 'update');
-    setActivePage('create');
-  }, [applyQuestionToForm, setActivePage]);
+    navigate(DEFAULT_PAGE_PATH);
+  }, [applyQuestionToForm, navigate]);
 
   const handleGeneratorPromptChange = useCallback((event) => {
     setGeneratorPrompt(event.target.value);
@@ -453,29 +663,13 @@ export default function QuizManager({
     setGeneratorStatus('loading');
 
     try {
-      const response = await fetch(generatorEndpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          prompt: generatorPrompt.trim() || undefined
-        })
-      });
-
-      const body = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        const message = body?.error ?? `Generation failed (${response.status})`;
-        throw new Error(message);
-      }
-
-      if (!body?.question) {
-        throw new Error('Generation did not return a question payload');
-      }
-
+      const body = await requestGeneratedQuestion(
+        generatorEndpoint,
+        generatorPrompt.trim()
+      );
       applyQuestionToForm(body.question, 'create');
       setFormMode('create');
-      setActivePage('create');
+      navigate(DEFAULT_PAGE_PATH);
       setFormSuccess(`Drafted question ${body.question.slug}`);
     } catch (error) {
       setGeneratorError(error instanceof Error ? error.message : 'Generation failed');
@@ -486,74 +680,110 @@ export default function QuizManager({
     applyQuestionToForm,
     generatorEndpoint,
     generatorPrompt,
-    setActivePage
+    navigate
   ]);
 
   const formDisabled = formStatus === 'submitting';
   const canSubmit = Boolean(form.slug.trim() && form.question.trim());
-  const handlePageChange = useCallback((event, value) => {
-    setActivePage(value);
-  }, [setActivePage]);
 
   return (
     <Stack spacing={3} className="quiz-manager">
       <Paper elevation={6} className="quiz-manager__nav">
-        <Tabs
-          value={activePage}
-          onChange={handlePageChange}
-          variant="fullWidth"
-          textColor="inherit"
-          indicatorColor="primary"
+        <Stack
+          direction={{ xs: 'column', md: 'row' }}
+          spacing={2}
+          alignItems={{ xs: 'flex-start', md: 'center' }}
+          justifyContent="space-between"
         >
-          <Tab label="Create Question" value="create" />
-          <Tab label="GPT Drafts" value="generate" />
-          <Tab label="Existing Questions" value="questions" />
-        </Tabs>
+          <Stack spacing={0.5}>
+            <Typography variant="h5" component="h1">
+              Quiz Manager
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              Choose a workflow to create, draft, or review quiz questions.
+            </Typography>
+          </Stack>
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={1}
+            flexWrap="wrap"
+          >
+            {PAGE_DEFINITIONS.map((page) => (
+              <Button
+                key={page.id}
+                component={RouterLink}
+                to={page.path}
+                variant={activePath === page.path ? 'contained' : 'outlined'}
+                color="primary"
+                aria-current={activePath === page.path ? 'page' : undefined}
+              >
+                {page.label}
+              </Button>
+            ))}
+          </Stack>
+        </Stack>
       </Paper>
 
-      {activePage === 'create' ? (
-        <CreateQuestionPage
-          canSubmit={canSubmit}
-          fileError={fileError}
-          fileName={fileName}
-          form={form}
-          formDisabled={formDisabled}
-          formError={formError}
-          formMode={formMode}
-          formSuccess={formSuccess}
-          handleAddOption={handleAddOption}
-          handleCorrectOptionChange={handleCorrectOptionChange}
-          handleFieldChange={handleFieldChange}
-          handleFileChange={handleFileChange}
-          handleOptionChange={handleOptionChange}
-          handleRemoveOption={handleRemoveOption}
-          handleSubmit={handleSubmit}
-          preview={preview}
-          previewQuestion={previewQuestion}
-          resetForm={resetForm}
+      <Routes>
+        <Route
+          path="/"
+          element={<Navigate to={DEFAULT_PAGE_PATH} replace />}
         />
-      ) : null}
-
-      {activePage === 'generate' ? (
-        <GeneratorPage
-          generatorError={generatorError}
-          generatorPrompt={generatorPrompt}
-          generatorStatus={generatorStatus}
-          handleGenerate={handleGenerate}
-          handleGeneratorPromptChange={handleGeneratorPromptChange}
+        <Route
+          path={DEFAULT_PAGE_PATH}
+          element={
+            <CreateQuestionPage
+              canSubmit={canSubmit}
+              fileError={fileError}
+              fileName={fileName}
+              form={form}
+              formDisabled={formDisabled}
+              formError={formError}
+              formMode={formMode}
+              formSuccess={formSuccess}
+              handleAddOption={handleAddOption}
+              handleCorrectOptionChange={handleCorrectOptionChange}
+              handleFieldChange={handleFieldChange}
+              handleFileChange={handleFileChange}
+              handleOptionChange={handleOptionChange}
+              handleRemoveOption={handleRemoveOption}
+              handleSubmit={handleSubmit}
+              preview={preview}
+              previewQuestion={previewQuestion}
+              resetForm={resetForm}
+            />
+          }
         />
-      ) : null}
-
-      {activePage === 'questions' ? (
-        <ExistingQuestionsPage
-          fetchQuestions={fetchQuestions}
-          handleSelectQuestion={handleSelectQuestion}
-          questions={questions}
-          questionsError={questionsError}
-          questionsStatus={questionsStatus}
-          selectedSlug={selectedSlug}
+        <Route
+          path="/generate"
+          element={
+            <GeneratorPage
+              generatorError={generatorError}
+              generatorPrompt={generatorPrompt}
+              generatorStatus={generatorStatus}
+              handleGenerate={handleGenerate}
+              handleGeneratorPromptChange={handleGeneratorPromptChange}
+            />
+          }
         />
-      ) : null}
+        <Route
+          path="/questions"
+          element={
+            <ExistingQuestionsPage
+              fetchQuestions={fetchQuestions}
+              handleSelectQuestion={handleSelectQuestion}
+              questions={questions}
+              questionsError={questionsError}
+              questionsStatus={questionsStatus}
+              selectedSlug={selectedSlug}
+            />
+          }
+        />
+        <Route
+          path="*"
+          element={<Navigate to={DEFAULT_PAGE_PATH} replace />}
+        />
+      </Routes>
     </Stack>
   );
 }
