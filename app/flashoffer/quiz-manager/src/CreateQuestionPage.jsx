@@ -22,6 +22,31 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { FlashofferThemeProvider, MultipleChoiceQuiz } from 'flashoffer-react';
 
+/**
+ * Renders the interactive form used to build and preview quiz questions.
+ * @param {object} props - Component props.
+ * @param {boolean} props.canSubmit - Indicates whether the form meets submission requirements.
+ * @param {Record<string, string>} props.celebrationLabels - Human readable celebration labels.
+ * @param {string[]} props.celebrationOptions - Available celebration presets.
+ * @param {string} props.fileError - Error message from file imports.
+ * @param {string} props.fileName - Name of the imported file.
+ * @param {object} props.form - Mutable form state.
+ * @param {boolean} props.formDisabled - Disables controls when true.
+ * @param {string} props.formError - Inline form error message.
+ * @param {'create' | 'update'} props.formMode - Current form mode.
+ * @param {string} props.formSuccess - Success status message.
+ * @param {() => void} props.handleAddOption - Handler to append a new answer option.
+ * @param {(event: import('react').ChangeEvent<HTMLInputElement>) => void} props.handleCorrectOptionChange - Handler for selecting the correct option.
+ * @param {(field: string) => (event: import('react').ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void} props.handleFieldChange - Field change handler factory.
+ * @param {(event: import('react').ChangeEvent<HTMLInputElement>) => void} props.handleFileChange - File upload handler.
+ * @param {(index: number, field: string) => (event: import('react').ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void} props.handleOptionChange - Option change handler factory.
+ * @param {(index: number) => void} props.handleRemoveOption - Removes an option at the given index.
+ * @param {() => void} props.handleSubmit - Submission handler.
+ * @param {string} props.preview - JSON payload preview string.
+ * @param {object} [props.previewQuestion] - Preview question payload for live demo.
+ * @param {() => void} props.resetForm - Resets the form to its initial state.
+ * @returns {JSX.Element} Create question layout.
+ */
 export default function CreateQuestionPage({
   canSubmit,
   celebrationLabels,
