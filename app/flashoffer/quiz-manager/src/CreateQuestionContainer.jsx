@@ -3,7 +3,7 @@
  * Released under the MIT license.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { forwardRef, useCallback, useImperativeHandle, useMemo, useState } from 'react';
 import CreateQuestionPage from './CreateQuestionPage.jsx';
 
 const DEFAULT_CELEBRATION = 'off';
@@ -343,7 +343,8 @@ function handlePayloadError(error, silent, setFormError) {
  * Coordinates form state and interaction handlers for the create-question view.
  * @returns {JSX.Element} Rendered create question workflow.
  */
-export default function CreateQuestionContainer() {
+const CreateQuestionContainer = forwardRef(function CreateQuestionContainer(props, ref) {
+  void props;
   const [form, setForm] = useState(() => createEmptyForm());
   const [formMode, setFormMode] = useState('create');
   const [formError, setFormError] = useState('');
@@ -351,11 +352,13 @@ export default function CreateQuestionContainer() {
   const [fileError, setFileError] = useState('');
   const [fileName, setFileName] = useState('');
 
-  const applyQuestionToForm = useCallback((question, mode) => {
+  const applyQuestionToForm = useCallback((question, mode, successMessage = '') => {
     setForm(buildFormStateForQuestion(question));
     setFormMode(mode);
     setFormError('');
-    setFormSuccess('');
+    setFormSuccess(successMessage);
+    setFileError('');
+    setFileName('');
   }, []);
 
   const resetForm = useCallback(() => {
@@ -366,6 +369,18 @@ export default function CreateQuestionContainer() {
     setFileError('');
     setFileName('');
   }, []);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      applyQuestionToForm,
+      resetForm,
+      setFormSuccess(message) {
+        setFormSuccess(message);
+      }
+    }),
+    [applyQuestionToForm, resetForm]
+  );
 
   const handleFieldChange = useCallback((field) => (event) => {
     const { value } = event.target;
@@ -545,4 +560,6 @@ export default function CreateQuestionContainer() {
       resetForm={resetForm}
     />
   );
-}
+});
+
+export default CreateQuestionContainer;

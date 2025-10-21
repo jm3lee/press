@@ -24,16 +24,56 @@ const NAVIGATION_ITEMS = [
   { id: 'generate', label: 'GPT-5 Drafts' }
 ];
 
+const QUESTIONS_ENDPOINT = '/api/quiz/questions';
+const GENERATOR_ENDPOINT = `${QUESTIONS_ENDPOINT.replace(/\/$/, '')}/generate`;
+const GENERATOR_PROMPT_STORAGE_KEY = 'flashoffer.quiz_manager.generator_prompt';
+
+async function requestGeneratedQuestion(endpoint, prompt) {
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      prompt: prompt || undefined
+    })
+  });
+
+  const body = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const message = body?.error ?? `Generation failed (${response.status})`;
+    throw new Error(message);
+  }
+
+  if (!body?.question) {
+    throw new Error('Generation did not return a question payload');
+  }
+
+  return body;
+}
+
 /**
  * Renders the quiz manager shell with navigation and page state.
  * @returns {JSX.Element} Quiz manager root component.
  */
 export default function App() {
   const [activePage, setActivePage] = useState('create');
-  const [generatorPrompt, setGeneratorPrompt] = useState('');
+  const [generatorPrompt, setGeneratorPrompt] = useState(() => {
+    if (typeof window === 'undefined') {
+      return '';
+    }
+    try {
+      return window.localStorage.getItem(GENERATOR_PROMPT_STORAGE_KEY) ?? '';
+    } catch {
+      return '';
+    }
+  });
   const [generatorStatus, setGeneratorStatus] = useState('idle');
   const [generatorError, setGeneratorError] = useState('');
-  const generationTimerRef = useRef();
+  const [pendingGeneratedQuestion, setPendingGeneratedQuestion] = useState(null);
+  const [pendingGeneratedMessage, setPendingGeneratedMessage] = useState('');
+  const createContainerRef = useRef(null);
 
   const navigationItems = useMemo(() => NAVIGATION_ITEMS, []);
 
@@ -45,52 +85,58 @@ export default function App() {
     setGeneratorPrompt(event.target.value);
   }, []);
 
-  const handleGenerate = useCallback(() => {
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    try {
+      if (generatorPrompt) {
+        window.localStorage.setItem(GENERATOR_PROMPT_STORAGE_KEY, generatorPrompt);
+      } else {
+        window.localStorage.removeItem(GENERATOR_PROMPT_STORAGE_KEY);
+      }
+    } catch {
+      /* ignore storage errors */
+    }
+  }, [generatorPrompt]);
+
+  const handleGenerate = useCallback(async () => {
     setGeneratorError('');
     setGeneratorStatus('loading');
+    const trimmedPrompt = generatorPrompt.trim();
 
-    if (generationTimerRef.current) {
-      window.clearTimeout(generationTimerRef.current);
-    }
-
-    generationTimerRef.current = window.setTimeout(() => {
+    try {
+      const body = await requestGeneratedQuestion(
+        GENERATOR_ENDPOINT,
+        trimmedPrompt
+      );
+      const slug = body.question?.slug;
+      setPendingGeneratedQuestion(body.question);
+      setPendingGeneratedMessage(
+        slug ? `Drafted question ${slug}` : 'Drafted question ready'
+      );
+      setActivePage('create');
+    } catch (error) {
+      setGeneratorError(
+        error instanceof Error ? error.message : 'Generation failed'
+      );
+    } finally {
       setGeneratorStatus('idle');
-      setGeneratorError('Generation API is not connected yet.');
-    }, 600);
-  }, []);
+    }
+  }, [generatorPrompt]);
 
   useEffect(() => {
-    return () => {
-      if (generationTimerRef.current) {
-        window.clearTimeout(generationTimerRef.current);
-      }
-    };
-  }, []);
-
-  const content = useMemo(() => {
-    if (activePage === 'create') {
-      return <CreateQuestionContainer />;
+    if (!pendingGeneratedQuestion || !createContainerRef.current) {
+      return;
     }
-    if (activePage === 'questions') {
-      return <ExistingQuestionsContainer />;
-    }
-    return (
-      <GeneratorPage
-        generatorError={generatorError}
-        generatorPrompt={generatorPrompt}
-        generatorStatus={generatorStatus}
-        handleGenerate={handleGenerate}
-        handleGeneratorPromptChange={handleGeneratorPromptChange}
-      />
+    createContainerRef.current.applyQuestionToForm(
+      pendingGeneratedQuestion,
+      'create',
+      pendingGeneratedMessage
     );
-  }, [
-    activePage,
-    generatorError,
-    generatorPrompt,
-    generatorStatus,
-    handleGenerate,
-    handleGeneratorPromptChange
-  ]);
+    setPendingGeneratedQuestion(null);
+    setPendingGeneratedMessage('');
+  }, [pendingGeneratedMessage, pendingGeneratedQuestion, createContainerRef]);
 
   return (
     <>
@@ -121,7 +167,21 @@ export default function App() {
           </Toolbar>
         </AppBar>
         <Container maxWidth="md" className="quiz-manager__content">
-          {content}
+          <Box sx={{ display: activePage === 'create' ? 'block' : 'none' }}>
+            <CreateQuestionContainer ref={createContainerRef} />
+          </Box>
+          {activePage === 'questions' ? (
+            <ExistingQuestionsContainer />
+          ) : null}
+          {activePage === 'generate' ? (
+            <GeneratorPage
+              generatorError={generatorError}
+              generatorPrompt={generatorPrompt}
+              generatorStatus={generatorStatus}
+              handleGenerate={handleGenerate}
+              handleGeneratorPromptChange={handleGeneratorPromptChange}
+            />
+          ) : null}
         </Container>
       </Box>
     </>
