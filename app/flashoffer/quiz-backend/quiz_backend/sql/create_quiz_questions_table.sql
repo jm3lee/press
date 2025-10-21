@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS quiz_questions (
     correct_option_id TEXT NOT NULL,
     published_on DATE NOT NULL,
     expires_on DATE,
+    celebration TEXT NOT NULL DEFAULT 'off',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

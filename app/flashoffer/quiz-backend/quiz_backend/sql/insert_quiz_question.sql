@@ -9,8 +9,10 @@ INSERT INTO quiz_questions (
     options,
     correct_option_id,
     published_on,
-    expires_on
+    expires_on,
+    celebration
 ) VALUES (
+    %s,
     %s,
     %s,
     %s,
@@ -34,5 +36,6 @@ RETURNING
     correct_option_id,
     published_on,
     expires_on,
+    celebration,
     created_at,
     updated_at;

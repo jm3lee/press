@@ -19,6 +19,8 @@ service uses and the access patterns maintained by `quiz_backend.db`.
 - `correct_option_id TEXT NOT NULL` – answer identifier flagged as correct.
 - `published_on DATE NOT NULL` – first UTC date the question should be served.
 - `expires_on DATE` – exclusive UTC date after which the prompt is retired.
+- `celebration TEXT NOT NULL DEFAULT 'off'` – confetti preset triggered once
+  a learner submits the correct answer.
 - `created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()` – insertion timestamp.
 - `updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()` – last modification timestamp.
 

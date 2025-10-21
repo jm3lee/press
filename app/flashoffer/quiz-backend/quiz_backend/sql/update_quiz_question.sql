@@ -10,6 +10,7 @@ SET
     correct_option_id = %s,
     published_on = %s,
     expires_on = %s,
+    celebration = %s,
     updated_at = NOW()
 WHERE slug = %s
 RETURNING
@@ -24,5 +25,6 @@ RETURNING
     correct_option_id,
     published_on,
     expires_on,
+    celebration,
     created_at,
     updated_at;
