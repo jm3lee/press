@@ -39,7 +39,13 @@ def _build_payload(
     }
 
 
-def _build_question_payload(*, slug: str, published_on: date, correct_option_id: str = "reminder") -> dict:
+def _build_question_payload(
+    *,
+    slug: str,
+    published_on: date,
+    correct_option_id: str = "reminder",
+    celebration: str = "classic",
+) -> dict:
     return {
         "slug": slug,
         "question": f"Prompt for {slug}?",
@@ -60,6 +66,7 @@ def _build_question_payload(*, slug: str, published_on: date, correct_option_id:
         "published_on": published_on.isoformat(),
         "success_message": "Exactly right.",
         "error_message": "Not quite.",
+        "celebration": celebration,
     }
 
 
@@ -186,8 +193,9 @@ def test_quiz_question_today_returns_active_question(client, flask_app):
                     error_message,
                     options,
                     correct_option_id,
-                    published_on
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    published_on,
+                    celebration
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """,
                 (
                     "flashoffer-demo",
@@ -199,6 +207,7 @@ def test_quiz_question_today_returns_active_question(client, flask_app):
                     Json(options),
                     "reminder",
                     date.today(),
+                    "classic",
                 ),
             )
         conn.commit()
@@ -209,6 +218,7 @@ def test_quiz_question_today_returns_active_question(client, flask_app):
     assert body["question"]["slug"] == "flashoffer-demo"
     assert body["question"]["correct_option_id"] == "reminder"
     assert len(body["question"]["options"]) == 2
+    assert body["question"]["celebration"] == "classic"
 
 
 def test_create_quiz_question_persists_payload(client, flask_app):
@@ -222,13 +232,14 @@ def test_create_quiz_question_persists_payload(client, flask_app):
     assert created["correct_option_id"] == payload["correct_option_id"]
     assert created["published_on"] == payload["published_on"]
     assert len(created["options"]) == 2
+    assert created["celebration"] == payload["celebration"]
 
     pool: QuizResultsStore = flask_app.config["DB_POOL"]
     with pool.connection() as conn:  # type: ignore[assignment]
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT slug, correct_option_id, published_on
+                SELECT slug, correct_option_id, published_on, celebration
                 FROM quiz_questions
                 WHERE slug = %s
                 """,
@@ -239,11 +250,20 @@ def test_create_quiz_question_persists_payload(client, flask_app):
     assert row[0] == payload["slug"]
     assert row[1] == payload["correct_option_id"]
     assert row[2].isoformat() == payload["published_on"]
+    assert row[3] == payload["celebration"]
 
 
 def test_list_quiz_questions_supports_pagination(client):
-    older = _build_question_payload(slug="alpha-question", published_on=date(2024, 7, 1))
-    newer = _build_question_payload(slug="beta-question", published_on=date(2024, 8, 1))
+    older = _build_question_payload(
+        slug="alpha-question",
+        published_on=date(2024, 7, 1),
+        celebration="off",
+    )
+    newer = _build_question_payload(
+        slug="beta-question",
+        published_on=date(2024, 8, 1),
+        celebration="streamers",
+    )
 
     client.post("/api/quiz/questions", json=older)
     client.post("/api/quiz/questions", json=newer)
@@ -253,6 +273,7 @@ def test_list_quiz_questions_supports_pagination(client):
     first_payload = first_page.get_json()
     assert first_payload["pagination"]["count"] == 1
     assert first_payload["questions"][0]["slug"] == "beta-question"
+    assert first_payload["questions"][0]["celebration"] == "streamers"
 
     second_page = client.get(
         "/api/quiz/questions",
@@ -261,6 +282,7 @@ def test_list_quiz_questions_supports_pagination(client):
     assert second_page.status_code == 200
     second_payload = second_page.get_json()
     assert second_payload["questions"][0]["slug"] == "alpha-question"
+    assert second_payload["questions"][0]["celebration"] == "off"
 
 
 def test_update_quiz_question_overwrites_prompt(client):
@@ -282,6 +304,7 @@ def test_update_quiz_question_overwrites_prompt(client):
             }
         ],
         "correct_option_id": "nudge",
+        "celebration": "burst",
     }
 
     client.post("/api/quiz/questions", json=original)
@@ -292,6 +315,7 @@ def test_update_quiz_question_overwrites_prompt(client):
     assert body["question"]["question"] == updated["question"]
     assert body["question"]["correct_option_id"] == "nudge"
     assert len(body["question"]["options"]) == 2
+    assert body["question"]["celebration"] == "burst"
 
 
 def test_generate_quiz_question_requires_api_key(client, monkeypatch):
@@ -350,6 +374,7 @@ def test_generate_quiz_question_uses_https_without_proxy(client, monkeypatch):
         "correct_option_id": "cta-a",
         "published_on": "2024-01-01",
         "expires_on": None,
+        "celebration": "classic",
     }
 
     class DummyOpenAI:
@@ -384,6 +409,7 @@ def test_generate_quiz_question_uses_https_without_proxy(client, monkeypatch):
     assert response.status_code == 200
     body = response.get_json()
     assert body["question"]["slug"] == "draft-slug"
+    assert body["question"]["celebration"] == "classic"
     assert len(DummyOpenAI.calls) == 1
     base_url, used_client = DummyOpenAI.calls[0]
     assert base_url.startswith("https://")

@@ -34,6 +34,10 @@ ENSURE_CAMPAIGN_ID_COLUMN_SQL = _load_sql("ensure_campaign_id_column.sql")
 
 CREATE_QUIZ_QUESTIONS_TABLE_SQL = _load_sql("create_quiz_questions_table.sql")
 
+ENSURE_QUIZ_QUESTION_CELEBRATION_COLUMN_SQL = _load_sql(
+    "ensure_quiz_question_celebration_column.sql"
+)
+
 FETCH_QUESTION_OF_DAY_SQL = _load_sql("fetch_question_of_day.sql")
 
 LIST_QUIZ_QUESTIONS_SQL = _load_sql("list_quiz_questions.sql")
@@ -58,6 +62,7 @@ class QuizResultsStore(PostgresPool):
                 cur.execute(CREATE_QUIZ_RESULTS_TABLE_SQL)
                 cur.execute(ENSURE_CAMPAIGN_ID_COLUMN_SQL)
                 cur.execute(CREATE_QUIZ_QUESTIONS_TABLE_SQL)
+                cur.execute(ENSURE_QUIZ_QUESTION_CELEBRATION_COLUMN_SQL)
                 cur.execute(ENSURE_QUIZ_QUESTIONS_INDEX_SQL)
                 cur.execute(CREATE_QUIZ_STATS_TABLE_SQL)
             conn.commit()
@@ -180,6 +185,7 @@ class QuizResultsStore(PostgresPool):
                         question["correct_option_id"],
                         published_on,
                         expires_on,
+                        question["celebration"],
                     ),
                 )
                 row = cur.fetchone()
@@ -216,6 +222,7 @@ class QuizResultsStore(PostgresPool):
                         question["correct_option_id"],
                         published_on,
                         expires_on,
+                        question["celebration"],
                         slug,
                     ),
                 )
@@ -284,6 +291,7 @@ class QuizResultsStore(PostgresPool):
             "correct_option_id": serialized["correct_option_id"],
             "published_on": serialized["published_on"],
             "expires_on": serialized["expires_on"],
+            "celebration": serialized["celebration"],
         }
 
     def fetch_quiz_stats(self, quiz_id: str) -> Optional[Dict[str, Any]]:
@@ -333,6 +341,7 @@ def _serialize_question_row(row: Any) -> Dict[str, Any]:
         correct_option_id,
         stored_published_on,
         stored_expires_on,
+        celebration,
         created_at,
         updated_at,
     ) = row
@@ -359,6 +368,7 @@ def _serialize_question_row(row: Any) -> Dict[str, Any]:
             if stored_expires_on is not None and hasattr(stored_expires_on, "isoformat")
             else (str(stored_expires_on) if stored_expires_on is not None else None)
         ),
+        "celebration": celebration,
         "created_at": _parse_timestamp(created_at).isoformat(),
         "updated_at": _parse_timestamp(updated_at).isoformat(),
     }

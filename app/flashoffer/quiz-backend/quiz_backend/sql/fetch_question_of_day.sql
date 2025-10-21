@@ -11,6 +11,7 @@ SELECT
     correct_option_id,
     published_on,
     expires_on,
+    celebration,
     created_at,
     updated_at
 FROM quiz_questions

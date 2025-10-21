@@ -29,6 +29,13 @@ except Exception:  # noqa: BLE001 - optional dependency
 
 HEALTHCHECK_QUERY = "SELECT 1 -- confirm quiz database connectivity"
 
+QUIZ_CELEBRATION_PRESETS = {
+    "off",
+    "classic",
+    "streamers",
+    "burst",
+}
+
 
 def _coerce_bool(value: Any, *, field: str) -> bool:
     if isinstance(value, bool):
@@ -154,6 +161,16 @@ def _load_question_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
     success_message = _normalize_optional_text(payload.get("success_message"))
     error_message = _normalize_optional_text(payload.get("error_message"))
 
+    celebration_value = payload.get("celebration")
+    celebration = "off"
+    if celebration_value is not None:
+        celebration = str(celebration_value).strip() or "off"
+    if celebration not in QUIZ_CELEBRATION_PRESETS:
+        allowed = ", ".join(sorted(QUIZ_CELEBRATION_PRESETS))
+        raise ValueError(
+            f"Field 'celebration' must be one of: {allowed}"
+        )
+
     return {
         "slug": slug,
         "question": question,
@@ -165,6 +182,7 @@ def _load_question_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
         "correct_option_id": correct_option_id,
         "published_on": published_on,
         "expires_on": normalized_expires_on,
+        "celebration": celebration,
     }
 
 
