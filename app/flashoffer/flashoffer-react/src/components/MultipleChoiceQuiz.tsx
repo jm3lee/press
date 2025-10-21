@@ -9,16 +9,10 @@ import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Collapse from "@mui/material/Collapse";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
 import FormControl from "@mui/material/FormControl";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormHelperText from "@mui/material/FormHelperText";
 import FormLabel from "@mui/material/FormLabel";
-import IconButton from "@mui/material/IconButton";
-import SvgIcon from "@mui/material/SvgIcon";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import Stack from "@mui/material/Stack";
@@ -27,15 +21,6 @@ import { alpha } from "@mui/material/styles";
 import type { Theme } from "@mui/material/styles";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import type { ChangeEvent, ReactNode } from "react";
-import type { SvgIconProps } from "@mui/material/SvgIcon";
-
-function CloseIcon(props: SvgIconProps): JSX.Element {
-  return (
-    <SvgIcon {...props}>
-      <path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-    </SvgIcon>
-  );
-}
 
 import type { QuizConfettiOptions } from "./QuizCelebrations";
 import { launchConfetti, resolveConfettiOptions } from "./QuizCelebrations";
@@ -519,12 +504,10 @@ export function MultipleChoiceQuiz({
 }: MultipleChoiceQuizProps) {
   const questionId = useId();
   const groupId = useId();
-  const feedbackDialogTitleId = useId();
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [submittedId, setSubmittedId] = useState<string | null>(null);
-  const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false);
-  const quizContainerRef = useRef<HTMLDivElement | null>(null);
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
   const endTimestamp = useMemo(() => {
     if (typeof endTime === "undefined" || endTime === null) {
@@ -598,16 +581,6 @@ export function MultipleChoiceQuiz({
   const { enabled: confettiEnabled, preset: confettiPreset } = resolvedConfetti;
   const hasCelebratedRef = useRef(false);
 
-  const dialogContainerResolver = useCallback(() => {
-    if (quizContainerRef.current) {
-      return quizContainerRef.current;
-    }
-    if (typeof window !== "undefined") {
-      return window.document.body;
-    }
-    return null;
-  }, []);
-
   useEffect(() => {
     if (!confettiEnabled) {
       hasCelebratedRef.current = false;
@@ -644,7 +617,7 @@ export function MultipleChoiceQuiz({
       return;
     }
     setSubmittedId(selectedId);
-    setIsFeedbackDialogOpen(true);
+    setIsFeedbackOpen(true);
     onAnswer?.({
       optionId: selectedId,
       isCorrect: correctOptionId
@@ -656,7 +629,7 @@ export function MultipleChoiceQuiz({
   const handleRetry = useCallback(() => {
     setSelectedId(null);
     setSubmittedId(null);
-    setIsFeedbackDialogOpen(false);
+    setIsFeedbackOpen(false);
   }, []);
 
   const promptHelper = useMemo(() => {
@@ -683,30 +656,38 @@ export function MultipleChoiceQuiz({
 
   const isFeedbackVisible = Boolean(showFeedback && typeof evaluation === "boolean");
 
-  const openFeedbackDialog = useCallback(() => {
+  useEffect(() => {
+    if (!isFeedbackVisible) {
+      setIsFeedbackOpen(false);
+      return;
+    }
+    setIsFeedbackOpen(true);
+  }, [isFeedbackVisible]);
+
+  const openFeedback = useCallback(() => {
     if (!isFeedbackVisible) {
       return;
     }
-    setIsFeedbackDialogOpen(true);
+    setIsFeedbackOpen(true);
   }, [isFeedbackVisible]);
 
-  const closeFeedbackDialog = useCallback(() => {
-    setIsFeedbackDialogOpen(false);
+  const closeFeedback = useCallback(() => {
+    setIsFeedbackOpen(false);
   }, []);
 
   const feedbackTrigger = useMemo(
     () => (
       <Collapse
-        in={isFeedbackVisible}
+        in={isFeedbackVisible && !isFeedbackOpen}
         timeout="auto"
         unmountOnExit
         mountOnEnter
         appear
       >
-        {isFeedbackVisible ? (
+        {isFeedbackVisible && !isFeedbackOpen ? (
           <Button
             variant="text"
-            onClick={openFeedbackDialog}
+            onClick={openFeedback}
             sx={{ alignSelf: "flex-start" }}
           >
             View feedback
@@ -714,12 +695,10 @@ export function MultipleChoiceQuiz({
         ) : null}
       </Collapse>
     ),
-    [isFeedbackVisible, openFeedbackDialog]
+    [isFeedbackOpen, isFeedbackVisible, openFeedback]
   );
 
-  const feedbackDialogOpen = Boolean(isFeedbackDialogOpen && isFeedbackVisible);
-  const feedbackDialogTitle =
-    evaluation === true ? "Correct answer" : "Review feedback";
+  const showFeedbackContent = Boolean(isFeedbackVisible && isFeedbackOpen);
 
   const retryButton = useMemo(
     () => (
@@ -867,7 +846,7 @@ export function MultipleChoiceQuiz({
   }, [closedMessage, endTimestamp, isClosed]);
 
   return (
-    <Box ref={quizContainerRef} sx={{ position: "relative" }}>
+    <Box sx={{ position: "relative" }}>
       <Card component="section" elevation={3} sx={{ borderRadius: 3 }}>
         <CardContent>
           <Stack spacing={3}>
@@ -883,124 +862,72 @@ export function MultipleChoiceQuiz({
               {promptHelper}
             </Stack>
             {closureNotice}
-            <FormControl component="fieldset" disabled={disableChoices}>
-              <FormLabel
-                htmlFor={groupId}
-                sx={{
-                  position: "absolute",
-                  height: 0,
-                  width: 0,
-                  overflow: "hidden"
-                }}
-              >
-                Multiple choice question
-              </FormLabel>
-              <RadioGroup
-                aria-labelledby={questionId}
-                id={groupId}
-                name={groupId}
-                value={selectedId ?? ""}
-                onChange={handleSelectionChange}
-              >
-                <Stack spacing={1.5}>
-                  {optionItems}
+            {showFeedbackContent ? (
+              <Stack spacing={2}>
+                <QuizFeedback
+                  evaluation={Boolean(evaluation)}
+                  successMessage={successMessage}
+                  errorMessage={errorMessage}
+                  explanation={explanation}
+                />
+                <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
+                  {showRetryButton ? (
+                    <Button variant="contained" onClick={handleRetry}>
+                      {tryAgainLabel}
+                    </Button>
+                  ) : null}
+                  <Button
+                    onClick={closeFeedback}
+                    variant={showRetryButton ? "text" : "contained"}
+                  >
+                    Close
+                  </Button>
                 </Stack>
-              </RadioGroup>
-              {fallbackHelper}
-            </FormControl>
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSubmit}
-                disabled={submitDisabled}
-              >
-                {submitLabel}
-              </Button>
-              {retryButton}
-            </Stack>
-            {feedbackTrigger}
+              </Stack>
+            ) : (
+              <>
+                <FormControl component="fieldset" disabled={disableChoices}>
+                  <FormLabel
+                    htmlFor={groupId}
+                    sx={{
+                      position: "absolute",
+                      height: 0,
+                      width: 0,
+                      overflow: "hidden"
+                    }}
+                  >
+                    Multiple choice question
+                  </FormLabel>
+                  <RadioGroup
+                    aria-labelledby={questionId}
+                    id={groupId}
+                    name={groupId}
+                    value={selectedId ?? ""}
+                    onChange={handleSelectionChange}
+                  >
+                    <Stack spacing={1.5}>
+                      {optionItems}
+                    </Stack>
+                  </RadioGroup>
+                  {fallbackHelper}
+                </FormControl>
+                <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleSubmit}
+                    disabled={submitDisabled}
+                  >
+                    {submitLabel}
+                  </Button>
+                  {retryButton}
+                </Stack>
+                {feedbackTrigger}
+              </>
+            )}
           </Stack>
         </CardContent>
       </Card>
-      <Dialog
-        container={dialogContainerResolver}
-        fullWidth
-        maxWidth={false}
-        open={feedbackDialogOpen}
-        onClose={closeFeedbackDialog}
-        aria-labelledby={feedbackDialogTitleId}
-        sx={{
-          position: "absolute",
-          inset: 0,
-          display: "flex",
-          alignItems: "stretch",
-          justifyContent: "stretch",
-          zIndex: (theme) => theme.zIndex.modal
-        }}
-        BackdropProps={{
-          sx: {
-            position: "absolute",
-            inset: 0,
-            backgroundColor: (theme) => alpha(theme.palette.common.black, 0.5)
-          }
-        }}
-        PaperProps={{
-          sx: {
-            m: 0,
-            width: "100%",
-            maxWidth: "100%",
-            height: "100%",
-            display: "flex",
-            flexDirection: "column"
-          }
-        }}
-      >
-        <DialogTitle id={feedbackDialogTitleId} sx={{ pr: 6 }}>
-          {feedbackDialogTitle}
-          <IconButton
-            aria-label="Close feedback"
-            onClick={closeFeedbackDialog}
-            sx={{ position: "absolute", right: 16, top: 16 }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent
-          sx={{
-            flex: 1,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            p: 3,
-            overflowY: "auto"
-          }}
-        >
-          {feedbackDialogOpen ? (
-            <Stack spacing={2} maxWidth={480} width="100%">
-              <QuizFeedback
-                evaluation={Boolean(evaluation)}
-                successMessage={successMessage}
-                errorMessage={errorMessage}
-                explanation={explanation}
-              />
-            </Stack>
-          ) : null}
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
-          {showRetryButton ? (
-            <Button variant="contained" onClick={handleRetry}>
-              {tryAgainLabel}
-            </Button>
-          ) : null}
-          <Button
-            onClick={closeFeedbackDialog}
-            variant={showRetryButton ? "text" : "contained"}
-          >
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 }

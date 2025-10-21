@@ -198,7 +198,7 @@ redis: ## Open redis-cli on the dragonfly service
 
 .PHONY: tags
 tags:
-	$(Q)ctags -R --languages=python,javascript,typescript --exclude=node_modules app/shell/py app/flashoffer/*/src
+	$(Q)ctags -R --languages=python,javascript,typescript --exclude=node_modules app/shell/py app/flashoffer/
 
 .PHONY: release
 release:
