@@ -27,6 +27,19 @@
 - Node.js projects: modify `package.json` and `package-lock.json` only when
   the dependency list changes.
 
+## Patch Workflow
+
+- Ship Codex updates as a numbered patch series, similar to Linux kernel
+  workflows. Each logical change should live in its own patch file.
+- Keep patches focused, buildable, and sequentially applicable so that the
+  series can be reviewed or bisected easily.
+- Prefix patch subjects with an incremental tag (for example, `[PATCH 1/3]`)
+  and describe the impact in the first sentence.
+- When iterating on a series, resend the full set with a bumped version tag
+  (for example, `v2`) and include a changelog for reviewers.
+- After applying the series locally, have the Codex CLI create corresponding
+  git commits so each patch is tracked individually.
+
 ## Docker Images
 
 - Pin all Node.js Docker base images to `node:22-slim`.
