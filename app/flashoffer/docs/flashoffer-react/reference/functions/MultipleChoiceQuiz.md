@@ -59,6 +59,11 @@ after a correct response. Every submission triggers `onAnswer` with the
 selected option identifier and the computed correctness flag when
 available.
 
+To minimize visual jumpiness, the component animates layout updates such as
+revealing option descriptions, feedback alerts, and the retry button. These
+smooth transitions help learners follow the flow of the quiz without abrupt
+shifts in content.
+
 ## Deadlines and tallies
 
 Provide an `endTime` to automatically close the quiz at a scheduled

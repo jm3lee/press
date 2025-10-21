@@ -7,6 +7,7 @@ import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import Collapse from "@mui/material/Collapse";
 import FormControl from "@mui/material/FormControl";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormHelperText from "@mui/material/FormHelperText";
@@ -385,11 +386,14 @@ function OptionContent({
   totalTallies,
   showDescription
 }: OptionContentProps): ReactNode {
-  const hasDescription = Boolean(option.description && showDescription);
-  const shouldCenterLabel = !hasDescription && !showTallies;
+  const hasDescriptionContent = Boolean(option.description);
+  const shouldDisplayDescription = Boolean(
+    option.description && showDescription
+  );
+  const shouldCenterLabel = !shouldDisplayDescription && !showTallies;
   const labelBlock = (
     <Stack
-      spacing={hasDescription ? 0.5 : 0}
+      spacing={0}
       flex={1}
       minWidth={0}
       justifyContent={shouldCenterLabel ? "center" : "flex-start"}
@@ -398,10 +402,17 @@ function OptionContent({
       <Typography variant="body1" fontWeight={600}>
         {option.label}
       </Typography>
-      {hasDescription ? (
-        <Typography variant="body2" color="text.secondary">
-          {option.description}
-        </Typography>
+      {hasDescriptionContent ? (
+        <Collapse
+          in={shouldDisplayDescription}
+          timeout="auto"
+          unmountOnExit
+          appear
+        >
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            {option.description}
+          </Typography>
+        </Collapse>
       ) : null}
     </Stack>
   );
@@ -639,30 +650,54 @@ export function MultipleChoiceQuiz({
     );
   }, [helperText, isClosed]);
 
-  const feedbackContent = useMemo(() => {
-    if (!showFeedback || typeof evaluation !== "boolean") {
-      return null;
-    }
-    return (
-      <QuizFeedback
-        evaluation={evaluation}
-        successMessage={successMessage}
-        errorMessage={errorMessage}
-        explanation={explanation}
-      />
-    );
-  }, [errorMessage, evaluation, explanation, showFeedback, successMessage]);
+  const isFeedbackVisible = Boolean(showFeedback && typeof evaluation === "boolean");
 
-  const retryButton = useMemo(() => {
-    if (!showRetryButton) {
-      return null;
-    }
-    return (
-      <Button variant="outlined" onClick={handleRetry}>
-        {tryAgainLabel}
-      </Button>
-    );
-  }, [handleRetry, showRetryButton, tryAgainLabel]);
+  const feedbackContent = useMemo(
+    () => (
+      <Collapse
+        in={isFeedbackVisible}
+        timeout="auto"
+        unmountOnExit
+        mountOnEnter
+        appear
+      >
+        {isFeedbackVisible ? (
+          <QuizFeedback
+            evaluation={Boolean(evaluation)}
+            successMessage={successMessage}
+            errorMessage={errorMessage}
+            explanation={explanation}
+          />
+        ) : null}
+      </Collapse>
+    ),
+    [
+      errorMessage,
+      evaluation,
+      explanation,
+      isFeedbackVisible,
+      successMessage
+    ]
+  );
+
+  const retryButton = useMemo(
+    () => (
+      <Collapse
+        in={showRetryButton}
+        orientation="horizontal"
+        timeout="auto"
+        unmountOnExit
+        mountOnEnter
+        appear
+        sx={{ display: "flex" }}
+      >
+        <Button variant="outlined" onClick={handleRetry}>
+          {tryAgainLabel}
+        </Button>
+      </Collapse>
+    ),
+    [handleRetry, showRetryButton, tryAgainLabel]
+  );
 
   const totalTallies = useMemo(
     () =>
