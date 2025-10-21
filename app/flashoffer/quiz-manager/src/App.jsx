@@ -10,7 +10,8 @@ import {
   Button,
   Container,
   CssBaseline,
-  Stack,
+  Menu,
+  MenuItem,
   Toolbar,
   Typography
 } from '@mui/material';
@@ -30,6 +31,7 @@ const NAVIGATION_ITEMS = [
  */
 export default function App() {
   const [activePage, setActivePage] = useState('create');
+  const [navigationMenuAnchor, setNavigationMenuAnchor] = useState(null);
   const [generatorPrompt, setGeneratorPrompt] = useState('');
   const [generatorStatus, setGeneratorStatus] = useState('idle');
   const [generatorError, setGeneratorError] = useState('');
@@ -39,6 +41,15 @@ export default function App() {
 
   const handleSelectPage = useCallback((pageId) => {
     setActivePage(pageId);
+    setNavigationMenuAnchor(null);
+  }, []);
+
+  const handleOpenNavigationMenu = useCallback((event) => {
+    setNavigationMenuAnchor(event.currentTarget);
+  }, []);
+
+  const handleCloseNavigationMenu = useCallback(() => {
+    setNavigationMenuAnchor(null);
   }, []);
 
   const handleGeneratorPromptChange = useCallback((event) => {
@@ -107,17 +118,34 @@ export default function App() {
               </Typography>
             </Box>
             <Box sx={{ flexGrow: 1 }} />
-            <Stack direction="column" spacing={1} className="quiz-manager__nav-buttons">
-              {navigationItems.map((item) => (
-                <Button
-                  key={item.id}
-                  variant={activePage === item.id ? 'contained' : 'outlined'}
-                  onClick={() => handleSelectPage(item.id)}
-                >
-                  {item.label}
-                </Button>
-              ))}
-            </Stack>
+            <Box className="quiz-manager__nav-buttons">
+              <Button
+                color="inherit"
+                variant="outlined"
+                onClick={handleOpenNavigationMenu}
+                aria-haspopup="true"
+                aria-controls="quiz-manager-navigation-menu"
+              >
+                {navigationItems.find((item) => item.id === activePage)?.label ?? 'Navigate'}
+              </Button>
+              <Menu
+                id="quiz-manager-navigation-menu"
+                anchorEl={navigationMenuAnchor}
+                open={Boolean(navigationMenuAnchor)}
+                onClose={handleCloseNavigationMenu}
+                keepMounted
+              >
+                {navigationItems.map((item) => (
+                  <MenuItem
+                    key={item.id}
+                    selected={activePage === item.id}
+                    onClick={() => handleSelectPage(item.id)}
+                  >
+                    {item.label}
+                  </MenuItem>
+                ))}
+              </Menu>
+            </Box>
           </Toolbar>
         </AppBar>
         <Container maxWidth="md" className="quiz-manager__content">
