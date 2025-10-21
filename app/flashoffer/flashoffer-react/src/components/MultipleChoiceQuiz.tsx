@@ -847,7 +847,7 @@ export function MultipleChoiceQuiz({
 
   return (
     <Box sx={{ position: "relative" }}>
-      <Card component="section" elevation={3} sx={{ borderRadius: 3 }}>
+      <Card component="section" elevation={3}>
         <CardContent>
           <Stack spacing={3}>
             <Stack spacing={1}>

@@ -19,6 +19,24 @@ services:
     volumes:
       - ./app/flashoffer/quiz-backend:/app
 
+  quiz-backend-prod:
+    build:
+      context: .
+      dockerfile: ./app/flashoffer/quiz-backend/Dockerfile
+      target: prod
+    environment:
+      DATABASE_HOST: analytics-db
+      DATABASE_PORT: 5432
+      DATABASE_USER: analytics
+      DATABASE_PASSWORD: analytics
+      DATABASE_NAME: analytics
+      CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-https://quiz.flashoffer.art}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    depends_on:
+      - analytics-db
+    ports:
+      - "8002:8000"
+
   # Runs the standalone quiz manager React server used for question ingestion.
   # Rebuild the container when dependencies change to keep npm modules fresh.
   quiz-manager:
