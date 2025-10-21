@@ -8,7 +8,7 @@
 
 Defined in: src/components/MultipleChoiceQuiz.tsx:76
 
-Accessible multiple choice quiz with inline evaluation feedback.
+Accessible multiple choice quiz with a full-screen feedback modal.
 
 ## Parameters
 
@@ -42,10 +42,11 @@ import { MultipleChoiceQuiz } from "flashoffer-react";
 ```
 
 When a `correctOptionId` is provided, the quiz displays success or error
-alerts after each submission. The messaging can be tuned using the
-`successMessage`, `errorMessage`, and `explanation` props. If no correct
-answer is configured, the component still surfaces the learner's selection
-through the `onAnswer` callback without rendering evaluation UI.
+feedback inside a full-screen modal after each submission. The modal can be
+reopened via the in-card `View feedback` control. The messaging can be tuned
+using the `successMessage`, `errorMessage`, and `explanation` props. If no
+correct answer is configured, the component still surfaces the learner's
+selection through the `onAnswer` callback without rendering evaluation UI.
 
 ## Submission flow
 
@@ -60,9 +61,9 @@ selected option identifier and the computed correctness flag when
 available.
 
 To minimize visual jumpiness, the component animates layout updates such as
-revealing option descriptions, feedback alerts, and the retry button. These
-smooth transitions help learners follow the flow of the quiz without abrupt
-shifts in content.
+revealing option descriptions, surfacing the feedback trigger, and presenting
+the retry button. These smooth transitions help learners follow the flow of
+the quiz without abrupt shifts in content.
 
 ## Deadlines and tallies
 
