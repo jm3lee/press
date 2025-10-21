@@ -10,6 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.3.4",
+    "@mui/material": "^7.3.4",
+    "@mui/utils": "^7.3.3",
+    "canvas-confetti": "^1.9.3",
     "flashoffer-react": "file:../flashoffer-react",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
