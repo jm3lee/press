@@ -386,11 +386,14 @@ function OptionContent({
   showDescription
 }: OptionContentProps): ReactNode {
   const hasDescription = Boolean(option.description && showDescription);
+  const shouldCenterLabel = !hasDescription && !showTallies;
   const labelBlock = (
     <Stack
       spacing={hasDescription ? 0.5 : 0}
       flex={1}
       minWidth={0}
+      justifyContent={shouldCenterLabel ? "center" : "flex-start"}
+      sx={shouldCenterLabel ? { minHeight: 40 } : undefined}
     >
       <Typography variant="body1" fontWeight={600}>
         {option.label}
@@ -676,6 +679,12 @@ export function MultipleChoiceQuiz({
   const optionItems = useMemo(
     () =>
       options.map((option) => {
+        const showOptionDescription = Boolean(
+          option.description && (hasSubmitted || resolvedDisabled)
+        );
+        const alignItemsValue =
+          showOptionDescription || isClosed ? "flex-start" : "center";
+
         const { highlight, highlightAnswer, optionState, isSelected } =
           resolveOptionState({
             optionId: option.id,
@@ -702,13 +711,13 @@ export function MultipleChoiceQuiz({
                 option={option}
                 showTallies={isClosed}
                 totalTallies={totalTallies}
-                showDescription={hasSubmitted || resolvedDisabled}
+                showDescription={showOptionDescription}
               />
             }
             disabled={disableChoices}
             data-option-state={optionState}
             sx={(theme) => ({
-              alignItems: "flex-start",
+              alignItems: alignItemsValue,
               m: 0,
               px: 2,
               py: 1.5,

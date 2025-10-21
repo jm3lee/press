@@ -35,6 +35,7 @@ const PAGE_DEFINITIONS = [
 ];
 
 const DEFAULT_PAGE_PATH = '/create';
+const GENERATOR_PROMPT_STORAGE_KEY = 'quiz-manager:last-generator-prompt';
 
 const emptyOption = () => ({
   id: '',
@@ -398,7 +399,16 @@ export default function QuizManager({
   const [questionsStatus, setQuestionsStatus] = useState('idle');
   const [questionsError, setQuestionsError] = useState('');
   const [selectedSlug, setSelectedSlug] = useState('');
-  const [generatorPrompt, setGeneratorPrompt] = useState('');
+  const [generatorPrompt, setGeneratorPrompt] = useState(() => {
+    if (typeof window === 'undefined') {
+      return '';
+    }
+    try {
+      return window.localStorage.getItem(GENERATOR_PROMPT_STORAGE_KEY) ?? '';
+    } catch {
+      return '';
+    }
+  });
   const [generatorStatus, setGeneratorStatus] = useState('idle');
   const [generatorError, setGeneratorError] = useState('');
   const navigate = useNavigate();
@@ -481,6 +491,23 @@ export default function QuizManager({
       /* handled in state */
     });
   }, [fetchQuestions]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    try {
+      if (generatorPrompt) {
+        window.localStorage.setItem(GENERATOR_PROMPT_STORAGE_KEY, generatorPrompt);
+      } else {
+        window.localStorage.removeItem(GENERATOR_PROMPT_STORAGE_KEY);
+      }
+    } catch (error) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn('Unable to persist generator prompt', error);
+      }
+    }
+  }, [generatorPrompt]);
 
   const handleFieldChange = useCallback((field) => (event) => {
     const value = event.target.value;
