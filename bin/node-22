@@ -1,0 +1,2 @@
+#!/bin/bash
+docker run --entrypoint bash --rm -i -t -u $(id -u) -v ./:/workspace --workdir /workspace node:22-slim
