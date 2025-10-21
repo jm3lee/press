@@ -8,6 +8,7 @@ import {
   Box,
   Button,
   FormControl,
+  FormHelperText,
   IconButton,
   InputLabel,
   MenuItem,
@@ -23,6 +24,8 @@ import { FlashofferThemeProvider, MultipleChoiceQuiz } from 'flashoffer-react';
 
 export default function CreateQuestionPage({
   canSubmit,
+  celebrationLabels,
+  celebrationOptions,
   fileError,
   fileName,
   form,
@@ -163,6 +166,27 @@ export default function CreateQuestionPage({
             fullWidth
           />
 
+          <FormControl fullWidth disabled={formDisabled}>
+            <InputLabel id="celebration-effect-label">
+              Celebration Effect
+            </InputLabel>
+            <Select
+              labelId="celebration-effect-label"
+              label="Celebration Effect"
+              value={form.celebration}
+              onChange={handleFieldChange('celebration')}
+            >
+              {celebrationOptions.map((value) => (
+                <MenuItem key={value} value={value}>
+                  {celebrationLabels[value]}
+                </MenuItem>
+              ))}
+            </Select>
+            <FormHelperText>
+              Choose the confetti animation shown after correct answers.
+            </FormHelperText>
+          </FormControl>
+
           <Stack spacing={1}>
             <Stack
               direction="row"
@@ -269,6 +293,14 @@ export default function CreateQuestionPage({
                     explanation={previewQuestion.explanation}
                     successMessage={previewQuestion.successMessage}
                     errorMessage={previewQuestion.errorMessage}
+                    confetti={
+                      previewQuestion.celebration === 'off'
+                        ? undefined
+                        : {
+                            enabled: true,
+                            preset: previewQuestion.celebration
+                          }
+                    }
                   />
                 </FlashofferThemeProvider>
               </Box>

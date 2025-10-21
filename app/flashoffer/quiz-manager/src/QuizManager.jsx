@@ -36,6 +36,14 @@ const PAGE_DEFINITIONS = [
 
 const DEFAULT_PAGE_PATH = '/create';
 const GENERATOR_PROMPT_STORAGE_KEY = 'quiz-manager:last-generator-prompt';
+const DEFAULT_CELEBRATION = 'off';
+const QUIZ_CELEBRATION_OPTIONS = ['off', 'classic', 'streamers', 'burst'];
+const QUIZ_CELEBRATION_LABELS = {
+  off: 'None',
+  classic: 'Classic confetti',
+  streamers: 'Streamer launch',
+  burst: 'Grand finale'
+};
 
 const emptyOption = () => ({
   id: '',
@@ -55,6 +63,7 @@ const createEmptyForm = () => ({
   published_on: todayIso(),
   expires_on: '',
   correct_option_id: '',
+  celebration: DEFAULT_CELEBRATION,
   options: [emptyOption(), emptyOption(), emptyOption()]
 });
 
@@ -114,6 +123,10 @@ function buildFormStateForQuestion(question, normalizeOptionsFn) {
     formState.published_on = isoDateValue(question.published_on, todayIso());
     formState.expires_on = optionalIsoDate(question.expires_on);
     formState.correct_option_id = trimValue(question.correct_option_id);
+    const celebration = trimValue(question.celebration);
+    formState.celebration = QUIZ_CELEBRATION_OPTIONS.includes(celebration)
+      ? celebration
+      : DEFAULT_CELEBRATION;
   }
 
   if (!formState.correct_option_id && normalizedOptions.length > 0) {
@@ -235,6 +248,10 @@ function resolvePreviewQuestion(formState) {
   const explanation = optionalTrimmed(formState.explanation);
   const successMessage = optionalTrimmed(formState.success_message);
   const errorMessage = optionalTrimmed(formState.error_message);
+  const celebrationValue = trimValue(formState.celebration);
+  const resolvedCelebration = QUIZ_CELEBRATION_OPTIONS.includes(celebrationValue)
+    ? celebrationValue
+    : DEFAULT_CELEBRATION;
   const hasOptionContent = previewOptionsHaveContent(normalizedOptions);
   const hasContent = previewHasContent([
     questionText,
@@ -261,7 +278,8 @@ function resolvePreviewQuestion(formState) {
     correctOptionId: resolvedCorrect,
     explanation: explanation || undefined,
     successMessage: successMessage || undefined,
-    errorMessage: errorMessage || undefined
+    errorMessage: errorMessage || undefined,
+    celebration: resolvedCelebration
   };
 }
 
@@ -575,6 +593,10 @@ export default function QuizManager({
       );
 
       const expiresOn = trimValue(targetForm.expires_on);
+      const celebrationValue = trimValue(targetForm.celebration) || DEFAULT_CELEBRATION;
+      const celebration = QUIZ_CELEBRATION_OPTIONS.includes(celebrationValue)
+        ? celebrationValue
+        : DEFAULT_CELEBRATION;
 
       return {
         slug,
@@ -586,7 +608,8 @@ export default function QuizManager({
         options: normalizedOptions,
         correct_option_id: correctOptionId,
         published_on: publishedOn,
-        expires_on: expiresOn ? expiresOn : undefined
+        expires_on: expiresOn ? expiresOn : undefined,
+        celebration
       };
     } catch (error) {
       return handlePayloadError(error, silent, setFormError);
@@ -761,6 +784,8 @@ export default function QuizManager({
           element={
             <CreateQuestionPage
               canSubmit={canSubmit}
+              celebrationLabels={QUIZ_CELEBRATION_LABELS}
+              celebrationOptions={QUIZ_CELEBRATION_OPTIONS}
               fileError={fileError}
               fileName={fileName}
               form={form}
