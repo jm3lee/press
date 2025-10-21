@@ -1,2 +1,10 @@
-#!/bin/bash
-docker run --entrypoint bash --rm -i -t -u $(id -u) -v ./:/workspace --workdir /workspace node:22-slim
+#!/bin/bash -x
+entrypoint="$1"; shift
+docker run \
+    --entrypoint "$entrypoint" \
+    --rm -i -t \
+    -u $(id -u) \
+    -v ./:/workspace \
+    --workdir /workspace \
+    --network host \
+    node:22-slim "$@"
