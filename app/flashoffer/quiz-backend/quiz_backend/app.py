@@ -202,6 +202,8 @@ def _build_generation_system_prompt() -> str:
         "Provide helper_text, explanation, success_message, and error_message when useful; otherwise use null. "
         "options must contain at least three entries. Each entry needs id (lowercase string), label (answer text), "
         "and optional description (<= 140 characters). "
+        "Shuffle or randomize the placement of the correct option so it is not "
+        "always first or predictably positioned. "
         "correct_option_id must exactly match one option id. "
         f"Use '{today}' for published_on unless instructed otherwise. "
         "Set expires_on to null unless a future ISO date is explicitly requested. "
