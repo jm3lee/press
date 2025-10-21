@@ -20,6 +20,8 @@ playground and learn how to iterate on content safely.
   offer redemption, and analytics exports.
 - `quiz-backend/` describes the server-side quiz engines, database schemas, and
   operational runbooks used during high-traffic campaigns.
+- `quiz-manager/` captures the architecture and workflows for the React-based
+  question ingestion console used by content operators.
 
 Each directory follows the same structure: a high-level README, task-focused
 recipes, and troubleshooting appendices. Start with the README for orientation,
