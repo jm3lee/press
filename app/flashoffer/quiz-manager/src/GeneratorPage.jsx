@@ -12,6 +12,11 @@ import {
   Box,
   Alert,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Paper,
   Stack,
   TextField,
@@ -202,8 +207,11 @@ export default function GeneratorPage() {
   const [generatorSuccess, setGeneratorSuccess] = useState('');
   const [generatedQuestion, setGeneratedQuestion] = useState(null);
   const [createStatus, setCreateStatus] = useState('idle');
-  const [createError, setCreateError] = useState('');
-  const [createSuccess, setCreateSuccess] = useState('');
+  const [createDialog, setCreateDialog] = useState({
+    open: false,
+    severity: 'success',
+    message: ''
+  });
 
   const previewQuestion = useMemo(() => {
     if (!generatedQuestion || typeof generatedQuestion !== 'object') {
@@ -318,8 +326,7 @@ export default function GeneratorPage() {
       const slug = body.question?.slug?.trim();
       const questionLabel = slug ? `Drafted question ${slug}` : 'Drafted question';
       setGeneratorSuccess(`${questionLabel} from GPT-5.`);
-      setCreateSuccess('');
-      setCreateError('');
+      setCreateDialog({ open: false, severity: 'success', message: '' });
     } catch (error) {
       setGeneratedQuestion(null);
       setGeneratorError(
@@ -332,13 +339,16 @@ export default function GeneratorPage() {
 
   const handleCreateQuestion = useCallback(async () => {
     if (typeof window === 'undefined') {
-      setCreateError('Creation is not available in this environment.');
+      setCreateDialog({
+        open: true,
+        severity: 'error',
+        message: 'Creation is not available in this environment.'
+      });
       return;
     }
 
     setCreateStatus('loading');
-    setCreateError('');
-    setCreateSuccess('');
+    setCreateDialog({ open: false, severity: 'success', message: '' });
 
     try {
       const payload = buildCreationPayload(generatedQuestion);
@@ -367,15 +377,25 @@ export default function GeneratorPage() {
 
       const slug = trimValue(body?.question?.slug ?? payload.slug);
       const questionLabel = slug ? `Created question ${slug}` : 'Created question';
-      setCreateSuccess(questionLabel);
+      setCreateDialog({ open: true, severity: 'success', message: questionLabel });
     } catch (error) {
-      setCreateError(
-        error instanceof Error ? error.message : 'Creation failed unexpectedly.'
-      );
+      setCreateDialog({
+        open: true,
+        severity: 'error',
+        message:
+          error instanceof Error ? error.message : 'Creation failed unexpectedly.'
+      });
     } finally {
       setCreateStatus('idle');
     }
   }, [generatedQuestion]);
+
+  /**
+   * Closes the modal dialog used to communicate creation results.
+   */
+  const handleCloseCreateDialog = useCallback(() => {
+    setCreateDialog((previous) => ({ ...previous, open: false }));
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -394,8 +414,9 @@ export default function GeneratorPage() {
   }, [generatorPrompt]);
 
   return (
-    <Paper elevation={6} className="quiz-manager__panel">
-      <Stack spacing={2}>
+    <>
+      <Paper elevation={6} className="quiz-manager__panel">
+        <Stack spacing={2}>
         <Typography variant="h5" component="h2">
           GPT-5 Drafts
         </Typography>
@@ -491,7 +512,20 @@ export default function GeneratorPage() {
             </Button>
           </Stack>
         </Stack>
-      </Stack>
-    </Paper>
+      </Paper>
+      <Dialog open={createDialog.open} onClose={handleCloseCreateDialog}>
+        <DialogTitle>
+          {createDialog.severity === 'success' ? 'Question created' : 'Creation failed'}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>{createDialog.message}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseCreateDialog} autoFocus>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }
