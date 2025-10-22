@@ -199,12 +199,17 @@ class GenerationModelError(RuntimeError):
     """Raised when the OpenAI response cannot be converted into a question."""
 
 
+MIN_GENERATION_COUNT = 1
+MAX_GENERATION_COUNT = 5
+
+
 @dataclass(frozen=True)
 class GenerationRequest:
     """Validated parameters for generating a quiz question."""
 
     prompt: str
     model: str
+    count: int
 
 
 def _build_generation_system_prompt() -> str:
@@ -262,6 +267,53 @@ def _load_generation_payload(flask_request: Request) -> Dict[str, Any]:
     return payload
 
 
+def _normalize_generation_count(value: Any) -> int:
+    """Coerce the inbound generation count into a bounded integer."""
+
+    if value is None:
+        return MIN_GENERATION_COUNT
+
+    if isinstance(value, bool):
+        raise GenerationRequestError(
+            f"count must be an integer between {MIN_GENERATION_COUNT}"
+            f" and {MAX_GENERATION_COUNT}"
+        )
+
+    if isinstance(value, int):
+        count = value
+    elif isinstance(value, float):
+        if not value.is_integer():
+            raise GenerationRequestError(
+                f"count must be an integer between {MIN_GENERATION_COUNT}"
+                f" and {MAX_GENERATION_COUNT}"
+            )
+        count = int(value)
+    elif isinstance(value, str):
+        stripped = value.strip()
+        if not stripped:
+            return MIN_GENERATION_COUNT
+        try:
+            count = int(stripped, 10)
+        except ValueError as exc:
+            raise GenerationRequestError(
+                f"count must be an integer between {MIN_GENERATION_COUNT}"
+                f" and {MAX_GENERATION_COUNT}"
+            ) from exc
+    else:
+        raise GenerationRequestError(
+            f"count must be an integer between {MIN_GENERATION_COUNT}"
+            f" and {MAX_GENERATION_COUNT}"
+        )
+
+    if count < MIN_GENERATION_COUNT or count > MAX_GENERATION_COUNT:
+        raise GenerationRequestError(
+            f"count must be an integer between {MIN_GENERATION_COUNT}"
+            f" and {MAX_GENERATION_COUNT}"
+        )
+
+    return count
+
+
 def _parse_generation_request(flask_request: Request) -> GenerationRequest:
     payload = _load_generation_payload(flask_request)
 
@@ -275,7 +327,9 @@ def _parse_generation_request(flask_request: Request) -> GenerationRequest:
 
     model = str(payload.get("model") or "gpt-5").strip() or "gpt-5"
 
-    return GenerationRequest(prompt=prompt, model=model)
+    count = _normalize_generation_count(payload.get("count"))
+
+    return GenerationRequest(prompt=prompt, model=model, count=count)
 
 
 def _request_generated_question(
@@ -498,11 +552,17 @@ def create_app() -> Flask:
                 return jsonify({"error": f"openai_client_init_failed: {exc}"}), 502
 
             try:
-                question_payload, generated = _request_generated_question(
-                    client,
-                    model=generation_request.model,
-                    prompt=generation_request.prompt,
-                )
+                questions: list[Dict[str, Any]] = []
+                raw_batch: list[Dict[str, Any]] = []
+
+                for _ in range(generation_request.count):
+                    question_payload, generated = _request_generated_question(
+                        client,
+                        model=generation_request.model,
+                        prompt=generation_request.prompt,
+                    )
+                    questions.append(question_payload)
+                    raw_batch.append(generated)
             except GenerationModelError as exc:
                 return jsonify({"error": str(exc)}), 502
             except Exception as exc:  # noqa: BLE001 - surface API error
@@ -511,7 +571,16 @@ def create_app() -> Flask:
                 )
                 return jsonify({"error": f"openai_request_failed: {exc}"}), 502
 
-            return jsonify({"question": question_payload, "raw": generated})
+            response_payload: Dict[str, Any] = {
+                "questions": questions,
+                "raw_batch": raw_batch,
+            }
+            if questions:
+                response_payload["question"] = questions[0]
+            if raw_batch:
+                response_payload["raw"] = raw_batch[0]
+
+            return jsonify(response_payload)
         finally:
             if managed_http_client is not None:
                 managed_http_client.close()

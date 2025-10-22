@@ -410,6 +410,8 @@ def test_generate_quiz_question_uses_https_without_proxy(client, monkeypatch):
     body = response.get_json()
     assert body["question"]["slug"] == "draft-slug"
     assert body["question"]["celebration"] == "classic"
+    assert body["questions"] == [generated_question]
+    assert body["raw_batch"] == [generated_question]
     assert len(DummyOpenAI.calls) == 1
     base_url, used_client = DummyOpenAI.calls[0]
     assert base_url.startswith("https://")
@@ -425,6 +427,86 @@ def test_generate_quiz_question_rejects_non_string_prompt(client, monkeypatch):
     assert response.status_code == 400
     body = response.get_json()
     assert body["error"] == "prompt must be a string"
+
+
+def test_generate_quiz_question_rejects_invalid_count(client, monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "unit-test-key")
+
+    response = client.post(
+        "/api/quiz/questions/generate",
+        json={"prompt": "", "count": 0},
+    )
+
+    assert response.status_code == 400
+    body = response.get_json()
+    assert "count must be an integer" in body["error"]
+
+
+def test_generate_quiz_question_batches_requests(client, monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "unit-test-key")
+
+    class DummyHttpClient:
+        instances: list["DummyHttpClient"] = []
+
+        def __init__(self, *args, **kwargs):
+            self.kwargs = kwargs
+            self.closed = False
+            DummyHttpClient.instances.append(self)
+
+        def close(self):
+            self.closed = True
+
+    class DummyOpenAI:
+        def __init__(self, *, api_key, base_url, http_client):
+            self.api_key = api_key
+            self.base_url = base_url
+            self.http_client = http_client
+            self._counter = 0
+            self.chat = SimpleNamespace(
+                completions=SimpleNamespace(create=self._create_completion)
+            )
+
+        def _create_completion(self, **_kwargs):
+            slug = f"batched-question-{self._counter}"
+            self._counter += 1
+            payload = {
+                "slug": slug,
+                "question": f"Question #{self._counter}?",
+                "helper_text": None,
+                "explanation": None,
+                "success_message": None,
+                "error_message": None,
+                "options": [
+                    {"id": "a", "label": "First"},
+                    {"id": "b", "label": "Second"},
+                    {"id": "c", "label": "Third"},
+                ],
+                "correct_option_id": "a",
+                "published_on": "2024-01-01",
+                "expires_on": None,
+                "celebration": "off",
+            }
+            return SimpleNamespace(
+                choices=[
+                    SimpleNamespace(
+                        message=SimpleNamespace(content=json.dumps(payload))
+                    )
+                ]
+            )
+
+    monkeypatch.setattr("quiz_backend.app.httpx.Client", DummyHttpClient)
+    monkeypatch.setattr("quiz_backend.app.OpenAI", DummyOpenAI)
+
+    response = client.post(
+        "/api/quiz/questions/generate",
+        json={"prompt": "", "count": 3},
+    )
+
+    assert response.status_code == 200
+    body = response.get_json()
+    assert len(body["questions"]) == 3
+    assert len(body["raw_batch"]) == 3
+    assert body["question"]["slug"] == "batched-question-0"
 
 
 def test_generate_quiz_question_handles_openai_error(client, monkeypatch):

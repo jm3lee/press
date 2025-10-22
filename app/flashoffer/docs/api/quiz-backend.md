@@ -114,12 +114,16 @@ curl -s \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $QUIZ_TOKEN" \
   https://quiz.flashoffer.example/api/quiz/questions/generate \
-  -d '{"topic": "cashback basics", "difficulty": "easy"}' |
+  -d '{"count": 2, "topic": "cashback basics", "difficulty": "easy"}' |
   jq
 ```
 
-The generator responds with a draft question and choices that your moderation
-workflow can review before publishing.
+The generator responds with a list of draft questions plus the raw completions
+returned by the model. Quiz Manager surfaces one question at a time so
+moderators can step through the batch and publish only the approved entries.
+Responses include a `questions` array and a matching `raw_batch`.
+The first entry is also exposed as `question` for backwards
+compatibility with older clients.
 
 ## Tracking Quiz Performance
 

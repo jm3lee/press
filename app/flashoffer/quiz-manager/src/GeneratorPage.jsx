@@ -17,6 +17,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  LinearProgress,
   Paper,
   Stack,
   TextField,
@@ -29,6 +30,34 @@ const GENERATOR_ENDPOINT = '/api/quiz/questions/generate';
 const QUESTIONS_ENDPOINT = '/api/quiz/questions';
 const GENERATOR_PROMPT_STORAGE_KEY = 'quiz-manager:last-generator-prompt';
 const DEFAULT_CELEBRATION = 'off';
+const MIN_GENERATION_COUNT = 1;
+const MAX_GENERATION_COUNT = 5;
+
+/**
+ * Formats a millisecond duration into a compact string.
+ * @param {number} milliseconds - Duration in milliseconds.
+ * @returns {string} Human friendly representation.
+ */
+function formatDuration(milliseconds) {
+  if (!Number.isFinite(milliseconds) || milliseconds <= 0) {
+    return '0s';
+  }
+
+  if (milliseconds < 1000) {
+    return `${Math.round(milliseconds)}ms`;
+  }
+
+  const totalSeconds = milliseconds / 1000;
+  if (totalSeconds < 60) {
+    const precision = totalSeconds < 10 ? 1 : 0;
+    return `${totalSeconds.toFixed(precision)}s`;
+  }
+
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = Math.floor(totalSeconds % 60);
+  const paddedSeconds = String(seconds).padStart(2, '0');
+  return `${minutes}m ${paddedSeconds}s`;
+}
 
 /**
  * Trims arbitrary values into normalized strings.
@@ -208,7 +237,12 @@ export default function GeneratorPage() {
   const [generatorStatus, setGeneratorStatus] = useState('idle');
   const [generatorError, setGeneratorError] = useState('');
   const [generatorSuccess, setGeneratorSuccess] = useState('');
-  const [generatedQuestion, setGeneratedQuestion] = useState(null);
+  const [questionCount, setQuestionCount] = useState(MIN_GENERATION_COUNT);
+  const [generatedQuestions, setGeneratedQuestions] = useState([]);
+  const [rawGenerations, setRawGenerations] = useState([]);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [generationStartedAt, setGenerationStartedAt] = useState(null);
+  const [generationElapsedMs, setGenerationElapsedMs] = useState(0);
   const [createStatus, setCreateStatus] = useState('idle');
   const [createDialog, setCreateDialog] = useState({
     open: false,
@@ -216,38 +250,54 @@ export default function GeneratorPage() {
     message: '',
   });
 
+  const currentQuestion = useMemo(() => {
+    if (
+      currentQuestionIndex < 0 ||
+      currentQuestionIndex >= generatedQuestions.length
+    ) {
+      return null;
+    }
+
+    const candidate = generatedQuestions[currentQuestionIndex];
+    if (!candidate || typeof candidate !== 'object') {
+      return null;
+    }
+
+    return candidate;
+  }, [generatedQuestions, currentQuestionIndex]);
+
   const previewQuestion = useMemo(() => {
-    if (!generatedQuestion || typeof generatedQuestion !== 'object') {
+    if (!currentQuestion || typeof currentQuestion !== 'object') {
       return null;
     }
 
     const questionText =
-      typeof generatedQuestion.question === 'string'
-        ? generatedQuestion.question.trim()
+      typeof currentQuestion.question === 'string'
+        ? currentQuestion.question.trim()
         : '';
 
     const helperText =
-      typeof generatedQuestion.helper_text === 'string'
-        ? generatedQuestion.helper_text.trim()
+      typeof currentQuestion.helper_text === 'string'
+        ? currentQuestion.helper_text.trim()
         : '';
 
     const explanation =
-      typeof generatedQuestion.explanation === 'string'
-        ? generatedQuestion.explanation.trim()
+      typeof currentQuestion.explanation === 'string'
+        ? currentQuestion.explanation.trim()
         : '';
 
     const successMessage =
-      typeof generatedQuestion.success_message === 'string'
-        ? generatedQuestion.success_message.trim()
+      typeof currentQuestion.success_message === 'string'
+        ? currentQuestion.success_message.trim()
         : '';
 
     const errorMessage =
-      typeof generatedQuestion.error_message === 'string'
-        ? generatedQuestion.error_message.trim()
+      typeof currentQuestion.error_message === 'string'
+        ? currentQuestion.error_message.trim()
         : '';
 
-    const options = Array.isArray(generatedQuestion.options)
-      ? generatedQuestion.options
+    const options = Array.isArray(currentQuestion.options)
+      ? currentQuestion.options
           .map((option) => ({
             id: typeof option?.id === 'string' ? option.id : '',
             label: typeof option?.label === 'string' ? option.label : '',
@@ -264,14 +314,14 @@ export default function GeneratorPage() {
     }
 
     const correctOptionId =
-      typeof generatedQuestion.correct_option_id === 'string'
-        ? generatedQuestion.correct_option_id
+      typeof currentQuestion.correct_option_id === 'string'
+        ? currentQuestion.correct_option_id
         : undefined;
 
     const celebration =
-      typeof generatedQuestion.celebration === 'string' &&
-      generatedQuestion.celebration
-        ? generatedQuestion.celebration
+      typeof currentQuestion.celebration === 'string' &&
+      currentQuestion.celebration
+        ? currentQuestion.celebration
         : undefined;
 
     return {
@@ -284,10 +334,65 @@ export default function GeneratorPage() {
       errorMessage: errorMessage || undefined,
       celebration,
     };
-  }, [generatedQuestion]);
+  }, [currentQuestion]);
+
+  const currentRawGeneration = useMemo(() => {
+    if (
+      currentQuestionIndex < 0 ||
+      currentQuestionIndex >= rawGenerations.length
+    ) {
+      return null;
+    }
+
+    const candidate = rawGenerations[currentQuestionIndex];
+    if (!candidate || typeof candidate !== 'object') {
+      return null;
+    }
+
+    return candidate;
+  }, [rawGenerations, currentQuestionIndex]);
+
+  const totalQuestions = generatedQuestions.length;
+  const reviewProgress = totalQuestions
+    ? Math.round(((currentQuestionIndex + 1) / totalQuestions) * 100)
+    : 0;
+  const generatorInFlight = generatorStatus === 'loading';
+  const generationTimeLabel = formatDuration(generationElapsedMs);
+  const currentSlug =
+    currentQuestion && typeof currentQuestion.slug === 'string'
+      ? currentQuestion.slug.trim()
+      : '';
+  const rawSummaryLabel = totalQuestions > 1
+    ? `Raw JSON payload (Question ${currentQuestionIndex + 1})`
+    : 'Raw JSON payload';
+  const generateButtonLabel = useMemo(() => {
+    if (generatorInFlight) {
+      return 'Generating…';
+    }
+    if (questionCount > 1) {
+      return 'Generate questions with GPT-5';
+    }
+    return 'Generate question with GPT-5';
+  }, [generatorInFlight, questionCount]);
 
   const handleGeneratorPromptChange = useCallback((event) => {
     setGeneratorPrompt(event.target.value);
+    setGeneratorError('');
+  }, []);
+
+  const handleQuestionCountChange = useCallback((event) => {
+    const nextValue = Number.parseInt(event.target.value, 10);
+    if (Number.isNaN(nextValue)) {
+      setQuestionCount(MIN_GENERATION_COUNT);
+      setGeneratorError('');
+      return;
+    }
+
+    const clamped = Math.min(
+      MAX_GENERATION_COUNT,
+      Math.max(MIN_GENERATION_COUNT, nextValue),
+    );
+    setQuestionCount(clamped);
     setGeneratorError('');
   }, []);
 
@@ -299,10 +404,26 @@ export default function GeneratorPage() {
 
     const trimmedPrompt = generatorPrompt.trim();
 
+    const desiredCount = Math.min(
+      MAX_GENERATION_COUNT,
+      Math.max(MIN_GENERATION_COUNT, Number.isFinite(questionCount)
+        ? questionCount
+        : MIN_GENERATION_COUNT),
+    );
+
+    if (desiredCount !== questionCount) {
+      setQuestionCount(desiredCount);
+    }
+
     setGeneratorStatus('loading');
     setGeneratorError('');
     setGeneratorSuccess('');
-
+    setGeneratedQuestions([]);
+    setRawGenerations([]);
+    setCurrentQuestionIndex(0);
+    const startTime = Date.now();
+    setGenerationStartedAt(startTime);
+    setGenerationElapsedMs(0);
     try {
       const url = new URL(
         'http://localhost:8002' + GENERATOR_ENDPOINT,
@@ -315,6 +436,7 @@ export default function GeneratorPage() {
         },
         body: JSON.stringify({
           prompt: trimmedPrompt || undefined,
+          count: desiredCount,
         }),
       });
 
@@ -325,28 +447,75 @@ export default function GeneratorPage() {
         throw new Error(message);
       }
 
-      if (!body?.question) {
-        throw new Error('Generation did not return a question payload.');
+      let questions = Array.isArray(body?.questions) ? body.questions : [];
+      if (!questions.length && body?.question) {
+        questions = [body.question];
       }
 
-      setGeneratedQuestion(body.question);
-      const slug = body.question?.slug?.trim();
-      const questionLabel = slug
-        ? `Drafted question ${slug}`
-        : 'Drafted question';
-      setGeneratorSuccess(`${questionLabel} from GPT-5.`);
+      if (!questions.length) {
+        throw new Error('Generation did not return any question payloads.');
+      }
+
+      const rawBatch = Array.isArray(body?.raw_batch) ? body.raw_batch : [];
+      const legacyRaw = body?.raw;
+      const normalizedRaw = questions.map((question, index) => {
+        if (rawBatch[index] && typeof rawBatch[index] === 'object') {
+          return rawBatch[index];
+        }
+
+        if (Array.isArray(legacyRaw) && legacyRaw[index] && typeof legacyRaw[index] === 'object') {
+          return legacyRaw[index];
+        }
+
+        if (legacyRaw && !Array.isArray(legacyRaw) && typeof legacyRaw === 'object' && index === 0) {
+          return legacyRaw;
+        }
+
+        return question;
+      });
+
+      setGeneratedQuestions(questions);
+      setRawGenerations(normalizedRaw);
+      setCurrentQuestionIndex(0);
+
+      const durationMs = Date.now() - startTime;
+      let successLabel = `Drafted ${questions.length} questions in ${formatDuration(
+        durationMs,
+      )} with GPT-5.`;
+      if (questions.length === 1) {
+        successLabel = `Drafted 1 question in ${formatDuration(durationMs)} with GPT-5.`;
+      }
+      setGeneratorSuccess(successLabel);
       setCreateDialog({ open: false, severity: 'success', message: '' });
     } catch (error) {
-      setGeneratedQuestion(null);
+      setGeneratedQuestions([]);
+      setRawGenerations([]);
       setGeneratorError(
         error instanceof Error
           ? error.message
           : 'Generation failed unexpectedly.',
       );
     } finally {
+      const finishedAt = Date.now();
+      const elapsed = Math.max(0, finishedAt - startTime);
+      setGenerationElapsedMs(elapsed);
+      setGenerationStartedAt(null);
       setGeneratorStatus('idle');
     }
-  }, [generatorPrompt]);
+  }, [generatorPrompt, questionCount]);
+
+  const handleSelectPrevious = useCallback(() => {
+    setCurrentQuestionIndex((previous) => (previous > 0 ? previous - 1 : previous));
+  }, []);
+
+  const handleSelectNext = useCallback(() => {
+    setCurrentQuestionIndex((previous) => {
+      if (previous + 1 >= totalQuestions) {
+        return previous;
+      }
+      return previous + 1;
+    });
+  }, [totalQuestions]);
 
   const handleCreateQuestion = useCallback(async () => {
     if (typeof window === 'undefined') {
@@ -358,11 +527,20 @@ export default function GeneratorPage() {
       return;
     }
 
+    if (!currentQuestion) {
+      setCreateDialog({
+        open: true,
+        severity: 'error',
+        message: 'Generate a question before creating it.',
+      });
+      return;
+    }
+
     setCreateStatus('loading');
     setCreateDialog({ open: false, severity: 'success', message: '' });
 
     try {
-      const payload = buildCreationPayload(generatedQuestion);
+      const payload = buildCreationPayload(currentQuestion);
       const url = new URL(
         'http://localhost:8002' + QUESTIONS_ENDPOINT,
         window.location.origin,
@@ -383,7 +561,14 @@ export default function GeneratorPage() {
       }
 
       if (body?.question && typeof body.question === 'object') {
-        setGeneratedQuestion(body.question);
+        setGeneratedQuestions((previous) => {
+          if (!previous.length) {
+            return previous;
+          }
+          const updated = [...previous];
+          updated[currentQuestionIndex] = body.question;
+          return updated;
+        });
       }
 
       const slug = trimValue(body?.question?.slug ?? payload.slug);
@@ -407,7 +592,7 @@ export default function GeneratorPage() {
     } finally {
       setCreateStatus('idle');
     }
-  }, [generatedQuestion]);
+  }, [currentQuestion, currentQuestionIndex]);
 
   /**
    * Closes the modal dialog used to communicate creation results.
@@ -415,6 +600,22 @@ export default function GeneratorPage() {
   const handleCloseCreateDialog = useCallback(() => {
     setCreateDialog((previous) => ({ ...previous, open: false }));
   }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+
+    if (generatorStatus !== 'loading' || !generationStartedAt) {
+      return undefined;
+    }
+
+    const interval = window.setInterval(() => {
+      setGenerationElapsedMs(Date.now() - generationStartedAt);
+    }, 200);
+
+    return () => window.clearInterval(interval);
+  }, [generatorStatus, generationStartedAt]);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -457,14 +658,84 @@ export default function GeneratorPage() {
             minRows={3}
             fullWidth
           />
+          <TextField
+            label={`Number of questions (${MIN_GENERATION_COUNT}-${MAX_GENERATION_COUNT})`}
+            type="number"
+            value={questionCount}
+            onChange={handleQuestionCountChange}
+            inputProps={{
+              min: MIN_GENERATION_COUNT,
+              max: MAX_GENERATION_COUNT,
+            }}
+            helperText={`Generate up to ${MAX_GENERATION_COUNT} questions per request.`}
+            fullWidth
+          />
           {generatorError ? (
             <Alert severity="error">{generatorError}</Alert>
           ) : null}
           {generatorSuccess ? (
             <Alert severity="success">{generatorSuccess}</Alert>
           ) : null}
-          {generatedQuestion ? (
+          {generatorInFlight ? (
+            <Stack spacing={1}>
+              <LinearProgress color="secondary" />
+              <Typography variant="caption" color="textSecondary">
+                Generating {questionCount > 1 ? `${questionCount} questions` : 'question'}…
+                {' '}
+                Elapsed {generationTimeLabel}
+              </Typography>
+            </Stack>
+          ) : null}
+          {totalQuestions ? (
             <Stack spacing={2}>
+              <Stack spacing={1}>
+                <Typography variant="subtitle2" color="textSecondary">
+                  Review progress
+                </Typography>
+                <LinearProgress
+                  variant="determinate"
+                  value={reviewProgress}
+                  color="secondary"
+                />
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography variant="body2">
+                    Question {currentQuestionIndex + 1} of {totalQuestions}
+                  </Typography>
+                  <Typography variant="body2">
+                    Draft time: {generationTimeLabel}
+                  </Typography>
+                </Stack>
+              </Stack>
+              <Stack
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                <Typography variant="h6">
+                  {currentSlug || `Question ${currentQuestionIndex + 1}`}
+                </Typography>
+                <Stack direction="row" spacing={1}>
+                  <Button
+                    variant="outlined"
+                    color="inherit"
+                    onClick={handleSelectPrevious}
+                    disabled={currentQuestionIndex === 0 || createStatus === 'loading'}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="inherit"
+                    onClick={handleSelectNext}
+                    disabled={
+                      currentQuestionIndex + 1 >= totalQuestions ||
+                      createStatus === 'loading'
+                    }
+                  >
+                    Next
+                  </Button>
+                </Stack>
+              </Stack>
               {previewQuestion ? (
                 <Paper variant="outlined" sx={{ p: 2 }}>
                   <Stack spacing={2}>
@@ -502,7 +773,7 @@ export default function GeneratorPage() {
               ) : null}
               <Accordion>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Typography variant="subtitle1">Raw JSON payload</Typography>
+                  <Typography variant="subtitle1">{rawSummaryLabel}</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <Box
@@ -515,7 +786,11 @@ export default function GeneratorPage() {
                         'Menlo, Consolas, "Liberation Mono", monospace',
                     }}
                   >
-                    {JSON.stringify(generatedQuestion, null, 2)}
+                    {JSON.stringify(
+                      currentRawGeneration ?? currentQuestion ?? {},
+                      null,
+                      2,
+                    )}
                   </Box>
                 </AccordionDetails>
               </Accordion>
@@ -526,7 +801,7 @@ export default function GeneratorPage() {
               variant="contained"
               color="primary"
               onClick={handleCreateQuestion}
-              disabled={createStatus === 'loading' || !generatedQuestion}
+              disabled={createStatus === 'loading' || !currentQuestion}
             >
               {createStatus === 'loading' ? 'Creating…' : 'Create question'}
             </Button>
@@ -534,11 +809,9 @@ export default function GeneratorPage() {
               variant="outlined"
               color="inherit"
               onClick={handleGenerate}
-              disabled={generatorStatus === 'loading'}
+              disabled={generatorInFlight}
             >
-              {generatorStatus === 'loading'
-                ? 'Generating…'
-                : 'Generate with GPT-5'}
+              {generateButtonLabel}
             </Button>
           </Stack>
         </Stack>
