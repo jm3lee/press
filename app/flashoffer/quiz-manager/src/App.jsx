@@ -3,18 +3,16 @@
  * Released under the MIT license.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   AppBar,
   Box,
   Button,
   Container,
   CssBaseline,
-  Menu,
-  MenuItem,
+  Stack,
   Toolbar,
-  Typography,
-    Stack,
+  Typography
 } from '@mui/material';
 import CreateQuestionContainer from './CreateQuestionContainer.jsx';
 import ExistingQuestionsContainer from './ExistingQuestionsContainer.jsx';
@@ -32,51 +30,10 @@ const NAVIGATION_ITEMS = [
  */
 export default function App() {
   const [activePage, setActivePage] = useState('draft');
-  const [navigationMenuAnchor, setNavigationMenuAnchor] = useState(null);
-  const [generatorPrompt, setGeneratorPrompt] = useState('');
-  const [generatorStatus, setGeneratorStatus] = useState('idle');
-  const [generatorError, setGeneratorError] = useState('');
-  const generationTimerRef = useRef();
-
   const navigationItems = useMemo(() => NAVIGATION_ITEMS, []);
 
   const handleSelectPage = useCallback((pageId) => {
     setActivePage(pageId);
-    setNavigationMenuAnchor(null);
-  }, []);
-
-  const handleOpenNavigationMenu = useCallback((event) => {
-    setNavigationMenuAnchor(event.currentTarget);
-  }, []);
-
-  const handleCloseNavigationMenu = useCallback(() => {
-    setNavigationMenuAnchor(null);
-  }, []);
-
-  const handleGeneratorPromptChange = useCallback((event) => {
-    setGeneratorPrompt(event.target.value);
-  }, []);
-
-  const handleGenerate = useCallback(() => {
-    setGeneratorError('');
-    setGeneratorStatus('loading');
-
-    if (generationTimerRef.current) {
-      window.clearTimeout(generationTimerRef.current);
-    }
-
-    generationTimerRef.current = window.setTimeout(() => {
-      setGeneratorStatus('idle');
-      setGeneratorError('Generation API is not connected yet.');
-    }, 600);
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (generationTimerRef.current) {
-        window.clearTimeout(generationTimerRef.current);
-      }
-    };
   }, []);
 
   const content = useMemo(() => {
@@ -86,23 +43,8 @@ export default function App() {
     if (activePage === 'browse') {
       return <ExistingQuestionsContainer />;
     }
-    return (
-      <GeneratorPage
-        generatorError={generatorError}
-        generatorPrompt={generatorPrompt}
-        generatorStatus={generatorStatus}
-        handleGenerate={handleGenerate}
-        handleGeneratorPromptChange={handleGeneratorPromptChange}
-      />
-    );
-  }, [
-    activePage,
-    generatorError,
-    generatorPrompt,
-    generatorStatus,
-    handleGenerate,
-    handleGeneratorPromptChange
-  ]);
+    return <GeneratorPage />;
+  }, [activePage]);
 
   return (
     <>
@@ -120,15 +62,15 @@ export default function App() {
             </Box>
             <Box sx={{ flexGrow: 1 }} />
             <Stack direction="row" spacing={1} alignItems="center">
-                {navigationItems.map((item) => (
-                  <Button
-                    key={item.id}
-                    onClick={() => handleSelectPage(item.id)}
-                    variant={(activePage == item.id) ? "contained":"outlined"}
-                  >
-                    {item.label}
-                    </Button>
-                ))}
+              {navigationItems.map((item) => (
+                <Button
+                  key={item.id}
+                  onClick={() => handleSelectPage(item.id)}
+                  variant={activePage === item.id ? 'contained' : 'outlined'}
+                >
+                  {item.label}
+                </Button>
+              ))}
             </Stack>
           </Toolbar>
         </AppBar>
