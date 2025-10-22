@@ -3,8 +3,11 @@
  * Released under the MIT license.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   AlertTitle,
   Box,
   Alert,
@@ -14,6 +17,8 @@ import {
   TextField,
   Typography
 } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { FlashofferThemeProvider, MultipleChoiceQuiz } from 'flashoffer-react';
 
 const GENERATOR_ENDPOINT = '/api/quiz/questions/generate';
 const GENERATOR_PROMPT_STORAGE_KEY = 'quiz-manager:last-generator-prompt';
@@ -38,6 +43,75 @@ export default function GeneratorPage() {
   const [generatorError, setGeneratorError] = useState('');
   const [generatorSuccess, setGeneratorSuccess] = useState('');
   const [generatedQuestion, setGeneratedQuestion] = useState(null);
+
+  const previewQuestion = useMemo(() => {
+    if (!generatedQuestion || typeof generatedQuestion !== 'object') {
+      return null;
+    }
+
+    const questionText =
+      typeof generatedQuestion.question === 'string'
+        ? generatedQuestion.question.trim()
+        : '';
+
+    const helperText =
+      typeof generatedQuestion.helper_text === 'string'
+        ? generatedQuestion.helper_text.trim()
+        : '';
+
+    const explanation =
+      typeof generatedQuestion.explanation === 'string'
+        ? generatedQuestion.explanation.trim()
+        : '';
+
+    const successMessage =
+      typeof generatedQuestion.success_message === 'string'
+        ? generatedQuestion.success_message.trim()
+        : '';
+
+    const errorMessage =
+      typeof generatedQuestion.error_message === 'string'
+        ? generatedQuestion.error_message.trim()
+        : '';
+
+    const options = Array.isArray(generatedQuestion.options)
+      ? generatedQuestion.options
+          .map((option) => ({
+            id: typeof option?.id === 'string' ? option.id : '',
+            label: typeof option?.label === 'string' ? option.label : '',
+            description:
+              typeof option?.description === 'string' && option.description
+                ? option.description
+                : undefined
+          }))
+          .filter((option) => option.id && option.label)
+      : [];
+
+    if (!questionText || options.length === 0) {
+      return null;
+    }
+
+    const correctOptionId =
+      typeof generatedQuestion.correct_option_id === 'string'
+        ? generatedQuestion.correct_option_id
+        : undefined;
+
+    const celebration =
+      typeof generatedQuestion.celebration === 'string' && generatedQuestion.celebration
+        ? generatedQuestion.celebration
+        : undefined;
+
+    return {
+      question: questionText,
+      helperText: helperText || undefined,
+      options,
+      correctOptionId,
+      explanation: explanation || undefined,
+      successMessage: successMessage || undefined,
+      errorMessage: errorMessage || undefined,
+      celebration
+    };
+  }, [generatedQuestion]);
 
   const handleGeneratorPromptChange = useCallback((event) => {
     setGeneratorPrompt(event.target.value);
@@ -134,25 +208,57 @@ export default function GeneratorPage() {
             <Alert severity="success">{generatorSuccess}</Alert>
           ) : null}
           {generatedQuestion ? (
-            <Paper variant="outlined" sx={{ p: 2 }}>
-              <Stack spacing={1}>
-                <Alert severity="info">
-                  <AlertTitle>Draft Payload</AlertTitle>
-                  Review and copy the generated question below.
-                </Alert>
-                <Box
-                  component="pre"
-                  sx={{
-                    m: 0,
-                    whiteSpace: 'pre-wrap',
-                    wordBreak: 'break-word',
-                    fontFamily: 'Menlo, Consolas, "Liberation Mono", monospace'
-                  }}
-                >
-                  {JSON.stringify(generatedQuestion, null, 2)}
-                </Box>
-              </Stack>
-            </Paper>
+            <Stack spacing={2}>
+              {previewQuestion ? (
+                <Paper variant="outlined" sx={{ p: 2 }}>
+                  <Stack spacing={2}>
+                    <Alert severity="info">
+                      <AlertTitle>Live Preview</AlertTitle>
+                      Interact with the draft question exactly as learners will see it.
+                    </Alert>
+                    <FlashofferThemeProvider>
+                      <Box className="quiz-manager__quiz-preview">
+                        <MultipleChoiceQuiz
+                          question={previewQuestion.question}
+                          helperText={previewQuestion.helperText}
+                          options={previewQuestion.options}
+                          correctOptionId={previewQuestion.correctOptionId}
+                          explanation={previewQuestion.explanation}
+                          successMessage={previewQuestion.successMessage}
+                          errorMessage={previewQuestion.errorMessage}
+                          allowRetry
+                          confetti={
+                            previewQuestion.celebration === 'off'
+                              ? { enabled: false }
+                              : previewQuestion.celebration
+                              ? { enabled: true, preset: previewQuestion.celebration }
+                              : undefined
+                          }
+                        />
+                      </Box>
+                    </FlashofferThemeProvider>
+                  </Stack>
+                </Paper>
+              ) : null}
+              <Accordion>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography variant="subtitle1">Raw JSON payload</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Box
+                    component="pre"
+                    sx={{
+                      m: 0,
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-word',
+                      fontFamily: 'Menlo, Consolas, "Liberation Mono", monospace'
+                    }}
+                  >
+                    {JSON.stringify(generatedQuestion, null, 2)}
+                  </Box>
+                </AccordionDetails>
+              </Accordion>
+            </Stack>
           ) : null}
           <Stack direction="row" spacing={2} justifyContent="flex-end">
             <Button
