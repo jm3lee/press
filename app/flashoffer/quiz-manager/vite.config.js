@@ -3,19 +3,22 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { fileURLToPath, URL } from 'node:url';
 
-const toPosixPath = (value) => value.split(sep).join('/');
-const projectRoot = fileURLToPath(new URL('./', import.meta.url));
+function toPosixPath(value) {
+  return value.split(sep).join('/');
+}
 
-const nodeModulesDir = resolvePath(projectRoot, 'node_modules');
-const materialBase = toPosixPath(resolvePath(nodeModulesDir, '@mui/material'));
-const muiUtilsBase = toPosixPath(resolvePath(nodeModulesDir, '@mui/utils'));
+const PROJECT_ROOT = fileURLToPath(new URL('./', import.meta.url));
 
-const flashofferSource = fileURLToPath(
+const NODE_MODULES_DIR = resolvePath(PROJECT_ROOT, 'node_modules');
+const MATERIAL_BASE = toPosixPath(resolvePath(NODE_MODULES_DIR, '@mui/material'));
+const MUI_UTILS_BASE = toPosixPath(resolvePath(NODE_MODULES_DIR, '@mui/utils'));
+
+const FLASHOFFER_SOURCE = fileURLToPath(
   new URL('../flashoffer-react/src/index.ts', import.meta.url),
 );
 
-const canvasConfettiModule = toPosixPath(
-  resolvePath(nodeModulesDir, 'canvas-confetti', 'dist', 'confetti.module.mjs'),
+const CANVAS_CONFETTI_MODULE = toPosixPath(
+  resolvePath(NODE_MODULES_DIR, 'canvas-confetti', 'dist', 'confetti.module.mjs'),
 );
 
 // https://vite.dev/config/
@@ -25,27 +28,27 @@ export default defineConfig({
     alias: [
       {
         find: 'flashoffer-react',
-        replacement: flashofferSource,
+        replacement: FLASHOFFER_SOURCE,
       },
       {
         find: /^canvas-confetti$/,
-        replacement: canvasConfettiModule,
+        replacement: CANVAS_CONFETTI_MODULE,
       },
       {
         find: /^@mui\/material$/i,
-        replacement: `${materialBase}/index.js`,
+        replacement: `${MATERIAL_BASE}/index.js`,
       },
       {
         find: /^@mui\/material\/(.*)$/i,
-        replacement: `${materialBase}/$1`,
+        replacement: `${MATERIAL_BASE}/$1`,
       },
       {
         find: /^@mui\/utils$/i,
-        replacement: `${muiUtilsBase}/index.js`,
+        replacement: `${MUI_UTILS_BASE}/index.js`,
       },
       {
         find: /^@mui\/utils\/(.*)$/i,
-        replacement: `${muiUtilsBase}/$1`,
+        replacement: `${MUI_UTILS_BASE}/$1`,
       },
     ],
   },
