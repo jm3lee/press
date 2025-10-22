@@ -14,14 +14,12 @@ import {
   Toolbar,
   Typography
 } from '@mui/material';
-import CreateQuestionContainer from './CreateQuestionContainer.jsx';
-import ExistingQuestionsContainer from './ExistingQuestionsContainer.jsx';
+import ManageQuestionsContainer from './ManageQuestionsContainer.jsx';
 import GeneratorPage from './GeneratorPage.jsx';
 
 const NAVIGATION_ITEMS = [
-  { id: 'generate', label: 'Generate' },
-  { id: 'create', label: 'Create' },
-  { id: 'browse', label: 'Browse' },
+  { id: 'manage', label: 'Manage' },
+  { id: 'generate', label: 'Generate' }
 ];
 
 /**
@@ -29,7 +27,7 @@ const NAVIGATION_ITEMS = [
  * @returns {JSX.Element} Quiz manager root component.
  */
 export default function App() {
-  const [activePage, setActivePage] = useState('draft');
+  const [activePage, setActivePage] = useState('manage');
   const navigationItems = useMemo(() => NAVIGATION_ITEMS, []);
 
   const handleSelectPage = useCallback((pageId) => {
@@ -37,11 +35,8 @@ export default function App() {
   }, []);
 
   const content = useMemo(() => {
-    if (activePage === 'create') {
-      return <CreateQuestionContainer />;
-    }
-    if (activePage === 'browse') {
-      return <ExistingQuestionsContainer />;
+    if (activePage === 'manage') {
+      return <ManageQuestionsContainer />;
     }
     return <GeneratorPage />;
   }, [activePage]);
@@ -74,7 +69,7 @@ export default function App() {
             </Stack>
           </Toolbar>
         </AppBar>
-        <Container maxWidth="md" className="quiz-manager__content">
+        <Container maxWidth="lg" className="quiz-manager__content">
           {content}
         </Container>
       </Box>

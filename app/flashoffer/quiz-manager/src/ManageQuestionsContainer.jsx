@@ -3,9 +3,19 @@
  * Released under the MIT license.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import {
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useState
+} from 'react';
+import { Box, Stack } from '@mui/material';
 import CreateQuestionPage from './CreateQuestionPage.jsx';
+import ExistingQuestionsPage from './ExistingQuestionsPage.jsx';
 
+const API_BASE_URL = 'http://localhost:8002';
+const QUESTIONS_ENDPOINT = '/api/quiz/questions';
 const DEFAULT_CELEBRATION = 'off';
 const CELEBRATION_OPTIONS = ['off', 'classic', 'streamers', 'burst'];
 const CELEBRATION_LABELS = {
@@ -340,24 +350,181 @@ function handlePayloadError(error, silent, setFormError) {
 }
 
 /**
- * Coordinates form state and interaction handlers for the create-question view.
- * @returns {JSX.Element} Rendered create question workflow.
+ * Resolves the confirmation message shown after a successful submission.
+ * @param {'create' | 'update'} mode - Submission mode.
+ * @param {string} slug - Question slug used in the confirmation copy.
+ * @returns {string} Human readable status message.
  */
-export default function CreateQuestionContainer() {
+function resolveSubmissionMessage(mode, slug) {
+  return mode === 'update'
+    ? `Updated question ${slug}`
+    : `Created question ${slug}`;
+}
+
+/**
+ * Applies post-submission side effects such as resetting the form state.
+ * @param {object} params - Side effect configuration.
+ * @param {'create' | 'update'} params.mode - Submission mode.
+ * @param {object} params.payload - Submitted payload.
+ * @param {() => void} params.resetForm - Resets the form to its defaults.
+ * @param {(message: string) => void} params.setFormSuccess - Success state setter.
+ * @returns {void}
+ */
+function applySubmissionSideEffects({ mode, payload, resetForm, setFormSuccess }) {
+  if (mode === 'create') {
+    resetForm();
+  }
+  setFormSuccess(resolveSubmissionMessage(mode, payload.slug));
+}
+
+/**
+ * Expands a relative API path into a fully qualified URL for the backend.
+ * @param {string} path - Endpoint path beginning with a slash.
+ * @returns {string} Fully qualified API URL.
+ */
+function resolveApiUrl(path) {
+  return `${API_BASE_URL}${path}`;
+}
+
+/**
+ * Safely refreshes the question catalog while swallowing handled errors.
+ * @param {() => Promise<unknown>} fetchQuestions - Fetch callback.
+ * @returns {Promise<void>} Promise that resolves once the refresh completes.
+ */
+async function refreshQuestions(fetchQuestions) {
+  try {
+    await fetchQuestions();
+  } catch {
+    /* handled in state */
+  }
+}
+
+/**
+ * Sends the normalized payload to the backend for persistence.
+ * @param {object} payload - Normalized question payload.
+ * @param {'create' | 'update'} mode - Submission mode.
+ * @returns {Promise<object>} Parsed backend response body.
+ */
+async function submitQuestionPayload(payload, mode) {
+  const baseUrl = resolveApiUrl(QUESTIONS_ENDPOINT);
+  const targetUrl =
+    mode === 'update'
+      ? `${baseUrl}/${encodeURIComponent(payload.slug)}`
+      : baseUrl;
+
+  const response = await fetch(targetUrl, {
+    method: mode === 'update' ? 'PUT' : 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const body = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const message = body?.error ?? `Request failed (${response.status})`;
+    throw new Error(message);
+  }
+
+  return body;
+}
+
+/**
+ * Coordinates submission, handles optimistic updates, and refreshes the list.
+ * @param {object} params - Workflow configuration.
+ * @param {object} params.form - Raw form state.
+ * @param {(form: object, options?: { silent?: boolean }) => object | null} params.buildPayload -
+ *  Payload builder.
+ * @param {'create' | 'update'} params.formMode - Submission mode.
+ * @param {(question: object, mode?: 'create' | 'update') => void} params.applyQuestionToForm -
+ *  Syncs the form with the persisted question.
+ * @param {() => void} params.resetForm - Resets the form to defaults.
+ * @param {(message: string) => void} params.setFormError - Error state setter.
+ * @param {(message: string) => void} params.setFormSuccess - Success state setter.
+ * @param {(status: 'idle' | 'submitting') => void} params.setFormStatus - Submission status setter.
+ * @param {() => Promise<unknown>} params.fetchQuestions - Refresh callback for the catalog.
+ * @returns {Promise<void>} Promise that resolves when the submission flow finishes.
+ */
+async function submitFormWorkflow({
+  form,
+  buildPayload,
+  formMode,
+  applyQuestionToForm,
+  resetForm,
+  setFormError,
+  setFormSuccess,
+  setFormStatus,
+  fetchQuestions
+}) {
+  setFormError('');
+  setFormSuccess('');
+
+  const payload = buildPayload(form);
+  if (!payload) {
+    return;
+  }
+
+  setFormStatus('submitting');
+
+  try {
+    const body = await submitQuestionPayload(payload, formMode);
+
+    applyQuestionToForm(body.question, formMode === 'update' ? 'update' : 'create');
+    applySubmissionSideEffects({
+      mode: formMode,
+      payload,
+      resetForm,
+      setFormSuccess
+    });
+    await refreshQuestions(fetchQuestions);
+  } catch (error) {
+    setFormError(error instanceof Error ? error.message : 'Request failed');
+  } finally {
+    setFormStatus('idle');
+  }
+}
+
+/**
+ * Coordinates form state, question list, and submission workflows.
+ * @returns {JSX.Element} Rendered management workflow.
+ */
+export default function ManageQuestionsContainer() {
   const [form, setForm] = useState(() => createEmptyForm());
   const [formMode, setFormMode] = useState('create');
+  const [formStatus, setFormStatus] = useState('idle');
   const [formError, setFormError] = useState('');
   const [formSuccess, setFormSuccess] = useState('');
   const [fileError, setFileError] = useState('');
   const [fileName, setFileName] = useState('');
+  const [questions, setQuestions] = useState([]);
+  const [questionsStatus, setQuestionsStatus] = useState('idle');
+  const [questionsError, setQuestionsError] = useState('');
+  const [selectedSlug, setSelectedSlug] = useState('');
 
-  const applyQuestionToForm = useCallback((question, mode) => {
-    setForm(buildFormStateForQuestion(question));
+  /**
+   * Syncs the interactive form with a persisted question payload.
+   * @param {object} question - Question data sourced from the backend.
+   * @param {'create' | 'update'} [mode='update'] - Desired form mode.
+   * @returns {void}
+   */
+  const applyQuestionToForm = useCallback((question, mode = 'update') => {
+    if (!question) {
+      return;
+    }
+
+    const normalized = buildFormStateForQuestion(question);
+    setForm(normalized);
     setFormMode(mode);
     setFormError('');
     setFormSuccess('');
+    setSelectedSlug(mode === 'update' ? normalized.slug : '');
   }, []);
 
+  /**
+   * Restores the form to a pristine state for authoring a new question.
+   * @returns {void}
+   */
   const resetForm = useCallback(() => {
     setForm(createEmptyForm());
     setFormMode('create');
@@ -365,8 +532,64 @@ export default function CreateQuestionContainer() {
     setFormSuccess('');
     setFileError('');
     setFileName('');
+    setSelectedSlug('');
   }, []);
 
+  /**
+   * Loads the latest quiz questions from the backend service.
+   * @returns {Promise<Array<object>>} Loaded question collection.
+   */
+  const fetchQuestions = useCallback(async () => {
+    if (typeof window === 'undefined') {
+      return [];
+    }
+
+    setQuestionsStatus('loading');
+    setQuestionsError('');
+
+    try {
+      const url = new URL(resolveApiUrl(QUESTIONS_ENDPOINT));
+      url.searchParams.set('limit', '50');
+      url.searchParams.set('offset', '0');
+
+      const response = await fetch(url.toString());
+      const body = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        const message = body?.error ?? `Failed to load questions (${response.status})`;
+        throw new Error(message);
+      }
+
+      const items = Array.isArray(body?.questions) ? body.questions : [];
+      setQuestions(items);
+      setQuestionsStatus('success');
+      setSelectedSlug((current) =>
+        current && items.some((item) => item.slug === current) ? current : ''
+      );
+      return items;
+    } catch (error) {
+      setQuestionsStatus('error');
+      setQuestionsError(
+        error instanceof Error ? error.message : 'Unable to load questions'
+      );
+      setQuestions([]);
+      setSelectedSlug('');
+      throw error;
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchQuestions().catch(() => {
+      /* handled in state */
+    });
+  }, [fetchQuestions]);
+
+  /**
+   * Generates a change handler for the provided form field key.
+   * @param {string} field - Form field name to update.
+   * @returns {(event: import('react').ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void}
+   *  Field change handler.
+   */
   const handleFieldChange = useCallback((field) => (event) => {
     const { value } = event.target;
     setForm((prev) => ({
@@ -375,6 +598,13 @@ export default function CreateQuestionContainer() {
     }));
   }, []);
 
+  /**
+   * Generates a change handler for a specific answer option entry.
+   * @param {number} index - Option index to mutate.
+   * @param {string} field - Option field key.
+   * @returns {(event: import('react').ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void}
+   *  Option change handler.
+   */
   const handleOptionChange = useCallback((index, field) => (event) => {
     const { value } = event.target;
     setForm((prev) => {
@@ -394,6 +624,10 @@ export default function CreateQuestionContainer() {
     });
   }, []);
 
+  /**
+   * Appends a blank answer option to the form state.
+   * @returns {void}
+   */
   const handleAddOption = useCallback(() => {
     setForm((prev) => ({
       ...prev,
@@ -401,6 +635,11 @@ export default function CreateQuestionContainer() {
     }));
   }, []);
 
+  /**
+   * Removes an option row while preserving minimum option constraints.
+   * @param {number} index - Index of the option slated for deletion.
+   * @returns {void}
+   */
   const handleRemoveOption = useCallback((index) => {
     setForm((prev) => {
       if (prev.options.length <= MIN_OPTIONS) {
@@ -419,10 +658,21 @@ export default function CreateQuestionContainer() {
     });
   }, []);
 
+  /**
+   * Updates the form with the selected correct answer identifier.
+   * @param {import('react').ChangeEvent<HTMLInputElement>} event - Change event.
+   * @returns {void}
+   */
   const handleCorrectOptionChange = useCallback((event) => {
     setForm((prev) => ({ ...prev, correct_option_id: event.target.value }));
   }, []);
 
+  /**
+   * Constructs the API payload while surfacing validation failures.
+   * @param {object} targetForm - Candidate form state.
+   * @param {{ silent?: boolean }} [options] - Payload builder options.
+   * @returns {object | null} Normalized payload or null on validation error.
+   */
   const buildPayload = useCallback((targetForm, options = { silent: false }) => {
     const { silent } = options;
 
@@ -439,7 +689,7 @@ export default function CreateQuestionContainer() {
       );
 
       const publishedOn = trimValue(targetForm.published_on);
-      assertCondition(/^\d{4}-\d{2}-\d{2}$/.test(publishedOn), 'Published date must be in YYYY-MM-DD format.');
+      assertCondition(/^(\d{4})-(\d{2})-(\d{2})$/.test(publishedOn), 'Published date must be in YYYY-MM-DD format.');
 
       const expiresOn = trimValue(targetForm.expires_on);
       const celebrationValue = trimValue(targetForm.celebration) || DEFAULT_CELEBRATION;
@@ -465,7 +715,12 @@ export default function CreateQuestionContainer() {
     }
   }, []);
 
-  const previewPayload = useMemo(() => buildPayload(form, { silent: true }), [buildPayload, form]);
+  const deferredForm = useDeferredValue(form);
+
+  const previewPayload = useMemo(
+    () => buildPayload(deferredForm, { silent: true }),
+    [buildPayload, deferredForm]
+  );
 
   const preview = useMemo(() => {
     if (!previewPayload) {
@@ -474,16 +729,44 @@ export default function CreateQuestionContainer() {
     return JSON.stringify(previewPayload, null, 2);
   }, [previewPayload]);
 
-  const previewQuestion = useMemo(() => resolvePreviewQuestion(form), [form]);
+  const previewQuestion = useMemo(
+    () => resolvePreviewQuestion(deferredForm),
+    [deferredForm]
+  );
 
+  /**
+   * Handles form submission by delegating to the workflow helper.
+   * @returns {void}
+   */
   const handleSubmit = useCallback(() => {
-    const payload = buildPayload(form);
-    if (!payload) {
-      return;
-    }
-    setFormSuccess(`Preview ready for question ${payload.slug}`);
-  }, [buildPayload, form]);
+    submitFormWorkflow({
+      form,
+      buildPayload,
+      formMode,
+      applyQuestionToForm,
+      resetForm,
+      setFormError,
+      setFormSuccess,
+      setFormStatus,
+      fetchQuestions
+    });
+  }, [
+    applyQuestionToForm,
+    buildPayload,
+    fetchQuestions,
+    form,
+    formMode,
+    resetForm,
+    setFormError,
+    setFormSuccess,
+    setFormStatus
+  ]);
 
+  /**
+   * Imports JSON payloads and maps them into form state.
+   * @param {import('react').ChangeEvent<HTMLInputElement>} event - File input event.
+   * @returns {void}
+   */
   const handleFileChange = useCallback((event) => {
     const [file] = event.target.files ?? [];
     setFileName('');
@@ -518,31 +801,67 @@ export default function CreateQuestionContainer() {
       });
   }, [applyQuestionToForm]);
 
-  const formDisabled = false;
+  /**
+   * Hydrates the form with an existing question for editing.
+   * @param {object} question - Selected question payload.
+   * @returns {void}
+   */
+  const handleSelectQuestion = useCallback(
+    (question) => {
+      if (!question) {
+        return;
+      }
+      applyQuestionToForm(question, 'update');
+    },
+    [applyQuestionToForm]
+  );
+
+  const formDisabled = formStatus === 'submitting';
   const canSubmit = Boolean(previewPayload);
 
   return (
-    <CreateQuestionPage
-      canSubmit={canSubmit}
-      celebrationLabels={CELEBRATION_LABELS}
-      celebrationOptions={CELEBRATION_OPTIONS}
-      fileError={fileError}
-      fileName={fileName}
-      form={form}
-      formDisabled={formDisabled}
-      formError={formError}
-      formMode={formMode}
-      formSuccess={formSuccess}
-      handleAddOption={handleAddOption}
-      handleCorrectOptionChange={handleCorrectOptionChange}
-      handleFieldChange={handleFieldChange}
-      handleFileChange={handleFileChange}
-      handleOptionChange={handleOptionChange}
-      handleRemoveOption={handleRemoveOption}
-      handleSubmit={handleSubmit}
-      preview={preview}
-      previewQuestion={previewQuestion}
-      resetForm={resetForm}
-    />
+    <Stack spacing={3} sx={{ width: '100%' }}>
+      <Stack
+        direction={{ xs: 'column', lg: 'row' }}
+        spacing={3}
+        alignItems="stretch"
+        sx={{ width: '100%' }}
+      >
+        <Box sx={{ flex: { lg: 2 }, width: '100%' }}>
+          <CreateQuestionPage
+            canSubmit={canSubmit}
+            celebrationLabels={CELEBRATION_LABELS}
+            celebrationOptions={CELEBRATION_OPTIONS}
+            fileError={fileError}
+            fileName={fileName}
+            form={form}
+            formDisabled={formDisabled}
+            formError={formError}
+            formMode={formMode}
+            formSuccess={formSuccess}
+            handleAddOption={handleAddOption}
+            handleCorrectOptionChange={handleCorrectOptionChange}
+            handleFieldChange={handleFieldChange}
+            handleFileChange={handleFileChange}
+            handleOptionChange={handleOptionChange}
+            handleRemoveOption={handleRemoveOption}
+            handleSubmit={handleSubmit}
+            preview={preview}
+            previewQuestion={previewQuestion}
+            resetForm={resetForm}
+          />
+        </Box>
+        <Box sx={{ flex: { lg: 1 }, width: '100%' }}>
+          <ExistingQuestionsPage
+            fetchQuestions={fetchQuestions}
+            handleSelectQuestion={handleSelectQuestion}
+            questions={questions}
+            questionsError={questionsError}
+            questionsStatus={questionsStatus}
+            selectedSlug={selectedSlug}
+          />
+        </Box>
+      </Stack>
+    </Stack>
   );
 }

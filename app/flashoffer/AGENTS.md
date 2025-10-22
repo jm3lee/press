@@ -18,6 +18,10 @@
   Developers" and noting that the library is released under the MIT license.
 - Document every function with a succinct summary of its purpose; use Typedoc
   conventions for detailed parameter and return information.
+- Always apply comprehensive software engineering documentation practices:
+  update architecture, maintenance, and design references when behavior or
+  workflows change, and include inline source documentation that clarifies
+  complex logic.
 - Author documentation with the depth and tone expected between expert
   software engineers.
 - When updating documentation, include a representative code sample whenever
