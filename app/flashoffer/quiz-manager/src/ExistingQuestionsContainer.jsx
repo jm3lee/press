@@ -6,6 +6,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import ExistingQuestionsPage from './ExistingQuestionsPage.jsx';
 
+const API_BASE_URL = 'http://localhost:8002';
 const QUESTIONS_ENDPOINT = '/api/quiz/questions';
 
 /**
@@ -28,7 +29,7 @@ export default function ExistingQuestionsContainer() {
 
     try {
       const url = new URL(
-        'http://localhost:8002' + QUESTIONS_ENDPOINT,
+        API_BASE_URL + QUESTIONS_ENDPOINT,
         window.location.origin,
       );
       url.searchParams.set('limit', '50');

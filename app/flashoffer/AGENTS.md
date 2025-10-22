@@ -10,6 +10,11 @@
 - Convert UTC timestamps to a viewer's local timezone before displaying them.
 - Pin all Flashoffer Docker Node base images to `node:22-slim`.
 - Pin all Flashoffer Docker Python base images to `python:3.14-slim`.
+- Use PEP 8 as the default Python style unless a language-specific override in
+  this file states otherwise.
+- Apply the per-language overrides described here on top of the default style
+  expectations for each language.
+- Declare all global constants in source code using ALL_CAPS names.
 
 ## Flashoffer React Components
 
