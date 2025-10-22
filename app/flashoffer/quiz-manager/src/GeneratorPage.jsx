@@ -424,6 +424,7 @@ export default function GeneratorPage() {
           Provide a short prompt and the manager will request a draft question
           from the backend generator endpoint.
         </Typography>
+      </Stack>
         <Stack spacing={2} className="quiz-manager__generator">
           <TextField
             label="AI Prompt (optional)"
@@ -438,8 +439,6 @@ export default function GeneratorPage() {
           {generatorSuccess ? (
             <Alert severity="success">{generatorSuccess}</Alert>
           ) : null}
-          {createError ? <Alert severity="error">{createError}</Alert> : null}
-          {createSuccess ? <Alert severity="success">{createSuccess}</Alert> : null}
           {generatedQuestion ? (
             <Stack spacing={2}>
               {previewQuestion ? (
