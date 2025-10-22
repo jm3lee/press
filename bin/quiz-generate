@@ -1,0 +1,160 @@
+#!/usr/bin/env bash
+set -euo pipefail
+set -x
+
+# Track script runtime for the elapsed-time summary at exit.
+SECONDS=0
+
+# Print a short help message for the CLI.
+usage() {
+  cat <<'USAGE'
+usage: quiz-generate [options] [prompt]
+
+Send a prompt to the quiz-backend generation endpoint, pretty-print the JSON
+response, and save the payload using the returned question slug.
+
+Options:
+  --base-url URL     Override the quiz-backend base URL.
+  --model MODEL      Optional model identifier forwarded to quiz-backend.
+  --output-dir DIR   Directory where the response JSON will be stored.
+  -h, --help         Show this help message and exit.
+USAGE
+}
+
+# Emit progress updates to stderr so stdout remains reserved for JSON output.
+log() {
+  printf '[%s] %s\n' "$(date '+%H:%M:%S')" "$*" >&2
+}
+
+# Parse CLI arguments and populate global configuration variables.
+parse_args() {
+  BASE_URL="${QUIZ_BACKEND_BASE_URL:-http://localhost:8000}"
+  MODEL="${QUIZ_GENERATE_MODEL:-}"
+  OUTPUT_DIR="${QUIZ_GENERATE_OUTPUT_DIR:-.}"
+  PROMPT_ARG=""
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --base-url)
+        BASE_URL="$2"
+        shift 2
+        ;;
+      --model)
+        MODEL="$2"
+        shift 2
+        ;;
+      --output-dir)
+        OUTPUT_DIR="$2"
+        shift 2
+        ;;
+      -h|--help)
+        usage
+        exit 0
+        ;;
+      *)
+        PROMPT_ARG="$1"
+        shift
+        ;;
+    esac
+  done
+}
+
+# Resolve the prompt from CLI arguments or stdin.
+read_prompt() {
+  if [[ "${PROMPT_ARG:-}" == "-" ]]; then
+    cat
+  elif [[ -n "${PROMPT_ARG:-}" ]]; then
+    printf '%s' "$PROMPT_ARG"
+  elif [[ ! -t 0 ]]; then
+    cat
+  else
+    return 1
+  fi
+}
+
+# Construct the JSON payload expected by the quiz-backend service.
+build_payload() {
+  local prompt="$1"
+
+  jq -n --arg prompt "$prompt" --arg model "${MODEL:-}" '
+    if $model == "" then
+      {prompt: $prompt}
+    else
+      {prompt: $prompt, model: $model}
+    end
+  '
+}
+
+# Call the backend endpoint and return the raw JSON response.
+send_request() {
+  local payload="$1"
+  local endpoint="${BASE_URL%/}/api/quiz/questions/generate"
+
+  log "Sending request to $endpoint"
+
+  curl --fail-with-body -sS \
+    -X POST \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/json' \
+    -d "$payload" \
+    "$endpoint"
+}
+
+# Pretty-print the backend response for readability.
+format_response() {
+  jq '.'
+}
+
+# Extract the slug from the backend response to determine the output filename.
+extract_slug() {
+  jq -r '.question.slug'
+}
+
+# Persist the pretty-printed response to disk alongside progress output.
+save_response() {
+  local slug="$1"
+  local pretty_json="$2"
+
+  mkdir -p "$OUTPUT_DIR"
+  local output_path="${OUTPUT_DIR%/}/$slug.json"
+  printf '%s\n' "$pretty_json" > "$output_path"
+  log "Saved response to $output_path"
+}
+
+# Convert elapsed seconds into HH:MM:SS formatting.
+format_elapsed() {
+  local total_seconds="$1"
+  local hours=$(( total_seconds / 3600 ))
+  local minutes=$(( (total_seconds % 3600) / 60 ))
+  local seconds=$(( total_seconds % 60 ))
+
+  printf '%02d:%02d:%02d' "$hours" "$minutes" "$seconds"
+}
+
+main() {
+  parse_args "$@"
+
+  if ! PROMPT="$(read_prompt)"; then
+    echo "error: prompt is required" >&2
+    usage
+    exit 1
+  fi
+
+  log "Building request payload"
+  PAYLOAD="$(build_payload "$PROMPT")"
+
+  RESPONSE="$(send_request "$PAYLOAD")"
+
+  log "Formatting backend response"
+  PRETTY="$(printf '%s' "$RESPONSE" | format_response)"
+
+  echo "$PRETTY"
+
+  SLUG="$(printf '%s' "$RESPONSE" | extract_slug)"
+  save_response "$SLUG" "$PRETTY"
+
+  local elapsed="$SECONDS"
+  log "Elapsed time: $(format_elapsed "$elapsed")"
+}
+
+main "$@"
