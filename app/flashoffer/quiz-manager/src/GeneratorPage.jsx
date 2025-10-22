@@ -57,7 +57,7 @@ export default function GeneratorPage() {
     setGeneratorSuccess('');
 
     try {
-      const url = new URL(GENERATOR_ENDPOINT, window.location.origin);
+      const url = new URL("http://quiz-backend:8002" + GENERATOR_ENDPOINT, window.location.origin);
       const response = await fetch(url.toString(), {
         method: 'POST',
         headers: {

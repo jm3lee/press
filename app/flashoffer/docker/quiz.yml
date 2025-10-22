@@ -45,6 +45,8 @@ services:
       dockerfile: ./app/flashoffer/quiz-manager/Dockerfile
     ports:
       - "${QUIZ_MANAGER_PORT:-5175}:5175"
+    volumes:
+      - ./app:/app
     restart: unless-stopped
     depends_on:
       - quiz-backend
