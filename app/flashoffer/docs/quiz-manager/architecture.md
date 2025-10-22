@@ -19,36 +19,41 @@ all sub-routes to `<QuizManager />`, which manages a simple tab navigation
 constructed from the `PAGE_DEFINITIONS` table.
 
 ## State and Data Flow
-`QuizManager.jsx` centralizes application state with React hooks. It builds an
-empty form model with helpers such as `createEmptyForm()` and
-`buildFormStateForQuestion()` so both manual authoring and existing question
-selection reuse the same shape. The component keeps track of async status flags
-for the upload form, question list, and generator workflow, allowing the pages
-to render contextual spinners and alerts. The manager normalizes inbound data,
-coerces date fields, and maintains option arrays with helpers like
-`normalizeOptionEntries()` to guarantee payloads align with backend validation.
+`ManageQuestionsContainer.jsx` now centralizes application state with React
+hooks. It builds an empty form model with helpers such as `createEmptyForm()`
+and `buildFormStateForQuestion()` so both manual authoring and existing
+question selection reuse the same shape. The container keeps track of async
+status flags for the upload form, question list, and submission workflow,
+allowing the pages to render contextual spinners and alerts. The manager
+normalizes inbound data, coerces date fields, and maintains option arrays with
+helpers like `normalizeOptionEntries()` to guarantee payloads align with
+backend validation.
 
-The component accepts `uploadEndpoint` and `listEndpoint` props, trimming any
-trailing slashes before constructing the canonical REST targets. CRUD
-operations use the native Fetch API: `fetchQuestions()` lists the latest 50
-entries, `submitQuestion()` posts new or updated payloads, and
-`requestGeneratedQuestion()` requests AI drafts from the backend. LocalStorage
-persists the last generator prompt via `GENERATOR_PROMPT_STORAGE_KEY`, and the
-value is hydrated during initialization for better operator ergonomics.
+The container constructs its REST URLs with `resolveApiUrl()` and coordinates
+CRUD operations directly: `fetchQuestions()` lists the latest 50 entries,
+`submitFormWorkflow()` posts new or updated payloads, and
+`handleFileChange()` ingests JSON exports. The generator workflow remains in a
+separate page that focuses on composing AI prompts. LocalStorage persists the
+last generator prompt via `GENERATOR_PROMPT_STORAGE_KEY`, and the value is
+hydrated during initialization for better operator ergonomics.
 
 ## Page Composition
 The manager renders three child pages that receive state and handlers via props:
 
+- **ManageQuestionsContainer** – Orchestrates the `CreateQuestionPage` and
+  `ExistingQuestionsPage` panes in a unified layout. It streams selection and
+  submission handlers to both panes so they operate on a single source of
+  truth.
 - **CreateQuestionPage** – Presents the authoring form, file-import flow, and
   Flashoffer React preview. It uses Material UI controls, wires option
   management handlers, and embeds `FlashofferThemeProvider` with
   `MultipleChoiceQuiz` to preview the payload before submission.
-- **GeneratorPage** – Captures optional prompts and kicks off the generator
-  request. It surfaces async errors and toggles the button label while the
-  backend request is pending.
 - **ExistingQuestionsPage** – Displays the catalog with Material UI tables,
   offers manual refresh, and reports loading or error states. Selecting a row
   loads the question into the form for edits.
+- **GeneratorPage** – Captures optional prompts and kicks off the generator
+  request. It surfaces async errors and toggles the button label while the
+  backend request is pending.
 
 Each page is styled via `src/styles.css`, which defines the responsive layout
 classes consumed across the panels. Because the parent manages all mutations,
