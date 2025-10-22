@@ -16,7 +16,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Typography
+  Typography,
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 
@@ -38,7 +38,7 @@ export default function ExistingQuestionsPage({
   questions,
   questionsError,
   questionsStatus,
-  selectedSlug
+  selectedSlug,
 }) {
   return (
     <Paper
@@ -77,8 +77,8 @@ export default function ExistingQuestionsPage({
 
         {questionsStatus === 'success' && questions.length === 0 ? (
           <Typography variant="body2" color="textSecondary">
-            No questions found. Upload a JSON payload or use the form to seed the
-            catalog.
+            No questions found. Upload a JSON payload or use the form to seed
+            the catalog.
           </Typography>
         ) : null}
 

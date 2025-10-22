@@ -1,10 +1,10 @@
 #!/bin/bash -x
 entrypoint="$1"; shift
-docker run \
+docker compose run \
+    --build \
     --entrypoint "$entrypoint" \
     --rm -i -t \
     -u $(id -u) \
     -v /home/brian/press/app/flashoffer:/workspace \
     --workdir /workspace \
-    --network host \
-    node:22-slim "$@"
+    node-22 "$@"

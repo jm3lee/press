@@ -20,7 +20,7 @@ import {
   Paper,
   Stack,
   TextField,
-  Typography
+  Typography,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { FlashofferThemeProvider, MultipleChoiceQuiz } from 'flashoffer-react';
@@ -80,13 +80,13 @@ function normalizePayloadOptions(options) {
     .map((option) => ({
       id: trimValue(option?.id),
       label: trimValue(option?.label),
-      description: trimValue(option?.description)
+      description: trimValue(option?.description),
     }))
     .filter((option) => option.id || option.label)
     .map((option) => {
       const nextOption = {
         id: option.id,
-        label: option.label || option.id
+        label: option.label || option.id,
       };
       if (option.description) {
         nextOption.description = option.description;
@@ -105,7 +105,9 @@ function normalizeAndValidateOptions(options, preferredId) {
   const normalizedOptions = normalizePayloadOptions(options);
 
   if (normalizedOptions.length < 3) {
-    throw new Error('Generated question must include at least three answer options.');
+    throw new Error(
+      'Generated question must include at least three answer options.',
+    );
   }
 
   const optionIds = normalizedOptions.map((option) => option.id);
@@ -119,7 +121,8 @@ function normalizeAndValidateOptions(options, preferredId) {
 
   let correctOptionId = trimValue(preferredId);
   const hasPreferred =
-    correctOptionId && normalizedOptions.some((option) => option.id === correctOptionId);
+    correctOptionId &&
+    normalizedOptions.some((option) => option.id === correctOptionId);
   if (!hasPreferred) {
     correctOptionId = normalizedOptions[0]?.id ?? '';
   }
@@ -130,7 +133,7 @@ function normalizeAndValidateOptions(options, preferredId) {
 
   return {
     normalizedOptions,
-    correctOptionId
+    correctOptionId,
   };
 }
 
@@ -156,7 +159,7 @@ function buildCreationPayload(generated) {
 
   const { normalizedOptions, correctOptionId } = normalizeAndValidateOptions(
     generated.options,
-    generated.correct_option_id
+    generated.correct_option_id,
   );
 
   const today = new Date().toISOString().slice(0, 10);
@@ -176,7 +179,7 @@ function buildCreationPayload(generated) {
     options: normalizedOptions,
     correct_option_id: correctOptionId,
     published_on: publishedOn,
-    celebration
+    celebration,
   };
 
   if (expiresOn) {
@@ -210,7 +213,7 @@ export default function GeneratorPage() {
   const [createDialog, setCreateDialog] = useState({
     open: false,
     severity: 'success',
-    message: ''
+    message: '',
   });
 
   const previewQuestion = useMemo(() => {
@@ -251,7 +254,7 @@ export default function GeneratorPage() {
             description:
               typeof option?.description === 'string' && option.description
                 ? option.description
-                : undefined
+                : undefined,
           }))
           .filter((option) => option.id && option.label)
       : [];
@@ -266,7 +269,8 @@ export default function GeneratorPage() {
         : undefined;
 
     const celebration =
-      typeof generatedQuestion.celebration === 'string' && generatedQuestion.celebration
+      typeof generatedQuestion.celebration === 'string' &&
+      generatedQuestion.celebration
         ? generatedQuestion.celebration
         : undefined;
 
@@ -278,7 +282,7 @@ export default function GeneratorPage() {
       explanation: explanation || undefined,
       successMessage: successMessage || undefined,
       errorMessage: errorMessage || undefined,
-      celebration
+      celebration,
     };
   }, [generatedQuestion]);
 
@@ -300,15 +304,18 @@ export default function GeneratorPage() {
     setGeneratorSuccess('');
 
     try {
-      const url = new URL("http://localhost:8002" + GENERATOR_ENDPOINT, window.location.origin);
+      const url = new URL(
+        'http://localhost:8002' + GENERATOR_ENDPOINT,
+        window.location.origin,
+      );
       const response = await fetch(url.toString(), {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          prompt: trimmedPrompt || undefined
-        })
+          prompt: trimmedPrompt || undefined,
+        }),
       });
 
       const body = await response.json().catch(() => ({}));
@@ -324,13 +331,17 @@ export default function GeneratorPage() {
 
       setGeneratedQuestion(body.question);
       const slug = body.question?.slug?.trim();
-      const questionLabel = slug ? `Drafted question ${slug}` : 'Drafted question';
+      const questionLabel = slug
+        ? `Drafted question ${slug}`
+        : 'Drafted question';
       setGeneratorSuccess(`${questionLabel} from GPT-5.`);
       setCreateDialog({ open: false, severity: 'success', message: '' });
     } catch (error) {
       setGeneratedQuestion(null);
       setGeneratorError(
-        error instanceof Error ? error.message : 'Generation failed unexpectedly.'
+        error instanceof Error
+          ? error.message
+          : 'Generation failed unexpectedly.',
       );
     } finally {
       setGeneratorStatus('idle');
@@ -342,7 +353,7 @@ export default function GeneratorPage() {
       setCreateDialog({
         open: true,
         severity: 'error',
-        message: 'Creation is not available in this environment.'
+        message: 'Creation is not available in this environment.',
       });
       return;
     }
@@ -353,15 +364,15 @@ export default function GeneratorPage() {
     try {
       const payload = buildCreationPayload(generatedQuestion);
       const url = new URL(
-        "http://localhost:8002" + QUESTIONS_ENDPOINT,
-        window.location.origin
+        'http://localhost:8002' + QUESTIONS_ENDPOINT,
+        window.location.origin,
       );
       const response = await fetch(url.toString(), {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
       const body = await response.json().catch(() => ({}));
@@ -376,14 +387,22 @@ export default function GeneratorPage() {
       }
 
       const slug = trimValue(body?.question?.slug ?? payload.slug);
-      const questionLabel = slug ? `Created question ${slug}` : 'Created question';
-      setCreateDialog({ open: true, severity: 'success', message: questionLabel });
+      const questionLabel = slug
+        ? `Created question ${slug}`
+        : 'Created question';
+      setCreateDialog({
+        open: true,
+        severity: 'success',
+        message: questionLabel,
+      });
     } catch (error) {
       setCreateDialog({
         open: true,
         severity: 'error',
         message:
-          error instanceof Error ? error.message : 'Creation failed unexpectedly.'
+          error instanceof Error
+            ? error.message
+            : 'Creation failed unexpectedly.',
       });
     } finally {
       setCreateStatus('idle');
@@ -404,7 +423,10 @@ export default function GeneratorPage() {
 
     try {
       if (generatorPrompt) {
-        window.localStorage.setItem(GENERATOR_PROMPT_STORAGE_KEY, generatorPrompt);
+        window.localStorage.setItem(
+          GENERATOR_PROMPT_STORAGE_KEY,
+          generatorPrompt,
+        );
       } else {
         window.localStorage.removeItem(GENERATOR_PROMPT_STORAGE_KEY);
       }
@@ -417,14 +439,14 @@ export default function GeneratorPage() {
     <>
       <Paper elevation={6} className="quiz-manager__panel">
         <Stack spacing={2}>
-        <Typography variant="h5" component="h2">
-          GPT-5 Drafts
-        </Typography>
-        <Typography variant="body2" color="textSecondary">
-          Provide a short prompt and the manager will request a draft question
-          from the backend generator endpoint.
-        </Typography>
-      </Stack>
+          <Typography variant="h5" component="h2">
+            GPT-5 Drafts
+          </Typography>
+          <Typography variant="body2" color="textSecondary">
+            Provide a short prompt and the manager will request a draft question
+            from the backend generator endpoint.
+          </Typography>
+        </Stack>
         <Stack spacing={2} className="quiz-manager__generator">
           <TextField
             label="AI Prompt (optional)"
@@ -435,7 +457,9 @@ export default function GeneratorPage() {
             minRows={3}
             fullWidth
           />
-          {generatorError ? <Alert severity="error">{generatorError}</Alert> : null}
+          {generatorError ? (
+            <Alert severity="error">{generatorError}</Alert>
+          ) : null}
           {generatorSuccess ? (
             <Alert severity="success">{generatorSuccess}</Alert>
           ) : null}
@@ -446,7 +470,8 @@ export default function GeneratorPage() {
                   <Stack spacing={2}>
                     <Alert severity="info">
                       <AlertTitle>Live Preview</AlertTitle>
-                      Interact with the draft question exactly as learners will see it.
+                      Interact with the draft question exactly as learners will
+                      see it.
                     </Alert>
                     <FlashofferThemeProvider>
                       <Box className="quiz-manager__quiz-preview">
@@ -463,8 +488,11 @@ export default function GeneratorPage() {
                             previewQuestion.celebration === 'off'
                               ? { enabled: false }
                               : previewQuestion.celebration
-                              ? { enabled: true, preset: previewQuestion.celebration }
-                              : undefined
+                                ? {
+                                    enabled: true,
+                                    preset: previewQuestion.celebration,
+                                  }
+                                : undefined
                           }
                         />
                       </Box>
@@ -483,7 +511,8 @@ export default function GeneratorPage() {
                       m: 0,
                       whiteSpace: 'pre-wrap',
                       wordBreak: 'break-word',
-                      fontFamily: 'Menlo, Consolas, "Liberation Mono", monospace'
+                      fontFamily:
+                        'Menlo, Consolas, "Liberation Mono", monospace',
                     }}
                   >
                     {JSON.stringify(generatedQuestion, null, 2)}
@@ -507,14 +536,18 @@ export default function GeneratorPage() {
               onClick={handleGenerate}
               disabled={generatorStatus === 'loading'}
             >
-              {generatorStatus === 'loading' ? 'Generating…' : 'Generate with GPT-5'}
+              {generatorStatus === 'loading'
+                ? 'Generating…'
+                : 'Generate with GPT-5'}
             </Button>
           </Stack>
         </Stack>
       </Paper>
       <Dialog open={createDialog.open} onClose={handleCloseCreateDialog}>
         <DialogTitle>
-          {createDialog.severity === 'success' ? 'Question created' : 'Creation failed'}
+          {createDialog.severity === 'success'
+            ? 'Question created'
+            : 'Creation failed'}
         </DialogTitle>
         <DialogContent>
           <DialogContentText>{createDialog.message}</DialogContentText>

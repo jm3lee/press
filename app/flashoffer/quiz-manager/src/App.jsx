@@ -12,7 +12,7 @@ import {
   CssBaseline,
   Stack,
   Toolbar,
-  Typography
+  Typography,
 } from '@mui/material';
 import CreateQuestionContainer from './CreateQuestionContainer.jsx';
 import ExistingQuestionsContainer from './ExistingQuestionsContainer.jsx';

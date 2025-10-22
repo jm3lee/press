@@ -16,7 +16,7 @@ import {
   Select,
   Stack,
   TextField,
-  Typography
+  Typography,
 } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -67,7 +67,7 @@ export default function CreateQuestionPage({
   handleSubmit,
   preview,
   previewQuestion,
-  resetForm
+  resetForm,
 }) {
   return (
     <Paper elevation={6} className="quiz-manager__panel">
@@ -323,7 +323,7 @@ export default function CreateQuestionPage({
                         ? undefined
                         : {
                             enabled: true,
-                            preset: previewQuestion.celebration
+                            preset: previewQuestion.celebration,
                           }
                     }
                   />

@@ -27,7 +27,10 @@ export default function ExistingQuestionsContainer() {
     setQuestionsError('');
 
     try {
-      const url = new URL("http://localhost:8002" + QUESTIONS_ENDPOINT, window.location.origin);
+      const url = new URL(
+        'http://localhost:8002' + QUESTIONS_ENDPOINT,
+        window.location.origin,
+      );
       url.searchParams.set('limit', '50');
       url.searchParams.set('offset', '0');
 
@@ -47,7 +50,7 @@ export default function ExistingQuestionsContainer() {
     } catch (error) {
       setQuestionsStatus('error');
       setQuestionsError(
-        error instanceof Error ? error.message : 'Unable to load questions'
+        error instanceof Error ? error.message : 'Unable to load questions',
       );
       setQuestions([]);
       throw error;

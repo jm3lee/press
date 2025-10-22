@@ -12,7 +12,7 @@ const CELEBRATION_LABELS = {
   off: 'None',
   classic: 'Classic confetti',
   streamers: 'Streamer launch',
-  burst: 'Grand finale'
+  burst: 'Grand finale',
 };
 const MIN_OPTIONS = 3;
 
@@ -58,7 +58,7 @@ function createEmptyForm() {
     expires_on: '',
     correct_option_id: '',
     celebration: DEFAULT_CELEBRATION,
-    options: [emptyOption(), emptyOption(), emptyOption()]
+    options: [emptyOption(), emptyOption(), emptyOption()],
   };
 }
 
@@ -114,7 +114,7 @@ function normalizeOptionEntries(options) {
   return options.map((option) => ({
     id: trimValue(option.id),
     label: trimValue(option.label),
-    description: optionalTrimmed(option.description)
+    description: optionalTrimmed(option.description),
   }));
 }
 
@@ -127,7 +127,7 @@ function buildFormStateForQuestion(question) {
   const normalizedOptions = normalizeOptionEntries(question?.options);
   const formState = {
     ...createEmptyForm(),
-    options: normalizedOptions
+    options: normalizedOptions,
   };
 
   if (question) {
@@ -160,7 +160,10 @@ function buildFormStateForQuestion(question) {
  * @returns {string} Selected correct identifier.
  */
 function resolvePreferredCorrectId(normalizedOptions, preferredId) {
-  if (preferredId && normalizedOptions.some((option) => option.id === preferredId)) {
+  if (
+    preferredId &&
+    normalizedOptions.some((option) => option.id === preferredId)
+  ) {
     return preferredId;
   }
   return normalizedOptions[0]?.id ?? '';
@@ -191,7 +194,7 @@ function toPreviewOption(option, index) {
   return {
     id: id || `option-${index + 1}`,
     label: label || id || `Option ${index + 1}`,
-    description
+    description,
   };
 }
 
@@ -219,8 +222,8 @@ function previewHasContent(parts) {
  * @returns {object | undefined} Preview question or undefined when empty.
  */
 function resolvePreviewQuestion(formState) {
-  const normalizedOptions = getPreviewOptionsSource(formState).map((option, index) =>
-    toPreviewOption(option, index)
+  const normalizedOptions = getPreviewOptionsSource(formState).map(
+    (option, index) => toPreviewOption(option, index),
   );
 
   const questionText = trimValue(formState.question);
@@ -239,7 +242,7 @@ function resolvePreviewQuestion(formState) {
     explanation,
     successMessage,
     errorMessage,
-    hasOptionContent
+    hasOptionContent,
   ]);
 
   if (!hasContent) {
@@ -248,7 +251,7 @@ function resolvePreviewQuestion(formState) {
 
   const resolvedCorrect = resolvePreferredCorrectId(
     normalizedOptions,
-    trimValue(formState.correct_option_id)
+    trimValue(formState.correct_option_id),
   );
 
   return {
@@ -259,7 +262,7 @@ function resolvePreviewQuestion(formState) {
     explanation: explanation || undefined,
     successMessage: successMessage || undefined,
     errorMessage: errorMessage || undefined,
-    celebration: resolvedCelebration
+    celebration: resolvedCelebration,
   };
 }
 
@@ -273,13 +276,13 @@ function normalizePayloadOptions(formOptions) {
     .map((option) => ({
       id: trimValue(option.id),
       label: trimValue(option.label),
-      description: trimValue(option.description)
+      description: trimValue(option.description),
     }))
     .filter((option) => option.id || option.label)
     .map((option) => {
       const nextOption = {
         id: option.id,
-        label: option.label || option.id
+        label: option.label || option.id,
       };
       if (option.description) {
         nextOption.description = option.description;
@@ -307,18 +310,33 @@ function assertCondition(condition, message) {
  */
 function normalizeAndValidateOptions(formOptions, preferredId) {
   const normalizedOptions = normalizePayloadOptions(formOptions);
-  assertCondition(normalizedOptions.length >= MIN_OPTIONS, 'Provide at least three answer options.');
+  assertCondition(
+    normalizedOptions.length >= MIN_OPTIONS,
+    'Provide at least three answer options.',
+  );
 
   const optionIds = normalizedOptions.map((option) => option.id);
-  assertCondition(optionIds.every((value) => Boolean(value)), 'Each option must include a non-empty id.');
-  assertCondition(new Set(optionIds).size === optionIds.length, 'Each option id must be unique.');
+  assertCondition(
+    optionIds.every((value) => Boolean(value)),
+    'Each option must include a non-empty id.',
+  );
+  assertCondition(
+    new Set(optionIds).size === optionIds.length,
+    'Each option id must be unique.',
+  );
 
-  const correctOptionId = resolvePreferredCorrectId(normalizedOptions, trimValue(preferredId));
-  assertCondition(Boolean(correctOptionId), 'Correct option must reference one of the option ids.');
+  const correctOptionId = resolvePreferredCorrectId(
+    normalizedOptions,
+    trimValue(preferredId),
+  );
+  assertCondition(
+    Boolean(correctOptionId),
+    'Correct option must reference one of the option ids.',
+  );
 
   return {
     normalizedOptions,
-    correctOptionId
+    correctOptionId,
   };
 }
 
@@ -367,37 +385,43 @@ export default function CreateQuestionContainer() {
     setFileName('');
   }, []);
 
-  const handleFieldChange = useCallback((field) => (event) => {
-    const { value } = event.target;
-    setForm((prev) => ({
-      ...prev,
-      [field]: value
-    }));
-  }, []);
+  const handleFieldChange = useCallback(
+    (field) => (event) => {
+      const { value } = event.target;
+      setForm((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    },
+    [],
+  );
 
-  const handleOptionChange = useCallback((index, field) => (event) => {
-    const { value } = event.target;
-    setForm((prev) => {
-      const nextOptions = prev.options.map((option, optionIndex) => {
-        if (optionIndex !== index) {
-          return option;
-        }
+  const handleOptionChange = useCallback(
+    (index, field) => (event) => {
+      const { value } = event.target;
+      setForm((prev) => {
+        const nextOptions = prev.options.map((option, optionIndex) => {
+          if (optionIndex !== index) {
+            return option;
+          }
+          return {
+            ...option,
+            [field]: value,
+          };
+        });
         return {
-          ...option,
-          [field]: value
+          ...prev,
+          options: nextOptions,
         };
       });
-      return {
-        ...prev,
-        options: nextOptions
-      };
-    });
-  }, []);
+    },
+    [],
+  );
 
   const handleAddOption = useCallback(() => {
     setForm((prev) => ({
       ...prev,
-      options: [...prev.options, emptyOption()]
+      options: [...prev.options, emptyOption()],
     }));
   }, []);
 
@@ -406,7 +430,9 @@ export default function CreateQuestionContainer() {
       if (prev.options.length <= MIN_OPTIONS) {
         return prev;
       }
-      const nextOptions = prev.options.filter((_, optionIndex) => optionIndex !== index);
+      const nextOptions = prev.options.filter(
+        (_, optionIndex) => optionIndex !== index,
+      );
       let nextCorrect = prev.correct_option_id;
       if (!nextOptions.some((option) => option.id === nextCorrect)) {
         nextCorrect = nextOptions[0]?.id ?? '';
@@ -414,7 +440,7 @@ export default function CreateQuestionContainer() {
       return {
         ...prev,
         options: nextOptions,
-        correct_option_id: nextCorrect
+        correct_option_id: nextCorrect,
       };
     });
   }, []);
@@ -423,49 +449,61 @@ export default function CreateQuestionContainer() {
     setForm((prev) => ({ ...prev, correct_option_id: event.target.value }));
   }, []);
 
-  const buildPayload = useCallback((targetForm, options = { silent: false }) => {
-    const { silent } = options;
+  const buildPayload = useCallback(
+    (targetForm, options = { silent: false }) => {
+      const { silent } = options;
 
-    try {
-      const slug = trimValue(targetForm.slug);
-      assertCondition(slug, 'Slug is required.');
+      try {
+        const slug = trimValue(targetForm.slug);
+        assertCondition(slug, 'Slug is required.');
 
-      const questionText = trimValue(targetForm.question);
-      assertCondition(questionText, 'Question prompt is required.');
+        const questionText = trimValue(targetForm.question);
+        assertCondition(questionText, 'Question prompt is required.');
 
-      const { normalizedOptions, correctOptionId } = normalizeAndValidateOptions(
-        targetForm.options,
-        targetForm.correct_option_id
-      );
+        const { normalizedOptions, correctOptionId } =
+          normalizeAndValidateOptions(
+            targetForm.options,
+            targetForm.correct_option_id,
+          );
 
-      const publishedOn = trimValue(targetForm.published_on);
-      assertCondition(/^\d{4}-\d{2}-\d{2}$/.test(publishedOn), 'Published date must be in YYYY-MM-DD format.');
+        const publishedOn = trimValue(targetForm.published_on);
+        assertCondition(
+          /^\d{4}-\d{2}-\d{2}$/.test(publishedOn),
+          'Published date must be in YYYY-MM-DD format.',
+        );
 
-      const expiresOn = trimValue(targetForm.expires_on);
-      const celebrationValue = trimValue(targetForm.celebration) || DEFAULT_CELEBRATION;
-      const celebration = CELEBRATION_OPTIONS.includes(celebrationValue)
-        ? celebrationValue
-        : DEFAULT_CELEBRATION;
+        const expiresOn = trimValue(targetForm.expires_on);
+        const celebrationValue =
+          trimValue(targetForm.celebration) || DEFAULT_CELEBRATION;
+        const celebration = CELEBRATION_OPTIONS.includes(celebrationValue)
+          ? celebrationValue
+          : DEFAULT_CELEBRATION;
 
-      return {
-        slug,
-        question: questionText,
-        helper_text: optionalTrimmed(targetForm.helper_text) || undefined,
-        explanation: optionalTrimmed(targetForm.explanation) || undefined,
-        success_message: optionalTrimmed(targetForm.success_message) || undefined,
-        error_message: optionalTrimmed(targetForm.error_message) || undefined,
-        options: normalizedOptions,
-        correct_option_id: correctOptionId,
-        published_on: publishedOn,
-        expires_on: expiresOn ? expiresOn : undefined,
-        celebration
-      };
-    } catch (error) {
-      return handlePayloadError(error, silent, setFormError);
-    }
-  }, []);
+        return {
+          slug,
+          question: questionText,
+          helper_text: optionalTrimmed(targetForm.helper_text) || undefined,
+          explanation: optionalTrimmed(targetForm.explanation) || undefined,
+          success_message:
+            optionalTrimmed(targetForm.success_message) || undefined,
+          error_message: optionalTrimmed(targetForm.error_message) || undefined,
+          options: normalizedOptions,
+          correct_option_id: correctOptionId,
+          published_on: publishedOn,
+          expires_on: expiresOn ? expiresOn : undefined,
+          celebration,
+        };
+      } catch (error) {
+        return handlePayloadError(error, silent, setFormError);
+      }
+    },
+    [],
+  );
 
-  const previewPayload = useMemo(() => buildPayload(form, { silent: true }), [buildPayload, form]);
+  const previewPayload = useMemo(
+    () => buildPayload(form, { silent: true }),
+    [buildPayload, form],
+  );
 
   const preview = useMemo(() => {
     if (!previewPayload) {
@@ -484,39 +522,46 @@ export default function CreateQuestionContainer() {
     setFormSuccess(`Preview ready for question ${payload.slug}`);
   }, [buildPayload, form]);
 
-  const handleFileChange = useCallback((event) => {
-    const [file] = event.target.files ?? [];
-    setFileName('');
-    setFileError('');
+  const handleFileChange = useCallback(
+    (event) => {
+      const [file] = event.target.files ?? [];
+      setFileName('');
+      setFileError('');
 
-    if (!file) {
-      return;
-    }
+      if (!file) {
+        return;
+      }
 
-    setFileName(file.name);
-    file
-      .text()
-      .then((rawText) => {
-        try {
-          const parsed = JSON.parse(rawText);
-          if (Array.isArray(parsed)) {
-            if (parsed.length !== 1) {
-              throw new Error('When providing an array, include exactly one question');
+      setFileName(file.name);
+      file
+        .text()
+        .then((rawText) => {
+          try {
+            const parsed = JSON.parse(rawText);
+            if (Array.isArray(parsed)) {
+              if (parsed.length !== 1) {
+                throw new Error(
+                  'When providing an array, include exactly one question',
+                );
+              }
+              applyQuestionToForm(parsed[0], 'create');
+            } else {
+              applyQuestionToForm(parsed, 'create');
             }
-            applyQuestionToForm(parsed[0], 'create');
-          } else {
-            applyQuestionToForm(parsed, 'create');
+          } catch (parseError) {
+            setFileError(
+              parseError instanceof Error
+                ? parseError.message
+                : 'Invalid JSON payload',
+            );
           }
-        } catch (parseError) {
-          setFileError(
-            parseError instanceof Error ? parseError.message : 'Invalid JSON payload'
-          );
-        }
-      })
-      .catch(() => {
-        setFileError('Unable to read the selected file');
-      });
-  }, [applyQuestionToForm]);
+        })
+        .catch(() => {
+          setFileError('Unable to read the selected file');
+        });
+    },
+    [applyQuestionToForm],
+  );
 
   const formDisabled = false;
   const canSubmit = Boolean(previewPayload);

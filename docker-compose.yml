@@ -103,3 +103,9 @@ services:
       - "8080:8080"
     volumes:
       - ./app/shell/py/pie:/pie
+
+  node-22:
+    build:
+      context: .
+      dockerfile: ./app/node-22/Dockerfile
+    network_mode: host
