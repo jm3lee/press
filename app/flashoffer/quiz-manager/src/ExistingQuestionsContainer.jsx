@@ -27,7 +27,7 @@ export default function ExistingQuestionsContainer() {
     setQuestionsError('');
 
     try {
-      const url = new URL(QUESTIONS_ENDPOINT, window.location.origin);
+      const url = new URL("http://localhost:8002" + QUESTIONS_ENDPOINT, window.location.origin);
       url.searchParams.set('limit', '50');
       url.searchParams.set('offset', '0');
 
