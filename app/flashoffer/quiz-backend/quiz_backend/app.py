@@ -220,6 +220,7 @@ def _build_generation_system_prompt() -> str:
         "The JSON must NOT be wrapped in any additional words or Markdown. "
         "Structure the object with these keys: slug, question, helper_text, explanation, "
         "success_message, error_message, options, correct_option_id, published_on, expires_on. "
+        "Include celebration with a value of off, classic, streamers, or burst. "
         "Rules: slug must be lowercase kebab-case (letters, digits, hyphen) with a maximum length of 48 characters. "
         "question should be concise plain text without HTML. "
         "Provide helper_text, explanation, success_message, and error_message when useful; otherwise use null. "
@@ -338,13 +339,93 @@ def _request_generated_question(
     system_prompt = _build_generation_system_prompt()
     user_prompt = prompt.strip() or _DEFAULT_GENERATION_USER_PROMPT
 
+    schema = {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,47}$",
+                "description": "Lowercase kebab-case identifier",
+            },
+            "question": {
+                "type": "string",
+                "description": "Quiz question text",
+            },
+            "helper_text": {
+                "type": ["string", "null"],
+            },
+            "explanation": {
+                "type": ["string", "null"],
+            },
+            "success_message": {
+                "type": ["string", "null"],
+            },
+            "error_message": {
+                "type": ["string", "null"],
+            },
+            "options": {
+                "type": "array",
+                "minItems": 3,
+                "items": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "properties": {
+                        "id": {
+                            "type": "string",
+                            "pattern": "^[a-z][a-z0-9-]{0,47}$",
+                        },
+                        "label": {
+                            "type": "string",
+                        },
+                        "description": {
+                            "type": ["string", "null"],
+                            "maxLength": 140,
+                        },
+                    },
+                    "required": ["id", "label"],
+                },
+            },
+            "correct_option_id": {
+                "type": "string",
+            },
+            "published_on": {
+                "type": "string",
+                "format": "date",
+            },
+            "expires_on": {
+                "type": ["string", "null"],
+                "format": "date",
+            },
+            "celebration": {
+                "type": "string",
+                "enum": sorted(QUIZ_CELEBRATION_PRESETS),
+            },
+        },
+        "required": [
+            "slug",
+            "question",
+            "options",
+            "correct_option_id",
+            "published_on",
+            "celebration",
+        ],
+    }
+
     completion = client.chat.completions.create(  # type: ignore[attr-defined]
         model=model,
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ],
-        response_format={"type": "json_object"},
+        response_format={
+            "type": "json_schema",
+            "json_schema": {
+                "name": "quiz_question",
+                "schema": schema,
+                "strict": True,
+            },
+        },
     )
 
     try:
