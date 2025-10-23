@@ -388,17 +388,30 @@ def test_generate_quiz_question_uses_https_without_proxy(client, monkeypatch):
             assert base_url.startswith("https://")
             assert isinstance(http_client, DummyHttpClient)
             self.chat = SimpleNamespace(
-                completions=SimpleNamespace(
-                    create=lambda **kwargs: SimpleNamespace(
-                        choices=[
-                            SimpleNamespace(
-                                message=SimpleNamespace(
-                                    content=json.dumps(generated_question)
-                                )
-                            )
-                        ]
+                completions=SimpleNamespace(create=self._create_completion)
+            )
+
+        def _create_completion(self, **kwargs):
+            response_format = kwargs.get("response_format")
+            assert response_format is not None
+            assert response_format["type"] == "json_schema"
+            schema = response_format["json_schema"]["schema"]
+            required_fields = schema["required"]
+            assert "celebration" in required_fields
+            assert schema["properties"]["celebration"]["enum"] == [
+                "burst",
+                "classic",
+                "off",
+                "streamers",
+            ]
+            return SimpleNamespace(
+                choices=[
+                    SimpleNamespace(
+                        message=SimpleNamespace(
+                            content=json.dumps(generated_question)
+                        )
                     )
-                )
+                ]
             )
 
     monkeypatch.setattr("quiz_backend.app.httpx.Client", DummyHttpClient)
@@ -467,6 +480,7 @@ def test_generate_quiz_question_batches_requests(client, monkeypatch):
             )
 
         def _create_completion(self, **_kwargs):
+            assert _kwargs["response_format"]["type"] == "json_schema"
             slug = f"batched-question-{self._counter}"
             self._counter += 1
             payload = {
