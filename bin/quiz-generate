@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
-set -x
 
 # Track script runtime for the elapsed-time summary at exit.
 SECONDS=0
@@ -28,7 +27,7 @@ log() {
 
 # Parse CLI arguments and populate global configuration variables.
 parse_args() {
-  BASE_URL="${QUIZ_BACKEND_BASE_URL:-http://localhost:8000}"
+  BASE_URL="${QUIZ_BACKEND_BASE_URL:-http://localhost:8002}"
   MODEL="${QUIZ_GENERATE_MODEL:-}"
   OUTPUT_DIR="${QUIZ_GENERATE_OUTPUT_DIR:-.}"
   PROMPT_ARG=""
