@@ -8,9 +8,11 @@
  */
 
 import { StrictMode } from 'react';
+import { Provider } from 'react-redux';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import Quiz from './Quiz';
+import { store } from './store';
 
 /**
  * Bootstraps and renders the SearchIndex component into the DOM.
@@ -31,7 +33,9 @@ function initializeSearchIndex() {
   const root = createRoot(mount);
   root.render(
     <StrictMode>
-      <Quiz src={mount.getAttribute('data-src')} />
+      <Provider store={store}>
+        <Quiz src={mount.getAttribute('data-src')} />
+      </Provider>
     </StrictMode>
   );
 }

@@ -1,4 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchQuiz, submitQuiz } from './features/quizSlice';
 
 /**
  * @fileoverview Interactive multiple-choice quiz component.
@@ -20,50 +23,54 @@ import React, { useEffect, useState } from 'react';
  * @returns {JSX.Element}
  */
 const Quiz = ({ src = "/study/key_terms.json" }) => {
-  const [questions, setQuestions] = useState([]);
-  const [selected, setSelected] = useState({});
-  const [showAnswers, setShowAnswers] = useState(false);
-  const [score, setScore] = useState(null);
+  const dispatch = useDispatch();
+  const { answers, error, questions, score, showAnswers, status } = useSelector(
+    (state) => state.quiz,
+  );
+
+  const {
+    handleSubmit,
+    register,
+    reset,
+    watch,
+  } = useForm({
+    defaultValues: { answers: {} },
+  });
+
+  const watchedAnswers = watch('answers');
 
   // Fetch quiz questions whenever the `src` prop changes.
   useEffect(() => {
-    fetch(src)
-      .then((res) => res.json())
-      .then(setQuestions)
-      .catch(console.error);
-  }, [src]);
+    dispatch(fetchQuiz(src));
+  }, [dispatch, src]);
 
-  /**
-   * Record the choice a user selects for a given question.
-   *
-   * Selections are ignored after the quiz has been submitted.
-   *
-   * @param {number} qIndex - Index of the question.
-   * @param {number} cIndex - Index of the choice.
-   */
-  const handleSelect = (qIndex, cIndex) => {
-    if (showAnswers) return;
-    setSelected((prev) => ({ ...prev, [qIndex]: cIndex }));
-  };
+  useEffect(() => {
+    const defaults = questions.reduce((acc, _question, index) => {
+      const persisted = answers[index];
+      acc[index] = persisted ?? '';
+      return acc;
+    }, {});
 
-  /**
-   * Tally the user's answers and reveal the results.
-   */
-  const handleSubmit = () => {
-    const newScore = questions.reduce((acc, q, qIndex) => {
-      const correctIndex = q.a[0];
-      return acc + (selected[qIndex] === correctIndex ? 1 : 0);
-    }, 0);
+    reset({ answers: defaults });
+  }, [answers, questions, reset]);
 
-    setScore(newScore);
-    setShowAnswers(true);
+  const onSubmit = (data) => {
+    dispatch(submitQuiz({ answers: data.answers ?? {} }));
   };
 
   return (
-    <div className="quiz-container">
+    <form className="quiz-container" onSubmit={handleSubmit(onSubmit)}>
+      {status === 'loading' && <p>Loading quiz...</p>}
+      {status === 'failed' && (
+        <p className="error">{error || 'Unable to load quiz.'}</p>
+      )}
+
       {questions.map((q, qIndex) => {
         const correctIndex = q.a[0];
         const explanation = q.a[1];
+        const currentSelection = showAnswers
+          ? answers[qIndex]
+          : watchedAnswers?.[qIndex];
 
         return (
           <div key={qIndex} className="question-block">
@@ -74,7 +81,7 @@ const Quiz = ({ src = "/study/key_terms.json" }) => {
 
             <ul className="choices">
               {q.c.map((choice, cIndex) => {
-                const isSelected = selected[qIndex] === cIndex;
+                const isSelected = String(currentSelection) === String(cIndex);
                 const isCorrect = cIndex === correctIndex;
                 const isWrong = isSelected && !isCorrect;
 
@@ -87,12 +94,19 @@ const Quiz = ({ src = "/study/key_terms.json" }) => {
                 }
 
                 return (
-                  <li
-                    key={cIndex}
-                    className={className}
-                    onClick={() => handleSelect(qIndex, cIndex)}
-                    dangerouslySetInnerHTML={{ __html: choice }}
-                  />
+                  <li key={cIndex} className={className}>
+                    <label>
+                      <input
+                        type="radio"
+                        value={cIndex}
+                        disabled={showAnswers}
+                        {...register(`answers.${qIndex}`)}
+                      />
+                      <span
+                        dangerouslySetInnerHTML={{ __html: choice }}
+                      />
+                    </label>
+                  </li>
                 );
               })}
             </ul>
@@ -110,7 +124,7 @@ const Quiz = ({ src = "/study/key_terms.json" }) => {
       })}
 
       {!showAnswers ? (
-        <button className="submit-btn" onClick={handleSubmit}>
+        <button className="submit-btn" type="submit">
           Submit Answers
         </button>
       ) : (
@@ -118,7 +132,7 @@ const Quiz = ({ src = "/study/key_terms.json" }) => {
           <h2>Your Score: {score} / {questions.length}</h2>
         </div>
       )}
-    </div>
+    </form>
   );
 };
 
